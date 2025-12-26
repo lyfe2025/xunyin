@@ -1443,7 +1443,7 @@ async function main() {
     {
       configName: '网站名称',
       configKey: 'sys.app.name',
-      configValue: 'RBAC Admin Pro',
+      configValue: 'Xunyin Admin',
       configType: 'Y',
     },
     {
@@ -1455,7 +1455,7 @@ async function main() {
     {
       configName: '版权信息',
       configKey: 'sys.app.copyright',
-      configValue: '© 2025 RBAC Admin Pro. All rights reserved.',
+      configValue: '© 2025 Xunyin Admin. All rights reserved.',
       configType: 'Y',
     },
     {

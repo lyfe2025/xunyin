@@ -70,6 +70,9 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 3. WHEN 用户开始一条文化之旅 THEN THE Journey_Module SHALL 记录开始时间并追踪完成进度
 4. WHILE 用户正在进行文化之旅 THEN THE Journey_Module SHALL 实时显示已完成和未完成的探索点状态
 5. WHEN 用户暂停或退出文化之旅 THEN THE Journey_Module SHALL 保存当前进度以便后续继续
+6. WHEN 用户查看文化之旅详情 THEN THE Journey_Module SHALL 显示预计时长、总距离和已完成人数
+7. THE Journey_Module SHALL 支持文化之旅解锁机制，部分文化之旅需完成前置条件才能开启
+8. WHEN 用户查看城市面板 THEN THE Journey_Module SHALL 显示该城市的文化之旅解锁进度
 
 ### Requirement 3: AR任务系统
 
@@ -83,6 +86,9 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 4. WHEN 用户完成AR任务 THEN THE AR_Module SHALL 保存任务完成记录和相关照片
 5. IF AR识别失败或环境不适合 THEN THE AR_Module SHALL 提供备选的任务完成方式
 6. WHEN AR相机启动 THEN THE AR_Module SHALL 请求并验证相机权限
+7. WHEN 手势识别进行中 THEN THE AR_Module SHALL 实时显示识别进度百分比
+8. THE AR_Module SHALL 支持多种AR滤镜选择（如古风、水墨、原图）
+9. WHEN 任务类型为AR寻宝 THEN THE AR_Module SHALL 在场景中显示隐藏的虚拟物品供用户寻找
 
 ### Requirement 4: 任务验证与完成
 
@@ -96,6 +102,9 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 4. WHEN 任务验证通过 THEN THE Validation_Module SHALL 更新用户的探索进度并发放即时奖励
 5. IF 任务验证失败 THEN THE Validation_Module SHALL 提示失败原因并允许用户重新尝试
 6. THE Validation_Module SHALL 在离线状态下缓存验证请求，待网络恢复后同步
+7. WHEN 任务完成 THEN THE Validation_Module SHALL 显示任务完成页面，包含拍摄照片和积分奖励
+8. WHEN 任务完成 THEN THE Validation_Module SHALL 解锁并展示文化小知识内容
+9. WHEN 任务完成 THEN THE Validation_Module SHALL 提供分享到社交平台和继续下一个探索点的选项
 
 ### Requirement 5: 印记系统
 
@@ -110,6 +119,10 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 5. WHEN 用户查看印记集 THEN THE Seal_Module SHALL 展示所有已收集的印记、完成时间和文化之旅信息
 6. THE Seal_Module SHALL 支持印记分享到社交平台
 7. WHEN 印记授予 THEN THE Seal_Module SHALL 播放获得印记的动画效果
+8. WHEN 用户查看印记集 THEN THE Seal_Module SHALL 分类展示路线印记、城市印记、特殊印记
+9. WHEN 用户查看印记集 THEN THE Seal_Module SHALL 显示各类印记的收集进度条
+10. THE Seal_Module SHALL 显示未解锁印记为锁定状态并提示解锁条件
+11. WHEN 用户查看印记集 THEN THE Seal_Module SHALL 显示进行中的文化之旅及其进度
 
 ### Requirement 6: 区块链存证
 
@@ -123,6 +136,9 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 4. WHEN 用户或第三方查询印记 THEN THE Blockchain_Module SHALL 提供链上验证接口
 5. THE Blockchain_Module SHALL 确保存证数据包含用户ID、文化之旅ID、完成时间和任务完成证明
 6. IF 上链失败 THEN THE Blockchain_Module SHALL 提示错误原因并支持重试
+7. WHEN 用户查看印记详情 THEN THE Blockchain_Module SHALL 显示链名称、交易哈希、区块高度和时间戳
+8. THE Blockchain_Module SHALL 支持复制交易哈希和跳转链上查看
+9. THE Blockchain_Module SHALL 在印记卡片上显示已上链标识
 
 ### Requirement 7: 用户账户与数据
 
@@ -137,6 +153,12 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 5. IF 用户更换设备 THEN THE User_Module SHALL 支持数据迁移和账户恢复
 6. WHEN 用户退出登录 THEN THE User_Module SHALL 清除本地敏感数据但保留缓存
 7. THE User_Module SHALL 支持用户修改个人资料和头像
+8. WHEN 用户查看个人主页 THEN THE User_Module SHALL 显示城市解锁进度、印记收集进度和已上链数量
+9. WHEN 用户查看个人主页 THEN THE User_Module SHALL 显示用户称号徽章
+10. WHEN 用户查看个人主页 THEN THE User_Module SHALL 显示最近动态列表
+11. THE User_Module SHALL 提供区块链钱包入口
+12. THE User_Module SHALL 提供旅行统计详情入口
+13. THE User_Module SHALL 提供积分商城入口
 
 ### Requirement 8: 文化内容展示
 

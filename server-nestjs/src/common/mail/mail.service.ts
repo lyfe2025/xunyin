@@ -26,7 +26,7 @@ export class MailService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   /**
    * 从数据库获取邮件配置
@@ -130,12 +130,12 @@ export class MailService {
 
     return this.sendMail({
       to: testTo,
-      subject: '【RBAC Admin】邮件配置测试',
+      subject: '【Xunyin Admin】邮件配置测试',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">邮件配置测试成功</h2>
           <p>您好，</p>
-          <p>这是一封来自 <strong>RBAC Admin</strong> 系统的测试邮件。</p>
+          <p>这是一封来自 <strong>Xunyin Admin</strong> 系统的测试邮件。</p>
           <p>如果您收到此邮件，说明 SMTP 配置正确。</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="color: #666; font-size: 12px;">发送时间: ${now}</p>

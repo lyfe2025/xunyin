@@ -1,5 +1,5 @@
 # ============================================================================
-# RBAC Admin Pro - 后端 Dockerfile (适配 Zeabur monorepo 部署)
+# Xunyin Admin - 后端 Dockerfile (适配 Zeabur monorepo 部署)
 # ============================================================================
 
 FROM node:20-alpine

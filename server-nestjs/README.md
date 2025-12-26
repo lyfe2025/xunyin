@@ -1,4 +1,4 @@
-# RBAC Admin Pro - Backend (NestJS)
+# Xunyin Admin - Backend (NestJS)
 
 基于 NestJS + TypeScript + PostgreSQL 的企业级后台管理系统后端服务。
 

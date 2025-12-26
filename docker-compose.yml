@@ -2,11 +2,11 @@ services:
   # PostgreSQL 数据库
   postgres:
     image: postgres:16-alpine
-    container_name: rbac-postgres
+    container_name: xunyin-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-rbac_admin}
-      POSTGRES_USER: ${POSTGRES_USER:-rbac_admin}
+      POSTGRES_DB: ${POSTGRES_DB:-xunyin_admin}
+      POSTGRES_USER: ${POSTGRES_USER:-xunyin_admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在 .env 中设置 POSTGRES_PASSWORD}
       TZ: Asia/Shanghai
     volumes:
@@ -17,9 +17,9 @@ services:
     ports:
       - "5433:5432"
     networks:
-      - rbac-network
+      - xunyin-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rbac_admin} -d ${POSTGRES_DB:-rbac_admin}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xunyin_admin} -d ${POSTGRES_DB:-xunyin_admin}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,7 +27,7 @@ services:
   # Redis 缓存
   redis:
     image: redis:7-alpine
-    container_name: rbac-redis
+    container_name: xunyin-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     environment:
@@ -37,7 +37,7 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - rbac-network
+      - xunyin-network
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -49,12 +49,12 @@ services:
     build:
       context: ./server-nestjs
       dockerfile: Dockerfile
-    container_name: rbac-server
+    container_name: xunyin-server
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-rbac_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-rbac_admin}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-xunyin_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-xunyin_admin}?schema=public
       REDIS_ENABLED: ${REDIS_ENABLED:-true}
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-super-secret-key-change-it-in-production}
@@ -68,7 +68,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - rbac-network
+      - xunyin-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,14 +86,14 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
-    container_name: rbac-web
+    container_name: xunyin-web
     restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
     ports:
       - "8080:80"
     networks:
-      - rbac-network
+      - xunyin-network
     depends_on:
       - server
     healthcheck:
@@ -103,7 +103,7 @@ services:
       retries: 3
 
 networks:
-  rbac-network:
+  xunyin-network:
     driver: bridge
 
 volumes:

@@ -72,7 +72,7 @@ server {
     listen 80;
     server_name admin.example.com;
     
-    root /www/wwwroot/rbac-admin-pro/web/dist;
+    root /www/wwwroot/xunyin-admin/web/dist;
     index index.html;
     
     # SPA 路由

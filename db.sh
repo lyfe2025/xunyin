@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================
-# RBAC Admin Pro - Prisma 数据库管理脚本
+# Xunyin Admin - Prisma 数据库管理脚本
 # 支持本地开发和 Docker 生产环境
 # ============================================================
 
@@ -12,7 +12,7 @@ SERVER_DIR="$ROOT/server-nestjs"
 BACKUP_DIR="$ROOT/backups"
 
 # Docker 容器名称
-POSTGRES_CONTAINER="rbac-postgres"
+POSTGRES_CONTAINER="xunyin-postgres"
 
 # Docker 宿主机端口（避免与本地 PostgreSQL 5432 冲突）
 DOCKER_PG_PORT=5433
@@ -119,7 +119,7 @@ get_docker_db_url() {
   if [ -f "$ROOT/.env" ]; then
     source "$ROOT/.env"
   fi
-  echo "postgresql://${POSTGRES_USER:-rbac_admin}:${POSTGRES_PASSWORD}@localhost:${DOCKER_PG_PORT}/${POSTGRES_DB:-rbac_admin}?schema=public"
+  echo "postgresql://${POSTGRES_USER:-xunyin_admin}:${POSTGRES_PASSWORD}@localhost:${DOCKER_PG_PORT}/${POSTGRES_DB:-xunyin_admin}?schema=public"
 }
 
 # ============================================================
@@ -298,8 +298,8 @@ cmd_docker_exec_sql() {
   
   print_warning "即将执行 SQL 文件: $sql_file"
   if confirm "确定要执行吗？"; then
-    print_info "执行: docker exec -i $POSTGRES_CONTAINER psql -U ${POSTGRES_USER:-rbac_admin} -d ${POSTGRES_DB:-rbac_admin} < $sql_file"
-    docker exec -i "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-rbac_admin}" -d "${POSTGRES_DB:-rbac_admin}" < "$ROOT/$sql_file"
+    print_info "执行: docker exec -i $POSTGRES_CONTAINER psql -U ${POSTGRES_USER:-xunyin_admin} -d ${POSTGRES_DB:-xunyin_admin} < $sql_file"
+    docker exec -i "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-xunyin_admin}" -d "${POSTGRES_DB:-xunyin_admin}" < "$ROOT/$sql_file"
     print_success "SQL 执行完成"
   else
     print_info "操作已取消"
@@ -319,10 +319,10 @@ cmd_docker_backup() {
   
   local timestamp backup_file
   timestamp=$(date +%Y%m%d_%H%M%S)
-  backup_file="$BACKUP_DIR/rbac_backup_${timestamp}.sql"
+  backup_file="$BACKUP_DIR/xunyin_backup_${timestamp}.sql"
   
-  print_info "执行: docker exec $POSTGRES_CONTAINER pg_dump -U ${POSTGRES_USER:-rbac_admin} ${POSTGRES_DB:-rbac_admin} > $backup_file"
-  docker exec "$POSTGRES_CONTAINER" pg_dump -U "${POSTGRES_USER:-rbac_admin}" "${POSTGRES_DB:-rbac_admin}" > "$backup_file"
+  print_info "执行: docker exec $POSTGRES_CONTAINER pg_dump -U ${POSTGRES_USER:-xunyin_admin} ${POSTGRES_DB:-xunyin_admin} > $backup_file"
+  docker exec "$POSTGRES_CONTAINER" pg_dump -U "${POSTGRES_USER:-xunyin_admin}" "${POSTGRES_DB:-xunyin_admin}" > "$backup_file"
   
   print_success "数据库备份完成: $backup_file"
 }
@@ -385,8 +385,8 @@ cmd_docker_restore() {
   print_warning "此操作将覆盖当前数据库！"
   print_info "备份文件: $(basename "$backup_file")"
   if confirm "确定要恢复数据库吗？"; then
-    print_info "执行: docker exec -i $POSTGRES_CONTAINER psql -U ${POSTGRES_USER:-rbac_admin} -d ${POSTGRES_DB:-rbac_admin} < $backup_file"
-    docker exec -i "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-rbac_admin}" -d "${POSTGRES_DB:-rbac_admin}" < "$backup_file"
+    print_info "执行: docker exec -i $POSTGRES_CONTAINER psql -U ${POSTGRES_USER:-xunyin_admin} -d ${POSTGRES_DB:-xunyin_admin} < $backup_file"
+    docker exec -i "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-xunyin_admin}" -d "${POSTGRES_DB:-xunyin_admin}" < "$backup_file"
     print_success "数据库恢复完成"
   else
     print_info "操作已取消"
@@ -402,8 +402,8 @@ cmd_docker_psql() {
     source "$ROOT/.env"
   fi
   
-  print_info "执行: docker exec -it $POSTGRES_CONTAINER psql -U ${POSTGRES_USER:-rbac_admin} -d ${POSTGRES_DB:-rbac_admin}"
-  docker exec -it "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-rbac_admin}" -d "${POSTGRES_DB:-rbac_admin}"
+  print_info "执行: docker exec -it $POSTGRES_CONTAINER psql -U ${POSTGRES_USER:-xunyin_admin} -d ${POSTGRES_DB:-xunyin_admin}"
+  docker exec -it "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-xunyin_admin}" -d "${POSTGRES_DB:-xunyin_admin}"
 }
 
 # ============================================================
@@ -412,7 +412,7 @@ cmd_docker_psql() {
 
 print_menu() {
   echo ""
-  center_line "${BOLD}${FG_CYAN}RBAC Admin Pro - Prisma 数据库管理${RESET}"
+  center_line "${BOLD}${FG_CYAN}Xunyin Admin - Prisma 数据库管理${RESET}"
   hr
   
   printf "${FG_CYAN}[本地开发]${RESET}\n"
@@ -432,10 +432,10 @@ print_menu() {
   printf "${FG_CYAN}11${RESET}. 执行生产迁移                 ${FG_GRAY}DATABASE_URL=<url> pnpm prisma migrate deploy${RESET}\n"
   printf "${FG_CYAN}12${RESET}. 查看迁移状态 (Docker)        ${FG_GRAY}DATABASE_URL=<url> pnpm prisma migrate status${RESET}\n"
   printf "${FG_CYAN}13${RESET}. 导入种子数据 (Docker)        ${FG_GRAY}DATABASE_URL=<url> pnpm prisma db seed${RESET}\n"
-  printf "${FG_CYAN}14${RESET}. 执行 SQL 文件                ${FG_GRAY}docker exec -i rbac-postgres psql < file.sql${RESET}\n"
-  printf "${FG_CYAN}15${RESET}. 备份数据库                   ${FG_GRAY}docker exec rbac-postgres pg_dump > backup.sql${RESET}\n"
-  printf "${FG_CYAN}16${RESET}. 恢复数据库                   ${FG_GRAY}docker exec -i rbac-postgres psql < backup.sql${RESET}\n"
-  printf "${FG_CYAN}17${RESET}. 连接 PostgreSQL              ${FG_GRAY}docker exec -it rbac-postgres psql${RESET}\n"
+  printf "${FG_CYAN}14${RESET}. 执行 SQL 文件                ${FG_GRAY}docker exec -i xunyin-postgres psql < file.sql${RESET}\n"
+  printf "${FG_CYAN}15${RESET}. 备份数据库                   ${FG_GRAY}docker exec xunyin-postgres pg_dump > backup.sql${RESET}\n"
+  printf "${FG_CYAN}16${RESET}. 恢复数据库                   ${FG_GRAY}docker exec -i xunyin-postgres psql < backup.sql${RESET}\n"
+  printf "${FG_CYAN}17${RESET}. 连接 PostgreSQL              ${FG_GRAY}docker exec -it xunyin-postgres psql${RESET}\n"
   
   hr
   printf "${FG_CYAN}0${RESET}.  退出\n"

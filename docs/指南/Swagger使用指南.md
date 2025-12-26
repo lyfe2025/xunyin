@@ -514,7 +514,7 @@ async function bootstrap() {
 
   // Swagger 配置
   const config = new DocumentBuilder()
-    .setTitle('RBAC Admin Pro API')
+    .setTitle('Xunyin Admin API')
     .setDescription('权限管理系统 API 文档')
     .setVersion('1.0')
     .addBearerAuth(

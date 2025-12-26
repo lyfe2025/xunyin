@@ -21,7 +21,7 @@ export class ExcelService {
     sheetName = 'Sheet1',
   ): Promise<void> {
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'RBAC Admin Pro';
+    workbook.creator = 'Xunyin Admin';
     workbook.created = new Date();
 
     const worksheet = workbook.addWorksheet(sheetName);

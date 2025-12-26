@@ -1,3 +1,13 @@
 packages:
-  - 'web'
-  - 'server-nestjs'
+  - web
+  - server-nestjs
+
+ignoredBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/engines'
+  - '@scarf/scarf'
+  - bcrypt
+  - esbuild
+  - prisma
+  - unrs-resolver
+  - vue-demi

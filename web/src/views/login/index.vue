@@ -17,9 +17,9 @@ const userStore = useUserStore()
 const appStore = useAppStore()
 
 // 网站配置
-const siteName = computed(() => appStore.siteConfig.name || 'RBAC Admin Pro')
+const siteName = computed(() => appStore.siteConfig.name || 'Xunyin Admin')
 const siteDescription = computed(() => appStore.siteConfig.description || '企业级权限管理系统')
-const siteCopyright = computed(() => appStore.siteConfig.copyright || '© 2025 RBAC Admin Pro. All rights reserved.')
+const siteCopyright = computed(() => appStore.siteConfig.copyright || '© 2025 Xunyin Admin. All rights reserved.')
 const siteIcp = computed(() => appStore.siteConfig.icp || '')
 const siteLogo = computed(() => {
   const logo = appStore.siteConfig.logo

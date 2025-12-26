@@ -26,7 +26,7 @@ const customFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.ms(),
-  nestWinstonModuleUtilities.format.nestLike('RBAC-Admin', {
+  nestWinstonModuleUtilities.format.nestLike('Xunyin-Admin', {
     colors: true,
     prettyPrint: true,
   }),

@@ -15,7 +15,7 @@ export class TwoFactorService {
     private redis: RedisService,
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   /**
    * 检查两步验证是否全局启用
@@ -32,7 +32,7 @@ export class TwoFactorService {
    */
   generateSecret(username: string): { secret: string; otpauthUrl: string } {
     const secret = authenticator.generateSecret();
-    const otpauthUrl = authenticator.keyuri(username, 'RBAC Admin Pro', secret);
+    const otpauthUrl = authenticator.keyuri(username, 'Xunyin Admin', secret);
     return { secret, otpauthUrl };
   }
 

@@ -1,16 +1,16 @@
-<h1 align="center">RBAC Admin Pro</h1>
+<h1 align="center">Xunyin Admin</h1>
 
 <p align="center">
   <strong>企业级全栈后台管理系统</strong>
 </p>
 
 <p align="center">
-  基于 Vue 3 + NestJS + Prisma 的现代化 RBAC 权限管理系统
+  基于 Vue 3 + NestJS + Prisma 的现代化权限管理系统
 </p>
 
 <p align="center">
-  <a href="https://rbac.zeabur.app/login" target="_blank">🌐 在线演示</a> |
-  <a href="https://api-rbac.zeabur.app/api-docs" target="_blank">📖 API 文档</a>
+  <a href="https://xunyin.zeabur.app/login" target="_blank">🌐 在线演示</a> |
+  <a href="https://api-xunyin.zeabur.app/api-docs" target="_blank">📖 API 文档</a>
 </p>
 
 <p align="center">
@@ -47,8 +47,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/lyfe2025/rbac-admin-pro.git
-cd rbac-admin-pro
+git clone https://github.com/lyfe2025/xunyin-admin.git
+cd xunyin-admin
 
 # 配置环境变量
 cp .env.docker.example .env
@@ -103,7 +103,7 @@ pnpm dev
 ## 📦 项目结构
 
 ```
-rbac-admin-pro/
+xunyin-admin/
 ├── web/                  # 前端 Vue 3
 │   └── src/
 │       ├── api/          # API 接口
@@ -201,10 +201,10 @@ pnpm db:studio        # Prisma GUI
 | 11 | 执行生产迁移 | `DATABASE_URL=... pnpm prisma migrate deploy` |
 | 12 | 查看迁移状态 | `DATABASE_URL=... pnpm prisma migrate status` |
 | 13 | 导入种子数据 | `DATABASE_URL=... pnpm prisma db seed` |
-| 14 | 执行 SQL 文件 | `docker exec -i rbac-postgres psql < file.sql` |
-| 15 | 备份数据库 | `docker exec rbac-postgres pg_dump > backup.sql` |
-| 16 | 恢复数据库 | `docker exec -i rbac-postgres psql < backup.sql` |
-| 17 | 连接 PostgreSQL | `docker exec -it rbac-postgres psql` |
+| 14 | 执行 SQL 文件 | `docker exec -i xunyin-postgres psql < file.sql` |
+| 15 | 备份数据库 | `docker exec xunyin-postgres pg_dump > backup.sql` |
+| 16 | 恢复数据库 | `docker exec -i xunyin-postgres psql < backup.sql` |
+| 17 | 连接 PostgreSQL | `docker exec -it xunyin-postgres psql` |
 
 </details>
 

@@ -1,0 +1,57 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+build/
+.output/
+
+# 环境变量（包含敏感信息）
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.development
+!.env.production
+
+# 日志
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# 编辑器/IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 运行时文件
+.run/
+*.pid
+
+# 测试覆盖率
+coverage/
+
+# 缓存
+.cache/
+.eslintcache
+.prettiercache
+*.tsbuildinfo
+
+# 上传文件（本地开发）
+uploads/
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# 备份文件
+*.sql
+*.bak
+backups/

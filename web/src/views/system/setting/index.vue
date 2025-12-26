@@ -491,7 +491,7 @@ onMounted(() => {
           <CardContent class="space-y-4">
             <div class="grid gap-2">
               <Label>版权信息</Label>
-              <Input v-model="form['sys.app.copyright']" placeholder="© 2025 RBAC Admin. All rights reserved." />
+              <Input v-model="form['sys.app.copyright']" placeholder="© 2025 Xunyin Admin. All rights reserved." />
             </div>
             <div class="grid gap-2">
               <Label>ICP 备案号</Label>

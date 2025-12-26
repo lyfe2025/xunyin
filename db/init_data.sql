@@ -1,5 +1,5 @@
 -- =============================================
--- RBAC Admin Pro - 初始化数据脚本
+-- Xunyin Admin - 初始化数据脚本
 -- 说明：本脚本用于初始化系统基础数据
 -- 注意：密码使用 bcrypt 加密，默认密码为 admin123
 -- 前置条件：需先执行 schema.sql 创建表结构和索引
@@ -255,9 +255,9 @@ VALUES
   ('两步验证开关', 'sys.account.twoFactorEnabled', 'false', 'Y', NOW()),
 
   -- 网站信息设置
-  ('网站名称', 'sys.app.name', 'RBAC Admin Pro', 'Y', NOW()),
+  ('网站名称', 'sys.app.name', 'Xunyin Admin', 'Y', NOW()),
   ('网站描述', 'sys.app.description', '企业级全栈权限管理系统', 'Y', NOW()),
-  ('版权信息', 'sys.app.copyright', '© 2025 RBAC Admin Pro. All rights reserved.', 'Y', NOW()),
+  ('版权信息', 'sys.app.copyright', '© 2025 Xunyin Admin. All rights reserved.', 'Y', NOW()),
   ('ICP备案号', 'sys.app.icp', '', 'Y', NOW()),
   ('联系邮箱', 'sys.app.email', 'admin@example.com', 'Y', NOW()),
   -- 邮件设置

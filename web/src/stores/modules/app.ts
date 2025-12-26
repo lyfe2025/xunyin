@@ -6,11 +6,11 @@ import { setupLoginRoute } from '@/router'
 export const useAppStore = defineStore('app', () => {
   // 网站配置
   const siteConfig = ref<SiteConfig>({
-    name: 'RBAC Admin Pro',
+    name: 'Xunyin Admin',
     description: '企业级权限管理系统',
     logo: '',
     favicon: '',
-    copyright: '© 2025 RBAC Admin Pro. All rights reserved.',
+    copyright: '© 2025 Xunyin Admin. All rights reserved.',
     icp: '',
     loginPath: '/login',
   })

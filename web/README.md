@@ -1,4 +1,4 @@
-# RBAC Admin Pro - Frontend (Web)
+# Xunyin Admin - Frontend (Web)
 
 基于 Vue 3 + TypeScript + Shadcn-Vue 的现代化后台管理前端。
 

@@ -53,13 +53,13 @@ server-nestjs/
 psql -U postgres
 
 # 2. 创建数据库
-CREATE DATABASE rbac_admin_pro;
+CREATE DATABASE xunyin_admin;
 
 # 3. 创建用户(可选)
-CREATE USER rbac_admin WITH PASSWORD 'RbacAdmin@2024';
+CREATE USER xunyin_admin WITH PASSWORD 'XunyinAdmin@2024';
 
 # 4. 授权
-GRANT ALL PRIVILEGES ON DATABASE rbac_admin_pro TO rbac_admin;
+GRANT ALL PRIVILEGES ON DATABASE xunyin_admin TO xunyin_admin;
 
 # 5. 退出
 \q
@@ -70,10 +70,10 @@ GRANT ALL PRIVILEGES ON DATABASE rbac_admin_pro TO rbac_admin;
 ```bash
 # 启动 PostgreSQL 容器
 docker run -d \
-  --name postgres-rbac \
-  -e POSTGRES_DB=rbac_admin_pro \
-  -e POSTGRES_USER=rbac_admin \
-  -e POSTGRES_PASSWORD=RbacAdmin@2024 \
+  --name postgres-xunyin \
+  -e POSTGRES_DB=xunyin_admin \
+  -e POSTGRES_USER=xunyin_admin \
+  -e POSTGRES_PASSWORD=XunyinAdmin@2024 \
   -p 5432:5432 \
   postgres:15
 ```
@@ -95,7 +95,7 @@ vim .env
 
 ```env
 # .env 文件内容
-DATABASE_URL="postgresql://rbac_admin:RbacAdmin@2024@localhost:5432/rbac_admin_pro?schema=public"
+DATABASE_URL="postgresql://xunyin_admin:XunyinAdmin@2024@localhost:5432/xunyin_admin?schema=public"
 
 # 格式说明:
 # postgresql://用户名:密码@主机:端口/数据库名?schema=模式名
@@ -155,8 +155,8 @@ npx prisma studio
 
 ```bash
 # 在项目根目录
-psql -h localhost -U rbac_admin -d rbac_admin_pro -f db/schema.sql
-psql -h localhost -U rbac_admin -d rbac_admin_pro -f db/init_data.sql
+psql -h localhost -U xunyin_admin -d xunyin_admin -f db/schema.sql
+psql -h localhost -U xunyin_admin -d xunyin_admin -f db/init_data.sql
 ```
 
 ### 验证初始化结果
@@ -166,7 +166,7 @@ psql -h localhost -U rbac_admin -d rbac_admin_pro -f db/init_data.sql
 npx prisma studio
 
 # 方法 2: 使用 psql
-psql -h localhost -U rbac_admin -d rbac_admin_pro
+psql -h localhost -U xunyin_admin -d xunyin_admin
 
 # 查看表
 \dt
@@ -435,7 +435,7 @@ npx prisma migrate deploy
 3. **生产环境执行**
    ```bash
    # 备份数据库
-   pg_dump -h localhost -U rbac_admin rbac_admin_pro > backup.sql
+   pg_dump -h localhost -U xunyin_admin xunyin_admin > backup.sql
    
    # 应用回滚 migration
    npx prisma migrate deploy
@@ -528,7 +528,7 @@ pg_isready -h localhost -p 5432
 cat .env | grep DATABASE_URL
 
 # 3. 用户权限是否足够
-psql -h localhost -U rbac_admin -d rbac_admin_pro -c "SELECT 1"
+psql -h localhost -U xunyin_admin -d xunyin_admin -c "SELECT 1"
 
 # 4. 防火墙是否开放
 telnet localhost 5432
@@ -592,10 +592,10 @@ npx prisma migrate dev --name <描述>
 | 11 | 执行生产迁移 | `DATABASE_URL=... pnpm prisma migrate deploy` |
 | 12 | 查看迁移状态 | `DATABASE_URL=... pnpm prisma migrate status` |
 | 13 | 导入种子数据 | `DATABASE_URL=... pnpm prisma db seed` |
-| 14 | 执行 SQL 文件 | `docker exec -i rbac-postgres psql < file.sql` |
-| 15 | 备份数据库 | `docker exec rbac-postgres pg_dump > backup.sql` |
-| 16 | 恢复数据库 | `docker exec -i rbac-postgres psql < backup.sql` |
-| 17 | 连接 PostgreSQL | `docker exec -it rbac-postgres psql` |
+| 14 | 执行 SQL 文件 | `docker exec -i xunyin-postgres psql < file.sql` |
+| 15 | 备份数据库 | `docker exec xunyin-postgres pg_dump > backup.sql` |
+| 16 | 恢复数据库 | `docker exec -i xunyin-postgres psql < backup.sql` |
+| 17 | 连接 PostgreSQL | `docker exec -it xunyin-postgres psql` |
 
 ### 命令行直接调用
 
@@ -785,7 +785,7 @@ psql $DATABASE_URL -c "SELECT * FROM _prisma_migrations ORDER BY finished_at"
 5. **定期备份**
    ```bash
    # 生产环境定期备份
-   pg_dump -h localhost -U rbac_admin rbac_admin_pro > backup_$(date +%Y%m%d).sql
+   pg_dump -h localhost -U xunyin_admin xunyin_admin > backup_$(date +%Y%m%d).sql
    ```
 
 ### ❌ 避免的做法

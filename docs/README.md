@@ -1,6 +1,6 @@
 # 📚 项目文档中心
 
-欢迎来到 RBAC Admin Pro 项目文档中心!
+欢迎来到 Xunyin Admin 项目文档中心!
 
 ## 🚀 快速开始
 

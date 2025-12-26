@@ -11,7 +11,7 @@ export class ConfigService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   async findAll(query: QueryConfigDto) {
     const where: Prisma.SysConfigWhereInput = {};
@@ -162,13 +162,13 @@ export class ConfigService {
     });
 
     return {
-      name: configMap['sys.app.name'] || 'RBAC Admin Pro',
+      name: configMap['sys.app.name'] || 'Xunyin Admin',
       description: configMap['sys.app.description'] || '企业级权限管理系统',
       logo: configMap['sys.app.logo'] || '',
       favicon: configMap['sys.app.favicon'] || '',
       copyright:
         configMap['sys.app.copyright'] ||
-        '© 2025 RBAC Admin Pro. All rights reserved.',
+        '© 2025 Xunyin Admin. All rights reserved.',
       icp: configMap['sys.app.icp'] || '',
       loginPath: configMap['sys.security.loginPath'] || '/login',
     };

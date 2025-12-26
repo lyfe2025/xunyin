@@ -1,6 +1,6 @@
-# RBAC Admin Pro 宝塔 Docker 部署指南
+# Xunyin Admin 宝塔 Docker 部署指南
 
-本文档介绍如何在宝塔面板上使用 Docker 方式部署 RBAC Admin Pro 项目。
+本文档介绍如何在宝塔面板上使用 Docker 方式部署 Xunyin Admin 项目。
 
 ## 环境要求
 
@@ -44,8 +44,8 @@ docker compose version
 
 ```bash
 cd /www/wwwroot
-git clone <你的仓库地址> rbac-admin-pro
-cd rbac-admin-pro
+git clone <你的仓库地址> xunyin-admin
+cd xunyin-admin
 ```
 
 ### 方式二：宝塔面板上传
@@ -56,7 +56,7 @@ cd rbac-admin-pro
 ## 三、配置环境变量
 
 ```bash
-cd /www/wwwroot/rbac-admin-pro
+cd /www/wwwroot/xunyin-admin
 
 # 复制示例配置
 cp .env.docker.example .env
@@ -69,8 +69,8 @@ vi .env
 
 ```bash
 # ==================== 数据库配置 ====================
-POSTGRES_DB=rbac_admin
-POSTGRES_USER=rbac_admin
+POSTGRES_DB=xunyin_admin
+POSTGRES_USER=xunyin_admin
 # 请修改为强密码！
 POSTGRES_PASSWORD=YourStrongPassword@2024
 
@@ -80,7 +80,7 @@ POSTGRES_PASSWORD=YourStrongPassword@2024
 JWT_SECRET=你的JWT密钥
 ```
 
-> ⚠️ **重要**：密码中如果包含特殊字符（如 `@`），直接写原始字符，**不要** URL 编码。例如密码是 `RBAC Admin@2025`，就直接写 `POSTGRES_PASSWORD=RBAC Admin@2025`，不要写成 `RBAC Admin%402025`。
+> ⚠️ **重要**：密码中如果包含特殊字符（如 `@`），直接写原始字符，**不要** URL 编码。例如密码是 `Xunyin@2025`，就直接写 `POSTGRES_PASSWORD=Xunyin@2025`，不要写成 `Xunyin%402025`。
 
 生成 JWT 密钥（二选一）：
 
@@ -95,7 +95,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ## 四、启动服务
 
 ```bash
-cd /www/wwwroot/rbac-admin-pro
+cd /www/wwwroot/xunyin-admin
 
 # 首次启动（会自动构建镜像）
 docker compose up -d
@@ -157,7 +157,7 @@ client_max_body_size 100m;
 推荐使用 Prisma 初始化数据库（确保与代码同步）：
 
 ```bash
-cd /www/wwwroot/rbac-admin-pro
+cd /www/wwwroot/xunyin-admin
 
 # 执行数据库迁移
 docker compose exec server npx prisma migrate deploy
@@ -177,7 +177,7 @@ docker compose exec server sh -c "npx prisma migrate reset --force && npx prisma
 ### 服务管理
 
 ```bash
-cd /www/wwwroot/rbac-admin-pro
+cd /www/wwwroot/xunyin-admin
 
 # 启动所有服务
 docker compose up -d
@@ -204,7 +204,7 @@ docker compose logs -f server
 ### 更新部署
 
 ```bash
-cd /www/wwwroot/rbac-admin-pro
+cd /www/wwwroot/xunyin-admin
 
 # 拉取最新代码
 git pull origin main
@@ -224,7 +224,7 @@ docker compose up -d --build web
 docker compose exec server sh
 
 # 进入数据库容器
-docker compose exec postgres psql -U rbac_admin -d rbac_admin
+docker compose exec postgres psql -U xunyin_admin -d xunyin_admin
 
 # 进入 Redis 容器
 docker compose exec redis redis-cli
@@ -252,10 +252,10 @@ docker system prune -f
 
 ```bash
 # 备份到文件
-docker compose exec postgres pg_dump -U rbac_admin rbac_admin > backup_$(date +%Y%m%d_%H%M%S).sql
+docker compose exec postgres pg_dump -U xunyin_admin xunyin_admin > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # 恢复数据库
-cat backup_xxx.sql | docker compose exec -T postgres psql -U rbac_admin -d rbac_admin
+cat backup_xxx.sql | docker compose exec -T postgres psql -U xunyin_admin -d xunyin_admin
 ```
 
 ### 8.2 定时备份（宝塔计划任务）
@@ -269,8 +269,8 @@ DATE=$(date +%Y%m%d_%H%M%S)
 
 mkdir -p $BACKUP_DIR
 
-cd /www/wwwroot/rbac-admin-pro
-docker compose exec -T postgres pg_dump -U rbac_admin rbac_admin > $BACKUP_DIR/db_$DATE.sql
+cd /www/wwwroot/xunyin-admin
+docker compose exec -T postgres pg_dump -U xunyin_admin xunyin_admin > $BACKUP_DIR/db_$DATE.sql
 
 # 保留最近 7 天的备份
 find $BACKUP_DIR -name "db_*.sql" -mtime +7 -delete
@@ -358,7 +358,7 @@ docker compose ps postgres
 docker compose logs postgres
 
 # 测试连接
-docker compose exec postgres psql -U rbac_admin -d rbac_admin -c "SELECT 1"
+docker compose exec postgres psql -U xunyin_admin -d xunyin_admin -c "SELECT 1"
 ```
 
 ### Q5: 磁盘空间不足
@@ -427,7 +427,7 @@ docker compose up -d
 ## 快速检查清单
 
 - [ ] Docker 和 Docker Compose 已安装
-- [ ] 项目代码已上传到 `/www/wwwroot/rbac-admin-pro`
+- [ ] 项目代码已上传到 `/www/wwwroot/xunyin-admin`
 - [ ] `.env` 文件已配置（数据库密码、JWT 密钥）
 - [ ] `docker compose up -d` 执行成功
 - [ ] `docker compose ps` 显示所有服务 healthy

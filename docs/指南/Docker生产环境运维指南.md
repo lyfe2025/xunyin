@@ -1,6 +1,6 @@
 # Docker 生产环境运维指南
 
-本文档介绍 RBAC Admin Pro 在 Docker 环境下的日常运维操作。
+本文档介绍 Xunyin Admin 在 Docker 环境下的日常运维操作。
 
 ## 一、服务管理
 
@@ -8,7 +8,7 @@
 
 ```bash
 # 进入项目目录（所有命令都需要在此目录执行）
-cd /www/wwwroot/rbac-admin-pro
+cd /www/wwwroot/xunyin-admin
 
 # 查看所有容器状态
 docker compose ps
@@ -72,56 +72,56 @@ docker compose up -d
 
 ```bash
 # 方式一：通过 Docker 进入 psql
-docker compose exec postgres psql -U rbac_admin -d rbac_admin
+docker compose exec postgres psql -U xunyin_admin -d xunyin_admin
 
 # 方式二：从宿主机连接（如果端口已映射）
-psql -h 127.0.0.1 -U rbac_admin -d rbac_admin
+psql -h 127.0.0.1 -U xunyin_admin -d xunyin_admin
 ```
 
 ### 2.2 常用 SQL 操作
 
 ```bash
 # 执行单条 SQL
-docker compose exec postgres psql -U rbac_admin -d rbac_admin -c "SELECT * FROM sys_user LIMIT 5;"
+docker compose exec postgres psql -U xunyin_admin -d xunyin_admin -c "SELECT * FROM sys_user LIMIT 5;"
 
 # 查看所有表
-docker compose exec postgres psql -U rbac_admin -d rbac_admin -c "\dt"
+docker compose exec postgres psql -U xunyin_admin -d xunyin_admin -c "\dt"
 
 # 查看表结构
-docker compose exec postgres psql -U rbac_admin -d rbac_admin -c "\d sys_user"
+docker compose exec postgres psql -U xunyin_admin -d xunyin_admin -c "\d sys_user"
 
 # 执行 SQL 文件
-docker compose exec -T postgres psql -U rbac_admin -d rbac_admin < /path/to/script.sql
+docker compose exec -T postgres psql -U xunyin_admin -d xunyin_admin < /path/to/script.sql
 ```
 
 ### 2.3 数据库备份
 
 ```bash
 # 备份整个数据库
-docker compose exec -T postgres pg_dump -U rbac_admin rbac_admin > backup_$(date +%Y%m%d_%H%M%S).sql
+docker compose exec -T postgres pg_dump -U xunyin_admin xunyin_admin > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # 备份到指定目录
-docker compose exec -T postgres pg_dump -U rbac_admin rbac_admin > /www/backup/db_$(date +%Y%m%d).sql
+docker compose exec -T postgres pg_dump -U xunyin_admin xunyin_admin > /www/backup/db_$(date +%Y%m%d).sql
 
 # 只备份表结构（不含数据）
-docker compose exec -T postgres pg_dump -U rbac_admin -s rbac_admin > schema_only.sql
+docker compose exec -T postgres pg_dump -U xunyin_admin -s xunyin_admin > schema_only.sql
 
 # 只备份数据（不含结构）
-docker compose exec -T postgres pg_dump -U rbac_admin -a rbac_admin > data_only.sql
+docker compose exec -T postgres pg_dump -U xunyin_admin -a xunyin_admin > data_only.sql
 
 # 备份单个表
-docker compose exec -T postgres pg_dump -U rbac_admin -t sys_user rbac_admin > sys_user_backup.sql
+docker compose exec -T postgres pg_dump -U xunyin_admin -t sys_user xunyin_admin > sys_user_backup.sql
 ```
 
 ### 2.4 数据库恢复
 
 ```bash
 # 恢复整个数据库（⚠️ 会覆盖现有数据）
-cat backup_xxx.sql | docker compose exec -T postgres psql -U rbac_admin -d rbac_admin
+cat backup_xxx.sql | docker compose exec -T postgres psql -U xunyin_admin -d xunyin_admin
 
 # 恢复前先清空数据库
-docker compose exec postgres psql -U rbac_admin -d rbac_admin -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-cat backup_xxx.sql | docker compose exec -T postgres psql -U rbac_admin -d rbac_admin
+docker compose exec postgres psql -U xunyin_admin -d xunyin_admin -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+cat backup_xxx.sql | docker compose exec -T postgres psql -U xunyin_admin -d xunyin_admin
 ```
 
 ### 2.5 Prisma 数据库操作
@@ -196,14 +196,14 @@ docker compose exec -u root server sh
 
 ```bash
 # 查看容器详细信息
-docker inspect rbac-server
+docker inspect xunyin-server
 
 # 查看容器资源使用
 docker stats
 
 # 查看容器网络
 docker network ls
-docker network inspect rbac-admin-pro_rbac-network
+docker network inspect xunyin-admin_xunyin-network
 ```
 
 ### 4.3 测试网络连通性
@@ -229,19 +229,19 @@ curl http://127.0.0.1:3000/api/health
 docker volume ls
 
 # 查看项目相关的数据卷
-docker volume ls | grep rbac
+docker volume ls | grep xunyin
 
 # 查看数据卷详情
-docker volume inspect rbac-admin-pro_postgres_data
+docker volume inspect xunyin-admin_postgres_data
 ```
 
 ### 5.2 数据卷位置
 
 | 数据卷 | 用途 | 宿主机位置 |
 |--------|------|-----------|
-| postgres_data | 数据库文件 | /var/lib/docker/volumes/rbac-admin-pro_postgres_data |
-| redis_data | Redis 持久化 | /var/lib/docker/volumes/rbac-admin-pro_redis_data |
-| server_logs | 后端日志 | /var/lib/docker/volumes/rbac-admin-pro_server_logs |
+| postgres_data | 数据库文件 | /var/lib/docker/volumes/xunyin-admin_postgres_data |
+| redis_data | Redis 持久化 | /var/lib/docker/volumes/xunyin-admin_redis_data |
+| server_logs | 后端日志 | /var/lib/docker/volumes/xunyin-admin_server_logs |
 
 ### 5.3 清理数据卷
 
@@ -250,14 +250,14 @@ docker volume inspect rbac-admin-pro_postgres_data
 docker volume prune
 
 # 删除指定数据卷（⚠️ 会丢失数据）
-docker volume rm rbac-admin-pro_postgres_data
+docker volume rm xunyin-admin_postgres_data
 ```
 
 ## 六、镜像管理
 
 ```bash
 # 查看项目镜像
-docker images | grep rbac
+docker images | grep xunyin
 
 # 删除旧镜像
 docker image prune -f
@@ -266,8 +266,8 @@ docker image prune -f
 docker compose build --no-cache
 
 # 导出镜像（用于离线部署）
-docker save rbac-admin-pro-server > server-image.tar
-docker save rbac-admin-pro-web > web-image.tar
+docker save xunyin-admin-server > server-image.tar
+docker save xunyin-admin-web > web-image.tar
 
 # 导入镜像
 docker load < server-image.tar
@@ -285,7 +285,7 @@ docker compose logs server
 docker compose ps -a
 
 # 查看容器退出原因
-docker inspect rbac-server | grep -A 10 "State"
+docker inspect xunyin-server | grep -A 10 "State"
 ```
 
 ### 7.2 数据库连接失败
@@ -332,13 +332,13 @@ docker compose up -d
 
 ```bash
 #!/bin/bash
-BACKUP_DIR=/www/backup/rbac-admin
+BACKUP_DIR=/www/backup/xunyin-admin
 DATE=$(date +%Y%m%d_%H%M%S)
 
 mkdir -p $BACKUP_DIR
 
-cd /www/wwwroot/rbac-admin-pro
-docker compose exec -T postgres pg_dump -U rbac_admin rbac_admin > $BACKUP_DIR/db_$DATE.sql
+cd /www/wwwroot/xunyin-admin
+docker compose exec -T postgres pg_dump -U xunyin_admin xunyin_admin > $BACKUP_DIR/db_$DATE.sql
 
 # 压缩备份文件
 gzip $BACKUP_DIR/db_$DATE.sql
@@ -373,9 +373,9 @@ echo "Docker 清理完成"
 | 查看日志 | `docker compose logs -f server` |
 | 更新部署 | `docker compose up -d --build` |
 | 进入容器 | `docker compose exec server sh` |
-| 连接数据库 | `docker compose exec postgres psql -U rbac_admin -d rbac_admin` |
-| 备份数据库 | `docker compose exec -T postgres pg_dump -U rbac_admin rbac_admin > backup.sql` |
-| 恢复数据库 | `cat backup.sql \| docker compose exec -T postgres psql -U rbac_admin -d rbac_admin` |
+| 连接数据库 | `docker compose exec postgres psql -U xunyin_admin -d xunyin_admin` |
+| 备份数据库 | `docker compose exec -T postgres pg_dump -U xunyin_admin xunyin_admin > backup.sql` |
+| 恢复数据库 | `cat backup.sql \| docker compose exec -T postgres psql -U xunyin_admin -d xunyin_admin` |
 | 执行迁移 | `docker compose exec server npx prisma migrate deploy` |
 | 导入种子 | `docker compose exec server npx prisma db seed` |
 | 重置数据库 | `docker compose exec server npx prisma migrate reset --force` |

@@ -509,7 +509,7 @@ print_menu() {
   if is_running "$spid" || is_port_in_use "$SERVER_PORT"; then sstatus="运行中"; else sstatus="未运行"; fi
   WEB_LOG_PATH="$PID_DIR/web-dev.log"; SERVER_LOG_PATH="$PID_DIR/server-dev.log"
   WEB_UP="$(fmt_uptime "$(pid_uptime_raw "$wpid")")"; SERVER_UP="$(fmt_uptime "$(pid_uptime_raw "$spid")")"
-  center_line "${BOLD}${FG_CYAN}RBAC Admin 控制台${RESET}"
+  center_line "${BOLD}${FG_CYAN}Xunyin Admin 控制台${RESET}"
   hr
   printf -- "${FG_CYAN}[前端]${RESET}\n"
   kv_line "状态" "$(status_badge "$wstatus")"
