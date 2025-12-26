@@ -73,6 +73,10 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 6. WHEN 用户查看文化之旅详情 THEN THE Journey_Module SHALL 显示预计时长、总距离和已完成人数
 7. THE Journey_Module SHALL 支持文化之旅解锁机制，部分文化之旅需完成前置条件才能开启
 8. WHEN 用户查看城市面板 THEN THE Journey_Module SHALL 显示该城市的文化之旅解锁进度
+9. WHEN 用户查看城市面板 THEN THE Journey_Module SHALL 显示该城市的总探索人数
+10. WHEN 用户查看城市面板展开状态 THEN THE Journey_Module SHALL 显示城市封面插画和文化介绍
+11. WHEN 用户查看文化之旅卡片 THEN THE Journey_Module SHALL 显示星级评分、探索点数量和距离
+12. WHEN 用户查看探索点列表 THEN THE Journey_Module SHALL 显示每个探索点的任务类型和距离
 
 ### Requirement 3: AR任务系统
 
@@ -89,6 +93,7 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 7. WHEN 手势识别进行中 THEN THE AR_Module SHALL 实时显示识别进度百分比
 8. THE AR_Module SHALL 支持多种AR滤镜选择（如古风、水墨、原图）
 9. WHEN 任务类型为AR寻宝 THEN THE AR_Module SHALL 在场景中显示隐藏的虚拟物品供用户寻找
+10. WHEN AR任务页面显示 THEN THE AR_Module SHALL 显示当前探索点进度（如 2/10）
 
 ### Requirement 4: 任务验证与完成
 
@@ -105,6 +110,7 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 7. WHEN 任务完成 THEN THE Validation_Module SHALL 显示任务完成页面，包含拍摄照片和积分奖励
 8. WHEN 任务完成 THEN THE Validation_Module SHALL 解锁并展示文化小知识内容
 9. WHEN 任务完成 THEN THE Validation_Module SHALL 提供分享到社交平台和继续下一个探索点的选项
+10. WHEN 到达探索点提示显示 THEN THE Validation_Module SHALL 提供「开始任务」和「稍后再来」两个选项
 
 ### Requirement 5: 印记系统
 
@@ -123,6 +129,11 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 9. WHEN 用户查看印记集 THEN THE Seal_Module SHALL 显示各类印记的收集进度条
 10. THE Seal_Module SHALL 显示未解锁印记为锁定状态并提示解锁条件
 11. WHEN 用户查看印记集 THEN THE Seal_Module SHALL 显示进行中的文化之旅及其进度
+12. WHEN 用户查看印记详情 THEN THE Seal_Module SHALL 显示该印记关联的探索照片
+13. WHEN 用户完成文化之旅 THEN THE Seal_Module SHALL 解锁相应的称号徽章（如「西湖文化达人」）
+14. WHEN 文化之旅完成页显示 THEN THE Seal_Module SHALL 显示完成时间、用时和积分奖励
+15. WHEN 文化之旅完成页显示 THEN THE Seal_Module SHALL 提供「分享印记」和「返回首页」按钮
+16. THE Seal_Module SHALL 提供筛选功能入口
 
 ### Requirement 6: 区块链存证
 
@@ -138,7 +149,8 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 6. IF 上链失败 THEN THE Blockchain_Module SHALL 提示错误原因并支持重试
 7. WHEN 用户查看印记详情 THEN THE Blockchain_Module SHALL 显示链名称、交易哈希、区块高度和时间戳
 8. THE Blockchain_Module SHALL 支持复制交易哈希和跳转链上查看
-9. THE Blockchain_Module SHALL 在印记卡片上显示已上链标识
+9. THE Blockchain_Module SHALL 在印记卡片上显示已上链标识（🔗）
+10. WHEN 文化之旅完成页显示 THEN THE Blockchain_Module SHALL 提供「立即上链」入口
 
 ### Requirement 7: 用户账户与数据
 
@@ -159,6 +171,7 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 11. THE User_Module SHALL 提供区块链钱包入口
 12. THE User_Module SHALL 提供旅行统计详情入口
 13. THE User_Module SHALL 提供积分商城入口
+14. THE User_Module SHALL 提供设置入口
 
 ### Requirement 8: 文化内容展示
 
@@ -172,6 +185,7 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 4. THE Content_Module SHALL 支持多媒体内容展示，包括文字、图片、音频和视频
 5. WHERE 用户选择语音导览 THEN THE Content_Module SHALL 提供语音讲解功能
 6. THE Content_Module SHALL 支持内容离线缓存以便无网络时查看
+7. WHEN 任务完成页显示文化小知识 THEN THE Content_Module SHALL 提供「查看更多」入口跳转深度内容
 
 ### Requirement 9: 相册管理
 
@@ -180,12 +194,14 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 #### Acceptance Criteria
 
 1. WHEN 用户点击地图右侧浮动相册图标 THEN THE Album_Module SHALL 打开相册页面展示所有探索照片
-2. WHEN 用户进入相册页面 THEN THE Album_Module SHALL 展示所有探索照片的统计信息
+2. WHEN 用户进入相册页面 THEN THE Album_Module SHALL 展示所有探索照片的统计信息（总照片数、文化之旅数）
 3. WHEN 用户按文化之旅筛选 THEN THE Album_Module SHALL 按文化之旅分类展示照片
 4. WHEN 用户按时间筛选 THEN THE Album_Module SHALL 按时间线展示照片
 5. WHEN 用户点击照片 THEN THE Album_Module SHALL 显示照片详情，包括拍摄地点和时间
 6. THE Album_Module SHALL 支持照片分享到社交平台
 7. THE Album_Module SHALL 支持删除不需要的照片
+8. WHEN 用户查看文化之旅分类 THEN THE Album_Module SHALL 显示每条文化之旅的照片数量
+9. THE Album_Module SHALL 提供筛选功能入口
 
 ### Requirement 10: 背景音乐系统
 
@@ -194,12 +210,13 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 #### Acceptance Criteria
 
 1. WHEN 用户打开应用 THEN THE Audio_Module SHALL 默认播放轻柔古风背景音乐
-2. WHEN 用户进入城市篇章 THEN THE Audio_Module SHALL 切换为该城市特色音乐
+2. WHEN 用户进入城市篇章 THEN THE Audio_Module SHALL 切换为该城市特色音乐（如杭州播江南丝竹、西安播秦腔元素）
 3. WHEN 用户开始文化之旅 THEN THE Audio_Module SHALL 播放与文化之旅主题匹配的背景音乐
 4. WHEN 用户点击地图右侧浮动音乐图标 THEN THE Audio_Module SHALL 切换音乐播放/暂停状态
 5. THE Audio_Module SHALL 记住用户的音乐偏好设置
 6. WHEN 用户进入AR任务页面 THEN THE Audio_Module SHALL 自动暂停背景音乐避免干扰
 7. THE Audio_Module SHALL 支持音乐淡入淡出过渡效果
+8. WHEN 音乐播放状态变化 THEN THE Audio_Module SHALL 更新浮动控件图标状态
 
 ### Requirement 11: 全屏沉浸式导航
 
@@ -208,7 +225,7 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 #### Acceptance Criteria
 
 1. THE App SHALL 采用无底部导航栏、无顶部搜索栏的全屏沉浸式设计
-2. THE App SHALL 在地图右侧提供竖排浮动控件，包含：我的、印记、相册、音乐、定位
+2. THE App SHALL 在地图右侧提供竖排浮动控件，包含：我的(👤)、印记(🏆)、相册(📷)、音乐(🎵)、定位(📍)
 3. WHEN 用户点击我的图标 THEN THE App SHALL 打开个人中心页面
 4. WHEN 用户点击印记图标 THEN THE App SHALL 打开印记集页面
 5. WHEN 用户点击定位图标 THEN THE Map_Module SHALL 将地图中心移动到用户当前位置
@@ -216,6 +233,7 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 7. WHEN 用户点击城市图标 THEN THE App SHALL 从底部弹出城市面板而非跳转页面
 8. THE 底部面板 SHALL 支持上滑展开、下滑收起的手势交互
 9. THE 底部面板 SHALL 包含省份标签横向滚动，支持快速切换区域
+10. THE 底部面板 SHALL 包含拖动条指示可拖动状态
 
 ### Requirement 12: 离线支持与网络处理
 
@@ -240,3 +258,17 @@ Flutter App 将与现有的 NestJS 后端进行 API 交互。
 3. WHEN 应用需要存储权限 THEN THE App SHALL 在保存照片前请求授权
 4. IF 用户拒绝必要权限 THEN THE App SHALL 提示功能受限并引导用户开启
 5. THE App SHALL 遵循最小权限原则，仅请求功能必需的权限
+
+
+### Requirement 14: 页面导航与返回
+
+**User Story:** As a 用户, I want 在各个页面之间流畅导航, so that 我可以方便地浏览和返回。
+
+#### Acceptance Criteria
+
+1. THE App SHALL 在所有二级页面提供返回按钮（←）
+2. WHEN 用户点击返回按钮 THEN THE App SHALL 返回上一级页面
+3. THE App SHALL 在全屏任务页面提供关闭按钮（×）
+4. WHEN 用户点击关闭按钮 THEN THE App SHALL 关闭当前页面并返回主流程
+5. WHEN 用户在导航中点击关闭 THEN THE App SHALL 结束导航并返回文化之旅进行中页面
+6. WHEN 用户在AR任务中点击关闭 THEN THE App SHALL 提示是否放弃当前任务
