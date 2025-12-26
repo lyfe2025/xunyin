@@ -1,0 +1,23 @@
+{
+  "name": "rbac-admin-pro",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @rbac-admin-pro/web run dev & pnpm --filter server-nestjs run start:dev",
+    "dev:web": "pnpm --filter @rbac-admin-pro/web run dev",
+    "dev:server": "pnpm --filter server-nestjs run start:dev",
+    "build": "pnpm -r run build",
+    "build:web": "pnpm --filter @rbac-admin-pro/web run build",
+    "build:server": "pnpm --filter server-nestjs run build",
+    "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "type-check": "pnpm --filter @rbac-admin-pro/web run type-check",
+    "validate": "pnpm --filter server-nestjs run validate",
+    "db:migrate": "pnpm --filter server-nestjs exec prisma migrate dev",
+    "db:generate": "pnpm --filter server-nestjs exec prisma generate",
+    "db:seed": "pnpm --filter server-nestjs exec prisma db seed",
+    "db:studio": "pnpm --filter server-nestjs exec prisma studio"
+  },
+  "devDependencies": {
+    "shadcn-vue": "^2.4.1"
+  }
+}

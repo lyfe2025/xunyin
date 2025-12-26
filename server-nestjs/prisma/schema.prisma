@@ -1,0 +1,507 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// 部门表
+model SysDept {
+  /// 部门ID
+  deptId     BigInt        @id @default(autoincrement()) @map("dept_id")
+  /// 父部门ID
+  parentId   BigInt?       @map("parent_id")
+  /// 祖级列表
+  ancestors  String?       @default("") @db.VarChar(500)
+  /// 部门名称
+  deptName   String        @map("dept_name") @db.VarChar(50)
+  /// 显示顺序
+  orderNum   Int?          @default(0) @map("order_num")
+  /// 负责人
+  leader     String?       @db.VarChar(20)
+  /// 联系电话
+  phone      String?       @db.VarChar(11)
+  /// 邮箱
+  email      String?       @db.VarChar(50)
+  /// 部门状态（0正常 1停用）
+  status     String?       @default("0") @db.Char(1)
+  /// 删除标志（0代表存在 2代表删除）
+  delFlag    String?       @default("0") @map("del_flag") @db.Char(1)
+  /// 创建者
+  createBy   String?       @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime DateTime?     @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy   String?       @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime DateTime?     @updatedAt @map("update_time") @db.Timestamp(6)
+  parent     SysDept?      @relation("DeptToDept", fields: [parentId], references: [deptId])
+  children   SysDept[]     @relation("DeptToDept")
+  roles      SysRoleDept[]
+  users      SysUser[]
+
+  @@index([parentId])
+  @@index([status, delFlag])
+  @@map("sys_dept")
+}
+
+/// 用户信息表
+model SysUser {
+  /// 用户ID
+  userId           BigInt        @id @default(autoincrement()) @map("user_id")
+  /// 部门ID
+  deptId           BigInt?       @map("dept_id")
+  /// 用户账号
+  userName         String        @map("user_name") @db.VarChar(30)
+  /// 用户昵称
+  nickName         String        @map("nick_name") @db.VarChar(30)
+  /// 用户类型（00系统用户）
+  userType         String?       @default("00") @map("user_type") @db.VarChar(2)
+  /// 用户邮箱
+  email            String?       @default("") @db.VarChar(50)
+  /// 手机号码
+  phonenumber      String?       @default("") @db.VarChar(11)
+  /// 用户性别（0男 1女 2未知）
+  sex              String?       @default("0") @db.Char(1)
+  /// 头像地址
+  avatar           String?       @default("") @db.VarChar(100)
+  /// 密码
+  password         String?       @default("") @db.VarChar(100)
+  /// 帐号状态（0正常 1停用）
+  status           String?       @default("0") @db.Char(1)
+  /// 删除标志（0代表存在 2代表删除）
+  delFlag          String?       @default("0") @map("del_flag") @db.Char(1)
+  /// 最后登录IP
+  loginIp          String?       @default("") @map("login_ip") @db.VarChar(128)
+  /// 最后登录时间
+  loginDate        DateTime?     @map("login_date") @db.Timestamp(6)
+  /// 两步验证密钥
+  twoFactorSecret  String?       @map("two_factor_secret") @db.VarChar(100)
+  /// 两步验证是否启用
+  twoFactorEnabled Boolean?      @default(false) @map("two_factor_enabled")
+  /// 创建者
+  createBy         String?       @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime       DateTime?     @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy         String?       @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime       DateTime?     @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark           String?       @db.VarChar(500)
+  dept             SysDept?      @relation(fields: [deptId], references: [deptId])
+  posts            SysUserPost[]
+  roles            SysUserRole[]
+
+  @@unique([userName, delFlag])
+  @@index([deptId])
+  @@index([status, delFlag])
+  @@index([phonenumber])
+  @@index([email])
+  @@map("sys_user")
+}
+
+/// 岗位信息表
+model SysPost {
+  /// 岗位ID
+  postId     BigInt        @id @default(autoincrement()) @map("post_id")
+  /// 岗位编码
+  postCode   String        @map("post_code") @db.VarChar(64)
+  /// 岗位名称
+  postName   String        @map("post_name") @db.VarChar(50)
+  /// 显示顺序
+  postSort   Int           @map("post_sort")
+  /// 状态（0正常 1停用）
+  status     String        @db.Char(1)
+  /// 创建者
+  createBy   String?       @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime DateTime?     @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy   String?       @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime DateTime?     @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark     String?       @db.VarChar(500)
+  users      SysUserPost[]
+
+  @@unique([postCode])
+  @@index([status])
+  @@map("sys_post")
+}
+
+/// 角色信息表
+model SysRole {
+  /// 角色ID
+  roleId            BigInt        @id @default(autoincrement()) @map("role_id")
+  /// 角色名称
+  roleName          String        @map("role_name") @db.VarChar(30)
+  /// 角色权限字符串
+  roleKey           String        @map("role_key") @db.VarChar(100)
+  /// 显示顺序
+  roleSort          Int           @map("role_sort")
+  /// 数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）
+  dataScope         String?       @default("1") @map("data_scope") @db.Char(1)
+  /// 菜单树选择项是否关联显示
+  menuCheckStrictly Boolean?      @default(true) @map("menu_check_strictly")
+  /// 部门树选择项是否关联显示
+  deptCheckStrictly Boolean?      @default(true) @map("dept_check_strictly")
+  /// 角色状态（0正常 1停用）
+  status            String        @db.Char(1)
+  /// 删除标志（0代表存在 2代表删除）
+  delFlag           String?       @default("0") @map("del_flag") @db.Char(1)
+  /// 创建者
+  createBy          String?       @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime        DateTime?     @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy          String?       @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime        DateTime?     @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark            String?       @db.VarChar(500)
+  depts             SysRoleDept[]
+  menus             SysRoleMenu[]
+  users             SysUserRole[]
+
+  @@unique([roleKey, delFlag])
+  @@index([status, delFlag])
+  @@map("sys_role")
+}
+
+/// 菜单权限表
+model SysMenu {
+  /// 菜单ID
+  menuId     BigInt        @id @default(autoincrement()) @map("menu_id")
+  /// 菜单名称
+  menuName   String        @map("menu_name") @db.VarChar(50)
+  /// 父菜单ID
+  parentId   BigInt?       @map("parent_id")
+  /// 显示顺序
+  orderNum   Int?          @default(0) @map("order_num")
+  /// 路由地址
+  path       String?       @default("") @db.VarChar(200)
+  /// 组件路径
+  component  String?       @db.VarChar(255)
+  /// 是否为外链（0是 1否）
+  isFrame    Int?          @default(1) @map("is_frame")
+  /// 是否缓存（0缓存 1不缓存）
+  isCache    Int?          @default(0) @map("is_cache")
+  /// 菜单类型（M目录 C菜单 F按钮）
+  menuType   String?       @default("") @map("menu_type") @db.Char(1)
+  /// 菜单状态（0显示 1隐藏）
+  visible    String?       @default("0") @db.Char(1)
+  /// 菜单状态（0正常 1停用）
+  status     String?       @default("0") @db.Char(1)
+  /// 权限标识
+  perms      String?       @db.VarChar(100)
+  /// 菜单图标
+  icon       String?       @default("#") @db.VarChar(100)
+  /// 创建者
+  createBy   String?       @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime DateTime?     @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy   String?       @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime DateTime?     @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark     String?       @db.VarChar(500)
+  parent     SysMenu?      @relation("MenuToMenu", fields: [parentId], references: [menuId])
+  children   SysMenu[]     @relation("MenuToMenu")
+  roles      SysRoleMenu[]
+
+  @@index([parentId])
+  @@index([status, visible])
+  @@index([perms])
+  @@map("sys_menu")
+}
+
+/// 用户和角色关联表
+model SysUserRole {
+  /// 用户ID
+  userId BigInt  @map("user_id")
+  /// 角色ID
+  roleId BigInt  @map("role_id")
+  role   SysRole @relation(fields: [roleId], references: [roleId])
+  user   SysUser @relation(fields: [userId], references: [userId])
+
+  @@id([userId, roleId])
+  @@map("sys_user_role")
+}
+
+/// 角色和菜单关联表
+model SysRoleMenu {
+  /// 角色ID
+  roleId BigInt  @map("role_id")
+  /// 菜单ID
+  menuId BigInt  @map("menu_id")
+  menu   SysMenu @relation(fields: [menuId], references: [menuId])
+  role   SysRole @relation(fields: [roleId], references: [roleId])
+
+  @@id([roleId, menuId])
+  @@map("sys_role_menu")
+}
+
+/// 角色和部门关联表
+model SysRoleDept {
+  /// 角色ID
+  roleId BigInt  @map("role_id")
+  /// 部门ID
+  deptId BigInt  @map("dept_id")
+  dept   SysDept @relation(fields: [deptId], references: [deptId])
+  role   SysRole @relation(fields: [roleId], references: [roleId])
+
+  @@id([roleId, deptId])
+  @@map("sys_role_dept")
+}
+
+/// 用户与岗位关联表
+model SysUserPost {
+  /// 用户ID
+  userId BigInt  @map("user_id")
+  /// 岗位ID
+  postId BigInt  @map("post_id")
+  post   SysPost @relation(fields: [postId], references: [postId])
+  user   SysUser @relation(fields: [userId], references: [userId])
+
+  @@id([userId, postId])
+  @@map("sys_user_post")
+}
+
+/// 操作日志记录
+model SysOperLog {
+  /// 日志主键
+  operId        BigInt    @id @default(autoincrement()) @map("oper_id")
+  /// 模块标题
+  title         String?   @default("") @db.VarChar(50)
+  /// 业务类型（0其它 1新增 2修改 3删除）
+  businessType  Int?      @default(0) @map("business_type")
+  /// 方法名称
+  method        String?   @default("") @db.VarChar(100)
+  /// 请求方式
+  requestMethod String?   @default("") @map("request_method") @db.VarChar(10)
+  /// 操作类别（0其它 1后台用户 2手机端用户）
+  operatorType  Int?      @default(0) @map("operator_type")
+  /// 操作人员
+  operName      String?   @default("") @map("oper_name") @db.VarChar(50)
+  /// 部门名称
+  deptName      String?   @default("") @map("dept_name") @db.VarChar(50)
+  /// 请求URL
+  operUrl       String?   @default("") @map("oper_url") @db.VarChar(255)
+  /// 主机IP地址
+  operIp        String?   @default("") @map("oper_ip") @db.VarChar(128)
+  /// 操作地点
+  operLocation  String?   @default("") @map("oper_location") @db.VarChar(255)
+  /// 请求参数
+  operParam     String?   @default("") @map("oper_param")
+  /// 返回参数
+  jsonResult    String?   @default("") @map("json_result")
+  /// 操作状态（0正常 1异常）
+  status        Int?      @default(0)
+  /// 错误消息
+  errorMsg      String?   @default("") @map("error_msg")
+  /// 操作时间
+  operTime      DateTime? @default(now()) @map("oper_time") @db.Timestamp(6)
+
+  @@index([operTime])
+  @@index([operName])
+  @@index([businessType])
+  @@index([status])
+  @@map("sys_oper_log")
+}
+
+/// 字典类型表
+model SysDictType {
+  /// 字典主键
+  dictId     BigInt    @id @default(autoincrement()) @map("dict_id")
+  /// 字典名称
+  dictName   String?   @default("") @map("dict_name") @db.VarChar(100)
+  /// 字典类型
+  dictType   String?   @default("") @map("dict_type") @db.VarChar(100)
+  /// 状态（0正常 1停用）
+  status     String?   @default("0") @db.Char(1)
+  /// 创建者
+  createBy   String?   @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime DateTime? @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy   String?   @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime DateTime? @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark     String?   @db.VarChar(500)
+
+  @@unique([dictType])
+  @@index([status])
+  @@map("sys_dict_type")
+}
+
+/// 字典数据表
+model SysDictData {
+  /// 字典编码
+  dictCode   BigInt    @id @default(autoincrement()) @map("dict_code")
+  /// 字典排序
+  dictSort   Int?      @default(0) @map("dict_sort")
+  /// 字典标签
+  dictLabel  String?   @default("") @map("dict_label") @db.VarChar(100)
+  /// 字典键值
+  dictValue  String?   @default("") @map("dict_value") @db.VarChar(100)
+  /// 字典类型
+  dictType   String?   @default("") @map("dict_type") @db.VarChar(100)
+  /// 样式属性
+  cssClass   String?   @map("css_class") @db.VarChar(100)
+  /// 表格回显样式
+  listClass  String?   @map("list_class") @db.VarChar(100)
+  /// 是否默认（Y是 N否）
+  isDefault  String?   @default("N") @map("is_default") @db.Char(1)
+  /// 状态（0正常 1停用）
+  status     String?   @default("0") @db.Char(1)
+  /// 创建者
+  createBy   String?   @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime DateTime? @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy   String?   @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime DateTime? @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark     String?   @db.VarChar(500)
+
+  @@index([dictType])
+  @@index([status])
+  @@map("sys_dict_data")
+}
+
+/// 参数配置表
+model SysConfig {
+  /// 参数主键
+  configId    BigInt    @id @default(autoincrement()) @map("config_id")
+  /// 参数名称
+  configName  String?   @default("") @map("config_name") @db.VarChar(100)
+  /// 参数键名
+  configKey   String?   @default("") @map("config_key") @db.VarChar(100)
+  /// 参数键值
+  configValue String?   @default("") @map("config_value") @db.VarChar(500)
+  /// 系统内置（Y是 N否）
+  configType  String?   @default("N") @map("config_type") @db.Char(1)
+  /// 创建者
+  createBy    String?   @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime  DateTime? @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy    String?   @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime  DateTime? @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark      String?   @db.VarChar(500)
+
+  @@unique([configKey])
+  @@map("sys_config")
+}
+
+/// 系统访问记录(登录日志)
+model SysLoginLog {
+  infoId        BigInt    @id @default(autoincrement()) @map("info_id") /// 访问ID
+  userName      String?   @default("") @map("user_name") @db.VarChar(50) /// 用户账号
+  ipaddr        String?   @default("") @db.VarChar(128) /// 登录IP地址
+  loginLocation String?   @default("") @map("login_location") @db.VarChar(255) /// 登录地点
+  browser       String?   @default("") @db.VarChar(50) /// 浏览器类型
+  os            String?   @default("") @db.VarChar(50) /// 操作系统
+  status        String?   @default("0") @db.Char(1) /// 登录状态（0成功 1失败）
+  msg           String?   @default("") @db.VarChar(255) /// 提示消息
+  loginTime     DateTime? @default(now()) @map("login_time") @db.Timestamp(6) /// 访问时间
+
+  @@index([loginTime])
+  @@index([userName])
+  @@index([status])
+  @@map("sys_login_log")
+}
+
+/// 通知公告表
+model SysNotice {
+  /// 公告ID
+  noticeId      BigInt    @id @default(autoincrement()) @map("notice_id")
+  /// 公告标题
+  noticeTitle   String    @map("notice_title") @db.VarChar(50)
+  /// 公告类型（1通知 2公告）
+  noticeType    String    @map("notice_type") @db.Char(1)
+  /// 公告内容
+  noticeContent String?   @map("notice_content")
+  /// 公告状态（0正常 1关闭）
+  status        String?   @default("0") @db.Char(1)
+  /// 创建者
+  createBy      String?   @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime    DateTime? @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy      String?   @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime    DateTime? @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注
+  remark        String?   @db.VarChar(255)
+
+  @@index([status])
+  @@index([noticeType])
+  @@map("sys_notice")
+}
+
+/// 定时任务调度表
+model SysJob {
+  /// 任务ID
+  jobId          BigInt    @id @default(autoincrement()) @map("job_id")
+  /// 任务名称
+  jobName        String?   @default("") @map("job_name") @db.VarChar(64)
+  /// 任务组名
+  jobGroup       String?   @default("DEFAULT") @map("job_group") @db.VarChar(64)
+  /// 调用目标字符串
+  invokeTarget   String    @map("invoke_target") @db.VarChar(500)
+  /// cron执行表达式
+  cronExpression String?   @default("") @map("cron_expression") @db.VarChar(255)
+  /// 计划执行错误策略（1立即执行 2执行一次 3放弃执行）
+  misfirePolicy  String?   @default("3") @map("misfire_policy") @db.VarChar(20)
+  /// 是否并发执行（0允许 1禁止）
+  concurrent     String?   @default("1") @db.Char(1)
+  /// 状态（0正常 1暂停）
+  status         String?   @default("0") @db.Char(1)
+  /// 创建者
+  createBy       String?   @default("") @map("create_by") @db.VarChar(64)
+  /// 创建时间
+  createTime     DateTime? @default(now()) @map("create_time") @db.Timestamp(6)
+  /// 更新者
+  updateBy       String?   @default("") @map("update_by") @db.VarChar(64)
+  /// 更新时间
+  updateTime     DateTime? @updatedAt @map("update_time") @db.Timestamp(6)
+  /// 备注信息
+  remark         String?   @db.VarChar(500)
+
+  @@index([status])
+  @@index([jobGroup])
+  @@map("sys_job")
+}
+
+/// 定时任务调度日志表
+model SysJobLog {
+  /// 任务日志ID
+  jobLogId      BigInt    @id @default(autoincrement()) @map("job_log_id")
+  /// 任务名称
+  jobName       String    @map("job_name") @db.VarChar(64)
+  /// 任务组名
+  jobGroup      String    @map("job_group") @db.VarChar(64)
+  /// 调用目标字符串
+  invokeTarget  String    @map("invoke_target") @db.VarChar(500)
+  /// 日志信息
+  jobMessage    String?   @map("job_message") @db.VarChar(500)
+  /// 执行状态（0正常 1失败）
+  status        String?   @default("0") @db.Char(1)
+  /// 异常信息
+  exceptionInfo String?   @map("exception_info")
+  /// 创建时间
+  createTime    DateTime? @default(now()) @map("create_time") @db.Timestamp(6)
+
+  @@index([createTime])
+  @@index([jobName, jobGroup])
+  @@index([status])
+  @@map("sys_job_log")
+}

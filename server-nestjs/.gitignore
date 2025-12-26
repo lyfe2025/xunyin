@@ -1,0 +1,13 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+
+# 日志文件
+logs/
+*.log
+
+# 上传文件
+uploads/
+!uploads/avatars/.gitkeep
