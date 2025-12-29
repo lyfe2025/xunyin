@@ -5,477 +5,500 @@
 ### 1. 首页 - 全屏沉浸式地图
 
 ```
-Mobile app UI design, full-screen illustrated map of China for cultural tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的全屏中国插画地图。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Elegant, culturally rich, immersive
+风格：清新扁平矢量插画，柔和渐变天空背景，可爱地标图标，游戏化UI配色活泼，圆润友好的组件
 
-Key elements:
-- Full-screen map with NO top navigation bar, NO bottom tab bar
-- Illustrated style map with warm paper texture background
-- City markers as cute cultural icons (pandas for Chengdu, pagoda for Xi'an, West Lake for Hangzhou, ice sculpture for Harbin)
-- Right side floating vertical toolbar with 5 circular buttons (profile 👤, trophy 🏆, camera 📷, music 🎵, location 📍)
-- Floating buttons have subtle shadow and glass morphism effect
-- User location indicator with soft teal glow
-- Subtle ink wash texture overlay on map
+核心元素：
+- 渐变天空背景：顶部柔和青色(#E0F7FA)渐变到底部浅绿色(#E8F5E9)
+- 简洁白色云朵漂浮
+- 扁平矢量插画风格中国地图，层叠绿色山丘和蓝色水域
+- 城市标记为可爱扁平插画图标：
+  - 杭州：薄荷绿色亭子配橙色屋顶
+  - 西安：兵马俑剪影
+  - 成都：可爱熊猫脸
+  - 哈尔滨：冰雕城堡
+  - 北京：红色天坛
+- 柔和绿色虚线路径连接各城市
+- 右侧：浮动垂直工具栏（5个圆形按钮）
+  - 白色背景配柔和阴影，毛玻璃效果
+  - 图标：👤个人中心、🏆印记、�相册、 🎵音乐、📍定位
+  - 激活状态：橙色(#FFB74D)背景
+- 用户位置：蓝色圆点配柔和发光脉冲
+- 右上角：积分显示"🪙 12000"橙色胶囊徽章
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：天青色(#E0F7FA)、薄荷绿(#81C784)、橙色(#FFB74D)、珊瑚色(#FF7043)、白色、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
-### 2. 城市面板 - Bottom Sheet（收起状态）
+### 2. 城市面板 - 底部弹出面板（收起状态）
 
 ```
-Mobile app UI design, bottom sheet panel for city cultural information in tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的城市信息底部弹出面板。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Elegant, culturally rich, discoverable
+风格：清新扁平矢量插画，柔和渐变背景，游戏化UI，白色圆角卡片配柔和阴影，活泼橙色点缀
 
-Key elements:
-- Map visible in background (slightly dimmed), focused on Hangzhou area
-- Bottom sheet covering 40% of screen from bottom
-- Drag indicator bar at top of sheet (small horizontal line)
-- City name "杭州 · 文化之书" with search icon (🔍)
-- Explorer count "👥 3,569人探索过"
-- Horizontal scrollable province tags: [华东] [华南] [华北] [西南] [海外]
-- Two journey cards in horizontal scroll:
-  - Card 1: "西湖十景" with West Lake illustration, 0.5km, ⭐⭐⭐⭐⭐, 10探索点
-  - Card 2: "龙井茶道" with tea leaf illustration, 2.1km, ⭐⭐⭐⭐, 6探索点
-- Cards have 16px rounded corners, subtle shadow, cream background
-- "发现更多文化之旅" button at bottom
+核心元素：
+- 背景可见地图，聚焦杭州区域，配柔和暗色遮罩
+- 底部面板覆盖屏幕40%，白色背景，顶部圆角(24px)
+- 顶部拖动指示条（小灰色胶囊）
+- 城市标题行：
+  - "杭州 · 文化之书"粗体炭灰色文字
+  - 右侧橙色搜索图标(🔍)
+- 统计行："👥 3,569人探索过"灰色文字
+- 横向滚动省份标签：
+  - 胶囊按钮：[华东] [华南] [华北] [西南] [海外]
+  - 选中标签：橙色背景，白色文字
+  - 未选中：白色背景，灰色边框
+- 两张文化之旅卡片横向滚动：
+  - 卡片样式：白色圆角矩形(16px圆角)，柔和阴影
+  - 卡片1：西湖扁平插画（亭子、水面、柳树），"西湖十景"，"0.5km"橙色胶囊，"江南水乡文化"主题描述，⭐⭐⭐⭐⭐，"10探索点"
+  - 卡片2：茶叶茶杯扁平插画，"龙井茶道"，"2.1km"橙色胶囊，"茶文化体验"主题描述，⭐⭐⭐⭐，"6探索点"
+- 底部："发现更多文化之旅"按钮
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：白色、橙色(#FFB74D)、薄荷绿(#81C784)、天蓝色(#64B5F6)、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
-### 3. 城市面板 - Bottom Sheet（展开状态）
+
+### 3. 城市面板 - 底部弹出面板（展开状态）
 
 ```
-Mobile app UI design, expanded bottom sheet for city cultural details in tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的城市详情展开底部面板。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Elegant, informative, inspiring
+风格：清新扁平矢量插画，柔和渐变背景，游戏化UI，白色圆角卡片配柔和阴影，活泼橙色点缀
 
-Key elements:
-- Bottom sheet covering 85% of screen
-- Drag indicator bar at top
-- City header: "杭州 · 文化之书" with search icon
-- Stats row: "👥 3,569人探索过 | 📍 3条文化之旅"
-- Province tags horizontal scroll
-- Large city cover illustration (West Lake with pagoda, ink wash style, warm tones)
-- City description text in elegant typography
-- Section divider "─── 文化之旅 ───"
-- Journey list cards (vertical stack):
-  - Card: 🏯 icon, "西湖十景文化之旅", 0.5km, ⭐⭐⭐⭐⭐, 10探索点, 3小时, "👥 1,234人完成"
-  - Card: 🍵 icon, "龙井茶文化之旅", 2.1km, ⭐⭐⭐⭐, 6探索点, 2小时, "👥 856人完成"
-  - Locked card: 🔒 icon, "南宋御街历史探秘", grayed out, "完成前2条文化之旅后解锁"
+核心元素：
+- 底部面板覆盖屏幕85%，白色背景
+- 顶部拖动指示条
+- 城市标题："杭州 · 文化之书"配搜索图标
+- 统计行："👥 3,569人探索过 | 📍 3条文化之旅"配图标
+- 省份标签横向滚动（同收起状态）
+- 大型城市插画卡片：
+  - 圆角矩形配柔和阴影
+  - 内部：西湖扁平矢量场景 - 亭子、山峦、橙色落日圆、仙鹤、粉色樱花
+  - 插画内暖色渐变天空背景
+- 下方城市介绍文字，炭灰色
+- 分隔线："─── 文化之旅 ───"装饰线条
+- 文化之旅列表（垂直卡片）：
+  - 卡片1：🏯图标，"西湖十景文化之旅"，"0.5km"胶囊，⭐⭐⭐⭐⭐，"10探索点 · 3小时"，"👥 1,234人完成"，橙色"开始"按钮
+  - 卡片2：🍵图标，"龙井茶文化之旅"，"2.1km"胶囊，⭐⭐⭐⭐，"6探索点 · 2小时"，"👥 856人完成"
+  - 锁定卡片：🔒图标，灰色，"南宋御街历史探秘"，"完成前2条解锁"橙色文字
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、薄荷绿(#81C784)、珊瑚色(#FF7043)、白色、柔和阴影、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 4. 文化之旅详情页
 
 ```
-Mobile app UI design, cultural journey detail page for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的文化之旅详情页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Adventurous, organized, culturally rich
+风格：清新扁平矢量插画，插画旅行卡片，白色圆角卡片配柔和阴影，游戏化进度UI，活泼橙色点缀
 
-Key elements:
-- Back button (←) in top left corner
-- Title: "西湖十景文化之旅"
-- Hero image: West Lake scenic illustration with mountains, pagoda, willow trees, ink wash style
-- Info section with icons:
-  - 📍 位置: 杭州西湖风景区
-  - 🎨 主题: 江南水乡文化
-  - ⏱️ 预计时长: 3小时
-  - 📏 总距离: 5.2公里
-  - 👥 已有 1,234 人完成
-- Section divider "─── 探索点列表 ───"
-- Exploration point cards (numbered list):
-  - "1. 断桥残雪" - 📷拍照任务 · 500m - teal [导航] button - "在断桥上与白娘子合影"
-  - "2. 平湖秋月" - 🖐️AR手势 · 800m - teal [导航] button - "比出赏月的手势"
-  - "3. 雷峰夕照" - 🔍AR寻宝 · 1.2km - teal [导航] button - "找到隐藏的法海"
-- Large CTA button at bottom: "开始这条文化之旅" (teal background, white text)
+核心元素：
+- 浅灰色(#F5F5F5)背景
+- 顶部导航：返回箭头(←)，标题"西湖十景文化之旅"
+- 大型插画卡片/书籍封面样式：
+  - 圆角矩形(20px圆角)配柔和阴影
+  - 内部：西湖扁平插画，亭子、山峦、橙色落日圆、仙鹤、樱花
+  - 底部标题叠加："西湖十景"白色粗体文字配阴影
+  - 副标题："杭州 · 江南水乡"
+- 卡片下方：白色信息区域
+  - 信息列表（每行独立显示）：
+    - "位置：杭州西湖风景区"
+    - "主题：江南水乡文化"
+    - "预计时长：3小时"
+    - "总距离：5.2公里"
+    - "已有 1,234 人完成"
+- 分隔区："─── 探索点列表 ───"
+- 探索点列表：
+  - 每个点为横向白色卡片配柔和阴影
+  - 左侧：橙色圆形数字徽章(1, 2, 3)
+  - 中间：点名"断桥残雪"，任务类型图标(📷🖐️🔍)，距离胶囊"500m"
+  - 右侧：薄荷绿[导航]按钮
+  - 左侧橙色虚线路径连接各点
+  - 名称下方灰色小字任务描述
+- 底部：大型橙色渐变按钮"开始这条文化之旅"
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、薄荷绿(#81C784)、天蓝色(#64B5F6)、珊瑚色(#FF7043)、白色卡片、柔和阴影、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 5. 文化之旅进行中页面
 
 ```
-Mobile app UI design, journey in-progress page with map for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的文化之旅进行中地图页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Guided, purposeful, exciting
+风格：清新扁平矢量插画，柔和渐变背景，游戏化进度UI，白色圆角卡片配柔和阴影，活泼橙色点缀
 
-Key elements:
-- Close button (×) in top left
-- Title: "西湖十景文化之旅"
-- Progress indicator "进度 1/10" in top right (teal badge)
-- Map view (60% of screen) showing:
-  - Teal route path connecting exploration points
-  - Numbered circular markers (1, 2, 3...) for each point
-  - Current target (point 1) highlighted with glow
-  - User location blue dot with direction indicator
-- Info card below map (white card with shadow):
-  - Label: "下一个探索点"
-  - Point name: "1. 断桥残雪" (bold)
-  - "距离：500m | 步行约6分钟"
-  - "开始导航" button (teal, full width)
-- Collapsible exploration point list at bottom:
-  - ○ 1. 断桥残雪 - 500m
-  - ○ 2. 平湖秋月 - 1.3km
-  - ○ 3. 雷峰夕照 - 2.5km
+核心元素：
+- 顶部栏：关闭按钮(×)，"西湖十景文化之旅"，进度徽章"1/10"橙色胶囊
+- 地图视图（占屏幕60%）：
+  - 柔和插画风格地图背景
+  - 橙色虚线路径连接各点
+  - 橙色圆形编号标记(1, 2, 3...)
+  - 当前目标点：更大，发光效果配旗帜图标
+  - 已完成点：绿色对勾叠加
+  - 用户位置：蓝色圆点配方向箭头，脉冲动画
+- 地图下方白色信息卡片（圆角，阴影）：
+  - "下一个探索点"灰色标签
+  - "1. 断桥残雪"黑色粗体
+  - "距离：500m | 步行约6分钟"配步行图标
+  - 大型橙色按钮"开始导航"
+- 底部可折叠探索点列表：
+  - 每行：状态图标(○/●/✓)，编号，名称，距离
+  - 当前点：橙色左边框高亮
+  - 已完成点：绿色对勾，删除线样式
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、薄荷绿(#81C784)、天蓝色(#64B5F6)、白色、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
+
 
 ### 6. 导航中页面
 
 ```
-Mobile app UI design, walking navigation screen for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的步行导航页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Clear, confident, helpful
+风格：清新扁平矢量插画，柔和渐变背景，友好导航UI，白色圆角卡片配柔和阴影，活泼橙色点缀
 
-Key elements:
-- Close button (×) in top left
-- Title: "导航到：断桥残雪"
-- Full map view with:
-  - Walking route highlighted in teal dashed line
-  - Destination marker (red pin with cultural icon)
-  - User location blue dot with direction cone
-  - Street names visible
-- Navigation instruction card (bottom, white with shadow):
-  - Large teal direction arrow icon (↑)
-  - "前方 100米 右转" (bold text)
-  - Horizontal divider line
-  - "剩余距离：350m"
-  - "预计到达：4分钟"
-- "结束导航" button at bottom (outline style, teal border)
+核心元素：
+- 顶部栏：关闭按钮(×)，"导航到：断桥残雪"
+- 全屏地图视图：
+  - 柔和色彩插画风格地图
+  - 步行路线：橙色虚线
+  - 目的地：旗帜图标配"断桥残雪"标签
+  - 用户位置：蓝色箭头显示方向
+  - 友好字体显示街道/路径名称
+- 导航指示卡片（底部，白色，大圆角）：
+  - 大型方向图标：橙色箭头(↑ ↗ → 等)
+  - 指示文字："前方 100米 右转"粗体
+  - 分隔线
+  - 统计行：
+    - "剩余距离：350m"配距离图标
+    - "预计到达：4分钟"配时钟图标
+  - 进度条显示行程完成度
+- 底部："结束导航"按钮（描边样式，橙色边框）
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、天蓝色(#64B5F6)、薄荷绿(#81C784)、白色、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 7. 到达探索点提示
 
 ```
-Mobile app UI design, arrival notification modal for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的到达通知弹窗。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Exciting, rewarding, inviting
+风格：清新扁平矢量插画，庆祝弹窗，白色圆角卡片配柔和阴影，活泼橙色点缀，彩色纸屑粒子
 
-Key elements:
-- Map background (dimmed) showing user at destination
-- Teal 50-meter radius circle around exploration point
-- Centered modal card (white, rounded corners, shadow):
-  - Celebration sparkle icon at top (gold)
-  - "你已到达探索点！" (large, bold)
-  - Point name: "1. 断桥残雪"
-  - Task type badge: "📷 拍照任务"
-  - Task description: "在断桥上与白娘子合影"
-  - Two buttons stacked:
-    - "开始任务" (teal filled, prominent)
-    - "稍后再来" (outline style)
+核心元素：
+- 地图背景配柔和暗色遮罩
+- 目的地周围橙色50米半径圆圈，脉冲发光
+- 居中弹窗卡片：
+  - 白色背景，大圆角(24px)，柔和阴影
+  - 顶部：庆祝图标(🎉)配闪光
+  - "你已到达探索点！"大号粗体文字
+  - 点名："1. 断桥残雪"配位置图标
+  - 任务类型徽章：橙色胶囊"📷 拍照任务"
+  - 任务描述："在断桥上与白娘子合影"灰色
+  - 分隔线
+  - 两个堆叠按钮：
+    - "开始任务" - 大型橙色渐变按钮，突出
+    - "稍后再来" - 文字链接样式，灰色
+- 弹窗周围漂浮彩色纸屑粒子
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、阳光黄(#FFD54F)、薄荷绿(#81C784)、白色、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 8. AR任务页 - 手势识别
 
 ```
-Mobile app UI design, AR camera screen for gesture recognition in tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的AR相机手势识别页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Focused, interactive, magical
+风格：清新扁平矢量插画，AR叠加UI，白色圆角卡片，活泼橙色点缀，友好进度反馈
 
-Key elements:
-- Close button (×) in top left (white with shadow for visibility)
-- Progress indicator "探索点 2/10" in top right (white badge)
-- Full-screen camera view as background (showing real outdoor scene)
-- AR anchor floating in scene: glowing moon icon with subtle particle effects
-- Target gesture reference box (bottom left): small card showing required "赏月" hand pose silhouette
-- Bottom info panel (semi-transparent dark overlay):
-  - Point name: "平湖秋月" (white text)
-  - Instruction: "请对准AR锚点，比出赏月手势"
-  - Progress bar: "████████░░░░░░░░ 识别中 60%" (teal fill)
-- "拍照确认" circular button at bottom (disabled/gray until gesture matched)
+核心元素：
+- 全屏相机画面作为背景
+- 顶部栏（半透明白色）：
+  - 橙色圆形关闭按钮(×)
+  - 进度徽章"探索点 2/10"白色胶囊配阴影
+- 场景中AR锚点：
+  - 可爱插画月亮图标漂浮
+  - 柔和发光效果和粒子闪光
+  - 引导圆圈显示瞄准位置
+- 目标手势参考（左下角）：
+  - 小型白色圆角卡片
+  - 手势剪影显示"赏月"姿势
+  - "目标手势"标签
+- 底部面板（白色，顶部圆角）：
+  - 点名："平湖秋月"粗体
+  - 指示："请对准AR锚点，比出赏月手势"配手势图标
+  - 进度条：橙色填充，"识别中 60%"标签
+- 快门按钮：大圆形，未匹配时灰色，匹配后橙色
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、白色、半透明叠加层、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 9. AR任务页 - 拍照探索
 
 ```
-Mobile app UI design, AR camera screen for photo task with virtual character in tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的AR相机拍照任务页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Fun, creative, immersive
+风格：清新扁平矢量插画，AR角色叠加，白色圆角卡片，活泼橙色点缀，有趣拍照体验
 
-Key elements:
-- Close button (×) in top left (white with shadow)
-- Progress indicator "探索点 1/10" in top right (white badge)
-- Full-screen camera view showing real bridge scene
-- AR virtual character: Lady White Snake (白娘子) in elegant white traditional Chinese dress, semi-transparent ethereal glow, positioned naturally on bridge
-- Bottom info panel (semi-transparent):
-  - Task title: "与白娘子合影" (white, bold)
-  - Instruction: "站在断桥上，与AR白娘子合影"
-  - Tip: "提示：可以选择不同滤镜"
-- Filter selection row: three pill buttons [古风] [水墨] [原图] - "古风" selected with teal background
-- Large circular shutter button at bottom center (white with teal ring)
+核心元素：
+- 全屏相机画面显示真实场景（桥、水面）
+- 顶部栏（半透明）：
+  - 白色圆形关闭按钮(×)
+  - 进度徽章"探索点 1/10"
+- AR虚拟角色：
+  - 扁平矢量风格可爱白娘子插画
+  - 白色飘逸长裙，优雅姿态
+  - 半透明配柔和发光边缘
+  - 自然融入场景
+  - 角色周围小闪光粒子
+- 底部面板（白色，圆角）：
+  - 任务标题："与白娘子合影"粗体配相机图标
+  - 指示："站在断桥上，与AR白娘子合影"
+  - 提示："💡 可以选择不同滤镜"
+- 滤镜选择行：
+  - 三个胶囊按钮：[古风] [水墨] [原图]
+  - 选中滤镜：橙色背景
+  - 未选中：白色配灰色边框
+- 大型快门按钮：白色圆形配橙色圆环，内部相机图标
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、白色、柔粉色(#FFB6C1)用于角色、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
+
 
 ### 10. 任务完成页
 
 ```
-Mobile app UI design, task completion celebration screen for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的任务完成庆祝页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Rewarding, educational, motivating
+风格：清新扁平矢量插画，欢快庆祝UI，白色圆角卡片配柔和阴影，游戏化奖励展示，彩色纸屑粒子
 
-Key elements:
-- Warm white background with subtle confetti particles
-- Centered layout:
-  - "恭喜！" (gold color, decorative)
-  - "任务完成！" (large, teal, bold)
-- Photo frame: captured image with subtle cream border and shadow
-- Success message: "断桥残雪 探索成功" (teal text)
-- Reward card (gold gradient border):
-  - Coin icon + "+50 积分"
-  - Subtle glow effect
-- Section divider "─── 文化小知识 ───"
-- Knowledge card (cream background):
-  - Text: "断桥残雪是西湖十景之一，因《白蛇传》中许仙与白娘子在此相遇而闻名..."
-  - "查看更多 >" link (teal, right aligned)
-- Two action buttons at bottom:
-  - "分享到社交" (outline, teal border)
-  - "继续下一个" (filled, teal background)
+核心元素：
+- 渐变背景：浅黄色(#FFF9C4)到柔和橙色(#FFE0B2)
+- 漂浮彩色纸屑和星星粒子
+- 顶部庆祝：
+  - "恭喜！"活泼字体配闪光装饰
+  - "任务完成！"大号粗体橙色文字
+- 照片展示：
+  - 白色边框配圆角和阴影
+  - 内部显示拍摄的照片
+  - 角落小对勾徽章
+- 成功消息："断桥残雪 探索成功 ✓"薄荷绿色
+- 奖励卡片（白色，圆角，阴影）：
+  - 标题："🎁 获得奖励"
+  - 行：金币图标 + "+50 积分"橙色粗体
+- 知识区域：
+  - 分隔线："─── 文化小知识 ───"
+  - 浅蓝色(#E3F2FD)卡片背景
+  - 地标历史介绍文字："断桥残雪是西湖十景之一，因《白蛇传》中许仙与白娘子在此相遇而闻名..."
+  - "发现更多 >"橙色链接（右下角）
+- 底部按钮（并排两个）：
+  - "分享到社交" - 描边按钮，橙色边框
+  - "继续下一个" - 填充橙色渐变按钮
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、阳光黄(#FFD54F)、薄荷绿(#81C784)、天蓝色(#64B5F6)、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 11. 文化之旅完成页 - 收集印记
 
 ```
-Mobile app UI design, journey completion screen with seal reward for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的文化之旅完成印记奖励页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Proud, accomplished, prestigious
+风格：清新扁平矢量插画，史诗奖励揭晓，收藏徽章庆祝，白色圆角卡片配柔和阴影，金色点缀
 
-Key elements:
-- Warm white background with subtle celebration particles
-- Header: "恭喜完成文化之旅！" (teal, centered)
-- Large seal illustration (centered, prominent):
-  - Traditional Chinese red seal/stamp style
-  - Square shape with rounded worn edges
-  - "西湖十景" carved text in seal script
-  - "2024.01" date
-  - Red ink texture with slight smudge effect
-  - Subtle gold glow around seal
-- Journey info below seal:
-  - "西湖十景文化之旅"
+核心元素：
+- 渐变背景：柔和桃色(#FFE5D9)到浅橙色(#FFE0B2)
+- 漂浮金色闪光和彩色纸屑
+- 标题："🎉 恭喜完成文化之旅！"粗体，居中
+- 大型印记/徽章展示（居中，突出）：
+  - 插画收藏卡片样式
+  - 圆角矩形配金色边框发光
+  - 内部：西湖场景扁平插画
+  - "西湖十景"艺术字体标题
+  - "2024.01"日期戳
+  - 底部丝带装饰
+  - 漂浮效果配柔和阴影和发光
+- 完成信息：
+  - "西湖十景文化之旅"名称
   - "完成时间：2024-01-15"
-  - "用时：2小时45分"
-- Reward summary card (cream background, gold border):
-  - "+500 积分" with coin icon
-  - "+1 路线印记" with seal icon
-  - "解锁「西湖文化达人」称号" with badge icon
-- Blockchain section card:
-  - "🔗 上链存证" header
-  - "将此印记永久记录到区块链，获得不可篡改的完成证明"
-  - "立即上链" button (gold background)
-- Bottom buttons:
-  - "分享印记" (outline)
-  - "返回首页" (teal filled)
+  - "用时：2小时45分"配时钟图标
+- 奖励汇总卡片（白色，金色边框点缀）：
+  - "+500 积分"配金币图标
+  - "+1 路线印记"配徽章图标
+  - "🏅 解锁「西湖文化达人」称号"配闪光
+- 区块链区域（浅蓝色卡片）：
+  - "🔗 上链存证"标题
+  - "将印记永久记录到区块链"
+  - "立即上链"金色渐变按钮
+- 底部按钮：
+  - "分享印记" - 描边，橙色
+  - "返回首页" - 填充橙色渐变
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、金黄色(#FFD54F)、珊瑚色(#FF7043)、薄荷绿(#81C784)、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 12. 印记集页面
 
 ```
-Mobile app UI design, seal collection gallery page for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的印记收藏画廊页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Collectible, motivating, organized
+风格：清新扁平矢量插画，收藏卡片画廊，游戏化进度追踪，白色圆角卡片配柔和阴影，活泼橙色点缀
 
-Key elements:
-- Back button (←), title "我的印记集", filter icon (right)
-- Progress summary card (cream background):
-  - "📊 收集进度"
-  - Three rows with progress bars:
-    - "路线印记: 12/100" + teal progress bar (12%)
-    - "城市印记: 3/50" + teal progress bar (6%)
-    - "特殊印记: 5/30" + teal progress bar (17%)
-  - "已上链: 8" (gold text)
-- Section: "─── 路线印记 ───"
-  - 3-column grid of seal cards:
-    - Seal 1: 🏯 西湖十景, red stamp style, "🔗已上链" badge
-    - Seal 2: 🏔️ 黄山云海, red stamp style, "🔗已上链" badge
-    - Seal 3: ⛩️ 京都祇园, red stamp style, "未上链"
-- Section: "─── 城市印记 ───"
-  - Seal grid:
-    - Seal 1: 🌆 杭州全通, gold stamp style, "🔗已上链"
-    - Seal 2: 🔒 locked, gray, "???" text, "未解锁"
-    - Seal 3: 🔒 locked, gray, "???" text, "未解锁"
-- Section: "─── 特殊印记 ───"
-  - Seal grid:
-    - 🌸 樱花季限定 (pink tint)
-    - ⚡ 速通达人 (gold tint)
-    - 🔒 隐藏印记 (locked)
-- Section: "─── 进行中的文化之旅 ───"
-  - Journey card: "🗼 上海外滩文化之旅", progress bar "████████░░░░ 7/10", "继续 >" button
+核心元素：
+- 浅灰色(#F5F5F5)背景
+- 顶部栏：返回箭头，"我的印记集"，右侧筛选图标
+- 进度汇总卡片（白色，圆角）：
+  - "📊 收集进度"标题
+  - 三行进度条：
+    - "路线印记: 12/100" + 橙色进度条
+    - "城市印记: 3/50" + 薄荷绿进度条
+    - "特殊印记: 5/30" + 珊瑚色进度条
+  - "已上链: 8"金色文字
+- 分隔线："─── 路线印记 ───"
+- 路线印记网格（3列）：
+  - 印记卡片：🏯西湖十景，"🔗已上链"
+  - 印记卡片：🏔️黄山云海，"🔗已上链"
+  - 印记卡片：⛩️京都祇园，"未上链"
+- 分隔线："─── 城市印记 ───"
+- 城市印记网格（3列）：
+  - 印记卡片：🌆杭州全通，"🔗已上链"
+  - 锁定卡片：🔒，"???"，"未解锁"
+  - 锁定卡片：🔒，"???"，"未解锁"
+- 分隔线："─── 特殊印记 ───"
+- 特殊印记网格（3列）：
+  - 印记卡片：🌸樱花季限定，"未上链"
+  - 印记卡片：⚡速通达人，"未上链"
+  - 锁定卡片：🔒，"???"，"隐藏"，"未解锁"
+- 分隔线："─── 进行中的文化之旅 ───"
+- 进行中卡片：
+  - "🗼 上海外滩文化之旅"
+  - 进度条"████████░░░░ 进度 7/10"
+  - "继续 >"橙色按钮（右侧）
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、薄荷绿(#81C784)、金色(#FFD54F)、锁定用灰色、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
+
 
 ### 13. 印记详情页（含区块链存证）
 
 ```
-Mobile app UI design, seal detail page with blockchain verification for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的印记详情区块链信息页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Verified, prestigious, shareable
+风格：清新扁平矢量插画，收藏卡片详情，验证徽章展示，白色圆角卡片配柔和阴影，金色点缀
 
-Key elements:
-- Back button (←), title "印记详情"
-- Large centered seal illustration:
-  - Traditional Chinese red seal style
-  - "西湖十景" in seal script
-  - "2024.01.15" date
-  - Ink texture effect
-  - Subtle shadow
-- Journey info:
-  - "西湖十景文化之旅" (bold)
-  - "⭐⭐⭐⭐⭐ 5星文化之旅"
-- Section "─── 完成信息 ───":
-  - "完成时间：2024-01-15 14:32"
-  - "用时：2小时45分"
-  - "探索点：10/10 ✓"
-- Section "─── 区块链存证 ───":
-  - Green "✓ 已上链" status badge
-  - Info card (cream background):
-    - "链：Polygon" with chain icon
-    - "交易哈希：0x7f3a...8b2c" (truncated, monospace font)
-    - "区块高度：45,678,901"
-    - "时间戳：2024-01-15 14:35:22"
-  - Two small buttons: [复制哈希] [链上查看]
-- Section "─── 探索照片 ───":
-  - Horizontal scroll of 4 photo thumbnails
-  - Last thumbnail shows "+7" overlay for more photos
-- "分享印记" button at bottom (teal, full width)
+核心元素：
+- 浅色背景配微妙图案
+- 顶部栏：返回箭头，"印记详情"
+- 大型印记卡片（居中）：
+  - 白色卡片配金色边框
+  - 内部西湖场景扁平插画
+  - "西湖十景"艺术字体
+  - "2024.01.15"日期
+  - 验证徽章："✓ 已上链"绿色胶囊
+  - 卡片微妙光泽效果
+- 文化之旅信息区域：
+  - "西湖十景文化之旅"名称
+  - 星级评分：⭐⭐⭐⭐⭐（5颗橙色星）
+- 完成信息卡片（白色）：
+  - "📅 完成时间：2024-01-15 14:32"
+  - "⏱️ 用时：2小时45分"
+  - "📍 探索点：10/10 ✓"绿色
+- 区块链区域卡片（浅蓝色背景）：
+  - "🔗 区块链存证"标题配链条图标
+  - 绿色"已验证"徽章
+  - 信息行：
+    - "链：Polygon"
+    - "哈希：0x7f3a...8b2c"配复制图标
+    - "区块：45,678,901"
+    - "时间：2024-01-15 14:35"
+  - 按钮：[复制] [链上查看]小胶囊
+- 照片画廊区域：
+  - "📷 探索照片"标题
+  - 横向滚动照片缩略图
+  - 最后缩略图显示"+7"叠加
+- 底部："分享印记"大型橙色按钮
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、薄荷绿(#81C784)、天蓝色(#64B5F6)、金色(#FFD54F)、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 14. 相册页面
 
 ```
-Mobile app UI design, photo album page for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的照片相册页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Nostalgic, organized, shareable
+风格：清新扁平矢量插画，有序照片画廊，白色圆角卡片配柔和阴影，活泼橙色点缀
 
-Key elements:
-- Back button (←), title "我的相册", filter icon (right)
-- Stats summary card:
+核心元素：
+- 浅灰色(#F5F5F5)背景
+- 顶部栏：返回箭头，"我的相册"，筛选图标
+- 统计卡片（白色，圆角）：
   - "📷 总照片: 86 | 🗺️ 文化之旅: 12"
-- Section: "─── 按文化之旅分类 ───"
-- Journey photo groups (expandable cards):
-  - Group 1: "西湖十景文化之旅 · 10张 >" 
-    - 3 photo thumbnails preview (rounded corners)
-  - Group 2: "龙井茶文化之旅 · 6张 >"
-    - 3 photo thumbnails preview
-  - Group 3: "黄山云海探秘 · 8张 >"
-    - 3 photo thumbnails preview
-- Section: "─── 按时间线 ───"
-- Timeline view:
-  - Month header: "2024年1月" (teal text)
-  - 4-column photo grid
-  - Photos with subtle rounded corners
-  - Chronological order, newest first
+  - 小相机和地图图标为橙色
+- 视图切换：[按旅程] [按时间]胶囊按钮，选中为橙色
+- 文化之旅分组区域：
+  - 每组为可展开卡片：
+    - 白色圆角卡片
+    - 左侧：小型文化之旅插画缩略图
+    - 中间："西湖十景文化之旅 · 10张"
+    - 右侧：箭头图标(>)
+    - 下方：3张照片缩略图预览行
+  - 多个文化之旅分组堆叠
+- 时间线区域（选择"按时间"时）：
+  - 月份标题："2024年1月"橙色文字
+  - 照片网格：4列
+  - 照片圆角(8px)
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、天蓝色(#64B5F6)、白色、浅灰色、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ### 15. 个人中心页面
 
 ```
-Mobile app UI design, user profile page for tourism app "寻印".
+移动应用UI设计，文化旅游应用"寻印"的用户个人中心页面。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) highlights, warm white (#FBF9F7) background
-- Typography: Chinese serif for titles, clean sans-serif for body
-- Mood: Personal, accomplished, organized
+风格：清新扁平矢量插画，游戏化个人资料，成就展示，白色圆角卡片配柔和阴影，活泼橙色点缀
 
-Key elements:
-- Back button (←), title "个人中心", settings icon ⚙️ (right)
-- Profile header card (cream background):
-  - Circular avatar (64px) with teal border
-  - Username: "旅行者小明" (bold)
-  - "ID: 12345678" (gray, small)
-  - Badge: "🏅 西湖文化达人" (gold background pill)
-- Stats row (three columns):
-  - "3/50" + "城市解锁" + mini progress bar
-  - "12/100" + "印记收集" + mini progress bar
-  - "8" + "已上链" (gold number)
-- Section "─── 功能菜单 ───":
-  - Menu list (white cards with right arrow):
+核心元素：
+- 渐变头部：天蓝色(#E3F2FD)到白色
+- 顶部栏：返回箭头，"个人中心"，设置齿轮图标
+- 个人资料卡片（白色，圆角，阴影）：
+  - 大型圆形头像(80px)配橙色边框
+  - 用户名："旅行者小明"粗体
+  - ID："ID: 12345678"小号灰色
+  - 徽章："🏅 西湖文化达人"金色胶囊
+- 统计行（三列，白色卡片）：
+  - "3/50"大数字 + "城市解锁"标签 + 迷你进度条
+  - "12/100" + "印记收集" + 进度条
+  - "8"金色 + "已上链"
+- 菜单区域：
+  - 区域标题："─── 功能菜单 ───"
+  - 菜单项为白色卡片配图标：
     - 🏆 我的印记集 >
     - 📸 我的相册 >
     - 🔗 区块链钱包 >
     - 📊 旅行统计 >
     - 🎁 积分商城 >
     - ⚙️ 设置 >
-- Section "─── 最近动态 ───":
-  - Activity card: "🎉 收集「西湖十景」路线印记"
-  - Date: "2024-01-15" (gray, right aligned)
+- 最近动态区域：
+  - "─── 最近动态 ───"标题
+  - 动态卡片配时间线圆点
 
-Device: iPhone 14 Pro, 390x844px
+配色方案：橙色(#FFB74D)、天蓝色(#64B5F6)、金色(#FFD54F)、薄荷绿(#81C784)、炭灰色文字(#424242)
+设备：iPhone 14 Pro, 390x844px
 ```
 
 ---
@@ -485,107 +508,85 @@ Device: iPhone 14 Pro, 390x844px
 ### 浮动控件组
 
 ```
-UI component design, vertical floating action buttons for mobile app "寻印".
+UI组件设计，文化旅游应用"寻印"的垂直浮动操作按钮。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, warm white (#FBF9F7) background
+风格：清新扁平设计，毛玻璃效果，活泼橙色点缀
 
-Key elements:
-- 5 circular buttons stacked vertically
-- Each button: 44x44px with 12px vertical gap
-- Icons: 👤 profile, 🏆 trophy, 📷 camera, 🎵 music note, 📍 location pin
-- Glass morphism effect: semi-transparent white background with blur
-- Subtle shadow for depth (0 4px 12px rgba(0,0,0,0.1))
-- Active state: teal (#2D5A5A) background with white icon
-- Inactive state: white/cream background with teal icon
-- Music button: shows sound wave animation when playing
-- Hover/press state: slight scale up (1.05x)
+核心元素：
+- 5个圆形按钮垂直堆叠
+- 每个按钮：48x48px，间距12px
+- 白色背景80%透明度配模糊效果
+- 柔和阴影(0 4px 12px rgba(0,0,0,0.1))
+- 炭灰色图标：👤个人中心、🏆印记、📷相册、🎵音乐、📍定位
+- 激活状态：橙色(#FFB74D)背景，白色图标
+- 按压状态：缩放至0.95x
 
-Size: 44px width, ~260px total height
+尺寸：48px宽度，约300px总高度
 ```
 
 ### 文化之旅卡片
 
 ```
-UI component design, journey card for cultural tourism app "寻印".
+UI组件设计，文化旅游应用"寻印"的文化之旅卡片。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, warm white (#FBF9F7) background
+风格：清新扁平矢量插画，白色圆角卡片，柔和阴影，游戏化信息展示
 
-Key elements:
-- Rounded rectangle card (16px border radius)
-- Left side: square illustration thumbnail (80x80px) with cultural scene
-- Right side content:
-  - Journey name (16px, bold, charcoal)
-  - Distance badge (teal pill: "0.5km")
-  - Star rating row (⭐⭐⭐⭐⭐ gold stars)
-  - Info row: "10探索点 · 3小时" (gray text)
-  - Completed count: "👥 1,234人完成" (small, gray)
-- Subtle shadow (0 2px 8px rgba(0,0,0,0.08))
-- Cream/white background
-- Locked variant: grayscale overlay, 🔒 icon, "完成前置条件解锁" text
+核心元素：
+- 白色圆角矩形(16px圆角)
+- 柔和阴影(0 2px 8px rgba(0,0,0,0.08))
+- 左侧：方形插画(80x80px)扁平矢量地标场景
+- 右侧内容：
+  - 文化之旅名称(16px，粗体，炭灰色)
+  - 距离胶囊：橙色背景，白色文字"0.5km"
+  - 星级评分：5颗橙色星
+  - 信息："10探索点 · 3小时"灰色
+  - 用户数："👥 1,234人完成"
+- 锁定变体：灰度，🔒图标，"完成前置条件解锁"橙色
 
-Size: Full width (358px), ~120px height
+尺寸：全宽，约120px高度
 ```
 
 ### 印记卡片
 
 ```
-UI component design, seal stamp card for collection display in app "寻印".
+UI组件设计，文化旅游应用"寻印"的收藏印记卡片。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) primary, warm gold (#D4A574) accent, coral red (#E07A5F) for seals
+风格：清新扁平矢量插画，收藏徽章样式，白色圆角卡片
 
-Key elements:
-- Square card with rounded corners (12px radius)
-- Traditional Chinese seal illustration:
-  - Red ink stamp texture
-  - Seal script characters
-  - Worn/aged edge effect
-- Seal name below (14px, centered)
-- Date stamp (12px, gray)
-- Chain status indicator bottom right:
-  - "🔗" icon for chained (gold)
-  - Empty for unchained
-- Locked variant:
-  - Grayscale filter
-  - 🔒 icon overlay centered
-  - "???" as name
-  - "未解锁" label
-- Subtle shadow
+核心元素：
+- 方形卡片配圆角(12px)
+- 白色背景配微妙边框
+- 内部：扁平矢量地标插画
+- 下方名称：居中，14px，炭灰色
+- 日期：小号灰色文字
+- 上链状态：金色"🔗"图标（如已上链）
+- 已收集：全彩色，微妙金色发光边框
+- 锁定：灰度，🔒图标叠加，"???"文字
 
-Size: ~100x130px (seal 80x80, text below)
+尺寸：约100x130px
 ```
 
 ### 进度条组件
 
 ```
-UI component design, progress bar for achievement tracking in app "寻印".
+UI组件设计，文化旅游应用"寻印"的进度条。
 
-Design Style:
-- Theme: Modern Chinese cultural tourism with ink wash painting meets minimalism
-- Colors: Deep teal (#2D5A5A) for fill, light gray (#E5E5E5) for track
+风格：清新扁平设计，活泼渐变填充
 
-Key elements:
-- Horizontal bar with fully rounded ends (4px radius)
-- Track: light gray (#E5E5E5) background
-- Fill: teal (#2D5A5A) gradient (slightly lighter at top)
-- Text label right side: "12/100" format (14px, charcoal)
-- Optional percentage below bar
-- Subtle inner shadow on track for depth
-- Animation: smooth fill transition (300ms ease-out)
+核心元素：
+- 水平条形配全圆角端点
+- 轨道：浅灰色(#E5E5E5)背景
+- 填充：橙色(#FFB74D)到珊瑚色(#FF7043)渐变
+- 高度：8px
+- 文字标签：右侧"12/100"
+- 完成状态：薄荷绿(#81C784)填充配对勾
 
-Size: Flexible width, 8px height (bar only)
+尺寸：灵活宽度，8px条形高度
 ```
 
 ---
 
 ## 设计交付清单
-
-完成设计后，请提供以下文件：
 
 ### P0 优先级（核心体验）
 - [ ] 首页地图 + 浮动控件
@@ -614,10 +615,10 @@ Size: Flexible width, 8px height (bar only)
 - [ ] 印记卡片
 - [ ] 进度条组件
 
-### 图标资源
-- [ ] 城市插画图标（杭州、西安、成都、哈尔滨、北京）
-- [ ] 任务类型图标（拍照、手势、寻宝）
-- [ ] 浮动控件图标
+### 插画资源
+- [ ] 城市地标插画（杭州西湖、西安兵马俑、成都熊猫、哈尔滨冰雕、北京天坛）
+- [ ] 文化之旅封面插画
+- [ ] 印记/徽章插画
 
 ---
 
