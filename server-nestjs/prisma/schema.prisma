@@ -505,3 +505,269 @@ model SysJobLog {
   @@index([status])
   @@map("sys_job_log")
 }
+
+
+// ============ 寻印 App 业务模型 ============
+
+/// App用户表（与管理后台用户分离）
+model AppUser {
+  id            String    @id @default(cuid())
+  phone         String?   @unique @db.VarChar(20)
+  nickname      String    @db.VarChar(50)
+  avatar        String?   @db.VarChar(255)
+  openId        String?   @unique @map("open_id") @db.VarChar(100)  // 微信openId
+  unionId       String?   @map("union_id") @db.VarChar(100)         // 微信unionId
+  badgeTitle    String?   @map("badge_title") @db.VarChar(50)       // 当前称号
+  totalPoints   Int       @default(0) @map("total_points")          // 总积分
+  status        String    @default("0") @db.Char(1)                 // 0正常 1禁用
+  createTime    DateTime  @default(now()) @map("create_time")
+  updateTime    DateTime  @updatedAt @map("update_time")
+
+  journeyProgresses JourneyProgress[]
+  seals             UserSeal[]
+  photos            ExplorationPhoto[]
+  activities        UserActivity[]
+
+  @@index([phone])
+  @@index([openId])
+  @@map("app_user")
+}
+
+/// 城市表
+model City {
+  id            String    @id @default(cuid())
+  name          String    @db.VarChar(50)
+  province      String    @db.VarChar(50)
+  latitude      Decimal   @db.Decimal(10, 7)
+  longitude     Decimal   @db.Decimal(10, 7)
+  iconAsset     String?   @map("icon_asset") @db.VarChar(255)
+  coverImage    String?   @map("cover_image") @db.VarChar(255)
+  description   String?   @db.Text
+  explorerCount Int       @default(0) @map("explorer_count")
+  bgmUrl        String?   @map("bgm_url") @db.VarChar(255)
+  orderNum      Int       @default(0) @map("order_num")
+  status        String    @default("0") @db.Char(1)
+  createTime    DateTime  @default(now()) @map("create_time")
+  updateTime    DateTime  @updatedAt @map("update_time")
+
+  journeys      Journey[]
+  citySeals     Seal[]    @relation("CitySeal")
+
+  @@index([province])
+  @@index([status])
+  @@map("city")
+}
+
+/// 文化之旅表
+model Journey {
+  id              String    @id @default(cuid())
+  cityId          String    @map("city_id")
+  name            String    @db.VarChar(100)
+  theme           String    @db.VarChar(100)
+  coverImage      String?   @map("cover_image") @db.VarChar(255)
+  description     String?   @db.Text
+  rating          Int       @default(5)                              // 星级 1-5
+  estimatedMinutes Int      @map("estimated_minutes")                // 预计时长(分钟)
+  totalDistance   Decimal   @map("total_distance") @db.Decimal(10, 2) // 总距离(米)
+  completedCount  Int       @default(0) @map("completed_count")
+  isLocked        Boolean   @default(false) @map("is_locked")
+  unlockCondition String?   @map("unlock_condition") @db.VarChar(255)
+  bgmUrl          String?   @map("bgm_url") @db.VarChar(255)
+  orderNum        Int       @default(0) @map("order_num")
+  status          String    @default("0") @db.Char(1)
+  createTime      DateTime  @default(now()) @map("create_time")
+  updateTime      DateTime  @updatedAt @map("update_time")
+
+  city            City      @relation(fields: [cityId], references: [id])
+  points          ExplorationPoint[]
+  progresses      JourneyProgress[]
+  routeSeals      Seal[]    @relation("RouteSeal")
+  photos          ExplorationPhoto[]
+
+  @@index([cityId])
+  @@index([status])
+  @@map("journey")
+}
+
+/// 探索点表
+model ExplorationPoint {
+  id                  String    @id @default(cuid())
+  journeyId           String    @map("journey_id")
+  name                String    @db.VarChar(100)
+  latitude            Decimal   @db.Decimal(10, 7)
+  longitude           Decimal   @db.Decimal(10, 7)
+  taskType            String    @map("task_type") @db.VarChar(20)    // gesture, photo, treasure
+  taskDescription     String    @map("task_description") @db.VarChar(255)
+  targetGesture       String?   @map("target_gesture") @db.VarChar(50)
+  arAssetUrl          String?   @map("ar_asset_url") @db.VarChar(255)
+  culturalBackground  String?   @map("cultural_background") @db.Text
+  culturalKnowledge   String?   @map("cultural_knowledge") @db.Text  // 文化小知识
+  distanceFromPrev    Decimal?  @map("distance_from_prev") @db.Decimal(10, 2)
+  pointsReward        Int       @default(50) @map("points_reward")
+  orderNum            Int       @map("order_num")
+  status              String    @default("0") @db.Char(1)
+  createTime          DateTime  @default(now()) @map("create_time")
+  updateTime          DateTime  @updatedAt @map("update_time")
+
+  journey             Journey   @relation(fields: [journeyId], references: [id])
+  completions         PointCompletion[]
+  photos              ExplorationPhoto[]
+
+  @@index([journeyId])
+  @@index([status])
+  @@map("exploration_point")
+}
+
+/// 用户文化之旅进度表
+model JourneyProgress {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  journeyId       String    @map("journey_id")
+  status          String    @default("in_progress") @db.VarChar(20)  // in_progress, completed, abandoned
+  startTime       DateTime  @map("start_time")
+  completeTime    DateTime? @map("complete_time")
+  timeSpentMinutes Int?     @map("time_spent_minutes")
+  createTime      DateTime  @default(now()) @map("create_time")
+  updateTime      DateTime  @updatedAt @map("update_time")
+
+  user            AppUser   @relation(fields: [userId], references: [id])
+  journey         Journey   @relation(fields: [journeyId], references: [id])
+  pointCompletions PointCompletion[]
+
+  @@unique([userId, journeyId])
+  @@index([userId])
+  @@index([journeyId])
+  @@index([status])
+  @@map("journey_progress")
+}
+
+/// 探索点完成记录表
+model PointCompletion {
+  id              String    @id @default(cuid())
+  progressId      String    @map("progress_id")
+  pointId         String    @map("point_id")
+  completeTime    DateTime  @map("complete_time")
+  pointsEarned    Int       @map("points_earned")
+  photoUrl        String?   @map("photo_url") @db.VarChar(255)
+  createTime      DateTime  @default(now()) @map("create_time")
+
+  progress        JourneyProgress   @relation(fields: [progressId], references: [id])
+  point           ExplorationPoint  @relation(fields: [pointId], references: [id])
+
+  @@unique([progressId, pointId])
+  @@index([progressId])
+  @@index([pointId])
+  @@map("point_completion")
+}
+
+/// 印记表
+model Seal {
+  id              String    @id @default(cuid())
+  type            String    @db.VarChar(20)                          // route, city, special
+  name            String    @db.VarChar(100)
+  imageAsset      String    @map("image_asset") @db.VarChar(255)
+  description     String?   @db.Text
+  unlockCondition String?   @map("unlock_condition") @db.VarChar(255)
+  badgeTitle      String?   @map("badge_title") @db.VarChar(50)      // 解锁的称号
+  journeyId       String?   @map("journey_id")                       // 路线印记关联
+  cityId          String?   @map("city_id")                          // 城市印记关联
+  orderNum        Int       @default(0) @map("order_num")
+  status          String    @default("0") @db.Char(1)
+  createTime      DateTime  @default(now()) @map("create_time")
+  updateTime      DateTime  @updatedAt @map("update_time")
+
+  journey         Journey?  @relation("RouteSeal", fields: [journeyId], references: [id])
+  city            City?     @relation("CitySeal", fields: [cityId], references: [id])
+  userSeals       UserSeal[]
+
+  @@index([type])
+  @@index([journeyId])
+  @@index([cityId])
+  @@index([status])
+  @@map("seal")
+}
+
+/// 用户印记表
+model UserSeal {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  sealId          String    @map("seal_id")
+  earnedTime      DateTime  @map("earned_time")
+  timeSpentMinutes Int?     @map("time_spent_minutes")
+  pointsEarned    Int       @default(0) @map("points_earned")
+  isChained       Boolean   @default(false) @map("is_chained")
+  chainName       String?   @map("chain_name") @db.VarChar(50)
+  txHash          String?   @map("tx_hash") @db.VarChar(100)
+  blockHeight     BigInt?   @map("block_height")
+  chainTime       DateTime? @map("chain_time")
+  createTime      DateTime  @default(now()) @map("create_time")
+  updateTime      DateTime  @updatedAt @map("update_time")
+
+  user            AppUser   @relation(fields: [userId], references: [id])
+  seal            Seal      @relation(fields: [sealId], references: [id])
+
+  @@unique([userId, sealId])
+  @@index([userId])
+  @@index([sealId])
+  @@index([isChained])
+  @@map("user_seal")
+}
+
+/// 探索照片表
+model ExplorationPhoto {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  journeyId       String    @map("journey_id")
+  pointId         String    @map("point_id")
+  photoUrl        String    @map("photo_url") @db.VarChar(255)
+  thumbnailUrl    String?   @map("thumbnail_url") @db.VarChar(255)
+  filter          String?   @db.VarChar(20)                          // 使用的滤镜
+  latitude        Decimal?  @db.Decimal(10, 7)
+  longitude       Decimal?  @db.Decimal(10, 7)
+  takenTime       DateTime  @map("taken_time")
+  createTime      DateTime  @default(now()) @map("create_time")
+
+  user            AppUser   @relation(fields: [userId], references: [id])
+  journey         Journey   @relation(fields: [journeyId], references: [id])
+  point           ExplorationPoint @relation(fields: [pointId], references: [id])
+
+  @@index([userId])
+  @@index([journeyId])
+  @@index([pointId])
+  @@index([takenTime])
+  @@map("exploration_photo")
+}
+
+/// 用户动态表
+model UserActivity {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  type            String    @db.VarChar(50)                          // seal_earned, journey_completed, etc.
+  title           String    @db.VarChar(255)
+  relatedId       String?   @map("related_id")                       // 关联的印记/文化之旅ID
+  createTime      DateTime  @default(now()) @map("create_time")
+
+  user            AppUser   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createTime])
+  @@map("user_activity")
+}
+
+/// 背景音乐表
+model BackgroundMusic {
+  id              String    @id @default(cuid())
+  name            String    @db.VarChar(100)
+  url             String    @db.VarChar(255)
+  context         String    @db.VarChar(20)                          // home, city, journey
+  contextId       String?   @map("context_id")                       // 城市ID或文化之旅ID
+  duration        Int?                                               // 时长(秒)
+  orderNum        Int       @default(0) @map("order_num")
+  status          String    @default("0") @db.Char(1)
+  createTime      DateTime  @default(now()) @map("create_time")
+  updateTime      DateTime  @updatedAt @map("update_time")
+
+  @@index([context, contextId])
+  @@index([status])
+  @@map("background_music")
+}

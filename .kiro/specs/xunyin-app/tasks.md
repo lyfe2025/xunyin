@@ -284,6 +284,73 @@ model BackgroundMusic {
 - [ ] 运行 `npx prisma migrate dev --name add_xunyin_models`
 - [ ] 运行 `npx prisma generate` 生成 Prisma Client
 
+#### Task 1.3: 添加寻印业务初始数据
+
+> 在 `db/init_data.sql` 中追加寻印管理相关的菜单、字典数据
+
+##### 1.3.1 添加寻印管理菜单
+- [ ] 添加「寻印管理」一级目录菜单
+- [ ] 添加子菜单：
+  - 城市管理 (`xunyin:city:list`)
+  - 文化之旅管理 (`xunyin:journey:list`)
+  - 探索点管理 (`xunyin:point:list`)
+  - 印记管理 (`xunyin:seal:list`)
+  - App用户管理 (`xunyin:appuser:list`)
+  - 数据统计 (`xunyin:stats:view`)
+- [ ] 为每个菜单添加按钮权限（查询、新增、修改、删除）
+
+菜单结构：
+```
+寻印管理 (M) - path: xunyin, icon: map-pin
+├── 城市管理 (C) - path: city, component: xunyin/city/index
+│   ├── 城市查询 (F) - xunyin:city:query
+│   ├── 城市新增 (F) - xunyin:city:add
+│   ├── 城市修改 (F) - xunyin:city:edit
+│   └── 城市删除 (F) - xunyin:city:remove
+├── 文化之旅管理 (C) - path: journey, component: xunyin/journey/index
+│   ├── 文化之旅查询 (F) - xunyin:journey:query
+│   ├── 文化之旅新增 (F) - xunyin:journey:add
+│   ├── 文化之旅修改 (F) - xunyin:journey:edit
+│   └── 文化之旅删除 (F) - xunyin:journey:remove
+├── 探索点管理 (C) - path: point, component: xunyin/point/index
+│   ├── 探索点查询 (F) - xunyin:point:query
+│   ├── 探索点新增 (F) - xunyin:point:add
+│   ├── 探索点修改 (F) - xunyin:point:edit
+│   └── 探索点删除 (F) - xunyin:point:remove
+├── 印记管理 (C) - path: seal, component: xunyin/seal/index
+│   ├── 印记查询 (F) - xunyin:seal:query
+│   ├── 印记新增 (F) - xunyin:seal:add
+│   ├── 印记修改 (F) - xunyin:seal:edit
+│   └── 印记删除 (F) - xunyin:seal:remove
+├── App用户管理 (C) - path: appuser, component: xunyin/appuser/index
+│   ├── App用户查询 (F) - xunyin:appuser:query
+│   ├── App用户修改 (F) - xunyin:appuser:edit
+│   └── App用户禁用 (F) - xunyin:appuser:disable
+└── 数据统计 (C) - path: stats, component: xunyin/stats/index
+    └── 数据统计查看 (F) - xunyin:stats:view
+```
+
+##### 1.3.2 添加寻印业务字典
+- [ ] 添加字典类型和字典数据：
+
+| 字典类型 | 字典名称 | 字典数据 |
+|----------|----------|----------|
+| `xunyin_task_type` | 任务类型 | gesture-手势识别, photo-拍照探索, treasure-AR寻宝 |
+| `xunyin_seal_type` | 印记类型 | route-路线印记, city-城市印记, special-特殊印记 |
+| `xunyin_progress_status` | 进度状态 | in_progress-进行中, completed-已完成, abandoned-已放弃 |
+| `xunyin_activity_type` | 动态类型 | seal_earned-获得印记, journey_completed-完成文化之旅, journey_started-开始文化之旅 |
+| `xunyin_audio_context` | 音频场景 | home-首页, city-城市, journey-文化之旅 |
+
+##### 1.3.3 绑定角色菜单权限
+- [ ] 为超级管理员角色绑定所有寻印管理菜单
+- [ ] 为系统管理员角色绑定寻印管理菜单（可选）
+
+##### 1.3.4 添加示例数据（可选）
+- [ ] 添加示例城市数据（杭州、西安）
+- [ ] 添加示例文化之旅数据
+- [ ] 添加示例探索点数据
+- [ ] 添加示例印记数据
+
 ---
 
 ### Task 2: App 用户认证模块
@@ -760,18 +827,25 @@ model BackgroundMusic {
 
 | 优先级 | 任务范围 | 预计时间 |
 |--------|----------|----------|
-| P0 | Task 1-6 (数据模型 + 核心 API) | 2 周 |
+| P0 | Task 1 (数据模型 + 初始数据) | 2-3 天 |
+| P0 | Task 2-6 (核心 API) | 1.5 周 |
 | P1 | Task 7-10 (扩展 API) | 1 周 |
 | P2 | Task 11-13 (管理后台 + 文档) | 1 周 |
 | P3 | Task 14-22 (Flutter App) | 4-6 周 |
 
 **开发建议：**
 
-1. **Week 1-4**：完成后端 API（P0-P2），不受地图方案影响
-2. **Week 5**：Flutter 项目搭建 + 高德地图 MVP
-3. **Week 5 同时**：设计师尝试 MapTiler 样式 / 绘制插画底图
-4. **Week 6**：根据设计效果决定是否切换地图方案（0.5-2 天）
-5. **Week 6+**：继续完成其他页面开发
+1. **Day 1-3**：完成 Task 1（数据模型 + 初始数据），确保数据库和管理后台菜单就绪
+2. **Week 1-2**：完成 Task 2-6（核心 API），App 端基础功能可用
+3. **Week 3**：完成 Task 7-10（扩展 API）+ Task 11（管理后台 API）
+4. **Week 4**：完成 Task 12-13（模块注册 + 文档测试）
+5. **Week 5+**：开始 Flutter App 开发（等 UI 设计稿完成后）
+
+**Task 1 执行顺序：**
+1. Task 1.1 - 添加 Prisma Schema 模型
+2. Task 1.2 - 执行数据库迁移
+3. Task 1.3 - 添加初始数据（菜单、字典、角色权限）
+4. 验证：登录管理后台，确认「寻印管理」菜单显示正常
 
 **地图方案决策点：**
 - 如果高德简约配色 + 插画 Marker 效果可接受 → 继续用高德

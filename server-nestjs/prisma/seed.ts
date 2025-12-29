@@ -1038,6 +1038,241 @@ async function main() {
     });
   }
 
+  // ============ 寻印管理菜单 ============
+  const xunyinDir = await ensureMenu({
+    menuName: '寻印管理',
+    path: 'xunyin',
+    component: 'Layout',
+    orderNum: 4,
+    menuType: 'M',
+    visible: '0',
+    status: '0',
+    icon: 'map-pin',
+    isFrame: 1,
+    parentId: null,
+  });
+
+  // 寻印子菜单
+  await ensureMenu({
+    menuName: '城市管理',
+    parentId: xunyinDir.menuId,
+    path: 'city',
+    component: 'xunyin/city/index',
+    orderNum: 1,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:city:list',
+    icon: 'building',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '文化之旅管理',
+    parentId: xunyinDir.menuId,
+    path: 'journey',
+    component: 'xunyin/journey/index',
+    orderNum: 2,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:journey:list',
+    icon: 'route',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '探索点管理',
+    parentId: xunyinDir.menuId,
+    path: 'point',
+    component: 'xunyin/point/index',
+    orderNum: 3,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:point:list',
+    icon: 'map-pin-check',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '印记管理',
+    parentId: xunyinDir.menuId,
+    path: 'seal',
+    component: 'xunyin/seal/index',
+    orderNum: 4,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:seal:list',
+    icon: 'stamp',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: 'App用户管理',
+    parentId: xunyinDir.menuId,
+    path: 'appuser',
+    component: 'xunyin/appuser/index',
+    orderNum: 5,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:appuser:list',
+    icon: 'smartphone',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '数据统计',
+    parentId: xunyinDir.menuId,
+    path: 'stats',
+    component: 'xunyin/stats/index',
+    orderNum: 6,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:stats:view',
+    icon: 'chart-bar',
+    isFrame: 1,
+  });
+
+  // 寻印按钮权限
+  const cityMenu = await getMenuByPath(xunyinDir.menuId, 'city');
+  if (cityMenu) {
+    await ensureButton({
+      menuName: '城市查询',
+      parentId: cityMenu.menuId,
+      perms: 'xunyin:city:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '城市新增',
+      parentId: cityMenu.menuId,
+      perms: 'xunyin:city:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '城市修改',
+      parentId: cityMenu.menuId,
+      perms: 'xunyin:city:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '城市删除',
+      parentId: cityMenu.menuId,
+      perms: 'xunyin:city:remove',
+      orderNum: 4,
+    });
+  }
+  const journeyMenu = await getMenuByPath(xunyinDir.menuId, 'journey');
+  if (journeyMenu) {
+    await ensureButton({
+      menuName: '文化之旅查询',
+      parentId: journeyMenu.menuId,
+      perms: 'xunyin:journey:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '文化之旅新增',
+      parentId: journeyMenu.menuId,
+      perms: 'xunyin:journey:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '文化之旅修改',
+      parentId: journeyMenu.menuId,
+      perms: 'xunyin:journey:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '文化之旅删除',
+      parentId: journeyMenu.menuId,
+      perms: 'xunyin:journey:remove',
+      orderNum: 4,
+    });
+  }
+  const pointMenu = await getMenuByPath(xunyinDir.menuId, 'point');
+  if (pointMenu) {
+    await ensureButton({
+      menuName: '探索点查询',
+      parentId: pointMenu.menuId,
+      perms: 'xunyin:point:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '探索点新增',
+      parentId: pointMenu.menuId,
+      perms: 'xunyin:point:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '探索点修改',
+      parentId: pointMenu.menuId,
+      perms: 'xunyin:point:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '探索点删除',
+      parentId: pointMenu.menuId,
+      perms: 'xunyin:point:remove',
+      orderNum: 4,
+    });
+  }
+  const sealMenu = await getMenuByPath(xunyinDir.menuId, 'seal');
+  if (sealMenu) {
+    await ensureButton({
+      menuName: '印记查询',
+      parentId: sealMenu.menuId,
+      perms: 'xunyin:seal:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '印记新增',
+      parentId: sealMenu.menuId,
+      perms: 'xunyin:seal:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '印记修改',
+      parentId: sealMenu.menuId,
+      perms: 'xunyin:seal:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '印记删除',
+      parentId: sealMenu.menuId,
+      perms: 'xunyin:seal:remove',
+      orderNum: 4,
+    });
+  }
+  const appuserMenu = await getMenuByPath(xunyinDir.menuId, 'appuser');
+  if (appuserMenu) {
+    await ensureButton({
+      menuName: 'App用户查询',
+      parentId: appuserMenu.menuId,
+      perms: 'xunyin:appuser:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: 'App用户修改',
+      parentId: appuserMenu.menuId,
+      perms: 'xunyin:appuser:edit',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: 'App用户禁用',
+      parentId: appuserMenu.menuId,
+      perms: 'xunyin:appuser:disable',
+      orderNum: 3,
+    });
+  }
+  const statsMenu = await getMenuByPath(xunyinDir.menuId, 'stats');
+  if (statsMenu) {
+    await ensureButton({
+      menuName: '数据统计查看',
+      parentId: statsMenu.menuId,
+      perms: 'xunyin:stats:view',
+      orderNum: 1,
+    });
+  }
+  console.log('Initialized xunyin menus');
+
   // 6. 为不同角色分配菜单权限
   const allMenus = await prisma.sysMenu.findMany({
     select: { menuId: true, path: true, menuType: true, parentId: true },
@@ -1169,6 +1404,12 @@ async function main() {
     { dictName: '通知状态', dictType: 'sys_notice_status' },
     { dictName: '操作类型', dictType: 'sys_oper_type' },
     { dictName: '通用状态', dictType: 'sys_common_status' },
+    // 寻印业务字典类型
+    { dictName: '任务类型', dictType: 'xunyin_task_type' },
+    { dictName: '印记类型', dictType: 'xunyin_seal_type' },
+    { dictName: '进度状态', dictType: 'xunyin_progress_status' },
+    { dictName: '动态类型', dictType: 'xunyin_activity_type' },
+    { dictName: '音频场景', dictType: 'xunyin_audio_context' },
   ];
   for (const dt of dictTypesToSeed) {
     const exists = await prisma.sysDictType.findFirst({
@@ -1395,6 +1636,117 @@ async function main() {
       dictLabel: '失败',
       dictValue: '1',
       dictSort: 2,
+      isDefault: 'N',
+    },
+    // ============ 寻印业务字典数据 ============
+    // 任务类型
+    {
+      dictType: 'xunyin_task_type',
+      dictLabel: '手势识别',
+      dictValue: 'gesture',
+      dictSort: 1,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_task_type',
+      dictLabel: '拍照探索',
+      dictValue: 'photo',
+      dictSort: 2,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_task_type',
+      dictLabel: 'AR寻宝',
+      dictValue: 'treasure',
+      dictSort: 3,
+      isDefault: 'N',
+    },
+    // 印记类型
+    {
+      dictType: 'xunyin_seal_type',
+      dictLabel: '路线印记',
+      dictValue: 'route',
+      dictSort: 1,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_seal_type',
+      dictLabel: '城市印记',
+      dictValue: 'city',
+      dictSort: 2,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_seal_type',
+      dictLabel: '特殊印记',
+      dictValue: 'special',
+      dictSort: 3,
+      isDefault: 'N',
+    },
+    // 进度状态
+    {
+      dictType: 'xunyin_progress_status',
+      dictLabel: '进行中',
+      dictValue: 'in_progress',
+      dictSort: 1,
+      isDefault: 'Y',
+    },
+    {
+      dictType: 'xunyin_progress_status',
+      dictLabel: '已完成',
+      dictValue: 'completed',
+      dictSort: 2,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_progress_status',
+      dictLabel: '已放弃',
+      dictValue: 'abandoned',
+      dictSort: 3,
+      isDefault: 'N',
+    },
+    // 动态类型
+    {
+      dictType: 'xunyin_activity_type',
+      dictLabel: '获得印记',
+      dictValue: 'seal_earned',
+      dictSort: 1,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_activity_type',
+      dictLabel: '完成文化之旅',
+      dictValue: 'journey_completed',
+      dictSort: 2,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_activity_type',
+      dictLabel: '开始文化之旅',
+      dictValue: 'journey_started',
+      dictSort: 3,
+      isDefault: 'N',
+    },
+    // 音频场景
+    {
+      dictType: 'xunyin_audio_context',
+      dictLabel: '首页',
+      dictValue: 'home',
+      dictSort: 1,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_audio_context',
+      dictLabel: '城市',
+      dictValue: 'city',
+      dictSort: 2,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_audio_context',
+      dictLabel: '文化之旅',
+      dictValue: 'journey',
+      dictSort: 3,
       isDefault: 'N',
     },
   ];

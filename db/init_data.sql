@@ -868,3 +868,198 @@ WHERE r.role_key = 'monitor_admin' AND r.del_flag = '0'
   AND m.perms LIKE 'monitor:%'
   AND m.menu_id NOT IN (SELECT menu_id FROM sys_role_menu WHERE role_id = r.role_id)
 ON CONFLICT DO NOTHING;
+
+-- =============================================
+-- 寻印管理模块初始数据
+-- 说明：与 Prisma seed.ts 保持同步
+-- 同步日期：2025-12-29
+-- =============================================
+
+-- 18. 寻印管理菜单
+-- 18.1 寻印管理目录
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+VALUES ('寻印管理', 'xunyin', 'Layout', 4, 'M', '0', '0', 'map-pin', 1, NULL, NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.2 寻印管理子菜单
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '城市管理', 'city', 'xunyin/city/index', 1, 'C', '0', '0', 'building', 1, menu_id, 'xunyin:city:list'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '文化之旅管理', 'journey', 'xunyin/journey/index', 2, 'C', '0', '0', 'route', 1, menu_id, 'xunyin:journey:list'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '探索点管理', 'point', 'xunyin/point/index', 3, 'C', '0', '0', 'map-pin-check', 1, menu_id, 'xunyin:point:list'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '印记管理', 'seal', 'xunyin/seal/index', 4, 'C', '0', '0', 'stamp', 1, menu_id, 'xunyin:seal:list'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT 'App用户管理', 'appuser', 'xunyin/appuser/index', 5, 'C', '0', '0', 'user-circle', 1, menu_id, 'xunyin:appuser:list'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '数据统计', 'stats', 'xunyin/stats/index', 6, 'C', '0', '0', 'chart-bar', 1, menu_id, 'xunyin:stats:view'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+-- 18.3 城市管理按钮
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '城市查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'xunyin:city:query'
+FROM sys_menu WHERE path = 'city' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '城市新增', '', '', 2, 'F', '1', '0', '#', 1, menu_id, 'xunyin:city:add'
+FROM sys_menu WHERE path = 'city' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '城市修改', '', '', 3, 'F', '1', '0', '#', 1, menu_id, 'xunyin:city:edit'
+FROM sys_menu WHERE path = 'city' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '城市删除', '', '', 4, 'F', '1', '0', '#', 1, menu_id, 'xunyin:city:remove'
+FROM sys_menu WHERE path = 'city' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.4 文化之旅管理按钮
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '文化之旅查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'xunyin:journey:query'
+FROM sys_menu WHERE path = 'journey' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '文化之旅新增', '', '', 2, 'F', '1', '0', '#', 1, menu_id, 'xunyin:journey:add'
+FROM sys_menu WHERE path = 'journey' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '文化之旅修改', '', '', 3, 'F', '1', '0', '#', 1, menu_id, 'xunyin:journey:edit'
+FROM sys_menu WHERE path = 'journey' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '文化之旅删除', '', '', 4, 'F', '1', '0', '#', 1, menu_id, 'xunyin:journey:remove'
+FROM sys_menu WHERE path = 'journey' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.5 探索点管理按钮
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '探索点查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'xunyin:point:query'
+FROM sys_menu WHERE path = 'point' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '探索点新增', '', '', 2, 'F', '1', '0', '#', 1, menu_id, 'xunyin:point:add'
+FROM sys_menu WHERE path = 'point' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '探索点修改', '', '', 3, 'F', '1', '0', '#', 1, menu_id, 'xunyin:point:edit'
+FROM sys_menu WHERE path = 'point' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '探索点删除', '', '', 4, 'F', '1', '0', '#', 1, menu_id, 'xunyin:point:remove'
+FROM sys_menu WHERE path = 'point' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.6 印记管理按钮
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '印记查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'xunyin:seal:query'
+FROM sys_menu WHERE path = 'seal' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '印记新增', '', '', 2, 'F', '1', '0', '#', 1, menu_id, 'xunyin:seal:add'
+FROM sys_menu WHERE path = 'seal' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '印记修改', '', '', 3, 'F', '1', '0', '#', 1, menu_id, 'xunyin:seal:edit'
+FROM sys_menu WHERE path = 'seal' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '印记删除', '', '', 4, 'F', '1', '0', '#', 1, menu_id, 'xunyin:seal:remove'
+FROM sys_menu WHERE path = 'seal' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.7 App用户管理按钮
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT 'App用户查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'xunyin:appuser:query'
+FROM sys_menu WHERE path = 'appuser' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT 'App用户修改', '', '', 2, 'F', '1', '0', '#', 1, menu_id, 'xunyin:appuser:edit'
+FROM sys_menu WHERE path = 'appuser' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT 'App用户禁用', '', '', 3, 'F', '1', '0', '#', 1, menu_id, 'xunyin:appuser:disable'
+FROM sys_menu WHERE path = 'appuser' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.8 为超级管理员分配寻印管理权限
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT r.role_id, m.menu_id
+FROM sys_role r, sys_menu m
+WHERE r.role_key = 'admin' AND r.del_flag = '0'
+  AND (
+    (m.path = 'xunyin' AND m.parent_id IS NULL)
+    OR m.parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+    OR m.parent_id IN (
+      SELECT menu_id FROM sys_menu 
+      WHERE parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+    )
+  )
+ON CONFLICT DO NOTHING;
+
+
+-- 19. 寻印业务字典
+-- 19.1 字典类型
+INSERT INTO sys_dict_type (dict_name, dict_type, status, create_time)
+VALUES
+  ('任务类型', 'xunyin_task_type', '0', NOW()),
+  ('印记类型', 'xunyin_seal_type', '0', NOW()),
+  ('进度状态', 'xunyin_progress_status', '0', NOW()),
+  ('动态类型', 'xunyin_activity_type', '0', NOW()),
+  ('音频场景', 'xunyin_audio_context', '0', NOW())
+ON CONFLICT (dict_type) DO NOTHING;
+
+-- 19.2 字典数据
+INSERT INTO sys_dict_data (dict_type, dict_label, dict_value, dict_sort, status, is_default, create_time)
+VALUES
+  -- 任务类型
+  ('xunyin_task_type', '手势识别', 'gesture', 1, '0', 'N', NOW()),
+  ('xunyin_task_type', '拍照探索', 'photo', 2, '0', 'N', NOW()),
+  ('xunyin_task_type', 'AR寻宝', 'treasure', 3, '0', 'N', NOW()),
+  -- 印记类型
+  ('xunyin_seal_type', '路线印记', 'route', 1, '0', 'N', NOW()),
+  ('xunyin_seal_type', '城市印记', 'city', 2, '0', 'N', NOW()),
+  ('xunyin_seal_type', '特殊印记', 'special', 3, '0', 'N', NOW()),
+  -- 进度状态
+  ('xunyin_progress_status', '进行中', 'in_progress', 1, '0', 'Y', NOW()),
+  ('xunyin_progress_status', '已完成', 'completed', 2, '0', 'N', NOW()),
+  ('xunyin_progress_status', '已放弃', 'abandoned', 3, '0', 'N', NOW()),
+  -- 动态类型
+  ('xunyin_activity_type', '获得印记', 'seal_earned', 1, '0', 'N', NOW()),
+  ('xunyin_activity_type', '完成文化之旅', 'journey_completed', 2, '0', 'N', NOW()),
+  ('xunyin_activity_type', '开始文化之旅', 'journey_started', 3, '0', 'N', NOW()),
+  -- 音频场景
+  ('xunyin_audio_context', '首页', 'home', 1, '0', 'N', NOW()),
+  ('xunyin_audio_context', '城市', 'city', 2, '0', 'N', NOW()),
+  ('xunyin_audio_context', '文化之旅', 'journey', 3, '0', 'N', NOW())
+ON CONFLICT DO NOTHING;

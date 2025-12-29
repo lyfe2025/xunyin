@@ -570,3 +570,380 @@ CREATE INDEX IF NOT EXISTS idx_sys_job_log_job_name_group ON sys_job_log(job_nam
 COMMENT ON INDEX idx_sys_job_log_job_name_group IS '任务日志名称+分组复合索引';
 CREATE INDEX IF NOT EXISTS idx_sys_job_log_status ON sys_job_log(status);
 COMMENT ON INDEX idx_sys_job_log_status IS '任务日志状态索引';
+
+
+-- =============================================
+-- 寻印 App 业务表
+-- 说明：与 Prisma schema.prisma 中的寻印模型对应
+-- 同步日期：2025-12-29
+-- =============================================
+
+-- ----------------------------
+-- 18. App用户表（与管理后台用户分离）
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_user (
+  id VARCHAR(30) PRIMARY KEY,
+  phone VARCHAR(20) UNIQUE,
+  nickname VARCHAR(50) NOT NULL,
+  avatar VARCHAR(255),
+  open_id VARCHAR(100) UNIQUE,
+  union_id VARCHAR(100),
+  badge_title VARCHAR(50),
+  total_points INT DEFAULT 0,
+  status CHAR(1) DEFAULT '0',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE app_user IS 'App用户表（与管理后台用户分离）';
+COMMENT ON COLUMN app_user.id IS '用户ID（CUID）';
+COMMENT ON COLUMN app_user.phone IS '手机号';
+COMMENT ON COLUMN app_user.nickname IS '昵称';
+COMMENT ON COLUMN app_user.avatar IS '头像URL';
+COMMENT ON COLUMN app_user.open_id IS '微信openId';
+COMMENT ON COLUMN app_user.union_id IS '微信unionId';
+COMMENT ON COLUMN app_user.badge_title IS '当前称号';
+COMMENT ON COLUMN app_user.total_points IS '总积分';
+COMMENT ON COLUMN app_user.status IS '状态（0正常 1禁用）';
+
+CREATE INDEX IF NOT EXISTS idx_app_user_phone ON app_user(phone);
+CREATE INDEX IF NOT EXISTS idx_app_user_open_id ON app_user(open_id);
+
+-- ----------------------------
+-- 19. 城市表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS city (
+  id VARCHAR(30) PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  province VARCHAR(50) NOT NULL,
+  latitude DECIMAL(10, 7) NOT NULL,
+  longitude DECIMAL(10, 7) NOT NULL,
+  icon_asset VARCHAR(255),
+  cover_image VARCHAR(255),
+  description TEXT,
+  explorer_count INT DEFAULT 0,
+  bgm_url VARCHAR(255),
+  order_num INT DEFAULT 0,
+  status CHAR(1) DEFAULT '0',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE city IS '城市表';
+COMMENT ON COLUMN city.id IS '城市ID（CUID）';
+COMMENT ON COLUMN city.name IS '城市名称';
+COMMENT ON COLUMN city.province IS '省份';
+COMMENT ON COLUMN city.latitude IS '纬度';
+COMMENT ON COLUMN city.longitude IS '经度';
+COMMENT ON COLUMN city.icon_asset IS '图标资源';
+COMMENT ON COLUMN city.cover_image IS '封面图';
+COMMENT ON COLUMN city.description IS '描述';
+COMMENT ON COLUMN city.explorer_count IS '探索人数';
+COMMENT ON COLUMN city.bgm_url IS '背景音乐URL';
+COMMENT ON COLUMN city.order_num IS '排序';
+COMMENT ON COLUMN city.status IS '状态（0正常 1停用）';
+
+CREATE INDEX IF NOT EXISTS idx_city_province ON city(province);
+CREATE INDEX IF NOT EXISTS idx_city_status ON city(status);
+
+-- ----------------------------
+-- 20. 文化之旅表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS journey (
+  id VARCHAR(30) PRIMARY KEY,
+  city_id VARCHAR(30) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  theme VARCHAR(100) NOT NULL,
+  cover_image VARCHAR(255),
+  description TEXT,
+  rating INT DEFAULT 5,
+  estimated_minutes INT NOT NULL,
+  total_distance DECIMAL(10, 2) NOT NULL,
+  completed_count INT DEFAULT 0,
+  is_locked BOOLEAN DEFAULT FALSE,
+  unlock_condition VARCHAR(255),
+  bgm_url VARCHAR(255),
+  order_num INT DEFAULT 0,
+  status CHAR(1) DEFAULT '0',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP,
+  FOREIGN KEY (city_id) REFERENCES city(id)
+);
+COMMENT ON TABLE journey IS '文化之旅表';
+COMMENT ON COLUMN journey.id IS '文化之旅ID（CUID）';
+COMMENT ON COLUMN journey.city_id IS '城市ID';
+COMMENT ON COLUMN journey.name IS '名称';
+COMMENT ON COLUMN journey.theme IS '主题';
+COMMENT ON COLUMN journey.cover_image IS '封面图';
+COMMENT ON COLUMN journey.description IS '描述';
+COMMENT ON COLUMN journey.rating IS '星级（1-5）';
+COMMENT ON COLUMN journey.estimated_minutes IS '预计时长（分钟）';
+COMMENT ON COLUMN journey.total_distance IS '总距离（米）';
+COMMENT ON COLUMN journey.completed_count IS '完成人数';
+COMMENT ON COLUMN journey.is_locked IS '是否锁定';
+COMMENT ON COLUMN journey.unlock_condition IS '解锁条件';
+COMMENT ON COLUMN journey.bgm_url IS '背景音乐URL';
+COMMENT ON COLUMN journey.order_num IS '排序';
+COMMENT ON COLUMN journey.status IS '状态（0正常 1停用）';
+
+CREATE INDEX IF NOT EXISTS idx_journey_city_id ON journey(city_id);
+CREATE INDEX IF NOT EXISTS idx_journey_status ON journey(status);
+
+-- ----------------------------
+-- 21. 探索点表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS exploration_point (
+  id VARCHAR(30) PRIMARY KEY,
+  journey_id VARCHAR(30) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  latitude DECIMAL(10, 7) NOT NULL,
+  longitude DECIMAL(10, 7) NOT NULL,
+  task_type VARCHAR(20) NOT NULL,
+  task_description VARCHAR(255) NOT NULL,
+  target_gesture VARCHAR(50),
+  ar_asset_url VARCHAR(255),
+  cultural_background TEXT,
+  cultural_knowledge TEXT,
+  distance_from_prev DECIMAL(10, 2),
+  points_reward INT DEFAULT 50,
+  order_num INT NOT NULL,
+  status CHAR(1) DEFAULT '0',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP,
+  FOREIGN KEY (journey_id) REFERENCES journey(id)
+);
+COMMENT ON TABLE exploration_point IS '探索点表';
+COMMENT ON COLUMN exploration_point.id IS '探索点ID（CUID）';
+COMMENT ON COLUMN exploration_point.journey_id IS '文化之旅ID';
+COMMENT ON COLUMN exploration_point.name IS '名称';
+COMMENT ON COLUMN exploration_point.latitude IS '纬度';
+COMMENT ON COLUMN exploration_point.longitude IS '经度';
+COMMENT ON COLUMN exploration_point.task_type IS '任务类型（gesture/photo/treasure）';
+COMMENT ON COLUMN exploration_point.task_description IS '任务描述';
+COMMENT ON COLUMN exploration_point.target_gesture IS '目标手势';
+COMMENT ON COLUMN exploration_point.ar_asset_url IS 'AR资源URL';
+COMMENT ON COLUMN exploration_point.cultural_background IS '文化背景';
+COMMENT ON COLUMN exploration_point.cultural_knowledge IS '文化小知识';
+COMMENT ON COLUMN exploration_point.distance_from_prev IS '距上一点距离（米）';
+COMMENT ON COLUMN exploration_point.points_reward IS '积分奖励';
+COMMENT ON COLUMN exploration_point.order_num IS '排序';
+COMMENT ON COLUMN exploration_point.status IS '状态（0正常 1停用）';
+
+CREATE INDEX IF NOT EXISTS idx_exploration_point_journey_id ON exploration_point(journey_id);
+CREATE INDEX IF NOT EXISTS idx_exploration_point_status ON exploration_point(status);
+
+-- ----------------------------
+-- 22. 用户文化之旅进度表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS journey_progress (
+  id VARCHAR(30) PRIMARY KEY,
+  user_id VARCHAR(30) NOT NULL,
+  journey_id VARCHAR(30) NOT NULL,
+  status VARCHAR(20) DEFAULT 'in_progress',
+  start_time TIMESTAMP NOT NULL,
+  complete_time TIMESTAMP,
+  time_spent_minutes INT,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES app_user(id),
+  FOREIGN KEY (journey_id) REFERENCES journey(id),
+  UNIQUE (user_id, journey_id)
+);
+COMMENT ON TABLE journey_progress IS '用户文化之旅进度表';
+COMMENT ON COLUMN journey_progress.id IS '进度ID（CUID）';
+COMMENT ON COLUMN journey_progress.user_id IS '用户ID';
+COMMENT ON COLUMN journey_progress.journey_id IS '文化之旅ID';
+COMMENT ON COLUMN journey_progress.status IS '状态（in_progress/completed/abandoned）';
+COMMENT ON COLUMN journey_progress.start_time IS '开始时间';
+COMMENT ON COLUMN journey_progress.complete_time IS '完成时间';
+COMMENT ON COLUMN journey_progress.time_spent_minutes IS '花费时间（分钟）';
+
+CREATE INDEX IF NOT EXISTS idx_journey_progress_user_id ON journey_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_journey_progress_journey_id ON journey_progress(journey_id);
+CREATE INDEX IF NOT EXISTS idx_journey_progress_status ON journey_progress(status);
+
+-- ----------------------------
+-- 23. 探索点完成记录表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS point_completion (
+  id VARCHAR(30) PRIMARY KEY,
+  progress_id VARCHAR(30) NOT NULL,
+  point_id VARCHAR(30) NOT NULL,
+  complete_time TIMESTAMP NOT NULL,
+  points_earned INT NOT NULL,
+  photo_url VARCHAR(255),
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (progress_id) REFERENCES journey_progress(id),
+  FOREIGN KEY (point_id) REFERENCES exploration_point(id),
+  UNIQUE (progress_id, point_id)
+);
+COMMENT ON TABLE point_completion IS '探索点完成记录表';
+COMMENT ON COLUMN point_completion.id IS '记录ID（CUID）';
+COMMENT ON COLUMN point_completion.progress_id IS '进度ID';
+COMMENT ON COLUMN point_completion.point_id IS '探索点ID';
+COMMENT ON COLUMN point_completion.complete_time IS '完成时间';
+COMMENT ON COLUMN point_completion.points_earned IS '获得积分';
+COMMENT ON COLUMN point_completion.photo_url IS '照片URL';
+
+CREATE INDEX IF NOT EXISTS idx_point_completion_progress_id ON point_completion(progress_id);
+CREATE INDEX IF NOT EXISTS idx_point_completion_point_id ON point_completion(point_id);
+
+-- ----------------------------
+-- 24. 印记表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS seal (
+  id VARCHAR(30) PRIMARY KEY,
+  type VARCHAR(20) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  image_asset VARCHAR(255) NOT NULL,
+  description TEXT,
+  unlock_condition VARCHAR(255),
+  badge_title VARCHAR(50),
+  journey_id VARCHAR(30),
+  city_id VARCHAR(30),
+  order_num INT DEFAULT 0,
+  status CHAR(1) DEFAULT '0',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP,
+  FOREIGN KEY (journey_id) REFERENCES journey(id),
+  FOREIGN KEY (city_id) REFERENCES city(id)
+);
+COMMENT ON TABLE seal IS '印记表';
+COMMENT ON COLUMN seal.id IS '印记ID（CUID）';
+COMMENT ON COLUMN seal.type IS '类型（route/city/special）';
+COMMENT ON COLUMN seal.name IS '名称';
+COMMENT ON COLUMN seal.image_asset IS '图片资源';
+COMMENT ON COLUMN seal.description IS '描述';
+COMMENT ON COLUMN seal.unlock_condition IS '解锁条件';
+COMMENT ON COLUMN seal.badge_title IS '解锁的称号';
+COMMENT ON COLUMN seal.journey_id IS '关联文化之旅ID';
+COMMENT ON COLUMN seal.city_id IS '关联城市ID';
+COMMENT ON COLUMN seal.order_num IS '排序';
+COMMENT ON COLUMN seal.status IS '状态（0正常 1停用）';
+
+CREATE INDEX IF NOT EXISTS idx_seal_type ON seal(type);
+CREATE INDEX IF NOT EXISTS idx_seal_journey_id ON seal(journey_id);
+CREATE INDEX IF NOT EXISTS idx_seal_city_id ON seal(city_id);
+CREATE INDEX IF NOT EXISTS idx_seal_status ON seal(status);
+
+-- ----------------------------
+-- 25. 用户印记表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS user_seal (
+  id VARCHAR(30) PRIMARY KEY,
+  user_id VARCHAR(30) NOT NULL,
+  seal_id VARCHAR(30) NOT NULL,
+  earned_time TIMESTAMP NOT NULL,
+  time_spent_minutes INT,
+  points_earned INT DEFAULT 0,
+  is_chained BOOLEAN DEFAULT FALSE,
+  chain_name VARCHAR(50),
+  tx_hash VARCHAR(100),
+  block_height BIGINT,
+  chain_time TIMESTAMP,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES app_user(id),
+  FOREIGN KEY (seal_id) REFERENCES seal(id),
+  UNIQUE (user_id, seal_id)
+);
+COMMENT ON TABLE user_seal IS '用户印记表';
+COMMENT ON COLUMN user_seal.id IS '记录ID（CUID）';
+COMMENT ON COLUMN user_seal.user_id IS '用户ID';
+COMMENT ON COLUMN user_seal.seal_id IS '印记ID';
+COMMENT ON COLUMN user_seal.earned_time IS '获得时间';
+COMMENT ON COLUMN user_seal.time_spent_minutes IS '花费时间（分钟）';
+COMMENT ON COLUMN user_seal.points_earned IS '获得积分';
+COMMENT ON COLUMN user_seal.is_chained IS '是否已上链';
+COMMENT ON COLUMN user_seal.chain_name IS '链名称';
+COMMENT ON COLUMN user_seal.tx_hash IS '交易哈希';
+COMMENT ON COLUMN user_seal.block_height IS '区块高度';
+COMMENT ON COLUMN user_seal.chain_time IS '上链时间';
+
+CREATE INDEX IF NOT EXISTS idx_user_seal_user_id ON user_seal(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_seal_seal_id ON user_seal(seal_id);
+CREATE INDEX IF NOT EXISTS idx_user_seal_is_chained ON user_seal(is_chained);
+
+-- ----------------------------
+-- 26. 探索照片表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS exploration_photo (
+  id VARCHAR(30) PRIMARY KEY,
+  user_id VARCHAR(30) NOT NULL,
+  journey_id VARCHAR(30) NOT NULL,
+  point_id VARCHAR(30) NOT NULL,
+  photo_url VARCHAR(255) NOT NULL,
+  thumbnail_url VARCHAR(255),
+  filter VARCHAR(20),
+  latitude DECIMAL(10, 7),
+  longitude DECIMAL(10, 7),
+  taken_time TIMESTAMP NOT NULL,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES app_user(id),
+  FOREIGN KEY (journey_id) REFERENCES journey(id),
+  FOREIGN KEY (point_id) REFERENCES exploration_point(id)
+);
+COMMENT ON TABLE exploration_photo IS '探索照片表';
+COMMENT ON COLUMN exploration_photo.id IS '照片ID（CUID）';
+COMMENT ON COLUMN exploration_photo.user_id IS '用户ID';
+COMMENT ON COLUMN exploration_photo.journey_id IS '文化之旅ID';
+COMMENT ON COLUMN exploration_photo.point_id IS '探索点ID';
+COMMENT ON COLUMN exploration_photo.photo_url IS '照片URL';
+COMMENT ON COLUMN exploration_photo.thumbnail_url IS '缩略图URL';
+COMMENT ON COLUMN exploration_photo.filter IS '使用的滤镜';
+COMMENT ON COLUMN exploration_photo.latitude IS '拍摄纬度';
+COMMENT ON COLUMN exploration_photo.longitude IS '拍摄经度';
+COMMENT ON COLUMN exploration_photo.taken_time IS '拍摄时间';
+
+CREATE INDEX IF NOT EXISTS idx_exploration_photo_user_id ON exploration_photo(user_id);
+CREATE INDEX IF NOT EXISTS idx_exploration_photo_journey_id ON exploration_photo(journey_id);
+CREATE INDEX IF NOT EXISTS idx_exploration_photo_point_id ON exploration_photo(point_id);
+CREATE INDEX IF NOT EXISTS idx_exploration_photo_taken_time ON exploration_photo(taken_time);
+
+-- ----------------------------
+-- 27. 用户动态表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS user_activity (
+  id VARCHAR(30) PRIMARY KEY,
+  user_id VARCHAR(30) NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  related_id VARCHAR(30),
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES app_user(id)
+);
+COMMENT ON TABLE user_activity IS '用户动态表';
+COMMENT ON COLUMN user_activity.id IS '动态ID（CUID）';
+COMMENT ON COLUMN user_activity.user_id IS '用户ID';
+COMMENT ON COLUMN user_activity.type IS '类型（seal_earned/journey_completed等）';
+COMMENT ON COLUMN user_activity.title IS '标题';
+COMMENT ON COLUMN user_activity.related_id IS '关联ID';
+
+CREATE INDEX IF NOT EXISTS idx_user_activity_user_id ON user_activity(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_activity_create_time ON user_activity(create_time);
+
+-- ----------------------------
+-- 28. 背景音乐表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS background_music (
+  id VARCHAR(30) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  url VARCHAR(255) NOT NULL,
+  context VARCHAR(20) NOT NULL,
+  context_id VARCHAR(30),
+  duration INT,
+  order_num INT DEFAULT 0,
+  status CHAR(1) DEFAULT '0',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE background_music IS '背景音乐表';
+COMMENT ON COLUMN background_music.id IS '音乐ID（CUID）';
+COMMENT ON COLUMN background_music.name IS '名称';
+COMMENT ON COLUMN background_music.url IS 'URL';
+COMMENT ON COLUMN background_music.context IS '场景（home/city/journey）';
+COMMENT ON COLUMN background_music.context_id IS '关联ID';
+COMMENT ON COLUMN background_music.duration IS '时长（秒）';
+COMMENT ON COLUMN background_music.order_num IS '排序';
+COMMENT ON COLUMN background_music.status IS '状态（0正常 1停用）';
+
+CREATE INDEX IF NOT EXISTS idx_background_music_context ON background_music(context, context_id);
+CREATE INDEX IF NOT EXISTS idx_background_music_status ON background_music(status);
