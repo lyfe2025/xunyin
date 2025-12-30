@@ -3,21 +3,15 @@ import pluginVue from 'eslint-plugin-vue'
 import * as parserVue from 'vue-eslint-parser'
 import configPrettier from 'eslint-config-prettier'
 import pluginPrettier from 'eslint-plugin-prettier'
-import { defineConfig } from 'eslint-define-config'
 import * as parserTypeScript from '@typescript-eslint/parser'
 import pluginTypeScript from '@typescript-eslint/eslint-plugin'
 
-export default defineConfig([
+export default [
+  {
+    ignores: ['node_modules/**', 'dist/**', 'dist-ssr/**', '*.local', '.vite/**', 'public/**'],
+  },
   {
     ...js.configs.recommended,
-    ignores: [
-      'node_modules',
-      'dist',
-      'dist-ssr',
-      '*.local',
-      '.vite',
-      'public',
-    ],
     languageOptions: {
       globals: {
         console: 'readonly',
@@ -27,6 +21,32 @@ export default defineConfig([
         Buffer: 'readonly',
         module: 'readonly',
         require: 'readonly',
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        FormData: 'readonly',
+        Blob: 'readonly',
+        File: 'readonly',
+        FileReader: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        requestAnimationFrame: 'readonly',
+        cancelAnimationFrame: 'readonly',
+        HTMLElement: 'readonly',
+        Event: 'readonly',
+        CustomEvent: 'readonly',
+        KeyboardEvent: 'readonly',
+        MouseEvent: 'readonly',
+        ResizeObserver: 'readonly',
+        IntersectionObserver: 'readonly',
+        MutationObserver: 'readonly',
       },
     },
   },
@@ -49,11 +69,10 @@ export default defineConfig([
     },
     processor: pluginVue.processors['.vue'],
     rules: {
-      ...pluginVue.configs.base.rules,
-      ...pluginVue.configs['vue3-essential'].rules,
-      ...pluginVue.configs['vue3-strongly-recommended'].rules,
-      ...pluginVue.configs['vue3-recommended'].rules,
-      
+      ...pluginVue.configs['flat/essential'].rules,
+      ...pluginVue.configs['flat/strongly-recommended'].rules,
+      ...pluginVue.configs['flat/recommended'].rules,
+
       // Vue 规则
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'off',
@@ -74,7 +93,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.?([cm])ts', '**/*.?([cm])tsx'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     languageOptions: {
       parser: parserTypeScript,
       parserOptions: {
@@ -85,13 +104,8 @@ export default defineConfig([
       '@typescript-eslint': pluginTypeScript,
     },
     rules: {
-      ...pluginTypeScript.configs['eslint-recommended'].rules,
-      ...pluginTypeScript.configs.recommended.rules,
-      
       // TypeScript 规则
-      '@typescript-eslint/ban-ts-ignore': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/ban-types': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-empty-function': 'off',
@@ -108,12 +122,6 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.?([cm])js'],
-    rules: {
-      '@typescript-eslint/no-var-requires': 'off',
-    },
-  },
-  {
     ...configPrettier,
     plugins: {
       prettier: pluginPrettier,
@@ -127,4 +135,4 @@ export default defineConfig([
       ],
     },
   },
-])
+]

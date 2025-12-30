@@ -513,10 +513,14 @@ model SysJobLog {
 model AppUser {
   id            String    @id @default(cuid())
   phone         String?   @unique @db.VarChar(20)
+  email         String?   @unique @db.VarChar(100)                  // 邮箱登录
   nickname      String    @db.VarChar(50)
   avatar        String?   @db.VarChar(255)
   openId        String?   @unique @map("open_id") @db.VarChar(100)  // 微信openId
   unionId       String?   @map("union_id") @db.VarChar(100)         // 微信unionId
+  googleId      String?   @unique @map("google_id") @db.VarChar(100) // Google登录ID
+  appleId       String?   @unique @map("apple_id") @db.VarChar(100)  // Apple登录ID
+  loginType     String    @default("wechat") @map("login_type") @db.VarChar(20) // wechat/email/google/apple
   badgeTitle    String?   @map("badge_title") @db.VarChar(50)       // 当前称号
   totalPoints   Int       @default(0) @map("total_points")          // 总积分
   status        String    @default("0") @db.Char(1)                 // 0正常 1禁用
@@ -529,7 +533,11 @@ model AppUser {
   activities        UserActivity[]
 
   @@index([phone])
+  @@index([email])
   @@index([openId])
+  @@index([googleId])
+  @@index([appleId])
+  @@index([loginType])
   @@map("app_user")
 }
 

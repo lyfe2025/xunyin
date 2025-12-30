@@ -32,6 +32,11 @@ const FILE_SIGNATURES: Record<string, number[][]> = {
     [0x00, 0x00, 0x01, 0x00],
     [0x00, 0x00, 0x02, 0x00],
   ],
+  'audio/mpeg': [[0xff, 0xfb], [0xff, 0xfa], [0xff, 0xf3], [0x49, 0x44, 0x33]], // MP3
+  'audio/wav': [[0x52, 0x49, 0x46, 0x46]], // WAV
+  'audio/ogg': [[0x4f, 0x67, 0x67, 0x53]], // OGG
+  'audio/flac': [[0x66, 0x4c, 0x61, 0x43]], // FLAC
+  'audio/aac': [[0xff, 0xf1], [0xff, 0xf9]], // AAC
 };
 
 /**
@@ -90,6 +95,12 @@ function sanitizeFilename(filename: string): string {
     '.webp',
     '.svg',
     '.ico',
+    '.mp3',
+    '.wav',
+    '.ogg',
+    '.flac',
+    '.aac',
+    '.m4a',
   ];
   if (!allowedExts.includes(ext)) {
     return '.png';
@@ -111,7 +122,7 @@ function generateFilename(prefix: string, originalname: string): string {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class UploadController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(private readonly storageService: StorageService) { }
 
   /**
    * 上传头像
@@ -244,6 +255,159 @@ export class UploadController {
       filename,
       file.mimetype,
       'system',
+    );
+
+    return {
+      url: result.url,
+      filename: result.filename,
+      size: result.size,
+      mimetype: file.mimetype,
+    };
+  }
+
+  /**
+   * 上传图片（通用）
+   */
+  @Post('image')
+  @ApiOperation({ summary: '上传图片（通用）' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (_req, file, cb) => {
+        const allowedMimes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/svg+xml',
+        ];
+        if (!allowedMimes.includes(file.mimetype)) {
+          cb(
+            new BadRequestException('只支持图片格式 (jpg, png, gif, webp, svg)'),
+            false,
+          );
+        } else {
+          cb(null, true);
+        }
+      },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    }),
+  )
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('请选择要上传的文件');
+    }
+
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+    ];
+    if (!validateFileMagic(file.buffer, allowedTypes)) {
+      throw new BadRequestException('文件类型不合法，请上传真实的图片文件');
+    }
+
+    let buffer = file.buffer;
+    if (
+      file.mimetype === 'image/svg+xml' ||
+      file.originalname.toLowerCase().endsWith('.svg')
+    ) {
+      buffer = sanitizeSvgBuffer(buffer);
+    }
+
+    const filename = generateFilename('img', file.originalname);
+    const result = await this.storageService.upload(
+      buffer,
+      filename,
+      file.mimetype,
+      'images',
+    );
+
+    return {
+      url: result.url,
+      filename: result.filename,
+      size: result.size,
+      mimetype: file.mimetype,
+    };
+  }
+
+  /**
+   * 上传音频文件
+   */
+  @Post('audio')
+  @ApiOperation({ summary: '上传音频文件' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (_req, file, cb) => {
+        const allowedMimes = [
+          'audio/mpeg',
+          'audio/mp3',
+          'audio/wav',
+          'audio/ogg',
+          'audio/flac',
+          'audio/aac',
+          'audio/x-m4a',
+          'audio/mp4',
+        ];
+        if (!allowedMimes.includes(file.mimetype)) {
+          cb(
+            new BadRequestException(
+              '只支持音频格式 (mp3, wav, ogg, flac, aac, m4a)',
+            ),
+            false,
+          );
+        } else {
+          cb(null, true);
+        }
+      },
+      limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+    }),
+  )
+  async uploadAudio(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('请选择要上传的文件');
+    }
+
+    const allowedTypes = [
+      'audio/mpeg',
+      'audio/wav',
+      'audio/ogg',
+      'audio/flac',
+      'audio/aac',
+    ];
+    // 音频文件魔数校验可能不完全准确，这里放宽限制
+    const isValidMagic = validateFileMagic(file.buffer, allowedTypes);
+    const hasValidExt = ['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a'].some(
+      (ext) => file.originalname.toLowerCase().endsWith(ext),
+    );
+
+    if (!isValidMagic && !hasValidExt) {
+      throw new BadRequestException('文件类型不合法，请上传真实的音频文件');
+    }
+
+    const filename = generateFilename('audio', file.originalname);
+    const result = await this.storageService.upload(
+      file.buffer,
+      filename,
+      file.mimetype,
+      'audio',
     );
 
     return {

@@ -18,8 +18,8 @@ export function uploadAvatar(file: File): Promise<UploadResult> {
     method: 'post',
     data: formData,
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   }).then((res: unknown) => (res as { data: UploadResult }).data)
 }
 
@@ -34,7 +34,39 @@ export function uploadSystem(file: File): Promise<UploadResult> {
     method: 'post',
     data: formData,
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
+  }).then((res: unknown) => (res as { data: UploadResult }).data)
+}
+
+/**
+ * 上传图片（通用）
+ */
+export function uploadImage(file: File): Promise<UploadResult> {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request<{ data: UploadResult }>({
+    url: '/upload/image',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }).then((res: unknown) => (res as { data: UploadResult }).data)
+}
+
+/**
+ * 上传音频文件
+ */
+export function uploadAudio(file: File): Promise<UploadResult> {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request<{ data: UploadResult }>({
+    url: '/upload/audio',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   }).then((res: unknown) => (res as { data: UploadResult }).data)
 }

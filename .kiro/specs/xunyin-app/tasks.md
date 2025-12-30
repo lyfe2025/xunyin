@@ -11,7 +11,7 @@
 ### Task 1: 数据库模型设计与 Prisma Schema 扩展
 
 #### Task 1.1: 添加寻印业务数据模型
-- [ ] 在 `server-nestjs/prisma/schema.prisma` 中添加以下模型：
+- [x] 在 `server-nestjs/prisma/schema.prisma` 中添加以下模型：
 
 ```prisma
 // ============ 寻印 App 业务模型 ============
@@ -281,23 +281,23 @@ model BackgroundMusic {
 ```
 
 #### Task 1.2: 执行数据库迁移
-- [ ] 运行 `npx prisma migrate dev --name add_xunyin_models`
-- [ ] 运行 `npx prisma generate` 生成 Prisma Client
+- [x] 运行 `npx prisma migrate dev --name add_xunyin_models`
+- [x] 运行 `npx prisma generate` 生成 Prisma Client
 
 #### Task 1.3: 添加寻印业务初始数据
 
 > 在 `db/init_data.sql` 中追加寻印管理相关的菜单、字典数据
 
 ##### 1.3.1 添加寻印管理菜单
-- [ ] 添加「寻印管理」一级目录菜单
-- [ ] 添加子菜单：
+- [x] 添加「寻印管理」一级目录菜单
+- [x] 添加子菜单：
   - 城市管理 (`xunyin:city:list`)
   - 文化之旅管理 (`xunyin:journey:list`)
   - 探索点管理 (`xunyin:point:list`)
   - 印记管理 (`xunyin:seal:list`)
   - App用户管理 (`xunyin:appuser:list`)
   - 数据统计 (`xunyin:stats:view`)
-- [ ] 为每个菜单添加按钮权限（查询、新增、修改、删除）
+- [x] 为每个菜单添加按钮权限（查询、新增、修改、删除）
 
 菜单结构：
 ```
@@ -331,7 +331,7 @@ model BackgroundMusic {
 ```
 
 ##### 1.3.2 添加寻印业务字典
-- [ ] 添加字典类型和字典数据：
+- [x] 添加字典类型和字典数据：
 
 | 字典类型 | 字典名称 | 字典数据 |
 |----------|----------|----------|
@@ -342,22 +342,22 @@ model BackgroundMusic {
 | `xunyin_audio_context` | 音频场景 | home-首页, city-城市, journey-文化之旅 |
 
 ##### 1.3.3 绑定角色菜单权限
-- [ ] 为超级管理员角色绑定所有寻印管理菜单
-- [ ] 为系统管理员角色绑定寻印管理菜单（可选）
+- [x] 为超级管理员角色绑定所有寻印管理菜单
+- [x] 为系统管理员角色绑定寻印管理菜单（可选）
 
 ##### 1.3.4 添加示例数据（可选）
-- [ ] 添加示例城市数据（杭州、西安）
-- [ ] 添加示例文化之旅数据
-- [ ] 添加示例探索点数据
-- [ ] 添加示例印记数据
+- [x] 添加示例城市数据（杭州、西安）
+- [x] 添加示例文化之旅数据
+- [x] 添加示例探索点数据
+- [x] 添加示例印记数据
 
 ---
 
 ### Task 2: App 用户认证模块
 
 #### Task 2.1: 创建 App Auth 模块结构
-- [ ] 创建 `server-nestjs/src/app-auth/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/app-auth/` 目录
+- [x] 创建以下文件：
   - `app-auth.module.ts`
   - `app-auth.controller.ts`
   - `app-auth.service.ts`
@@ -367,37 +367,37 @@ model BackgroundMusic {
   - `guards/app-auth.guard.ts`
 
 #### Task 2.2: 实现 App 用户认证接口
-- [ ] `POST /api/app/auth/login/phone` - 手机号验证码登录
-- [ ] `POST /api/app/auth/login/wechat` - 微信登录
-- [ ] `POST /api/app/auth/refresh` - 刷新 Token
-- [ ] `GET /api/app/auth/me` - 获取当前用户信息
-- [ ] `PUT /api/app/auth/profile` - 更新用户资料
+- [x] `POST /api/app/auth/login/phone` - 手机号验证码登录
+- [x] `POST /api/app/auth/login/wechat` - 微信登录
+- [x] `POST /api/app/auth/refresh` - 刷新 Token
+- [x] `GET /api/app/auth/me` - 获取当前用户信息
+- [x] `PUT /api/app/auth/profile` - 更新用户资料
 
 ---
 
 ### Task 3: 城市模块
 
 #### Task 3.1: 创建城市模块结构
-- [ ] 创建 `server-nestjs/src/city/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/city/` 目录
+- [x] 创建以下文件：
   - `city.module.ts`
   - `city.controller.ts`
   - `city.service.ts`
   - `dto/city.dto.ts`
 
 #### Task 3.2: 实现城市 API
-- [ ] `GET /api/app/cities` - 获取城市列表（支持省份筛选）
-- [ ] `GET /api/app/cities/:id` - 获取城市详情
-- [ ] `GET /api/app/cities/:id/journeys` - 获取城市文化之旅列表
-- [ ] `GET /api/app/cities/nearby` - 获取附近城市（基于经纬度）
+- [x] `GET /api/app/cities` - 获取城市列表（支持省份筛选）
+- [x] `GET /api/app/cities/:id` - 获取城市详情
+- [x] `GET /api/app/cities/:id/journeys` - 获取城市文化之旅列表
+- [x] `GET /api/app/cities/nearby` - 获取附近城市（基于经纬度）
 
 ---
 
 ### Task 4: 文化之旅模块
 
 #### Task 4.1: 创建文化之旅模块结构
-- [ ] 创建 `server-nestjs/src/journey/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/journey/` 目录
+- [x] 创建以下文件：
   - `journey.module.ts`
   - `journey.controller.ts`
   - `journey.service.ts`
@@ -405,114 +405,114 @@ model BackgroundMusic {
   - `dto/start-journey.dto.ts`
 
 #### Task 4.2: 实现文化之旅 API
-- [ ] `GET /api/app/journeys/:id` - 获取文化之旅详情
-- [ ] `GET /api/app/journeys/:id/points` - 获取探索点列表
-- [ ] `POST /api/app/journeys/:id/start` - 开始文化之旅
-- [ ] `GET /api/app/journeys/progress` - 获取用户进行中的文化之旅
-- [ ] `PUT /api/app/journeys/:id/abandon` - 放弃文化之旅
+- [x] `GET /api/app/journeys/:id` - 获取文化之旅详情
+- [x] `GET /api/app/journeys/:id/points` - 获取探索点列表
+- [x] `POST /api/app/journeys/:id/start` - 开始文化之旅
+- [x] `GET /api/app/journeys/progress` - 获取用户进行中的文化之旅
+- [x] `PUT /api/app/journeys/:id/abandon` - 放弃文化之旅
 
 ---
 
 ### Task 5: 探索点与任务模块
 
 #### Task 5.1: 创建探索点模块结构
-- [ ] 创建 `server-nestjs/src/exploration-point/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/exploration-point/` 目录
+- [x] 创建以下文件：
   - `exploration-point.module.ts`
   - `exploration-point.controller.ts`
   - `exploration-point.service.ts`
   - `dto/complete-task.dto.ts`
 
 #### Task 5.2: 实现探索点 API
-- [ ] `GET /api/app/points/:id` - 获取探索点详情
-- [ ] `POST /api/app/points/:id/complete` - 完成探索点任务
-- [ ] `POST /api/app/points/:id/validate-location` - 验证用户位置
+- [x] `GET /api/app/points/:id` - 获取探索点详情
+- [x] `POST /api/app/points/:id/complete` - 完成探索点任务
+- [x] `POST /api/app/points/:id/validate-location` - 验证用户位置
 
 ---
 
 ### Task 6: 印记模块
 
 #### Task 6.1: 创建印记模块结构
-- [ ] 创建 `server-nestjs/src/seal/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/seal/` 目录
+- [x] 创建以下文件：
   - `seal.module.ts`
   - `seal.controller.ts`
   - `seal.service.ts`
   - `dto/seal.dto.ts`
 
 #### Task 6.2: 实现印记 API
-- [ ] `GET /api/app/seals` - 获取用户印记列表（支持类型筛选）
-- [ ] `GET /api/app/seals/:id` - 获取印记详情
-- [ ] `GET /api/app/seals/progress` - 获取印记收集进度
-- [ ] `GET /api/app/seals/available` - 获取所有可收集印记（含锁定状态）
+- [x] `GET /api/app/seals` - 获取用户印记列表（支持类型筛选）
+- [x] `GET /api/app/seals/:id` - 获取印记详情
+- [x] `GET /api/app/seals/progress` - 获取印记收集进度
+- [x] `GET /api/app/seals/available` - 获取所有可收集印记（含锁定状态）
 
 ---
 
 ### Task 7: 区块链存证模块
 
 #### Task 7.1: 创建区块链模块结构
-- [ ] 创建 `server-nestjs/src/blockchain/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/blockchain/` 目录
+- [x] 创建以下文件：
   - `blockchain.module.ts`
   - `blockchain.controller.ts`
   - `blockchain.service.ts`
   - `dto/chain-seal.dto.ts`
 
 #### Task 7.2: 实现区块链 API
-- [ ] `POST /api/app/blockchain/chain/:sealId` - 印记上链
-- [ ] `GET /api/app/blockchain/verify/:txHash` - 验证链上记录
-- [ ] `GET /api/app/blockchain/status/:sealId` - 查询上链状态
+- [x] `POST /api/app/blockchain/chain/:sealId` - 印记上链
+- [x] `GET /api/app/blockchain/verify/:txHash` - 验证链上记录
+- [x] `GET /api/app/blockchain/status/:sealId` - 查询上链状态
 
 ---
 
 ### Task 8: 相册模块
 
 #### Task 8.1: 创建相册模块结构
-- [ ] 创建 `server-nestjs/src/album/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/album/` 目录
+- [x] 创建以下文件：
   - `album.module.ts`
   - `album.controller.ts`
   - `album.service.ts`
   - `dto/photo.dto.ts`
 
 #### Task 8.2: 实现相册 API
-- [ ] `GET /api/app/photos` - 获取照片列表（支持按文化之旅/时间筛选）
-- [ ] `GET /api/app/photos/stats` - 获取相册统计
-- [ ] `POST /api/app/photos` - 上传照片
-- [ ] `DELETE /api/app/photos/:id` - 删除照片
-- [ ] `GET /api/app/photos/journey/:journeyId` - 获取文化之旅照片
+- [x] `GET /api/app/photos` - 获取照片列表（支持按文化之旅/时间筛选）
+- [x] `GET /api/app/photos/stats` - 获取相册统计
+- [x] `POST /api/app/photos` - 上传照片
+- [x] `DELETE /api/app/photos/:id` - 删除照片
+- [x] `GET /api/app/photos/journey/:journeyId` - 获取文化之旅照片
 
 ---
 
 ### Task 9: 用户统计模块
 
 #### Task 9.1: 创建用户统计模块结构
-- [ ] 创建 `server-nestjs/src/user-stats/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/user-stats/` 目录
+- [x] 创建以下文件：
   - `user-stats.module.ts`
   - `user-stats.controller.ts`
   - `user-stats.service.ts`
 
 #### Task 9.2: 实现用户统计 API
-- [ ] `GET /api/app/stats/overview` - 获取用户统计概览
-- [ ] `GET /api/app/stats/activities` - 获取用户最近动态
-- [ ] `GET /api/app/stats/travel` - 获取旅行统计详情
+- [x] `GET /api/app/stats/overview` - 获取用户统计概览
+- [x] `GET /api/app/stats/activities` - 获取用户最近动态
+- [x] `GET /api/app/stats/travel` - 获取旅行统计详情
 
 ---
 
 ### Task 10: 背景音乐模块
 
 #### Task 10.1: 创建音乐模块结构
-- [ ] 创建 `server-nestjs/src/audio/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/audio/` 目录
+- [x] 创建以下文件：
   - `audio.module.ts`
   - `audio.controller.ts`
   - `audio.service.ts`
 
 #### Task 10.2: 实现音乐 API
-- [ ] `GET /api/app/audio/home` - 获取首页背景音乐
-- [ ] `GET /api/app/audio/city/:cityId` - 获取城市背景音乐
-- [ ] `GET /api/app/audio/journey/:journeyId` - 获取文化之旅背景音乐
+- [x] `GET /api/app/audio/home` - 获取首页背景音乐
+- [x] `GET /api/app/audio/city/:cityId` - 获取城市背景音乐
+- [x] `GET /api/app/audio/journey/:journeyId` - 获取文化之旅背景音乐
 
 ---
 
@@ -521,8 +521,8 @@ model BackgroundMusic {
 > 说明：后端提供地图配置和地理围栏验证，不依赖具体前端地图方案。
 
 #### Task 10.5.1: 创建地图服务模块结构
-- [ ] 创建 `server-nestjs/src/map/` 目录
-- [ ] 创建以下文件：
+- [x] 创建 `server-nestjs/src/map/` 目录
+- [x] 创建以下文件：
   - `map.module.ts`
   - `map.controller.ts`
   - `map.service.ts`
@@ -531,7 +531,7 @@ model BackgroundMusic {
   - `dto/route.dto.ts`
 
 #### Task 10.5.2: 实现地图配置 API
-- [ ] `GET /api/app/map/config` - 获取地图配置
+- [x] `GET /api/app/map/config` - 获取地图配置
   ```json
   {
     "provider": "amap",  // 当前使用的地图方案
@@ -554,7 +554,7 @@ model BackgroundMusic {
   ```
 
 #### Task 10.5.3: 实现地理围栏验证 API
-- [ ] `POST /api/app/map/validate-location` - 验证用户是否在探索点范围内
+- [x] `POST /api/app/map/validate-location` - 验证用户是否在探索点范围内
   ```json
   // Request
   {
@@ -571,7 +571,7 @@ model BackgroundMusic {
   ```
 
 #### Task 10.5.4: 实现路径规划代理 API（高德）
-- [ ] `POST /api/app/map/route/walking` - 步行路径规划
+- [x] `POST /api/app/map/route/walking` - 步行路径规划
   ```json
   // Request
   {
@@ -588,7 +588,7 @@ model BackgroundMusic {
   ```
 
 #### Task 10.5.5: 实现 POI 搜索代理 API
-- [ ] `GET /api/app/map/search` - 景点搜索（代理高德 POI 搜索）
+- [x] `GET /api/app/map/search` - 景点搜索（代理高德 POI 搜索）
   ```json
   // Request: ?keyword=断桥&city=杭州
   // Response
@@ -605,56 +605,56 @@ model BackgroundMusic {
   ```
 
 #### Task 10.5.6: 实现地图数据缓存
-- [ ] 缓存城市边界数据
-- [ ] 缓存热门路径规划结果
-- [ ] 缓存 POI 搜索结果（Redis）
+- [x] 缓存城市边界数据
+- [x] 缓存热门路径规划结果
+- [x] 缓存 POI 搜索结果（Redis）
 
 ---
 
 ### Task 11: 管理后台 API（用于 Web 管理端）
 
 #### Task 11.1: 城市管理
-- [ ] `GET /api/admin/cities` - 城市列表（分页）
-- [ ] `POST /api/admin/cities` - 创建城市
-- [ ] `PUT /api/admin/cities/:id` - 更新城市
-- [ ] `DELETE /api/admin/cities/:id` - 删除城市
+- [x] `GET /api/admin/cities` - 城市列表（分页）
+- [x] `POST /api/admin/cities` - 创建城市
+- [x] `PUT /api/admin/cities/:id` - 更新城市
+- [x] `DELETE /api/admin/cities/:id` - 删除城市
 
 #### Task 11.2: 文化之旅管理
-- [ ] `GET /api/admin/journeys` - 文化之旅列表（分页）
-- [ ] `POST /api/admin/journeys` - 创建文化之旅
-- [ ] `PUT /api/admin/journeys/:id` - 更新文化之旅
-- [ ] `DELETE /api/admin/journeys/:id` - 删除文化之旅
+- [x] `GET /api/admin/journeys` - 文化之旅列表（分页）
+- [x] `POST /api/admin/journeys` - 创建文化之旅
+- [x] `PUT /api/admin/journeys/:id` - 更新文化之旅
+- [x] `DELETE /api/admin/journeys/:id` - 删除文化之旅
 
 #### Task 11.3: 探索点管理
-- [ ] `GET /api/admin/points` - 探索点列表
-- [ ] `POST /api/admin/points` - 创建探索点
-- [ ] `PUT /api/admin/points/:id` - 更新探索点
-- [ ] `DELETE /api/admin/points/:id` - 删除探索点
+- [x] `GET /api/admin/points` - 探索点列表
+- [x] `POST /api/admin/points` - 创建探索点
+- [x] `PUT /api/admin/points/:id` - 更新探索点
+- [x] `DELETE /api/admin/points/:id` - 删除探索点
 
 #### Task 11.4: 印记管理
-- [ ] `GET /api/admin/seals` - 印记列表
-- [ ] `POST /api/admin/seals` - 创建印记
-- [ ] `PUT /api/admin/seals/:id` - 更新印记
-- [ ] `DELETE /api/admin/seals/:id` - 删除印记
+- [x] `GET /api/admin/seals` - 印记列表
+- [x] `POST /api/admin/seals` - 创建印记
+- [x] `PUT /api/admin/seals/:id` - 更新印记
+- [x] `DELETE /api/admin/seals/:id` - 删除印记
 
 #### Task 11.5: 数据统计
-- [ ] `GET /api/admin/dashboard/stats` - 仪表盘统计数据
-- [ ] `GET /api/admin/dashboard/trends` - 趋势数据
+- [x] `GET /api/admin/dashboard/stats` - 仪表盘统计数据
+- [x] `GET /api/admin/dashboard/trends` - 趋势数据
 
 ---
 
 ### Task 12: 注册模块到 AppModule
 
-- [ ] 在 `app.module.ts` 中导入所有新模块
-- [ ] 配置 API 路由前缀
+- [x] 在 `app.module.ts` 中导入所有新模块
+- [x] 配置 API 路由前缀
 
 ---
 
 ### Task 13: API 文档与测试
 
 #### Task 13.1: Swagger 文档
-- [ ] 为所有 API 添加 Swagger 装饰器
-- [ ] 配置 Swagger UI 访问路径
+- [x] 为所有 API 添加 Swagger 装饰器
+- [x] 配置 Swagger UI 访问路径
 
 #### Task 13.2: 单元测试
 - [ ] 为核心 Service 编写单元测试

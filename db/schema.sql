@@ -584,10 +584,14 @@ COMMENT ON INDEX idx_sys_job_log_status IS '任务日志状态索引';
 CREATE TABLE IF NOT EXISTS app_user (
   id VARCHAR(30) PRIMARY KEY,
   phone VARCHAR(20) UNIQUE,
+  email VARCHAR(100) UNIQUE,
   nickname VARCHAR(50) NOT NULL,
   avatar VARCHAR(255),
   open_id VARCHAR(100) UNIQUE,
   union_id VARCHAR(100),
+  google_id VARCHAR(100) UNIQUE,
+  apple_id VARCHAR(100) UNIQUE,
+  login_type VARCHAR(20) DEFAULT 'wechat',
   badge_title VARCHAR(50),
   total_points INT DEFAULT 0,
   status CHAR(1) DEFAULT '0',
@@ -597,16 +601,24 @@ CREATE TABLE IF NOT EXISTS app_user (
 COMMENT ON TABLE app_user IS 'App用户表（与管理后台用户分离）';
 COMMENT ON COLUMN app_user.id IS '用户ID（CUID）';
 COMMENT ON COLUMN app_user.phone IS '手机号';
+COMMENT ON COLUMN app_user.email IS '邮箱';
 COMMENT ON COLUMN app_user.nickname IS '昵称';
 COMMENT ON COLUMN app_user.avatar IS '头像URL';
 COMMENT ON COLUMN app_user.open_id IS '微信openId';
 COMMENT ON COLUMN app_user.union_id IS '微信unionId';
+COMMENT ON COLUMN app_user.google_id IS 'Google登录ID';
+COMMENT ON COLUMN app_user.apple_id IS 'Apple登录ID';
+COMMENT ON COLUMN app_user.login_type IS '登录方式（wechat/email/google/apple）';
 COMMENT ON COLUMN app_user.badge_title IS '当前称号';
 COMMENT ON COLUMN app_user.total_points IS '总积分';
 COMMENT ON COLUMN app_user.status IS '状态（0正常 1禁用）';
 
 CREATE INDEX IF NOT EXISTS idx_app_user_phone ON app_user(phone);
+CREATE INDEX IF NOT EXISTS idx_app_user_email ON app_user(email);
 CREATE INDEX IF NOT EXISTS idx_app_user_open_id ON app_user(open_id);
+CREATE INDEX IF NOT EXISTS idx_app_user_google_id ON app_user(google_id);
+CREATE INDEX IF NOT EXISTS idx_app_user_apple_id ON app_user(apple_id);
+CREATE INDEX IF NOT EXISTS idx_app_user_login_type ON app_user(login_type);
 
 -- ----------------------------
 -- 19. 城市表

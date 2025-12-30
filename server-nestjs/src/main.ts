@@ -8,6 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { json, urlencoded } from 'express';
+import redoc from 'redoc-express';
 
 // 全局 BigInt 序列化支持
 // 解决 "TypeError: Do not know how to serialize a BigInt" 错误
@@ -117,6 +118,23 @@ async function bootstrap() {
     .addTag('文件上传', '文件上传服务')
     .addTag('邮件服务', '邮件发送服务')
     .addTag('路由菜单', '前端路由获取')
+    // 寻印 App API
+    .addTag('App认证', 'App用户认证')
+    .addTag('城市', '城市信息')
+    .addTag('文化之旅', '文化之旅探索')
+    .addTag('探索点', '探索点任务')
+    .addTag('印记', '印记收集')
+    .addTag('区块链存证', '印记上链与验证')
+    .addTag('相册', '探索照片')
+    .addTag('用户统计', '用户数据统计')
+    .addTag('背景音乐', '背景音乐服务')
+    .addTag('地图服务', '地图与定位')
+    // 寻印 Admin API
+    .addTag('管理端-城市管理', '城市CRUD')
+    .addTag('管理端-文化之旅管理', '文化之旅CRUD')
+    .addTag('管理端-探索点管理', '探索点CRUD')
+    .addTag('管理端-印记管理', '印记CRUD')
+    .addTag('管理端-数据统计', '仪表盘统计')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -129,9 +147,32 @@ async function bootstrap() {
     },
   });
 
+  // 配置 Redoc 文档（带左侧目录导航）
+  // 注意：必须在 app.listen 之前配置
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.use(
+    '/redoc',
+    redoc({
+      title: 'Xunyin API 文档',
+      specUrl: '/api-docs-json',
+      redocOptions: {
+        theme: {
+          colors: {
+            primary: { main: '#1890ff' },
+          },
+        },
+        hideDownloadButton: false,
+        expandResponses: '200',
+        pathInMiddlePanel: true,
+        sortTagsAlphabetically: false,
+      },
+    }),
+  );
+
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');
   logger.log(`Application is running on: http://0.0.0.0:${port}`, 'Bootstrap');
   logger.log(`Swagger API Docs: http://0.0.0.0:${port}/api-docs`, 'Bootstrap');
+  logger.log(`Redoc API Docs: http://0.0.0.0:${port}/redoc`, 'Bootstrap');
 }
 void bootstrap();

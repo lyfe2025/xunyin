@@ -367,7 +367,7 @@ async function main() {
     menuName: '系统管理',
     path: 'system',
     component: 'Layout',
-    orderNum: 1,
+    orderNum: 2,
     menuType: 'M',
     visible: '0',
     status: '0',
@@ -512,7 +512,7 @@ async function main() {
     menuName: '系统监控',
     path: 'monitor',
     component: 'Layout',
-    orderNum: 2,
+    orderNum: 3,
     menuType: 'M',
     visible: '0',
     status: '0',
@@ -618,7 +618,7 @@ async function main() {
     menuName: '系统工具',
     path: 'tool',
     component: 'Layout',
-    orderNum: 3,
+    orderNum: 4,
     menuType: 'M',
     visible: '0',
     status: '0',
@@ -1043,7 +1043,7 @@ async function main() {
     menuName: '寻印管理',
     path: 'xunyin',
     component: 'Layout',
-    orderNum: 4,
+    orderNum: 1,
     menuType: 'M',
     visible: '0',
     status: '0',
@@ -1122,7 +1122,7 @@ async function main() {
     menuName: '数据统计',
     parentId: xunyinDir.menuId,
     path: 'stats',
-    component: 'xunyin/stats/index',
+    component: 'xunyin/dashboard/index',
     orderNum: 6,
     menuType: 'C',
     visible: '0',
@@ -1942,6 +1942,168 @@ async function main() {
       configName: 'SSL/TLS开关',
       configKey: 'sys.mail.ssl',
       configValue: 'true',
+      configType: 'Y',
+    },
+
+    // ========== 三方登录配置 ==========
+    // 微信登录
+    {
+      configName: '微信登录开关',
+      configKey: 'oauth.wechat.enabled',
+      configValue: 'false',
+      configType: 'Y',
+    },
+    {
+      configName: '微信AppID',
+      configKey: 'oauth.wechat.appId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '微信AppSecret',
+      configKey: 'oauth.wechat.appSecret',
+      configValue: '',
+      configType: 'Y',
+    },
+    // Google登录
+    {
+      configName: 'Google登录开关',
+      configKey: 'oauth.google.enabled',
+      configValue: 'false',
+      configType: 'Y',
+    },
+    {
+      configName: 'Google Client ID',
+      configKey: 'oauth.google.clientId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'Google Client Secret',
+      configKey: 'oauth.google.clientSecret',
+      configValue: '',
+      configType: 'Y',
+    },
+    // Apple登录
+    {
+      configName: 'Apple登录开关',
+      configKey: 'oauth.apple.enabled',
+      configValue: 'false',
+      configType: 'Y',
+    },
+    {
+      configName: 'Apple Team ID',
+      configKey: 'oauth.apple.teamId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'Apple Client ID',
+      configKey: 'oauth.apple.clientId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'Apple Key ID',
+      configKey: 'oauth.apple.keyId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'Apple Private Key',
+      configKey: 'oauth.apple.privateKey',
+      configValue: '',
+      configType: 'Y',
+    },
+
+    // ========== 地图配置 ==========
+    // 高德地图
+    {
+      configName: '高德地图开关',
+      configKey: 'map.amap.enabled',
+      configValue: 'true',
+      configType: 'Y',
+    },
+    {
+      configName: '高德Web服务Key',
+      configKey: 'map.amap.webKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '高德Android Key',
+      configKey: 'map.amap.androidKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '高德iOS Key',
+      configKey: 'map.amap.iosKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    // 腾讯地图
+    {
+      configName: '腾讯地图开关',
+      configKey: 'map.tencent.enabled',
+      configValue: 'false',
+      configType: 'Y',
+    },
+    {
+      configName: '腾讯地图Key',
+      configKey: 'map.tencent.key',
+      configValue: '',
+      configType: 'Y',
+    },
+    // Google地图（海外）
+    {
+      configName: 'Google地图开关',
+      configKey: 'map.google.enabled',
+      configValue: 'false',
+      configType: 'Y',
+    },
+    {
+      configName: 'Google地图Key',
+      configKey: 'map.google.key',
+      configValue: '',
+      configType: 'Y',
+    },
+
+    // ========== App配置 ==========
+    {
+      configName: 'App名称',
+      configKey: 'app.name',
+      configValue: '寻印',
+      configType: 'Y',
+    },
+    {
+      configName: 'App版本',
+      configKey: 'app.version',
+      configValue: '1.0.0',
+      configType: 'Y',
+    },
+    {
+      configName: '强制更新版本',
+      configKey: 'app.forceUpdateVersion',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'App下载地址',
+      configKey: 'app.downloadUrl',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '用户协议URL',
+      configKey: 'app.userAgreementUrl',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '隐私政策URL',
+      configKey: 'app.privacyPolicyUrl',
+      configValue: '',
       configType: 'Y',
     },
   ];

@@ -47,7 +47,7 @@ import {
 } from 'lucide-vue-next'
 
 const props = defineProps<{
-  modelValue: string
+  modelValue?: string
   placeholder?: string
   minHeight?: string
 }>()
@@ -75,7 +75,7 @@ const highlightColors = [
 ]
 
 const editor = useEditor({
-  content: props.modelValue,
+  content: props.modelValue || '',
   extensions: [
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },
@@ -112,7 +112,7 @@ watch(
   () => props.modelValue,
   (newValue) => {
     if (editor.value && editor.value.getHTML() !== newValue) {
-      editor.value.commands.setContent(newValue, { emitUpdate: false })
+      editor.value.commands.setContent(newValue || '', { emitUpdate: false })
     }
   }
 )

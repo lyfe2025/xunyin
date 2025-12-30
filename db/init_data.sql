@@ -286,7 +286,44 @@ VALUES
   -- 会话设置
   ('会话超时时间', 'sys.session.timeout', '30', 'Y', NOW()),
   -- 邮件SSL
-  ('SSL/TLS开关', 'sys.mail.ssl', 'true', 'Y', NOW())
+  ('SSL/TLS开关', 'sys.mail.ssl', 'true', 'Y', NOW()),
+
+  -- ========== 三方登录配置 ==========
+  -- 微信登录
+  ('微信登录开关', 'oauth.wechat.enabled', 'false', 'Y', NOW()),
+  ('微信AppID', 'oauth.wechat.appId', '', 'Y', NOW()),
+  ('微信AppSecret', 'oauth.wechat.appSecret', '', 'Y', NOW()),
+  -- Google登录
+  ('Google登录开关', 'oauth.google.enabled', 'false', 'Y', NOW()),
+  ('Google Client ID', 'oauth.google.clientId', '', 'Y', NOW()),
+  ('Google Client Secret', 'oauth.google.clientSecret', '', 'Y', NOW()),
+  -- Apple登录
+  ('Apple登录开关', 'oauth.apple.enabled', 'false', 'Y', NOW()),
+  ('Apple Team ID', 'oauth.apple.teamId', '', 'Y', NOW()),
+  ('Apple Client ID', 'oauth.apple.clientId', '', 'Y', NOW()),
+  ('Apple Key ID', 'oauth.apple.keyId', '', 'Y', NOW()),
+  ('Apple Private Key', 'oauth.apple.privateKey', '', 'Y', NOW()),
+
+  -- ========== 地图配置 ==========
+  -- 高德地图
+  ('高德地图开关', 'map.amap.enabled', 'true', 'Y', NOW()),
+  ('高德Web服务Key', 'map.amap.webKey', '', 'Y', NOW()),
+  ('高德Android Key', 'map.amap.androidKey', '', 'Y', NOW()),
+  ('高德iOS Key', 'map.amap.iosKey', '', 'Y', NOW()),
+  -- 腾讯地图
+  ('腾讯地图开关', 'map.tencent.enabled', 'false', 'Y', NOW()),
+  ('腾讯地图Key', 'map.tencent.key', '', 'Y', NOW()),
+  -- Google地图（海外）
+  ('Google地图开关', 'map.google.enabled', 'false', 'Y', NOW()),
+  ('Google地图Key', 'map.google.key', '', 'Y', NOW()),
+
+  -- ========== App配置 ==========
+  ('App名称', 'app.name', '寻印', 'Y', NOW()),
+  ('App版本', 'app.version', '1.0.0', 'Y', NOW()),
+  ('强制更新版本', 'app.forceUpdateVersion', '', 'Y', NOW()),
+  ('App下载地址', 'app.downloadUrl', '', 'Y', NOW()),
+  ('用户协议URL', 'app.userAgreementUrl', '', 'Y', NOW()),
+  ('隐私政策URL', 'app.privacyPolicyUrl', '', 'Y', NOW())
 ON CONFLICT (config_key) DO NOTHING;
 
 
@@ -305,7 +342,7 @@ ON CONFLICT DO NOTHING;
 -- 12. 初始化菜单数据
 -- 12.1 系统管理目录
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-VALUES ('系统管理', 'system', 'Layout', 1, 'M', '0', '0', 'settings', 1, NULL, NULL)
+VALUES ('系统管理', 'system', 'Layout', 2, 'M', '0', '0', 'settings', 1, NULL, NULL)
 ON CONFLICT DO NOTHING;
 
 -- 12.2 系统管理子菜单
@@ -361,7 +398,7 @@ ON CONFLICT DO NOTHING;
 
 -- 12.3 系统监控目录
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-VALUES ('系统监控', 'monitor', 'Layout', 2, 'M', '0', '0', 'monitor', 1, NULL, NULL)
+VALUES ('系统监控', 'monitor', 'Layout', 3, 'M', '0', '0', 'monitor', 1, NULL, NULL)
 ON CONFLICT DO NOTHING;
 
 -- 12.4 系统监控子菜单
@@ -402,7 +439,7 @@ ON CONFLICT DO NOTHING;
 
 -- 12.5 系统工具目录
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-VALUES ('系统工具', 'tool', 'Layout', 3, 'M', '0', '0', 'wrench', 1, NULL, NULL)
+VALUES ('系统工具', 'tool', 'Layout', 4, 'M', '0', '0', 'wrench', 1, NULL, NULL)
 ON CONFLICT DO NOTHING;
 
 -- 12.6 系统工具子菜单
@@ -878,7 +915,7 @@ ON CONFLICT DO NOTHING;
 -- 18. 寻印管理菜单
 -- 18.1 寻印管理目录
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-VALUES ('寻印管理', 'xunyin', 'Layout', 4, 'M', '0', '0', 'map-pin', 1, NULL, NULL)
+VALUES ('寻印管理', 'xunyin', 'Layout', 1, 'M', '0', '0', 'map-pin', 1, NULL, NULL)
 ON CONFLICT DO NOTHING;
 
 -- 18.2 寻印管理子菜单
@@ -908,7 +945,7 @@ FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-SELECT '数据统计', 'stats', 'xunyin/stats/index', 6, 'C', '0', '0', 'chart-bar', 1, menu_id, 'xunyin:stats:view'
+SELECT '数据统计', 'stats', 'xunyin/dashboard/index', 6, 'C', '0', '0', 'chart-bar', 1, menu_id, 'xunyin:stats:view'
 FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
 ON CONFLICT DO NOTHING;
 

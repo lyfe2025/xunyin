@@ -87,6 +87,43 @@ const form = reactive({
   'sys.storage.oss.bucket': '',
   'sys.storage.oss.accessKey': '',
   'sys.storage.oss.secretKey': '',
+
+  // ========== 三方登录配置 ==========
+  // 微信登录
+  'oauth.wechat.enabled': 'false',
+  'oauth.wechat.appId': '',
+  'oauth.wechat.appSecret': '',
+  // Google登录
+  'oauth.google.enabled': 'false',
+  'oauth.google.clientId': '',
+  'oauth.google.clientSecret': '',
+  // Apple登录
+  'oauth.apple.enabled': 'false',
+  'oauth.apple.teamId': '',
+  'oauth.apple.clientId': '',
+  'oauth.apple.keyId': '',
+  'oauth.apple.privateKey': '',
+
+  // ========== 地图配置 ==========
+  // 高德地图
+  'map.amap.enabled': 'true',
+  'map.amap.webKey': '',
+  'map.amap.androidKey': '',
+  'map.amap.iosKey': '',
+  // 腾讯地图
+  'map.tencent.enabled': 'false',
+  'map.tencent.key': '',
+  // Google地图
+  'map.google.enabled': 'false',
+  'map.google.key': '',
+
+  // ========== App配置 ==========
+  'app.name': '寻印',
+  'app.version': '1.0.0',
+  'app.forceUpdateVersion': '',
+  'app.downloadUrl': '',
+  'app.userAgreementUrl': '',
+  'app.privacyPolicyUrl': '',
 })
 
 const configMap = ref<Record<string, SysConfig>>({})
@@ -114,6 +151,9 @@ async function getData() {
       'sys.session.',
       'sys.mail.',
       'sys.storage.',
+      'oauth.',
+      'map.',
+      'app.',
     ]
     const results = await Promise.all(prefixes.map((p) => listConfig({ configKey: p })))
     configList.value = results.flatMap((r) => r.rows ?? [])
@@ -248,6 +288,34 @@ function getConfigName(key: string): string {
     'sys.storage.oss.bucket': 'OSS存储桶',
     'sys.storage.oss.accessKey': 'OSS AccessKey',
     'sys.storage.oss.secretKey': 'OSS SecretKey',
+    // 三方登录
+    'oauth.wechat.enabled': '微信登录开关',
+    'oauth.wechat.appId': '微信AppID',
+    'oauth.wechat.appSecret': '微信AppSecret',
+    'oauth.google.enabled': 'Google登录开关',
+    'oauth.google.clientId': 'Google Client ID',
+    'oauth.google.clientSecret': 'Google Client Secret',
+    'oauth.apple.enabled': 'Apple登录开关',
+    'oauth.apple.teamId': 'Apple Team ID',
+    'oauth.apple.clientId': 'Apple Client ID',
+    'oauth.apple.keyId': 'Apple Key ID',
+    'oauth.apple.privateKey': 'Apple Private Key',
+    // 地图配置
+    'map.amap.enabled': '高德地图开关',
+    'map.amap.webKey': '高德Web服务Key',
+    'map.amap.androidKey': '高德Android Key',
+    'map.amap.iosKey': '高德iOS Key',
+    'map.tencent.enabled': '腾讯地图开关',
+    'map.tencent.key': '腾讯地图Key',
+    'map.google.enabled': 'Google地图开关',
+    'map.google.key': 'Google地图Key',
+    // App配置
+    'app.name': 'App名称',
+    'app.version': 'App版本',
+    'app.forceUpdateVersion': '强制更新版本',
+    'app.downloadUrl': 'App下载地址',
+    'app.userAgreementUrl': '用户协议URL',
+    'app.privacyPolicyUrl': '隐私政策URL',
   }
   return names[key] || key
 }
@@ -385,6 +453,46 @@ const mailEnabled = computed({
   }
 })
 
+// 三方登录开关
+const wechatEnabled = computed({
+  get: () => form['oauth.wechat.enabled'] === 'true',
+  set: (val: boolean) => {
+    form['oauth.wechat.enabled'] = val ? 'true' : 'false'
+  }
+})
+const googleEnabled = computed({
+  get: () => form['oauth.google.enabled'] === 'true',
+  set: (val: boolean) => {
+    form['oauth.google.enabled'] = val ? 'true' : 'false'
+  }
+})
+const appleEnabled = computed({
+  get: () => form['oauth.apple.enabled'] === 'true',
+  set: (val: boolean) => {
+    form['oauth.apple.enabled'] = val ? 'true' : 'false'
+  }
+})
+
+// 地图开关
+const amapEnabled = computed({
+  get: () => form['map.amap.enabled'] === 'true',
+  set: (val: boolean) => {
+    form['map.amap.enabled'] = val ? 'true' : 'false'
+  }
+})
+const tencentMapEnabled = computed({
+  get: () => form['map.tencent.enabled'] === 'true',
+  set: (val: boolean) => {
+    form['map.tencent.enabled'] = val ? 'true' : 'false'
+  }
+})
+const googleMapEnabled = computed({
+  get: () => form['map.google.enabled'] === 'true',
+  set: (val: boolean) => {
+    form['map.google.enabled'] = val ? 'true' : 'false'
+  }
+})
+
 // 加载被锁定的账户列表
 async function loadLockedAccounts() {
   lockedLoading.value = true
@@ -434,11 +542,14 @@ onMounted(() => {
     </div>
 
     <Tabs default-value="site" class="space-y-4">
-      <TabsList>
+      <TabsList class="flex-wrap h-auto gap-1">
         <TabsTrigger value="site"><Globe class="h-4 w-4 mr-2" />网站设置</TabsTrigger>
         <TabsTrigger value="security"><Shield class="h-4 w-4 mr-2" />安全设置</TabsTrigger>
         <TabsTrigger value="mail"><Mail class="h-4 w-4 mr-2" />邮件设置</TabsTrigger>
         <TabsTrigger value="storage"><HardDrive class="h-4 w-4 mr-2" />存储设置</TabsTrigger>
+        <TabsTrigger value="oauth"><KeyRound class="h-4 w-4 mr-2" />三方登录</TabsTrigger>
+        <TabsTrigger value="map"><Globe class="h-4 w-4 mr-2" />地图配置</TabsTrigger>
+        <TabsTrigger value="app"><Globe class="h-4 w-4 mr-2" />App配置</TabsTrigger>
       </TabsList>
 
       <!-- 网站设置 -->
@@ -832,6 +943,218 @@ onMounted(() => {
         </Card>
       </TabsContent>
 
+      <!-- 三方登录配置 -->
+      <TabsContent value="oauth" class="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>微信登录</CardTitle>
+            <CardDescription>配置微信开放平台的移动应用登录</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex items-center justify-between pb-4 border-b">
+              <div class="space-y-0.5">
+                <Label class="text-base">启用微信登录</Label>
+                <p class="text-sm text-muted-foreground">允许用户使用微信账号登录 App</p>
+              </div>
+              <Switch v-model:checked="wechatEnabled" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid gap-2">
+                <Label>AppID</Label>
+                <Input v-model="form['oauth.wechat.appId']" placeholder="wx..." />
+                <p class="text-xs text-muted-foreground">微信开放平台移动应用的 AppID</p>
+              </div>
+              <div class="grid gap-2">
+                <Label>AppSecret</Label>
+                <Input v-model="form['oauth.wechat.appSecret']" type="password" placeholder="••••••••" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Google 登录</CardTitle>
+            <CardDescription>配置 Google OAuth 2.0 登录（海外用户）</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex items-center justify-between pb-4 border-b">
+              <div class="space-y-0.5">
+                <Label class="text-base">启用 Google 登录</Label>
+                <p class="text-sm text-muted-foreground">允许用户使用 Google 账号登录 App</p>
+              </div>
+              <Switch v-model:checked="googleEnabled" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid gap-2">
+                <Label>Client ID</Label>
+                <Input v-model="form['oauth.google.clientId']" placeholder="xxx.apps.googleusercontent.com" />
+              </div>
+              <div class="grid gap-2">
+                <Label>Client Secret</Label>
+                <Input v-model="form['oauth.google.clientSecret']" type="password" placeholder="••••••••" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Apple 登录</CardTitle>
+            <CardDescription>配置 Sign in with Apple（iOS 用户）</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex items-center justify-between pb-4 border-b">
+              <div class="space-y-0.5">
+                <Label class="text-base">启用 Apple 登录</Label>
+                <p class="text-sm text-muted-foreground">允许用户使用 Apple ID 登录 App</p>
+              </div>
+              <Switch v-model:checked="appleEnabled" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid gap-2">
+                <Label>Team ID</Label>
+                <Input v-model="form['oauth.apple.teamId']" placeholder="XXXXXXXXXX" />
+              </div>
+              <div class="grid gap-2">
+                <Label>Client ID (Service ID)</Label>
+                <Input v-model="form['oauth.apple.clientId']" placeholder="com.example.app" />
+              </div>
+              <div class="grid gap-2">
+                <Label>Key ID</Label>
+                <Input v-model="form['oauth.apple.keyId']" placeholder="XXXXXXXXXX" />
+              </div>
+            </div>
+            <div class="grid gap-2">
+              <Label>Private Key (.p8 内容)</Label>
+              <Textarea v-model="form['oauth.apple.privateKey']" placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----" rows="4" class="font-mono text-xs" />
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <!-- 地图配置 -->
+      <TabsContent value="map" class="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>高德地图</CardTitle>
+            <CardDescription>配置高德地图 API Key（国内用户推荐）</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex items-center justify-between pb-4 border-b">
+              <div class="space-y-0.5">
+                <Label class="text-base">启用高德地图</Label>
+                <p class="text-sm text-muted-foreground">使用高德地图作为 App 的地图服务</p>
+              </div>
+              <Switch v-model:checked="amapEnabled" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="grid gap-2">
+                <Label>Web 服务 Key</Label>
+                <Input v-model="form['map.amap.webKey']" placeholder="用于后端服务调用" />
+              </div>
+              <div class="grid gap-2">
+                <Label>Android Key</Label>
+                <Input v-model="form['map.amap.androidKey']" placeholder="Android 应用使用" />
+              </div>
+              <div class="grid gap-2">
+                <Label>iOS Key</Label>
+                <Input v-model="form['map.amap.iosKey']" placeholder="iOS 应用使用" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>腾讯地图</CardTitle>
+            <CardDescription>配置腾讯位置服务 API Key</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex items-center justify-between pb-4 border-b">
+              <div class="space-y-0.5">
+                <Label class="text-base">启用腾讯地图</Label>
+                <p class="text-sm text-muted-foreground">使用腾讯地图作为备选地图服务</p>
+              </div>
+              <Switch v-model:checked="tencentMapEnabled" />
+            </div>
+            <div class="grid gap-2">
+              <Label>API Key</Label>
+              <Input v-model="form['map.tencent.key']" placeholder="腾讯位置服务 Key" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Google 地图</CardTitle>
+            <CardDescription>配置 Google Maps API Key（海外用户）</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex items-center justify-between pb-4 border-b">
+              <div class="space-y-0.5">
+                <Label class="text-base">启用 Google 地图</Label>
+                <p class="text-sm text-muted-foreground">为海外用户提供 Google 地图服务</p>
+              </div>
+              <Switch v-model:checked="googleMapEnabled" />
+            </div>
+            <div class="grid gap-2">
+              <Label>API Key</Label>
+              <Input v-model="form['map.google.key']" placeholder="Google Maps API Key" />
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <!-- App配置 -->
+      <TabsContent value="app" class="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>App 基本信息</CardTitle>
+            <CardDescription>配置寻印 App 的基本信息</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid gap-2">
+                <Label>App 名称</Label>
+                <Input v-model="form['app.name']" placeholder="寻印" />
+              </div>
+              <div class="grid gap-2">
+                <Label>当前版本</Label>
+                <Input v-model="form['app.version']" placeholder="1.0.0" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid gap-2">
+                <Label>强制更新版本</Label>
+                <Input v-model="form['app.forceUpdateVersion']" placeholder="低于此版本强制更新，留空不强制" />
+                <p class="text-xs text-muted-foreground">低于此版本的用户将被强制更新</p>
+              </div>
+              <div class="grid gap-2">
+                <Label>App 下载地址</Label>
+                <Input v-model="form['app.downloadUrl']" placeholder="https://..." />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>协议与政策</CardTitle>
+            <CardDescription>配置用户协议和隐私政策链接</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="grid gap-2">
+              <Label>用户协议 URL</Label>
+              <Input v-model="form['app.userAgreementUrl']" placeholder="https://..." />
+            </div>
+            <div class="grid gap-2">
+              <Label>隐私政策 URL</Label>
+              <Input v-model="form['app.privacyPolicyUrl']" placeholder="https://..." />
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
 
     </Tabs>
 

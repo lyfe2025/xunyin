@@ -21,6 +21,17 @@ import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware
 import { UploadModule } from './common/upload/upload.module';
 import { MailModule } from './common/mail/mail.module';
 import { ExcelModule } from './common/excel/excel.module';
+import { AppAuthModule } from './app-auth/app-auth.module';
+import { CityModule } from './city/city.module';
+import { JourneyModule } from './journey/journey.module';
+import { ExplorationPointModule } from './exploration-point/exploration-point.module';
+import { SealModule } from './seal/seal.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
+import { AlbumModule } from './album/album.module';
+import { UserStatsModule } from './user-stats/user-stats.module';
+import { AudioModule } from './audio/audio.module';
+import { MapModule } from './map/map.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -42,6 +53,19 @@ import { ExcelModule } from './common/excel/excel.module';
     UploadModule,
     MailModule,
     ExcelModule,
+    // 寻印 App 模块
+    AppAuthModule,
+    CityModule,
+    JourneyModule,
+    ExplorationPointModule,
+    SealModule,
+    BlockchainModule,
+    AlbumModule,
+    UserStatsModule,
+    AudioModule,
+    MapModule,
+    // 寻印 Admin 模块
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
