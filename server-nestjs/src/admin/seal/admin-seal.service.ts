@@ -10,7 +10,7 @@ import type {
 
 @Injectable()
 export class AdminSealService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAdminSealDto) {
     const { type, name, status, pageNum = 1, pageSize = 10 } = query;

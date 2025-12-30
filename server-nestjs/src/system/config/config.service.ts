@@ -11,7 +11,7 @@ export class ConfigService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) { }
+  ) {}
 
   async findAll(query: QueryConfigDto) {
     const where: Prisma.SysConfigWhereInput = {};
@@ -162,13 +162,13 @@ export class ConfigService {
     });
 
     return {
-      name: configMap['sys.app.name'] || 'Xunyin Admin',
-      description: configMap['sys.app.description'] || '企业级权限管理系统',
+      name: configMap['sys.app.name'] || '寻印管理后台',
+      description:
+        configMap['sys.app.description'] || '城市文化探索与数字印记收藏平台',
       logo: configMap['sys.app.logo'] || '',
       favicon: configMap['sys.app.favicon'] || '',
       copyright:
-        configMap['sys.app.copyright'] ||
-        '© 2025 Xunyin Admin. All rights reserved.',
+        configMap['sys.app.copyright'] || '© 2025 Xunyin. All rights reserved.',
       icp: configMap['sys.app.icp'] || '',
       loginPath: configMap['sys.security.loginPath'] || '/login',
     };

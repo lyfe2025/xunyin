@@ -1,5 +1,12 @@
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, Min, Max, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+  IsIn,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class QueryAppUserDto {
@@ -18,7 +25,10 @@ export class QueryAppUserDto {
   @IsString()
   nickname?: string;
 
-  @ApiPropertyOptional({ description: '登录方式', enum: ['wechat', 'email', 'google', 'apple'] })
+  @ApiPropertyOptional({
+    description: '登录方式',
+    enum: ['wechat', 'email', 'google', 'apple'],
+  })
   @IsOptional()
   @IsString()
   @IsIn(['wechat', 'email', 'google', 'apple'])

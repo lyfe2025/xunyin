@@ -1795,19 +1795,19 @@ async function main() {
     {
       configName: '网站名称',
       configKey: 'sys.app.name',
-      configValue: 'Xunyin Admin',
+      configValue: '寻印管理后台',
       configType: 'Y',
     },
     {
       configName: '网站描述',
       configKey: 'sys.app.description',
-      configValue: '企业级全栈权限管理系统',
+      configValue: '城市文化探索与数字印记收藏平台',
       configType: 'Y',
     },
     {
       configName: '版权信息',
       configKey: 'sys.app.copyright',
-      configValue: '© 2025 Xunyin Admin. All rights reserved.',
+      configValue: '© 2025 Xunyin. All rights reserved.',
       configType: 'Y',
     },
     {
@@ -2277,6 +2277,368 @@ async function main() {
       ],
       skipDuplicates: true,
     });
+  }
+
+  // ==================== 寻印业务初始数据 ====================
+
+  // 检查是否已有城市数据
+  const existingCities = await prisma.city.count();
+  if (existingCities === 0) {
+    console.log('Seeding xunyin business data...');
+
+    // 创建城市
+    const hangzhou = await prisma.city.create({
+      data: {
+        name: '杭州',
+        province: '浙江省',
+        latitude: 30.2741,
+        longitude: 120.1551,
+        description:
+          '杭州，简称"杭"，是浙江省省会，素有"人间天堂"的美誉。西湖、灵隐寺、雷峰塔等名胜古迹闻名遐迩。',
+        coverImage: '',
+        explorerCount: 0,
+        orderNum: 1,
+        status: '0',
+      },
+    });
+    console.log(`Created city: ${hangzhou.name}`);
+
+    const suzhou = await prisma.city.create({
+      data: {
+        name: '苏州',
+        province: '江苏省',
+        latitude: 31.2989,
+        longitude: 120.5853,
+        description:
+          '苏州，古称姑苏，是江苏省地级市。以园林著称，拙政园、留园等被列入世界文化遗产。',
+        coverImage: '',
+        explorerCount: 0,
+        orderNum: 2,
+        status: '0',
+      },
+    });
+    console.log(`Created city: ${suzhou.name}`);
+
+    const nanjing = await prisma.city.create({
+      data: {
+        name: '南京',
+        province: '江苏省',
+        latitude: 32.0603,
+        longitude: 118.7969,
+        description:
+          '南京，简称"宁"，是江苏省省会，六朝古都，有着深厚的历史文化底蕴。',
+        coverImage: '',
+        explorerCount: 0,
+        orderNum: 3,
+        status: '0',
+      },
+    });
+    console.log(`Created city: ${nanjing.name}`);
+
+    // 创建杭州的文化之旅
+    const westLakeJourney = await prisma.journey.create({
+      data: {
+        cityId: hangzhou.id,
+        name: '西湖十景探秘',
+        theme: '自然风光',
+        description:
+          '漫步西湖，探寻苏堤春晓、断桥残雪等十大经典景观，感受"欲把西湖比西子"的诗意之美。',
+        coverImage: '',
+        rating: 3,
+        estimatedMinutes: 180,
+        totalDistance: 8500,
+        completedCount: 0,
+        isLocked: false,
+        orderNum: 1,
+        status: '0',
+      },
+    });
+    console.log(`Created journey: ${westLakeJourney.name}`);
+
+    const lingyinJourney = await prisma.journey.create({
+      data: {
+        cityId: hangzhou.id,
+        name: '灵隐禅踪',
+        theme: '佛教文化',
+        description:
+          '探访千年古刹灵隐寺，感受飞来峰石刻艺术，体验禅宗文化的深邃与宁静。',
+        coverImage: '',
+        rating: 4,
+        estimatedMinutes: 120,
+        totalDistance: 3200,
+        completedCount: 0,
+        isLocked: false,
+        orderNum: 2,
+        status: '0',
+      },
+    });
+    console.log(`Created journey: ${lingyinJourney.name}`);
+
+    // 创建苏州的文化之旅
+    const gardenJourney = await prisma.journey.create({
+      data: {
+        cityId: suzhou.id,
+        name: '园林雅韵',
+        theme: '古典园林',
+        description:
+          '游览拙政园、留园等世界文化遗产，领略"咫尺之内再造乾坤"的园林艺术。',
+        coverImage: '',
+        rating: 3,
+        estimatedMinutes: 150,
+        totalDistance: 5000,
+        completedCount: 0,
+        isLocked: false,
+        orderNum: 1,
+        status: '0',
+      },
+    });
+    console.log(`Created journey: ${gardenJourney.name}`);
+
+    // 创建西湖十景的探索点
+    const westLakePoints = [
+      {
+        name: '苏堤春晓',
+        latitude: 30.2456,
+        longitude: 120.1423,
+        taskType: 'photo',
+        taskDescription: '在苏堤上拍摄一张春日美景照片',
+        culturalBackground:
+          '苏堤是北宋诗人苏轼任杭州知州时主持修建的堤坝，全长2.8公里。',
+        culturalKnowledge:
+          '苏堤春晓是西湖十景之首，每到春天，堤上桃红柳绿，景色宜人。',
+        pointsReward: 100,
+        orderNum: 1,
+      },
+      {
+        name: '断桥残雪',
+        latitude: 30.2589,
+        longitude: 120.1512,
+        taskType: 'gesture',
+        taskDescription: '在断桥上做出"白娘子"的经典手势',
+        targetGesture: 'heart',
+        culturalBackground:
+          '断桥是白娘子与许仙相遇的地方，承载着美丽的爱情传说。',
+        culturalKnowledge:
+          '断桥并非断裂之桥，而是因冬日雪后，桥面阳面雪融，阴面雪残，远望似断非断。',
+        pointsReward: 120,
+        orderNum: 2,
+      },
+      {
+        name: '雷峰夕照',
+        latitude: 30.2312,
+        longitude: 120.1489,
+        taskType: 'photo',
+        taskDescription: '拍摄雷峰塔的夕阳剪影',
+        culturalBackground: '雷峰塔始建于公元977年，因白娘子传说而闻名。',
+        culturalKnowledge:
+          '原塔于1924年倒塌，现塔为2002年重建，塔内保存有原塔遗址。',
+        pointsReward: 100,
+        orderNum: 3,
+      },
+      {
+        name: '三潭印月',
+        latitude: 30.2378,
+        longitude: 120.1398,
+        taskType: 'treasure',
+        taskDescription: '找到三潭印月的AR宝藏',
+        culturalBackground:
+          '三潭印月是西湖中最大的岛屿，岛上有"我心相印亭"等景点。',
+        culturalKnowledge:
+          '三座石塔建于明代，每逢中秋，塔中点燃灯烛，与明月倒影相映成趣。',
+        pointsReward: 150,
+        orderNum: 4,
+      },
+    ];
+
+    let prevDistance = 0;
+    for (const point of westLakePoints) {
+      await prisma.explorationPoint.create({
+        data: {
+          journeyId: westLakeJourney.id,
+          name: point.name,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          taskType: point.taskType,
+          taskDescription: point.taskDescription,
+          targetGesture: point.targetGesture || null,
+          culturalBackground: point.culturalBackground,
+          culturalKnowledge: point.culturalKnowledge,
+          distanceFromPrev: prevDistance,
+          pointsReward: point.pointsReward,
+          orderNum: point.orderNum,
+          status: '0',
+        },
+      });
+      prevDistance = 800 + Math.floor(Math.random() * 500);
+    }
+    console.log(
+      `Created ${westLakePoints.length} exploration points for ${westLakeJourney.name}`,
+    );
+
+    // 创建灵隐禅踪的探索点
+    const lingyinPoints = [
+      {
+        name: '飞来峰',
+        latitude: 30.2398,
+        longitude: 120.0912,
+        taskType: 'photo',
+        taskDescription: '拍摄飞来峰石刻造像',
+        culturalBackground:
+          '飞来峰有五代至宋元时期的石刻造像470余尊，是中国南方石窟艺术的瑰宝。',
+        culturalKnowledge: '相传此峰是从印度灵鹫山飞来，故名飞来峰。',
+        pointsReward: 100,
+        orderNum: 1,
+      },
+      {
+        name: '灵隐寺山门',
+        latitude: 30.2412,
+        longitude: 120.0934,
+        taskType: 'gesture',
+        taskDescription: '双手合十，做出礼佛手势',
+        targetGesture: 'namaste',
+        culturalBackground:
+          '灵隐寺始建于东晋咸和元年（326年），是中国佛教禅宗十大古刹之一。',
+        culturalKnowledge: '寺名取"仙灵所隐"之意，历史上曾多次毁建。',
+        pointsReward: 120,
+        orderNum: 2,
+      },
+      {
+        name: '大雄宝殿',
+        latitude: 30.2425,
+        longitude: 120.0945,
+        taskType: 'photo',
+        taskDescription: '拍摄大雄宝殿全景',
+        culturalBackground:
+          '大雄宝殿内供奉释迦牟尼佛像，高24.8米，是中国最大的木雕坐式佛像之一。',
+        culturalKnowledge: '殿内还有十八罗汉像，神态各异，栩栩如生。',
+        pointsReward: 100,
+        orderNum: 3,
+      },
+    ];
+
+    prevDistance = 0;
+    for (const point of lingyinPoints) {
+      await prisma.explorationPoint.create({
+        data: {
+          journeyId: lingyinJourney.id,
+          name: point.name,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          taskType: point.taskType,
+          taskDescription: point.taskDescription,
+          targetGesture: point.targetGesture || null,
+          culturalBackground: point.culturalBackground,
+          culturalKnowledge: point.culturalKnowledge,
+          distanceFromPrev: prevDistance,
+          pointsReward: point.pointsReward,
+          orderNum: point.orderNum,
+          status: '0',
+        },
+      });
+      prevDistance = 300 + Math.floor(Math.random() * 200);
+    }
+    console.log(
+      `Created ${lingyinPoints.length} exploration points for ${lingyinJourney.name}`,
+    );
+
+    // 创建印记
+    const seals = [
+      {
+        type: 'route',
+        name: '西湖探秘者',
+        description: '完成西湖十景探秘路线，获得此印记',
+        badgeTitle: '西湖探秘者',
+        journeyId: westLakeJourney.id,
+        cityId: null,
+        orderNum: 1,
+      },
+      {
+        type: 'route',
+        name: '禅心悟道',
+        description: '完成灵隐禅踪路线，获得此印记',
+        badgeTitle: '禅心悟道',
+        journeyId: lingyinJourney.id,
+        cityId: null,
+        orderNum: 2,
+      },
+      {
+        type: 'route',
+        name: '园林雅士',
+        description: '完成园林雅韵路线，获得此印记',
+        badgeTitle: '园林雅士',
+        journeyId: gardenJourney.id,
+        cityId: null,
+        orderNum: 3,
+      },
+      {
+        type: 'city',
+        name: '杭州印记',
+        description: '完成杭州所有文化之旅，获得城市印记',
+        badgeTitle: '杭州文化使者',
+        journeyId: null,
+        cityId: hangzhou.id,
+        orderNum: 10,
+      },
+      {
+        type: 'city',
+        name: '苏州印记',
+        description: '完成苏州所有文化之旅，获得城市印记',
+        badgeTitle: '苏州文化使者',
+        journeyId: null,
+        cityId: suzhou.id,
+        orderNum: 11,
+      },
+      {
+        type: 'city',
+        name: '南京印记',
+        description: '完成南京所有文化之旅，获得城市印记',
+        badgeTitle: '南京文化使者',
+        journeyId: null,
+        cityId: nanjing.id,
+        orderNum: 12,
+      },
+      {
+        type: 'special',
+        name: '江南水乡',
+        description: '完成杭州和苏州的所有路线，获得特殊印记',
+        badgeTitle: '江南水乡行者',
+        journeyId: null,
+        cityId: null,
+        orderNum: 20,
+      },
+    ];
+
+    for (const seal of seals) {
+      await prisma.seal.create({
+        data: {
+          type: seal.type,
+          name: seal.name,
+          imageAsset: '',
+          description: seal.description,
+          badgeTitle: seal.badgeTitle,
+          journeyId: seal.journeyId,
+          cityId: seal.cityId,
+          orderNum: seal.orderNum,
+          status: '0',
+        },
+      });
+    }
+    console.log(`Created ${seals.length} seals`);
+
+    // 创建示例 App 用户
+    const demoUser = await prisma.appUser.create({
+      data: {
+        phone: '13800138000',
+        nickname: '探索者小明',
+        avatar: '',
+        loginType: 'wechat',
+        totalPoints: 0,
+        status: '0',
+      },
+    });
+    console.log(`Created demo app user: ${demoUser.nickname}`);
+
+    console.log('Xunyin business data seeding completed.');
   }
 
   console.log('Seeding finished.');

@@ -23,7 +23,7 @@ import {
 export class ExplorationPointController {
   constructor(
     private readonly explorationPointService: ExplorationPointService,
-  ) { }
+  ) {}
 
   @Get(':id')
   @ApiOperation({ summary: '获取探索点详情' })

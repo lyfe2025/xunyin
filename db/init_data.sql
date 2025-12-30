@@ -1100,3 +1100,176 @@ VALUES
   ('xunyin_audio_context', '城市', 'city', 2, '0', 'N', NOW()),
   ('xunyin_audio_context', '文化之旅', 'journey', 3, '0', 'N', NOW())
 ON CONFLICT DO NOTHING;
+
+
+-- =============================================
+-- 寻印业务初始数据
+-- 说明：城市、文化之旅、探索点、印记、示例用户
+-- 同步日期：2025-12-31
+-- =============================================
+
+-- 20. 城市数据
+INSERT INTO city (name, province, latitude, longitude, description, cover_image, explorer_count, order_num, status, create_time)
+VALUES 
+  ('杭州', '浙江省', 30.2741, 120.1551, '杭州，简称"杭"，是浙江省省会，素有"人间天堂"的美誉。西湖、灵隐寺、雷峰塔等名胜古迹闻名遐迩。', '', 0, 1, '0', NOW()),
+  ('苏州', '江苏省', 31.2989, 120.5853, '苏州，古称姑苏，是江苏省地级市。以园林著称，拙政园、留园等被列入世界文化遗产。', '', 0, 2, '0', NOW()),
+  ('南京', '江苏省', 32.0603, 118.7969, '南京，简称"宁"，是江苏省省会，六朝古都，有着深厚的历史文化底蕴。', '', 0, 3, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+
+-- 21. 文化之旅数据
+-- 21.1 杭州 - 西湖十景探秘
+INSERT INTO journey (city_id, name, theme, description, cover_image, rating, estimated_minutes, total_distance, completed_count, is_locked, order_num, status, create_time)
+SELECT id, '西湖十景探秘', '自然风光', '漫步西湖，探寻苏堤春晓、断桥残雪等十大经典景观，感受"欲把西湖比西子"的诗意之美。', '', 3, 180, 8500, 0, false, 1, '0', NOW()
+FROM city WHERE name = '杭州'
+ON CONFLICT DO NOTHING;
+
+-- 21.2 杭州 - 灵隐禅踪
+INSERT INTO journey (city_id, name, theme, description, cover_image, rating, estimated_minutes, total_distance, completed_count, is_locked, order_num, status, create_time)
+SELECT id, '灵隐禅踪', '佛教文化', '探访千年古刹灵隐寺，感受飞来峰石刻艺术，体验禅宗文化的深邃与宁静。', '', 4, 120, 3200, 0, false, 2, '0', NOW()
+FROM city WHERE name = '杭州'
+ON CONFLICT DO NOTHING;
+
+-- 21.3 苏州 - 园林雅韵
+INSERT INTO journey (city_id, name, theme, description, cover_image, rating, estimated_minutes, total_distance, completed_count, is_locked, order_num, status, create_time)
+SELECT id, '园林雅韵', '古典园林', '游览拙政园、留园等世界文化遗产，领略"咫尺之内再造乾坤"的园林艺术。', '', 3, 150, 5000, 0, false, 1, '0', NOW()
+FROM city WHERE name = '苏州'
+ON CONFLICT DO NOTHING;
+
+
+-- 22. 探索点数据
+-- 22.1 西湖十景探秘 - 苏堤春晓
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '苏堤春晓', 30.2456, 120.1423, 'photo', '在苏堤上拍摄一张春日美景照片', NULL, 
+  '苏堤是北宋诗人苏轼任杭州知州时主持修建的堤坝，全长2.8公里。', 
+  '苏堤春晓是西湖十景之首，每到春天，堤上桃红柳绿，景色宜人。', 
+  0, 100, 1, '0', NOW()
+FROM journey j WHERE j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+-- 22.2 西湖十景探秘 - 断桥残雪
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '断桥残雪', 30.2589, 120.1512, 'gesture', '在断桥上做出"白娘子"的经典手势', 'heart', 
+  '断桥是白娘子与许仙相遇的地方，承载着美丽的爱情传说。', 
+  '断桥并非断裂之桥，而是因冬日雪后，桥面阳面雪融，阴面雪残，远望似断非断。', 
+  1000, 120, 2, '0', NOW()
+FROM journey j WHERE j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+-- 22.3 西湖十景探秘 - 雷峰夕照
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '雷峰夕照', 30.2312, 120.1489, 'photo', '拍摄雷峰塔的夕阳剪影', NULL, 
+  '雷峰塔始建于公元977年，因白娘子传说而闻名。', 
+  '原塔于1924年倒塌，现塔为2002年重建，塔内保存有原塔遗址。', 
+  1200, 100, 3, '0', NOW()
+FROM journey j WHERE j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+-- 22.4 西湖十景探秘 - 三潭印月
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '三潭印月', 30.2378, 120.1398, 'treasure', '找到三潭印月的AR宝藏', NULL, 
+  '三潭印月是西湖中最大的岛屿，岛上有"我心相印亭"等景点。', 
+  '三座石塔建于明代，每逢中秋，塔中点燃灯烛，与明月倒影相映成趣。', 
+  900, 150, 4, '0', NOW()
+FROM journey j WHERE j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+-- 22.5 灵隐禅踪 - 飞来峰
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '飞来峰', 30.2398, 120.0912, 'photo', '拍摄飞来峰石刻造像', NULL, 
+  '飞来峰有五代至宋元时期的石刻造像470余尊，是中国南方石窟艺术的瑰宝。', 
+  '相传此峰是从印度灵鹫山飞来，故名飞来峰。', 
+  0, 100, 1, '0', NOW()
+FROM journey j WHERE j.name = '灵隐禅踪'
+ON CONFLICT DO NOTHING;
+
+-- 22.6 灵隐禅踪 - 灵隐寺山门
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '灵隐寺山门', 30.2412, 120.0934, 'gesture', '双手合十，做出礼佛手势', 'namaste', 
+  '灵隐寺始建于东晋咸和元年（326年），是中国佛教禅宗十大古刹之一。', 
+  '寺名取"仙灵所隐"之意，历史上曾多次毁建。', 
+  400, 120, 2, '0', NOW()
+FROM journey j WHERE j.name = '灵隐禅踪'
+ON CONFLICT DO NOTHING;
+
+-- 22.7 灵隐禅踪 - 大雄宝殿
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '大雄宝殿', 30.2425, 120.0945, 'photo', '拍摄大雄宝殿全景', NULL, 
+  '大雄宝殿内供奉释迦牟尼佛像，高24.8米，是中国最大的木雕坐式佛像之一。', 
+  '殿内还有十八罗汉像，神态各异，栩栩如生。', 
+  350, 100, 3, '0', NOW()
+FROM journey j WHERE j.name = '灵隐禅踪'
+ON CONFLICT DO NOTHING;
+
+
+-- 23. 印记数据
+-- 23.1 路线印记
+INSERT INTO seal (type, name, image_asset, description, badge_title, journey_id, city_id, order_num, status, create_time)
+SELECT 'route', '西湖探秘者', '', '完成西湖十景探秘路线，获得此印记', '西湖探秘者', j.id, NULL, 1, '0', NOW()
+FROM journey j WHERE j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO seal (type, name, image_asset, description, badge_title, journey_id, city_id, order_num, status, create_time)
+SELECT 'route', '禅心悟道', '', '完成灵隐禅踪路线，获得此印记', '禅心悟道', j.id, NULL, 2, '0', NOW()
+FROM journey j WHERE j.name = '灵隐禅踪'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO seal (type, name, image_asset, description, badge_title, journey_id, city_id, order_num, status, create_time)
+SELECT 'route', '园林雅士', '', '完成园林雅韵路线，获得此印记', '园林雅士', j.id, NULL, 3, '0', NOW()
+FROM journey j WHERE j.name = '园林雅韵'
+ON CONFLICT DO NOTHING;
+
+-- 23.2 城市印记
+INSERT INTO seal (type, name, image_asset, description, badge_title, journey_id, city_id, order_num, status, create_time)
+SELECT 'city', '杭州印记', '', '完成杭州所有文化之旅，获得城市印记', '杭州文化使者', NULL, c.id, 10, '0', NOW()
+FROM city c WHERE c.name = '杭州'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO seal (type, name, image_asset, description, badge_title, journey_id, city_id, order_num, status, create_time)
+SELECT 'city', '苏州印记', '', '完成苏州所有文化之旅，获得城市印记', '苏州文化使者', NULL, c.id, 11, '0', NOW()
+FROM city c WHERE c.name = '苏州'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO seal (type, name, image_asset, description, badge_title, journey_id, city_id, order_num, status, create_time)
+SELECT 'city', '南京印记', '', '完成南京所有文化之旅，获得城市印记', '南京文化使者', NULL, c.id, 12, '0', NOW()
+FROM city c WHERE c.name = '南京'
+ON CONFLICT DO NOTHING;
+
+-- 23.3 特殊印记
+INSERT INTO seal (type, name, image_asset, description, badge_title, journey_id, city_id, order_num, status, create_time)
+VALUES ('special', '江南水乡', '', '完成杭州和苏州的所有路线，获得特殊印记', '江南水乡行者', NULL, NULL, 20, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+
+-- 24. 示例 App 用户
+INSERT INTO app_user (phone, nickname, avatar, login_type, total_points, status, create_time)
+VALUES ('13800138000', '探索者小明', '', 'wechat', 0, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+
+-- 提示信息（更新）
+DO $
+DECLARE
+  city_count INTEGER;
+  journey_count INTEGER;
+  point_count INTEGER;
+  seal_count INTEGER;
+  appuser_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO city_count FROM city;
+  SELECT COUNT(*) INTO journey_count FROM journey;
+  SELECT COUNT(*) INTO point_count FROM exploration_point;
+  SELECT COUNT(*) INTO seal_count FROM seal;
+  SELECT COUNT(*) INTO appuser_count FROM app_user;
+  
+  RAISE NOTICE '==============================================';
+  RAISE NOTICE '寻印业务数据导入完成！';
+  RAISE NOTICE '==============================================';
+  RAISE NOTICE '业务数据统计：';
+  RAISE NOTICE '- 城市：% 个', city_count;
+  RAISE NOTICE '- 文化之旅：% 条', journey_count;
+  RAISE NOTICE '- 探索点：% 个', point_count;
+  RAISE NOTICE '- 印记：% 个', seal_count;
+  RAISE NOTICE '- App用户：% 个', appuser_count;
+  RAISE NOTICE '==============================================';
+END $;

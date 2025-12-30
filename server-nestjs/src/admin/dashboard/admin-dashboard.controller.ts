@@ -10,7 +10,7 @@ import { TrendQueryDto } from './dto/admin-dashboard.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('admin/dashboard')
 export class AdminDashboardController {
-  constructor(private readonly adminDashboardService: AdminDashboardService) { }
+  constructor(private readonly adminDashboardService: AdminDashboardService) {}
 
   @Get('stats')
   @ApiOperation({ summary: '仪表盘统计数据' })

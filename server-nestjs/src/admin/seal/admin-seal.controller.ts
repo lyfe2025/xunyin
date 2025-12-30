@@ -26,7 +26,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/seals')
 export class AdminSealController {
-  constructor(private readonly adminSealService: AdminSealService) { }
+  constructor(private readonly adminSealService: AdminSealService) {}
 
   @Get()
   @ApiOperation({ summary: '印记列表（分页）' })

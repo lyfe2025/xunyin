@@ -1,3 +1,5 @@
+import * as XLSX from 'xlsx'
+
 /**
  * 下载 Blob 文件
  */
@@ -10,6 +12,45 @@ export function downloadBlob(blob: Blob, filename: string) {
   link.click()
   document.body.removeChild(link)
   window.URL.revokeObjectURL(url)
+}
+
+/**
+ * 导出数据为 Excel (.xlsx)
+ */
+export function exportToExcel<T extends Record<string, any>>(
+  data: T[],
+  columns: { key: keyof T; label: string }[],
+  filename: string,
+  sheetName = 'Sheet1'
+) {
+  // 构建表头和数据
+  const headers = columns.map((c) => c.label)
+  const rows = data.map((row) =>
+    columns.map((c) => {
+      const value = row[c.key]
+      return value ?? ''
+    })
+  )
+
+  // 创建工作表
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows])
+
+  // 设置列宽（自动适应）
+  const colWidths = columns.map((col, index) => {
+    const maxLength = Math.max(
+      col.label.length * 2, // 中文字符宽度
+      ...rows.map((row) => String(row[index] ?? '').length)
+    )
+    return { wch: Math.min(maxLength + 2, 50) }
+  })
+  worksheet['!cols'] = colWidths
+
+  // 创建工作簿
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+
+  // 导出文件
+  XLSX.writeFile(workbook, `${filename}.xlsx`)
 }
 
 /**

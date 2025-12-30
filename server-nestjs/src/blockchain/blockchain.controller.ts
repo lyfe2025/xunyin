@@ -18,7 +18,7 @@ import {
 @ApiTags('区块链存证')
 @Controller('api/app/blockchain')
 export class BlockchainController {
-  constructor(private readonly blockchainService: BlockchainService) { }
+  constructor(private readonly blockchainService: BlockchainService) {}
 
   @Post('chain/:sealId')
   @UseGuards(AppAuthGuard)

@@ -163,7 +163,7 @@ const transitionName = computed(() => {
 })
 
 // 网站配置
-const siteName = computed(() => appStore.siteConfig.name || 'Xunyin Admin')
+const siteName = computed(() => appStore.siteConfig.name || '寻印管理后台')
 const siteLogo = computed(() => {
   const logo = appStore.siteConfig.logo
   if (!logo) return ''

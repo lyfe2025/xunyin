@@ -26,7 +26,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/cities')
 export class AdminCityController {
-  constructor(private readonly adminCityService: AdminCityService) { }
+  constructor(private readonly adminCityService: AdminCityService) {}
 
   @Get()
   @ApiOperation({ summary: '城市列表（分页）' })

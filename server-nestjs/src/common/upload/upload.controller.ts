@@ -32,11 +32,19 @@ const FILE_SIGNATURES: Record<string, number[][]> = {
     [0x00, 0x00, 0x01, 0x00],
     [0x00, 0x00, 0x02, 0x00],
   ],
-  'audio/mpeg': [[0xff, 0xfb], [0xff, 0xfa], [0xff, 0xf3], [0x49, 0x44, 0x33]], // MP3
+  'audio/mpeg': [
+    [0xff, 0xfb],
+    [0xff, 0xfa],
+    [0xff, 0xf3],
+    [0x49, 0x44, 0x33],
+  ], // MP3
   'audio/wav': [[0x52, 0x49, 0x46, 0x46]], // WAV
   'audio/ogg': [[0x4f, 0x67, 0x67, 0x53]], // OGG
   'audio/flac': [[0x66, 0x4c, 0x61, 0x43]], // FLAC
-  'audio/aac': [[0xff, 0xf1], [0xff, 0xf9]], // AAC
+  'audio/aac': [
+    [0xff, 0xf1],
+    [0xff, 0xf9],
+  ], // AAC
 };
 
 /**
@@ -122,7 +130,7 @@ function generateFilename(prefix: string, originalname: string): string {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class UploadController {
-  constructor(private readonly storageService: StorageService) { }
+  constructor(private readonly storageService: StorageService) {}
 
   /**
    * 上传头像
@@ -290,7 +298,9 @@ export class UploadController {
         ];
         if (!allowedMimes.includes(file.mimetype)) {
           cb(
-            new BadRequestException('只支持图片格式 (jpg, png, gif, webp, svg)'),
+            new BadRequestException(
+              '只支持图片格式 (jpg, png, gif, webp, svg)',
+            ),
             false,
           );
         } else {

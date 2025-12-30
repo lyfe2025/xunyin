@@ -26,7 +26,7 @@ export class MailService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) { }
+  ) {}
 
   /**
    * 从数据库获取邮件配置

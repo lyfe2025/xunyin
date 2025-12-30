@@ -21,7 +21,7 @@ import {
 @ApiTags('印记')
 @Controller('app/seals')
 export class SealController {
-  constructor(private readonly sealService: SealService) { }
+  constructor(private readonly sealService: SealService) {}
 
   @Get()
   @UseGuards(AppAuthGuard)

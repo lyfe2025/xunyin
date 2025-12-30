@@ -16,7 +16,7 @@ import type { CurrentAppUser } from '../app-auth/decorators/current-user.decorat
 @UseGuards(AppAuthGuard)
 @ApiBearerAuth()
 export class UserStatsController {
-  constructor(private readonly userStatsService: UserStatsService) { }
+  constructor(private readonly userStatsService: UserStatsService) {}
 
   @Get('overview')
   @ApiOperation({ summary: '获取用户统计概览' })

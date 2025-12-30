@@ -29,19 +29,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Search, RefreshCw, Award, Eye, Coins, Calendar, Smartphone, Mail } from 'lucide-vue-next'
-import {
-  listAppUser,
-  getAppUser,
-  changeAppUserStatus,
-  type AppUser,
-} from '@/api/xunyin/appuser'
+import { listAppUser, getAppUser, changeAppUserStatus, type AppUser } from '@/api/xunyin/appuser'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import ExportButton from '@/components/common/ExportButton.vue'
 import { formatDate } from '@/utils/format'
-import { exportToCsv, exportToJson, getExportFilename } from '@/utils/export'
+import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
+import { getResourceUrl } from '@/utils/url'
 
 const loading = ref(true)
 const userList = ref<AppUser[]>([])
@@ -145,22 +141,21 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
       ? userList.value.filter((u) => selectedIds.value.includes(u.id))
       : userList.value
   const filename = getExportFilename('App用户数据')
+  const columns = [
+    { key: 'nickname' as const, label: '昵称' },
+    { key: 'phone' as const, label: '手机号' },
+    { key: 'email' as const, label: '邮箱' },
+    { key: 'loginType' as const, label: '登录方式' },
+    { key: 'badgeTitle' as const, label: '称号' },
+    { key: 'totalPoints' as const, label: '总积分' },
+    { key: 'status' as const, label: '状态' },
+    { key: 'createTime' as const, label: '注册时间' },
+  ]
 
-  if (format === 'csv') {
-    exportToCsv(
-      data,
-      [
-        { key: 'nickname', label: '昵称' },
-        { key: 'phone', label: '手机号' },
-        { key: 'email', label: '邮箱' },
-        { key: 'loginType', label: '登录方式' },
-        { key: 'badgeTitle', label: '称号' },
-        { key: 'totalPoints', label: '总积分' },
-        { key: 'status', label: '状态' },
-        { key: 'createTime', label: '注册时间' },
-      ],
-      filename,
-    )
+  if (format === 'xlsx') {
+    exportToExcel(data, columns, filename, 'App用户')
+  } else if (format === 'csv') {
+    exportToCsv(data, columns, filename)
   } else {
     exportToJson(data, filename)
   }
@@ -182,7 +177,7 @@ onMounted(() => {
       <div class="flex gap-2">
         <ExportButton
           v-if="userList.length > 0"
-          :formats="['csv', 'json']"
+          :formats="['xlsx', 'csv', 'json']"
           :text="selectedIds.length > 0 ? `导出 (${selectedIds.length})` : '导出'"
           @export="handleExport"
         />
@@ -281,7 +276,7 @@ onMounted(() => {
             <TableCell>
               <div class="flex items-center gap-3">
                 <Avatar class="h-9 w-9">
-                  <AvatarImage :src="user.avatar || ''" />
+                  <AvatarImage :src="getResourceUrl(user.avatar)" />
                   <AvatarFallback>{{ user.nickname?.charAt(0) || 'U' }}</AvatarFallback>
                 </Avatar>
                 <span class="font-medium">{{ user.nickname }}</span>
@@ -358,14 +353,17 @@ onMounted(() => {
           <!-- 用户基本信息 -->
           <div class="flex items-center gap-4">
             <Avatar class="h-16 w-16">
-              <AvatarImage :src="currentUser.avatar || ''" />
+              <AvatarImage :src="getResourceUrl(currentUser.avatar)" />
               <AvatarFallback class="text-xl">{{
                 currentUser.nickname?.charAt(0) || 'U'
               }}</AvatarFallback>
             </Avatar>
             <div>
               <h3 class="text-lg font-semibold">{{ currentUser.nickname }}</h3>
-              <div v-if="currentUser.badgeTitle" class="flex items-center gap-1 text-sm text-muted-foreground">
+              <div
+                v-if="currentUser.badgeTitle"
+                class="flex items-center gap-1 text-sm text-muted-foreground"
+              >
                 <Award class="w-4 h-4 text-yellow-500" />
                 {{ currentUser.badgeTitle }}
               </div>
@@ -403,7 +401,11 @@ onMounted(() => {
           <!-- 登录方式信息 -->
           <div class="pt-4 border-t">
             <h4 class="text-sm font-medium mb-3">登录方式</h4>
-            <Badge variant="outline" :class="getLoginTypeInfo(currentUser.loginType).color" class="mb-3">
+            <Badge
+              variant="outline"
+              :class="getLoginTypeInfo(currentUser.loginType).color"
+              class="mb-3"
+            >
               {{ getLoginTypeInfo(currentUser.loginType).icon }}
               {{ getLoginTypeInfo(currentUser.loginType).label }}
             </Badge>
@@ -416,12 +418,8 @@ onMounted(() => {
                 <div>微信 OpenID: {{ currentUser.openId }}</div>
                 <div v-if="currentUser.unionId">微信 UnionID: {{ currentUser.unionId }}</div>
               </div>
-              <div v-if="currentUser.googleId">
-                Google ID: {{ currentUser.googleId }}
-              </div>
-              <div v-if="currentUser.appleId">
-                Apple ID: {{ currentUser.appleId }}
-              </div>
+              <div v-if="currentUser.googleId">Google ID: {{ currentUser.googleId }}</div>
+              <div v-if="currentUser.appleId">Apple ID: {{ currentUser.appleId }}</div>
             </div>
           </div>
         </div>

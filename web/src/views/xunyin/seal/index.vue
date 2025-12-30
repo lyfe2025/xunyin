@@ -51,7 +51,8 @@ import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { exportToCsv, exportToJson, getExportFilename } from '@/utils/export'
+import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
+import { getResourceUrl } from '@/utils/url'
 
 const loading = ref(true)
 const sealList = ref<Seal[]>([])
@@ -267,21 +268,20 @@ async function handleCopy(row: Seal) {
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
   const filename = getExportFilename('印记数据')
-  if (format === 'csv') {
-    exportToCsv(
-      sealList.value,
-      [
-        { key: 'name', label: '名称' },
-        { key: 'type', label: '类型' },
-        { key: 'journeyName', label: '关联文化之旅' },
-        { key: 'cityName', label: '关联城市' },
-        { key: 'badgeTitle', label: '称号' },
-        { key: 'unlockCondition', label: '解锁条件' },
-        { key: 'orderNum', label: '排序号' },
-        { key: 'status', label: '状态' },
-      ],
-      filename
-    )
+  const columns = [
+    { key: 'name' as const, label: '名称' },
+    { key: 'type' as const, label: '类型' },
+    { key: 'journeyName' as const, label: '关联文化之旅' },
+    { key: 'cityName' as const, label: '关联城市' },
+    { key: 'badgeTitle' as const, label: '称号' },
+    { key: 'unlockCondition' as const, label: '解锁条件' },
+    { key: 'orderNum' as const, label: '排序号' },
+    { key: 'status' as const, label: '状态' },
+  ]
+  if (format === 'xlsx') {
+    exportToExcel(sealList.value, columns, filename, '印记')
+  } else if (format === 'csv') {
+    exportToCsv(sealList.value, columns, filename)
   } else {
     exportToJson(sealList.value, filename)
   }
@@ -303,7 +303,7 @@ onMounted(() => {
       <div class="flex gap-2">
         <ExportButton
           v-if="sealList.length > 0"
-          :formats="['csv', 'json']"
+          :formats="['xlsx', 'csv', 'json']"
           @export="handleExport"
         />
         <Button
@@ -399,14 +399,14 @@ onMounted(() => {
                   <Tooltip>
                     <TooltipTrigger>
                       <img
-                        :src="seal.imageAsset"
+                        :src="getResourceUrl(seal.imageAsset)"
                         :alt="seal.name"
                         class="w-10 h-10 rounded-full object-cover border"
                       />
                     </TooltipTrigger>
                     <TooltipContent side="right" class="p-0">
                       <img
-                        :src="seal.imageAsset"
+                        :src="getResourceUrl(seal.imageAsset)"
                         :alt="seal.name"
                         class="max-w-[200px] max-h-[200px] rounded-lg"
                       />

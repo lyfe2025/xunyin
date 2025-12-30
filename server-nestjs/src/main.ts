@@ -83,8 +83,8 @@ async function bootstrap() {
 
   // 配置 Swagger 文档
   const config = new DocumentBuilder()
-    .setTitle('Xunyin Admin API')
-    .setDescription('基于 RBAC 权限模型的企业级后台管理系统')
+    .setTitle('寻印 API')
+    .setDescription('寻印 - 城市文化探索与数字印记收藏平台')
     .setVersion('1.0')
     .addBearerAuth(
       {

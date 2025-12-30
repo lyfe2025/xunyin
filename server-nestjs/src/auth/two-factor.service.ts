@@ -15,7 +15,7 @@ export class TwoFactorService {
     private redis: RedisService,
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) { }
+  ) {}
 
   /**
    * 检查两步验证是否全局启用

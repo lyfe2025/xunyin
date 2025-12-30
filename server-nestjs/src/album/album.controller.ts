@@ -31,7 +31,7 @@ import {
 @UseGuards(AppAuthGuard)
 @ApiBearerAuth()
 export class AlbumController {
-  constructor(private readonly albumService: AlbumService) { }
+  constructor(private readonly albumService: AlbumService) {}
 
   @Get()
   @ApiOperation({

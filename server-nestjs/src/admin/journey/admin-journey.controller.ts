@@ -26,7 +26,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/journeys')
 export class AdminJourneyController {
-  constructor(private readonly adminJourneyService: AdminJourneyService) { }
+  constructor(private readonly adminJourneyService: AdminJourneyService) {}
 
   @Get()
   @ApiOperation({ summary: '文化之旅列表（分页）' })

@@ -10,7 +10,7 @@ import type {
 
 @Injectable()
 export class AdminJourneyService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAdminJourneyDto) {
     const { cityId, name, status, pageNum = 1, pageSize = 10 } = query;

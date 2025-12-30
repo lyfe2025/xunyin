@@ -645,10 +645,7 @@ export class UserService {
       }
     }
 
-    this.logger.log(
-      `导入完成: 成功${success}条, 失败${fail}条`,
-      'UserService',
-    );
+    this.logger.log(`导入完成: 成功${success}条, 失败${fail}条`, 'UserService');
     return { success, fail, errors };
   }
 }

@@ -13,7 +13,7 @@ import {
 @ApiTags('城市')
 @Controller('app/cities')
 export class CityController {
-  constructor(private readonly cityService: CityService) { }
+  constructor(private readonly cityService: CityService) {}
 
   @Get()
   @ApiOperation({ summary: '获取城市列表', description: '支持按省份筛选' })

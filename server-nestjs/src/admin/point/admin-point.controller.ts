@@ -26,7 +26,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/points')
 export class AdminPointController {
-  constructor(private readonly adminPointService: AdminPointService) { }
+  constructor(private readonly adminPointService: AdminPointService) {}
 
   @Get()
   @ApiOperation({ summary: '探索点列表（分页）' })

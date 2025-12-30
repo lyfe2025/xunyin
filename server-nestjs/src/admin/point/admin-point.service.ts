@@ -10,7 +10,7 @@ import type {
 
 @Injectable()
 export class AdminPointService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAdminPointDto) {
     const {

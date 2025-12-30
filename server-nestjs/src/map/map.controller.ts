@@ -13,7 +13,7 @@ import {
 @ApiTags('地图服务')
 @Controller('app/map')
 export class MapController {
-  constructor(private readonly mapService: MapService) { }
+  constructor(private readonly mapService: MapService) {}
 
   @Get('config')
   @ApiOperation({ summary: '获取地图配置' })

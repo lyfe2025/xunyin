@@ -27,9 +27,9 @@ const maxValue = computed(() => Math.max(...props.data.map((d) => d.value), 1))
 
 const barWidth = computed(() => {
   const count = props.data.length
-  if (count <= 7) return 32
-  if (count <= 14) return 20
-  return 12
+  if (count <= 7) return 48
+  if (count <= 14) return 32
+  return 20
 })
 
 const points = computed(() => {
@@ -68,7 +68,7 @@ const points = computed(() => {
             minHeight: item.value > 0 ? '4px' : '0',
           }"
         />
-        <span v-if="showLabels" class="text-xs text-muted-foreground truncate w-full text-center">
+        <span v-if="showLabels" class="text-xs text-muted-foreground whitespace-nowrap text-center">
           {{ item.label }}
         </span>
       </div>

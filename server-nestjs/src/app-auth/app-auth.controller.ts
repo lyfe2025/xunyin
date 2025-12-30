@@ -25,7 +25,7 @@ import {
 @ApiTags('App认证')
 @Controller('app/auth')
 export class AppAuthController {
-  constructor(private readonly appAuthService: AppAuthService) { }
+  constructor(private readonly appAuthService: AppAuthService) {}
 
   @Post('sms/send')
   @ApiOperation({ summary: '发送短信验证码' })

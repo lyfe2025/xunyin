@@ -62,7 +62,8 @@ import ImageUpload from '@/components/common/ImageUpload.vue'
 import AudioUpload from '@/components/common/AudioUpload.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import ExportButton from '@/components/common/ExportButton.vue'
-import { exportToCsv, exportToJson, getExportFilename } from '@/utils/export'
+import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
+import { getResourceUrl } from '@/utils/url'
 
 const router = useRouter()
 const loading = ref(true)
@@ -300,21 +301,20 @@ async function handleCopy(row: City) {
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
   const filename = getExportFilename('城市数据')
-  if (format === 'csv') {
-    exportToCsv(
-      cityList.value,
-      [
-        { key: 'name', label: '城市名称' },
-        { key: 'province', label: '省份' },
-        { key: 'longitude', label: '经度' },
-        { key: 'latitude', label: '纬度' },
-        { key: 'explorerCount', label: '探索人数' },
-        { key: 'journeyCount', label: '文化之旅数' },
-        { key: 'orderNum', label: '排序号' },
-        { key: 'status', label: '状态' },
-      ],
-      filename
-    )
+  const columns = [
+    { key: 'name' as const, label: '城市名称' },
+    { key: 'province' as const, label: '省份' },
+    { key: 'longitude' as const, label: '经度' },
+    { key: 'latitude' as const, label: '纬度' },
+    { key: 'explorerCount' as const, label: '探索人数' },
+    { key: 'journeyCount' as const, label: '文化之旅数' },
+    { key: 'orderNum' as const, label: '排序号' },
+    { key: 'status' as const, label: '状态' },
+  ]
+  if (format === 'xlsx') {
+    exportToExcel(cityList.value, columns, filename, '城市数据')
+  } else if (format === 'csv') {
+    exportToCsv(cityList.value, columns, filename)
   } else {
     exportToJson(cityList.value, filename)
   }
@@ -335,7 +335,7 @@ onMounted(() => {
       <div class="flex gap-2">
         <ExportButton
           v-if="cityList.length > 0"
-          :formats="['csv', 'json']"
+          :formats="['xlsx', 'csv', 'json']"
           @export="handleExport"
         />
         <Button
@@ -431,14 +431,14 @@ onMounted(() => {
                   <Tooltip>
                     <TooltipTrigger>
                       <img
-                        :src="city.coverImage || city.iconAsset"
+                        :src="getResourceUrl(city.coverImage || city.iconAsset)"
                         :alt="city.name"
                         class="w-10 h-10 rounded-lg object-cover border"
                       />
                     </TooltipTrigger>
                     <TooltipContent side="right" class="p-0">
                       <img
-                        :src="city.coverImage || city.iconAsset"
+                        :src="getResourceUrl(city.coverImage || city.iconAsset)"
                         :alt="city.name"
                         class="max-w-[200px] max-h-[200px] rounded-lg"
                       />

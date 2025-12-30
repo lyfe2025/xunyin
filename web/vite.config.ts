@@ -9,8 +9,8 @@ export default defineConfig(({ mode }) => {
     plugins: [vue()],
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
-      }
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
     },
     server: {
       host: true,
@@ -18,10 +18,15 @@ export default defineConfig(({ mode }) => {
       proxy: {
         [env.VITE_APP_BASE_API]: {
           target: env.VITE_API_URL,
-          changeOrigin: true
+          changeOrigin: true,
           // 后端已设置 app.setGlobalPrefix('api')，无需 rewrite
-        }
-      }
-    }
+        },
+        // 代理上传文件的静态资源
+        '/uploads': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+        },
+      },
+    },
   }
 })

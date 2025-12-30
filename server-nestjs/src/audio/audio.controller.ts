@@ -5,7 +5,7 @@ import { AudioService } from './audio.service';
 @ApiTags('背景音乐')
 @Controller('app/audio')
 export class AudioController {
-  constructor(private readonly audioService: AudioService) { }
+  constructor(private readonly audioService: AudioService) {}
 
   @Get('home')
   @ApiOperation({ summary: '获取首页背景音乐' })

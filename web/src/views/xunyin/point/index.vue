@@ -61,7 +61,8 @@ import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { exportToCsv, exportToJson, getExportFilename } from '@/utils/export'
+import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
+import { getResourceUrl } from '@/utils/url'
 
 const route = useRoute()
 const loading = ref(true)
@@ -270,21 +271,20 @@ async function handleCopy(row: ExplorationPoint) {
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
   const filename = getExportFilename('探索点数据')
-  if (format === 'csv') {
-    exportToCsv(
-      pointList.value,
-      [
-        { key: 'name', label: '名称' },
-        { key: 'journeyName', label: '所属文化之旅' },
-        { key: 'taskType', label: '任务类型' },
-        { key: 'longitude', label: '经度' },
-        { key: 'latitude', label: '纬度' },
-        { key: 'pointsReward', label: '积分奖励' },
-        { key: 'orderNum', label: '排序号' },
-        { key: 'status', label: '状态' },
-      ],
-      filename
-    )
+  const columns = [
+    { key: 'name' as const, label: '名称' },
+    { key: 'journeyName' as const, label: '所属文化之旅' },
+    { key: 'taskType' as const, label: '任务类型' },
+    { key: 'longitude' as const, label: '经度' },
+    { key: 'latitude' as const, label: '纬度' },
+    { key: 'pointsReward' as const, label: '积分奖励' },
+    { key: 'orderNum' as const, label: '排序号' },
+    { key: 'status' as const, label: '状态' },
+  ]
+  if (format === 'xlsx') {
+    exportToExcel(pointList.value, columns, filename, '探索点')
+  } else if (format === 'csv') {
+    exportToCsv(pointList.value, columns, filename)
   } else {
     exportToJson(pointList.value, filename)
   }
@@ -306,7 +306,7 @@ onMounted(() => {
       <div class="flex gap-2">
         <ExportButton
           v-if="pointList.length > 0"
-          :formats="['csv', 'json']"
+          :formats="['xlsx', 'csv', 'json']"
           @export="handleExport"
         />
         <Button
@@ -404,14 +404,14 @@ onMounted(() => {
                   <Tooltip>
                     <TooltipTrigger>
                       <img
-                        :src="point.arAssetUrl"
+                        :src="getResourceUrl(point.arAssetUrl)"
                         :alt="point.name"
                         class="w-10 h-10 rounded-lg object-cover border"
                       />
                     </TooltipTrigger>
                     <TooltipContent side="right" class="p-0">
                       <img
-                        :src="point.arAssetUrl"
+                        :src="getResourceUrl(point.arAssetUrl)"
                         :alt="point.name"
                         class="max-w-[200px] max-h-[200px] rounded-lg"
                       />

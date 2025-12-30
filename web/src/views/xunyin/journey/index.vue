@@ -63,7 +63,8 @@ import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { exportToCsv, exportToJson, getExportFilename } from '@/utils/export'
+import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
+import { getResourceUrl } from '@/utils/url'
 
 const route = useRoute()
 const router = useRouter()
@@ -282,22 +283,21 @@ async function handleCopy(row: Journey) {
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
   const filename = getExportFilename('文化之旅数据')
-  if (format === 'csv') {
-    exportToCsv(
-      journeyList.value,
-      [
-        { key: 'name', label: '名称' },
-        { key: 'cityName', label: '所属城市' },
-        { key: 'theme', label: '主题' },
-        { key: 'rating', label: '星级' },
-        { key: 'estimatedMinutes', label: '预计时长(分钟)' },
-        { key: 'totalDistance', label: '总距离(米)' },
-        { key: 'completedCount', label: '完成人数' },
-        { key: 'pointCount', label: '探索点数' },
-        { key: 'status', label: '状态' },
-      ],
-      filename
-    )
+  const columns = [
+    { key: 'name' as const, label: '名称' },
+    { key: 'cityName' as const, label: '所属城市' },
+    { key: 'theme' as const, label: '主题' },
+    { key: 'rating' as const, label: '星级' },
+    { key: 'estimatedMinutes' as const, label: '预计时长(分钟)' },
+    { key: 'totalDistance' as const, label: '总距离(米)' },
+    { key: 'completedCount' as const, label: '完成人数' },
+    { key: 'pointCount' as const, label: '探索点数' },
+    { key: 'status' as const, label: '状态' },
+  ]
+  if (format === 'xlsx') {
+    exportToExcel(journeyList.value, columns, filename, '文化之旅')
+  } else if (format === 'csv') {
+    exportToCsv(journeyList.value, columns, filename)
   } else {
     exportToJson(journeyList.value, filename)
   }
@@ -319,7 +319,7 @@ onMounted(() => {
       <div class="flex gap-2">
         <ExportButton
           v-if="journeyList.length > 0"
-          :formats="['csv', 'json']"
+          :formats="['xlsx', 'csv', 'json']"
           @export="handleExport"
         />
         <Button
@@ -417,14 +417,14 @@ onMounted(() => {
                   <Tooltip>
                     <TooltipTrigger>
                       <img
-                        :src="journey.coverImage"
+                        :src="getResourceUrl(journey.coverImage)"
                         :alt="journey.name"
                         class="w-10 h-10 rounded-lg object-cover border"
                       />
                     </TooltipTrigger>
                     <TooltipContent side="right" class="p-0">
                       <img
-                        :src="journey.coverImage"
+                        :src="getResourceUrl(journey.coverImage)"
                         :alt="journey.name"
                         class="max-w-[200px] max-h-[200px] rounded-lg"
                       />

@@ -6,10 +6,18 @@ import type { QueryAppUserDto } from './dto/admin-appuser.dto';
 
 @Injectable()
 export class AdminAppUserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAppUserDto) {
-    const { phone, email, nickname, loginType, status, pageNum = 1, pageSize = 10 } = query;
+    const {
+      phone,
+      email,
+      nickname,
+      loginType,
+      status,
+      pageNum = 1,
+      pageSize = 10,
+    } = query;
 
     const where = {
       ...(phone && { phone: { contains: phone } }),

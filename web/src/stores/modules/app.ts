@@ -6,11 +6,11 @@ import { setupLoginRoute } from '@/router'
 export const useAppStore = defineStore('app', () => {
   // 网站配置
   const siteConfig = ref<SiteConfig>({
-    name: 'Xunyin Admin',
-    description: '企业级权限管理系统',
+    name: '寻印管理后台',
+    description: '城市文化探索与数字印记收藏平台',
     logo: '',
     favicon: '',
-    copyright: '© 2025 Xunyin Admin. All rights reserved.',
+    copyright: '© 2025 Xunyin. All rights reserved.',
     icp: '',
     loginPath: '/login',
   })

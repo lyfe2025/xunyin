@@ -19,7 +19,7 @@ import {
 @ApiTags('文化之旅')
 @Controller('app/journeys')
 export class JourneyController {
-  constructor(private readonly journeyService: JourneyService) { }
+  constructor(private readonly journeyService: JourneyService) {}
 
   @Get('progress')
   @UseGuards(AppAuthGuard)

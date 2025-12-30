@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-vue-next'
 import { uploadImage } from '@/api/upload'
+import { getResourceUrl } from '@/utils/url'
 
 const props = defineProps<{
   modelValue?: string
@@ -20,7 +21,10 @@ const { toast } = useToast()
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement>()
 
-const imageUrl = computed(() => props.modelValue || '')
+// 显示用的完整 URL
+const displayUrl = computed(() => getResourceUrl(props.modelValue))
+// 原始值（用于判断是否有值）
+const hasImage = computed(() => !!props.modelValue)
 const acceptTypes = computed(
   () => props.accept || 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml'
 )
@@ -81,8 +85,8 @@ function handleRemove() {
     />
 
     <!-- 已上传图片预览 -->
-    <div v-if="imageUrl" class="relative inline-block">
-      <img :src="imageUrl" alt="preview" class="h-24 w-24 rounded-lg border object-cover" />
+    <div v-if="hasImage" class="relative inline-block">
+      <img :src="displayUrl" alt="preview" class="h-24 w-24 rounded-lg border object-cover" />
       <Button
         variant="destructive"
         size="icon"

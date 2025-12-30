@@ -96,11 +96,19 @@ const statCards = computed(() => {
   ]
 })
 
+// 格式化日期为 MM-DD
+const formatDateLabel = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${month}-${day}`
+}
+
 // 图表数据
 const userChartData = computed(() => {
   if (!trends.value?.userTrends) return []
   return trends.value.userTrends.map((t) => ({
-    label: t.date.slice(5), // MM-DD
+    label: formatDateLabel(t.date),
     value: t.count,
   }))
 })
@@ -108,7 +116,7 @@ const userChartData = computed(() => {
 const journeyChartData = computed(() => {
   if (!trends.value?.journeyTrends) return []
   return trends.value.journeyTrends.map((t) => ({
-    label: t.date.slice(5),
+    label: formatDateLabel(t.date),
     value: t.count,
   }))
 })
@@ -116,7 +124,7 @@ const journeyChartData = computed(() => {
 const chainChartData = computed(() => {
   if (!trends.value?.chainTrends) return []
   return trends.value.chainTrends.map((t) => ({
-    label: t.date.slice(5),
+    label: formatDateLabel(t.date),
     value: t.count,
   }))
 })

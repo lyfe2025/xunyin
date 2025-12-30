@@ -17,9 +17,9 @@ const userStore = useUserStore()
 const appStore = useAppStore()
 
 // 网站配置
-const siteName = computed(() => appStore.siteConfig.name || 'Xunyin Admin')
-const siteDescription = computed(() => appStore.siteConfig.description || '企业级权限管理系统')
-const siteCopyright = computed(() => appStore.siteConfig.copyright || '© 2025 Xunyin Admin. All rights reserved.')
+const siteName = computed(() => appStore.siteConfig.name || '寻印管理后台')
+const siteDescription = computed(() => appStore.siteConfig.description || '城市文化探索与数字印记收藏平台')
+const siteCopyright = computed(() => appStore.siteConfig.copyright || '© 2025 Xunyin. All rights reserved.')
 const siteIcp = computed(() => appStore.siteConfig.icp || '')
 const siteLogo = computed(() => {
   const logo = appStore.siteConfig.logo
@@ -47,10 +47,10 @@ const twoFactorCode = ref('')
 const tempToken = ref('')
 
 const features = [
-  { icon: Shield, title: '权限管理', desc: '细粒度的菜单和按钮级权限控制' },
-  { icon: Users, title: '用户管理', desc: '支持部门层级和多角色分配' },
-  { icon: Settings, title: '系统配置', desc: '灵活的字典、参数和通知管理' },
-  { icon: BarChart3, title: '系统监控', desc: '操作日志、登录日志、在线用户' },
+  { icon: Shield, title: '文化之旅', desc: '探索城市历史文化，完成趣味任务' },
+  { icon: Users, title: '印记收藏', desc: '收集专属数字印记，记录探索足迹' },
+  { icon: Settings, title: '区块链存证', desc: '印记永久上链，不可篡改' },
+  { icon: BarChart3, title: '数据统计', desc: '用户行为分析，运营数据洞察' },
 ]
 
 // 获取验证码
@@ -188,9 +188,9 @@ const backToLogin = () => {
 
       <div class="space-y-8">
         <div>
-          <h2 class="text-3xl font-bold mb-4">开箱即用的<br />后台管理解决方案</h2>
+          <h2 class="text-3xl font-bold mb-4">城市文化探索<br />数字印记收藏</h2>
           <p class="text-primary-foreground/70 text-lg">
-            基于 Vue 3 + NestJS + PostgreSQL 构建，提供完整的 RBAC 权限模型
+            探索城市文化之旅，完成任务收集专属印记，区块链永久存证
           </p>
         </div>
 

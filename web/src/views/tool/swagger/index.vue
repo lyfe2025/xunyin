@@ -1,16 +1,33 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { ExternalLink } from 'lucide-vue-next'
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from '@/components/ui/toggle-group'
 
-const swaggerUrl = computed(() => {
+type DocType = 'swagger' | 'redoc'
+const docType = ref<DocType>('redoc')
+
+const apiBaseUrl = computed(() => {
   const apiUrl = import.meta.env.VITE_API_URL
-  // 如果没有配置 API URL，使用当前域名的 /api-docs 路径（通过 nginx 代理）
-  return apiUrl ? `${apiUrl}/api-docs` : '/api-docs'
+  return apiUrl || ''
 })
 
-function openSwagger() {
-  window.open(swaggerUrl.value, '_blank')
+const docUrl = computed(() => {
+  const base = apiBaseUrl.value
+  return docType.value === 'swagger' 
+    ? (base ? `${base}/api-docs` : '/api-docs')
+    : (base ? `${base}/redoc` : '/redoc')
+})
+
+const docTitle = computed(() => {
+  return docType.value === 'swagger' ? 'Swagger UI' : 'Redoc'
+})
+
+function openInNewWindow() {
+  window.open(docUrl.value, '_blank')
 }
 </script>
 
@@ -20,20 +37,26 @@ function openSwagger() {
     <div class="flex items-center justify-between p-4 border-b shrink-0">
       <div>
         <h2 class="text-xl font-bold tracking-tight">系统接口</h2>
-        <p class="text-sm text-muted-foreground">Swagger API 接口文档</p>
+        <p class="text-sm text-muted-foreground">{{ docTitle }} API 接口文档</p>
       </div>
-      <Button variant="outline" size="sm" @click="openSwagger">
-        <ExternalLink class="mr-2 h-4 w-4" />
-        新窗口打开
-      </Button>
+      <div class="flex items-center gap-3">
+        <ToggleGroup v-model="docType" type="single" variant="outline" size="sm">
+          <ToggleGroupItem value="redoc">Redoc</ToggleGroupItem>
+          <ToggleGroupItem value="swagger">Swagger</ToggleGroupItem>
+        </ToggleGroup>
+        <Button variant="outline" size="sm" @click="openInNewWindow">
+          <ExternalLink class="mr-2 h-4 w-4" />
+          新窗口打开
+        </Button>
+      </div>
     </div>
 
-    <!-- Swagger iframe -->
+    <!-- Doc iframe -->
     <div class="flex-1 min-h-0">
       <iframe
-        :src="swaggerUrl"
+        :src="docUrl"
         class="w-full h-full border-0"
-        title="Swagger API 文档"
+        :title="`${docTitle} API 文档`"
       />
     </div>
   </div>
