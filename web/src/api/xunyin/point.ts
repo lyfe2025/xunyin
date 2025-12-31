@@ -16,6 +16,9 @@ export interface ExplorationPoint {
   culturalKnowledge?: string
   distanceFromPrev?: number
   pointsReward: number
+  bgmId?: string
+  bgmName?: string
+  bgmUrl?: string
   orderNum: number
   status: string
   createTime: string
@@ -45,6 +48,7 @@ export interface PointForm {
   culturalKnowledge?: string
   distanceFromPrev?: number
   pointsReward?: number
+  bgmId?: string
   orderNum: number
   status?: string
 }

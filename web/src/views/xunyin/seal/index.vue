@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import {
   Table,
   TableBody,
@@ -61,7 +61,7 @@ const cityOptions = ref<City[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   type: undefined as string | undefined,
   name: '',
   status: undefined as string | undefined,
@@ -75,6 +75,7 @@ const submitLoading = ref(false)
 
 // 批量选择
 const selectedIds = ref<string[]>([])
+const selectAll = ref(false)
 const showBatchDeleteDialog = ref(false)
 
 const sealTypeOptions = [
@@ -105,6 +106,7 @@ async function getList() {
     sealList.value = res.list
     total.value = res.total
     selectedIds.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -196,7 +198,9 @@ async function confirmDelete() {
     toast({ title: '删除成功' })
     getList()
     showDeleteDialog.value = false
-  } catch {}
+  } catch {
+    // 错误已由拦截器处理
+  }
 }
 
 // 批量删除
@@ -214,20 +218,37 @@ async function confirmBatchDelete() {
     toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
     getList()
     showBatchDeleteDialog.value = false
-  } catch {}
-}
-
-function handleSelectAll(checked: boolean) {
-  selectedIds.value = checked ? sealList.value.map((s) => s.id) : []
-}
-
-function handleSelectOne(id: string, checked: boolean) {
-  if (checked) {
-    selectedIds.value.push(id)
-  } else {
-    selectedIds.value = selectedIds.value.filter((i) => i !== id)
+  } catch {
+    // 错误已由拦截器处理
   }
 }
+
+function handleSelectOne(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
+// 监听全选状态变化
+watch(selectAll, (newVal) => {
+  if (newVal) {
+    selectedIds.value = sealList.value.map((s) => s.id)
+  } else if (selectedIds.value.length === sealList.value.length) {
+    selectedIds.value = []
+  }
+})
+
+// 监听选中项变化，更新全选状态
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = sealList.value.length > 0 && newVal.length === sealList.value.length
+  },
+  { deep: true }
+)
 
 function getSealTypeLabel(type: string) {
   return sealTypeOptions.find((t) => t.value === type)?.label || type
@@ -371,10 +392,7 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">
-              <Checkbox
-                :checked="selectedIds.length === sealList.length && sealList.length > 0"
-                @update:checked="handleSelectAll"
-              />
+              <Checkbox v-model="selectAll" />
             </TableHead>
             <TableHead>印记</TableHead>
             <TableHead>类型</TableHead>
@@ -389,8 +407,8 @@ onMounted(() => {
           <TableRow v-for="seal in sealList" :key="seal.id">
             <TableCell>
               <Checkbox
-                :checked="selectedIds.includes(seal.id)"
-                @update:checked="(checked: boolean) => handleSelectOne(seal.id, checked)"
+                :model-value="selectedIds.includes(seal.id)"
+                @update:model-value="() => handleSelectOne(seal.id)"
               />
             </TableCell>
             <TableCell>

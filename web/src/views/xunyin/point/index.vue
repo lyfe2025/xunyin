@@ -41,6 +41,7 @@ import {
   MapPin,
   Image as ImageIcon,
   Copy,
+  Music,
 } from 'lucide-vue-next'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import RichTextEditor from '@/components/common/RichTextEditor.vue'
@@ -57,6 +58,7 @@ import {
   type PointForm,
 } from '@/api/xunyin/point'
 import { listJourney, type Journey } from '@/api/xunyin/journey'
+import { listBgm, type Bgm } from '@/api/xunyin/bgm'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -68,10 +70,11 @@ const route = useRoute()
 const loading = ref(true)
 const pointList = ref<ExplorationPoint[]>([])
 const journeyOptions = ref<Journey[]>([])
+const bgmOptions = ref<Bgm[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   journeyId: (route.query.journeyId as string) || undefined,
   name: '',
   taskType: undefined as string | undefined,
@@ -107,6 +110,7 @@ const form = reactive<PointForm>({
   culturalKnowledge: '',
   distanceFromPrev: 0,
   pointsReward: 50,
+  bgmId: '',
   orderNum: 0,
   status: '0',
 })
@@ -129,6 +133,15 @@ async function getJourneyOptions() {
   try {
     const res = await listJourney({ pageSize: 100 })
     journeyOptions.value = res.list
+  } catch {
+    // 忽略错误
+  }
+}
+
+async function getBgmOptions() {
+  try {
+    const res = await listBgm({ pageSize: 200, status: '0' })
+    bgmOptions.value = res.list
   } catch {
     // 忽略错误
   }
@@ -161,6 +174,7 @@ function resetForm() {
   form.culturalKnowledge = ''
   form.distanceFromPrev = 0
   form.pointsReward = 50
+  form.bgmId = ''
   form.orderNum = 0
   form.status = '0'
 }
@@ -293,6 +307,7 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
 onMounted(() => {
   getList()
   getJourneyOptions()
+  getBgmOptions()
 })
 </script>
 
@@ -564,15 +579,32 @@ onMounted(() => {
               <Input v-model.number="form.orderNum" type="number" />
             </div>
           </div>
-          <div class="grid gap-2">
-            <Label>状态</Label>
-            <Select v-model="form.status">
-              <SelectTrigger class="w-[150px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">正常</SelectItem>
-                <SelectItem value="1">停用</SelectItem>
-              </SelectContent>
-            </Select>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="grid gap-2">
+              <Label class="flex items-center gap-2">
+                <Music class="w-4 h-4" />
+                背景音乐
+              </Label>
+              <Select v-model="form.bgmId">
+                <SelectTrigger><SelectValue placeholder="不设置（继承旅程音乐）" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">不设置（继承旅程音乐）</SelectItem>
+                  <SelectItem v-for="bgm in bgmOptions" :key="bgm.id" :value="bgm.id">
+                    {{ bgm.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="grid gap-2">
+              <Label>状态</Label>
+              <Select v-model="form.status">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">正常</SelectItem>
+                  <SelectItem value="1">停用</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
         <DialogFooter>

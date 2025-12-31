@@ -57,7 +57,7 @@ const configList = ref<SysConfig[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   configName: '',
   configKey: '',
   configType: undefined

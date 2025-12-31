@@ -108,6 +108,11 @@ export class CreatePointDto {
   @IsNumber()
   pointsReward?: number = 50;
 
+  @ApiPropertyOptional({ description: '背景音乐ID' })
+  @IsOptional()
+  @IsString()
+  bgmId?: string;
+
   @ApiProperty({ description: '排序号' })
   @Type(() => Number)
   @IsNumber()
@@ -186,6 +191,11 @@ export class UpdatePointDto {
   @Type(() => Number)
   @IsNumber()
   pointsReward?: number;
+
+  @ApiPropertyOptional({ description: '背景音乐ID' })
+  @IsOptional()
+  @IsString()
+  bgmId?: string;
 
   @ApiPropertyOptional({ description: '排序号' })
   @IsOptional()

@@ -1092,12 +1092,28 @@ async function main() {
     icon: 'map-pin-check',
     isFrame: 1,
   });
+
+  // 背景音乐管理
+  await ensureMenu({
+    menuName: '背景音乐',
+    parentId: xunyinDir.menuId,
+    path: 'bgm',
+    component: 'xunyin/bgm/index',
+    orderNum: 4,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:bgm:list',
+    icon: 'music',
+    isFrame: 1,
+  });
+
   await ensureMenu({
     menuName: '印记管理',
     parentId: xunyinDir.menuId,
     path: 'seal',
     component: 'xunyin/seal/index',
-    orderNum: 4,
+    orderNum: 5,
     menuType: 'C',
     visible: '0',
     status: '0',
@@ -1110,7 +1126,7 @@ async function main() {
     parentId: xunyinDir.menuId,
     path: 'appuser',
     component: 'xunyin/appuser/index',
-    orderNum: 5,
+    orderNum: 6,
     menuType: 'C',
     visible: '0',
     status: '0',
@@ -1124,7 +1140,7 @@ async function main() {
     parentId: xunyinDir.menuId,
     path: 'progress',
     component: 'xunyin/progress/index',
-    orderNum: 6,
+    orderNum: 7,
     menuType: 'C',
     visible: '0',
     status: '0',
@@ -1139,7 +1155,7 @@ async function main() {
     parentId: xunyinDir.menuId,
     path: 'user-seal',
     component: 'xunyin/user-seal/index',
-    orderNum: 7,
+    orderNum: 8,
     menuType: 'C',
     visible: '0',
     status: '0',
@@ -1148,12 +1164,27 @@ async function main() {
     isFrame: 1,
   });
 
+  // 用户相册管理
+  await ensureMenu({
+    menuName: '用户相册',
+    parentId: xunyinDir.menuId,
+    path: 'photo',
+    component: 'xunyin/photo/index',
+    orderNum: 9,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:photo:list',
+    icon: 'image',
+    isFrame: 1,
+  });
+
   await ensureMenu({
     menuName: '数据统计',
     parentId: xunyinDir.menuId,
     path: 'stats',
     component: 'xunyin/dashboard/index',
-    orderNum: 8,
+    orderNum: 10,
     menuType: 'C',
     visible: '0',
     status: '0',
@@ -1321,6 +1352,58 @@ async function main() {
       parentId: userSealMenu.menuId,
       perms: 'xunyin:userseal:query',
       orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '手动上链',
+      parentId: userSealMenu.menuId,
+      perms: 'xunyin:userseal:chain',
+      orderNum: 2,
+    });
+  }
+
+  // 背景音乐按钮权限
+  const bgmMenu = await getMenuByPath(xunyinDir.menuId, 'bgm');
+  if (bgmMenu) {
+    await ensureButton({
+      menuName: '背景音乐查询',
+      parentId: bgmMenu.menuId,
+      perms: 'xunyin:bgm:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '背景音乐新增',
+      parentId: bgmMenu.menuId,
+      perms: 'xunyin:bgm:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '背景音乐修改',
+      parentId: bgmMenu.menuId,
+      perms: 'xunyin:bgm:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '背景音乐删除',
+      parentId: bgmMenu.menuId,
+      perms: 'xunyin:bgm:remove',
+      orderNum: 4,
+    });
+  }
+
+  // 用户相册按钮权限
+  const photoMenu = await getMenuByPath(xunyinDir.menuId, 'photo');
+  if (photoMenu) {
+    await ensureButton({
+      menuName: '用户相册查询',
+      parentId: photoMenu.menuId,
+      perms: 'xunyin:photo:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '用户相册删除',
+      parentId: photoMenu.menuId,
+      perms: 'xunyin:photo:remove',
+      orderNum: 2,
     });
   }
 
@@ -3359,7 +3442,7 @@ async function main() {
 
     // 创建用户进度数据
     // 用户1: 西湖十景探秘 - 已完成
-    await prisma.journeyProgress.create({
+    const progress1 = await prisma.journeyProgress.create({
       data: {
         userId: demoUser.id,
         journeyId: westLakeJourney.id,
@@ -3371,7 +3454,7 @@ async function main() {
     });
 
     // 用户1: 灵隐禅踪 - 进行中
-    await prisma.journeyProgress.create({
+    const progress2 = await prisma.journeyProgress.create({
       data: {
         userId: demoUser.id,
         journeyId: lingyinJourney.id,
@@ -3381,7 +3464,7 @@ async function main() {
     });
 
     // 用户2: 三坊七巷寻古 - 进行中
-    await prisma.journeyProgress.create({
+    const progress3 = await prisma.journeyProgress.create({
       data: {
         userId: demoUser2.id,
         journeyId: sanfangqixiangJourney.id,
@@ -3391,7 +3474,7 @@ async function main() {
     });
 
     // 用户3: 西湖十景探秘 - 已完成
-    await prisma.journeyProgress.create({
+    const progress4 = await prisma.journeyProgress.create({
       data: {
         userId: demoUser3.id,
         journeyId: westLakeJourney.id,
@@ -3403,7 +3486,7 @@ async function main() {
     });
 
     // 用户3: 灵隐禅踪 - 已完成
-    await prisma.journeyProgress.create({
+    const progress5 = await prisma.journeyProgress.create({
       data: {
         userId: demoUser3.id,
         journeyId: lingyinJourney.id,
@@ -3415,7 +3498,7 @@ async function main() {
     });
 
     // 用户3: 三坊七巷寻古 - 进行中
-    await prisma.journeyProgress.create({
+    const progress6 = await prisma.journeyProgress.create({
       data: {
         userId: demoUser3.id,
         journeyId: sanfangqixiangJourney.id,
@@ -3425,6 +3508,108 @@ async function main() {
     });
 
     console.log('Created journey progress data');
+
+    // 获取探索点数据，用于创建完成记录
+    const westLakePointsDb = await prisma.explorationPoint.findMany({
+      where: { journeyId: westLakeJourney.id },
+      orderBy: { orderNum: 'asc' },
+    });
+    const lingyinPointsDb = await prisma.explorationPoint.findMany({
+      where: { journeyId: lingyinJourney.id },
+      orderBy: { orderNum: 'asc' },
+    });
+    const sanfangPointsDb = await prisma.explorationPoint.findMany({
+      where: { journeyId: sanfangqixiangJourney.id },
+      orderBy: { orderNum: 'asc' },
+    });
+
+    // 创建探索点完成记录
+    // 用户1: 西湖十景探秘 - 已完成全部4个探索点
+    for (let i = 0; i < westLakePointsDb.length; i++) {
+      await prisma.pointCompletion.create({
+        data: {
+          progressId: progress1.id,
+          pointId: westLakePointsDb[i].id,
+          completeTime: new Date(
+            new Date('2025-01-10T09:00:00Z').getTime() +
+              (i + 1) * 90 * 60 * 1000,
+          ), // 每90分钟完成一个
+          pointsEarned: westLakePointsDb[i].pointsReward,
+        },
+      });
+    }
+
+    // 用户1: 灵隐禅踪 - 进行中，完成1个探索点
+    await prisma.pointCompletion.create({
+      data: {
+        progressId: progress2.id,
+        pointId: lingyinPointsDb[0].id,
+        completeTime: new Date('2025-01-15T10:30:00Z'),
+        pointsEarned: lingyinPointsDb[0].pointsReward,
+      },
+    });
+
+    // 用户2: 三坊七巷寻古 - 进行中，完成3个探索点
+    for (let i = 0; i < 3; i++) {
+      await prisma.pointCompletion.create({
+        data: {
+          progressId: progress3.id,
+          pointId: sanfangPointsDb[i].id,
+          completeTime: new Date(
+            new Date('2025-01-12T14:00:00Z').getTime() +
+              (i + 1) * 45 * 60 * 1000,
+          ), // 每45分钟完成一个
+          pointsEarned: sanfangPointsDb[i].pointsReward,
+        },
+      });
+    }
+
+    // 用户3: 西湖十景探秘 - 已完成全部4个探索点
+    for (let i = 0; i < westLakePointsDb.length; i++) {
+      await prisma.pointCompletion.create({
+        data: {
+          progressId: progress4.id,
+          pointId: westLakePointsDb[i].id,
+          completeTime: new Date(
+            new Date('2025-01-05T08:00:00Z').getTime() +
+              (i + 1) * 90 * 60 * 1000,
+          ),
+          pointsEarned: westLakePointsDb[i].pointsReward,
+        },
+      });
+    }
+
+    // 用户3: 灵隐禅踪 - 已完成全部3个探索点
+    for (let i = 0; i < lingyinPointsDb.length; i++) {
+      await prisma.pointCompletion.create({
+        data: {
+          progressId: progress5.id,
+          pointId: lingyinPointsDb[i].id,
+          completeTime: new Date(
+            new Date('2025-01-06T09:00:00Z').getTime() +
+              (i + 1) * 60 * 60 * 1000,
+          ), // 每60分钟完成一个
+          pointsEarned: lingyinPointsDb[i].pointsReward,
+        },
+      });
+    }
+
+    // 用户3: 三坊七巷寻古 - 进行中，完成2个探索点
+    for (let i = 0; i < 2; i++) {
+      await prisma.pointCompletion.create({
+        data: {
+          progressId: progress6.id,
+          pointId: sanfangPointsDb[i].id,
+          completeTime: new Date(
+            new Date('2025-01-20T10:00:00Z').getTime() +
+              (i + 1) * 45 * 60 * 1000,
+          ),
+          pointsEarned: sanfangPointsDb[i].pointsReward,
+        },
+      });
+    }
+
+    console.log('Created point completion data');
 
     // 创建用户印记数据
     // 用户1: 西湖探秘者印记 - 已上链
@@ -3488,6 +3673,327 @@ async function main() {
     }
 
     console.log('Created user seal data');
+
+    // 创建背景音乐数据
+    // 注意：URL 为占位符，实际部署时需替换为真实音频文件地址
+    const bgmData = [
+      // 首页默认背景音乐
+      {
+        name: '古韵悠然',
+        url: '/audio/bgm/home-default.mp3',
+        context: 'home',
+        contextId: null,
+        duration: 180,
+        orderNum: 1,
+      },
+      {
+        name: '山水清音',
+        url: '/audio/bgm/home-nature.mp3',
+        context: 'home',
+        contextId: null,
+        duration: 210,
+        orderNum: 2,
+      },
+      // 杭州城市背景音乐
+      {
+        name: '江南丝竹',
+        url: '/audio/bgm/city-hangzhou.mp3',
+        context: 'city',
+        contextId: hangzhou.id,
+        duration: 240,
+        orderNum: 1,
+      },
+      // 苏州城市背景音乐
+      {
+        name: '姑苏雅韵',
+        url: '/audio/bgm/city-suzhou.mp3',
+        context: 'city',
+        contextId: suzhou.id,
+        duration: 220,
+        orderNum: 1,
+      },
+      // 南京城市背景音乐
+      {
+        name: '金陵古调',
+        url: '/audio/bgm/city-nanjing.mp3',
+        context: 'city',
+        contextId: nanjing.id,
+        duration: 200,
+        orderNum: 1,
+      },
+      // 福州城市背景音乐
+      {
+        name: '闽韵悠扬',
+        url: '/audio/bgm/city-fuzhou.mp3',
+        context: 'city',
+        contextId: fuzhou.id,
+        duration: 230,
+        orderNum: 1,
+      },
+      // 西湖十景探秘背景音乐
+      {
+        name: '西湖春晓',
+        url: '/audio/bgm/journey-westlake.mp3',
+        context: 'journey',
+        contextId: westLakeJourney.id,
+        duration: 300,
+        orderNum: 1,
+      },
+      // 灵隐禅踪背景音乐
+      {
+        name: '禅意空灵',
+        url: '/audio/bgm/journey-lingyin.mp3',
+        context: 'journey',
+        contextId: lingyinJourney.id,
+        duration: 280,
+        orderNum: 1,
+      },
+      // 三坊七巷寻古背景音乐
+      {
+        name: '坊巷古韵',
+        url: '/audio/bgm/journey-sanfang.mp3',
+        context: 'journey',
+        contextId: sanfangqixiangJourney.id,
+        duration: 260,
+        orderNum: 1,
+      },
+      // 鼓山禅意行背景音乐
+      {
+        name: '鼓山梵音',
+        url: '/audio/bgm/journey-gushan.mp3',
+        context: 'journey',
+        contextId: gushanJourney.id,
+        duration: 290,
+        orderNum: 1,
+      },
+      // 闽江两岸背景音乐
+      {
+        name: '闽江夜曲',
+        url: '/audio/bgm/journey-minjiang.mp3',
+        context: 'journey',
+        contextId: minjiangJourney.id,
+        duration: 250,
+        orderNum: 1,
+      },
+    ];
+
+    for (const bgm of bgmData) {
+      await prisma.backgroundMusic.create({
+        data: {
+          name: bgm.name,
+          url: bgm.url,
+          context: bgm.context,
+          contextId: bgm.contextId,
+          duration: bgm.duration,
+          orderNum: bgm.orderNum,
+          status: '0',
+        },
+      });
+    }
+    console.log(`Created ${bgmData.length} background music records`);
+
+    // 创建探索照片测试数据
+    const photoData = [
+      // 用户1: 西湖十景探秘的照片
+      {
+        userId: demoUser.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[0].id,
+        photoUrl: '/uploads/photos/westlake-duanqiao-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-duanqiao-1.jpg',
+        filter: 'vintage',
+        latitude: 30.2598,
+        longitude: 120.1485,
+        takenTime: new Date('2025-01-10T09:30:00Z'),
+      },
+      {
+        userId: demoUser.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[0].id,
+        photoUrl: '/uploads/photos/westlake-duanqiao-2.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-duanqiao-2.jpg',
+        filter: 'ink',
+        latitude: 30.2599,
+        longitude: 120.1486,
+        takenTime: new Date('2025-01-10T09:45:00Z'),
+      },
+      {
+        userId: demoUser.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[1].id,
+        photoUrl: '/uploads/photos/westlake-leifeng-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-leifeng-1.jpg',
+        filter: 'warm',
+        latitude: 30.2318,
+        longitude: 120.1489,
+        takenTime: new Date('2025-01-10T11:20:00Z'),
+      },
+      {
+        userId: demoUser.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[2].id,
+        photoUrl: '/uploads/photos/westlake-santan-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-santan-1.jpg',
+        filter: 'classic',
+        latitude: 30.2398,
+        longitude: 120.1398,
+        takenTime: new Date('2025-01-10T13:00:00Z'),
+      },
+      // 用户1: 灵隐禅踪的照片
+      {
+        userId: demoUser.id,
+        journeyId: lingyinJourney.id,
+        pointId: lingyinPointsDb[0].id,
+        photoUrl: '/uploads/photos/lingyin-feilai-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/lingyin-feilai-1.jpg',
+        filter: 'zen',
+        latitude: 30.2398,
+        longitude: 120.0998,
+        takenTime: new Date('2025-01-15T10:30:00Z'),
+      },
+      // 用户2: 三坊七巷寻古的照片
+      {
+        userId: demoUser2.id,
+        journeyId: sanfangqixiangJourney.id,
+        pointId: sanfangPointsDb[0].id,
+        photoUrl: '/uploads/photos/sanfang-yijin-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/sanfang-yijin-1.jpg',
+        filter: 'retro',
+        latitude: 26.0898,
+        longitude: 119.2998,
+        takenTime: new Date('2025-01-12T14:30:00Z'),
+      },
+      {
+        userId: demoUser2.id,
+        journeyId: sanfangqixiangJourney.id,
+        pointId: sanfangPointsDb[1].id,
+        photoUrl: '/uploads/photos/sanfang-linzexu-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/sanfang-linzexu-1.jpg',
+        filter: 'classic',
+        latitude: 26.0878,
+        longitude: 119.2988,
+        takenTime: new Date('2025-01-12T15:15:00Z'),
+      },
+      // 用户3: 西湖十景探秘的照片
+      {
+        userId: demoUser3.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[0].id,
+        photoUrl: '/uploads/photos/westlake-duanqiao-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-duanqiao-user3-1.jpg',
+        filter: 'ink',
+        latitude: 30.2597,
+        longitude: 120.1484,
+        takenTime: new Date('2025-01-05T08:45:00Z'),
+      },
+      {
+        userId: demoUser3.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[1].id,
+        photoUrl: '/uploads/photos/westlake-leifeng-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-leifeng-user3-1.jpg',
+        filter: 'vintage',
+        latitude: 30.2319,
+        longitude: 120.149,
+        takenTime: new Date('2025-01-05T10:30:00Z'),
+      },
+      {
+        userId: demoUser3.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[2].id,
+        photoUrl: '/uploads/photos/westlake-santan-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-santan-user3-1.jpg',
+        filter: 'warm',
+        latitude: 30.2399,
+        longitude: 120.1399,
+        takenTime: new Date('2025-01-05T12:00:00Z'),
+      },
+      {
+        userId: demoUser3.id,
+        journeyId: westLakeJourney.id,
+        pointId: westLakePointsDb[3].id,
+        photoUrl: '/uploads/photos/westlake-huagang-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/westlake-huagang-user3-1.jpg',
+        filter: 'classic',
+        latitude: 30.2358,
+        longitude: 120.1358,
+        takenTime: new Date('2025-01-05T13:30:00Z'),
+      },
+      // 用户3: 灵隐禅踪的照片
+      {
+        userId: demoUser3.id,
+        journeyId: lingyinJourney.id,
+        pointId: lingyinPointsDb[0].id,
+        photoUrl: '/uploads/photos/lingyin-feilai-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/lingyin-feilai-user3-1.jpg',
+        filter: 'zen',
+        latitude: 30.2399,
+        longitude: 120.0999,
+        takenTime: new Date('2025-01-06T09:30:00Z'),
+      },
+      {
+        userId: demoUser3.id,
+        journeyId: lingyinJourney.id,
+        pointId: lingyinPointsDb[1].id,
+        photoUrl: '/uploads/photos/lingyin-temple-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/lingyin-temple-user3-1.jpg',
+        filter: 'ink',
+        latitude: 30.2378,
+        longitude: 120.0978,
+        takenTime: new Date('2025-01-06T10:30:00Z'),
+      },
+      {
+        userId: demoUser3.id,
+        journeyId: lingyinJourney.id,
+        pointId: lingyinPointsDb[2].id,
+        photoUrl: '/uploads/photos/lingyin-yongfu-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/lingyin-yongfu-user3-1.jpg',
+        filter: 'vintage',
+        latitude: 30.2358,
+        longitude: 120.0958,
+        takenTime: new Date('2025-01-06T11:30:00Z'),
+      },
+      // 用户3: 三坊七巷寻古的照片
+      {
+        userId: demoUser3.id,
+        journeyId: sanfangqixiangJourney.id,
+        pointId: sanfangPointsDb[0].id,
+        photoUrl: '/uploads/photos/sanfang-yijin-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/sanfang-yijin-user3-1.jpg',
+        filter: 'retro',
+        latitude: 26.0899,
+        longitude: 119.2999,
+        takenTime: new Date('2025-01-20T10:30:00Z'),
+      },
+      {
+        userId: demoUser3.id,
+        journeyId: sanfangqixiangJourney.id,
+        pointId: sanfangPointsDb[1].id,
+        photoUrl: '/uploads/photos/sanfang-linzexu-user3-1.jpg',
+        thumbnailUrl: '/uploads/photos/thumb/sanfang-linzexu-user3-1.jpg',
+        filter: 'classic',
+        latitude: 26.0879,
+        longitude: 119.2989,
+        takenTime: new Date('2025-01-20T11:15:00Z'),
+      },
+    ];
+
+    for (const photo of photoData) {
+      await prisma.explorationPhoto.create({
+        data: {
+          userId: photo.userId,
+          journeyId: photo.journeyId,
+          pointId: photo.pointId,
+          photoUrl: photo.photoUrl,
+          thumbnailUrl: photo.thumbnailUrl,
+          filter: photo.filter,
+          latitude: photo.latitude,
+          longitude: photo.longitude,
+          takenTime: photo.takenTime,
+        },
+      });
+    }
+    console.log(`Created ${photoData.length} exploration photos`);
 
     console.log('Xunyin business data seeding completed.');
   }

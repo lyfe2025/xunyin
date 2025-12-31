@@ -52,7 +52,7 @@ const dictName = computed(() => (route.query.dictName as string) || '字典数�
 
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   dictType: '',
   dictLabel: '',
   status: undefined as string | undefined,

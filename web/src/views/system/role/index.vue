@@ -58,7 +58,7 @@ const roleList = ref<SysRole[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   roleName: '',
   roleKey: '',
   status: undefined

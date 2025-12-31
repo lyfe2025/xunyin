@@ -55,7 +55,7 @@ const postList = ref<SysPost[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   postCode: '',
   postName: '',
   status: undefined

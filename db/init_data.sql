@@ -1397,6 +1397,235 @@ WHERE u.phone = '13700137000' AND j.name = '三坊七巷寻古'
 ON CONFLICT DO NOTHING;
 
 
+-- 25.1 探索点完成记录
+-- 用户1: 西湖十景探秘 - 完成全部4个探索点
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_1_1',
+  'progress_demo_1',
+  ep.id,
+  '2025-01-10 10:30:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '苏堤春晓'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_1_2',
+  'progress_demo_1',
+  ep.id,
+  '2025-01-10 12:00:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '断桥残雪'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_1_3',
+  'progress_demo_1',
+  ep.id,
+  '2025-01-10 13:30:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '雷峰夕照'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_1_4',
+  'progress_demo_1',
+  ep.id,
+  '2025-01-10 15:00:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '三潭印月'
+ON CONFLICT DO NOTHING;
+
+-- 用户1: 灵隐禅踪 - 进行中，完成1个探索点
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_2_1',
+  'progress_demo_2',
+  ep.id,
+  '2025-01-15 10:30:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '灵隐禅踪' AND ep.name = '飞来峰'
+ON CONFLICT DO NOTHING;
+
+-- 用户2: 三坊七巷寻古 - 进行中，完成3个探索点
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_3_1',
+  'progress_demo_3',
+  ep.id,
+  '2025-01-12 14:45:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '三坊七巷寻古' AND ep.name = '南后街'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_3_2',
+  'progress_demo_3',
+  ep.id,
+  '2025-01-12 15:30:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '三坊七巷寻古' AND ep.name = '林则徐纪念馆'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_3_3',
+  'progress_demo_3',
+  ep.id,
+  '2025-01-12 16:15:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '三坊七巷寻古' AND ep.name = '严复故居'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 西湖十景探秘 - 完成全部4个探索点
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_4_1',
+  'progress_demo_4',
+  ep.id,
+  '2025-01-05 09:30:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '苏堤春晓'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_4_2',
+  'progress_demo_4',
+  ep.id,
+  '2025-01-05 11:00:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '断桥残雪'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_4_3',
+  'progress_demo_4',
+  ep.id,
+  '2025-01-05 12:30:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '雷峰夕照'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_4_4',
+  'progress_demo_4',
+  ep.id,
+  '2025-01-05 14:00:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '西湖十景探秘' AND ep.name = '三潭印月'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 灵隐禅踪 - 完成全部3个探索点
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_5_1',
+  'progress_demo_5',
+  ep.id,
+  '2025-01-06 10:00:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '灵隐禅踪' AND ep.name = '飞来峰'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_5_2',
+  'progress_demo_5',
+  ep.id,
+  '2025-01-06 11:00:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '灵隐禅踪' AND ep.name = '灵隐寺山门'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_5_3',
+  'progress_demo_5',
+  ep.id,
+  '2025-01-06 12:00:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '灵隐禅踪' AND ep.name = '大雄宝殿'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 三坊七巷寻古 - 进行中，完成2个探索点
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_6_1',
+  'progress_demo_6',
+  ep.id,
+  '2025-01-20 10:45:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '三坊七巷寻古' AND ep.name = '南后街'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO point_completion (id, progress_id, point_id, complete_time, points_earned, create_time)
+SELECT 
+  'pc_demo_6_2',
+  'progress_demo_6',
+  ep.id,
+  '2025-01-20 11:30:00',
+  ep.points_reward,
+  NOW()
+FROM exploration_point ep
+JOIN journey j ON ep.journey_id = j.id
+WHERE j.name = '三坊七巷寻古' AND ep.name = '林则徐纪念馆'
+ON CONFLICT DO NOTHING;
+
+
 -- 26. 用户印记数据
 -- 用户1: 西湖探秘者印记 - 已上链
 INSERT INTO user_seal (id, user_id, seal_id, earned_time, is_chained, chain_name, tx_hash, block_height, chain_time, create_time, update_time)
@@ -1467,6 +1696,434 @@ WHERE u.phone = '13700137000' AND s.name = '杭州印记'
 ON CONFLICT DO NOTHING;
 
 
+-- 21. 初始化背景音乐数据
+-- 注意：URL 为占位符，实际部署时需替换为真实音频文件地址
+
+-- 首页默认背景音乐
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+VALUES 
+  ('bgm_home_1', '古韵悠然', '/audio/bgm/home-default.mp3', 'home', NULL, 180, 1, '0', NOW(), NOW()),
+  ('bgm_home_2', '山水清音', '/audio/bgm/home-nature.mp3', 'home', NULL, 210, 2, '0', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+-- 城市背景音乐
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_city_hangzhou',
+  '江南丝竹',
+  '/audio/bgm/city-hangzhou.mp3',
+  'city',
+  c.id,
+  240,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM city c WHERE c.name = '杭州'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_city_suzhou',
+  '姑苏雅韵',
+  '/audio/bgm/city-suzhou.mp3',
+  'city',
+  c.id,
+  220,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM city c WHERE c.name = '苏州'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_city_nanjing',
+  '金陵古调',
+  '/audio/bgm/city-nanjing.mp3',
+  'city',
+  c.id,
+  200,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM city c WHERE c.name = '南京'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_city_fuzhou',
+  '闽韵悠扬',
+  '/audio/bgm/city-fuzhou.mp3',
+  'city',
+  c.id,
+  230,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM city c WHERE c.name = '福州'
+ON CONFLICT DO NOTHING;
+
+-- 文化之旅背景音乐
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_journey_westlake',
+  '西湖春晓',
+  '/audio/bgm/journey-westlake.mp3',
+  'journey',
+  j.id,
+  300,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM journey j WHERE j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_journey_lingyin',
+  '禅意空灵',
+  '/audio/bgm/journey-lingyin.mp3',
+  'journey',
+  j.id,
+  280,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM journey j WHERE j.name = '灵隐禅踪'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_journey_sanfang',
+  '坊巷古韵',
+  '/audio/bgm/journey-sanfang.mp3',
+  'journey',
+  j.id,
+  260,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM journey j WHERE j.name = '三坊七巷寻古'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_journey_gushan',
+  '鼓山梵音',
+  '/audio/bgm/journey-gushan.mp3',
+  'journey',
+  j.id,
+  290,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM journey j WHERE j.name = '鼓山禅意行'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
+SELECT 
+  'bgm_journey_minjiang',
+  '闽江夜曲',
+  '/audio/bgm/journey-minjiang.mp3',
+  'journey',
+  j.id,
+  250,
+  1,
+  '0',
+  NOW(),
+  NOW()
+FROM journey j WHERE j.name = '闽江两岸'
+ON CONFLICT DO NOTHING;
+
+
+-- 22. 初始化探索照片测试数据
+-- 用户1（探索者小明）的照片 - 西湖十景探秘
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user1_westlake_1',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-duanqiao-1.jpg',
+  '/uploads/photos/thumb/westlake-duanqiao-1.jpg',
+  'vintage',
+  30.2598,
+  120.1485,
+  '2025-01-10 09:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13800138000' AND j.name = '西湖十景探秘' AND p.name = '断桥残雪'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user1_westlake_2',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-duanqiao-2.jpg',
+  '/uploads/photos/thumb/westlake-duanqiao-2.jpg',
+  'ink',
+  30.2599,
+  120.1486,
+  '2025-01-10 09:45:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13800138000' AND j.name = '西湖十景探秘' AND p.name = '断桥残雪'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user1_westlake_3',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-leifeng-1.jpg',
+  '/uploads/photos/thumb/westlake-leifeng-1.jpg',
+  'warm',
+  30.2318,
+  120.1489,
+  '2025-01-10 11:20:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13800138000' AND j.name = '西湖十景探秘' AND p.name = '雷峰夕照'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user1_westlake_4',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-santan-1.jpg',
+  '/uploads/photos/thumb/westlake-santan-1.jpg',
+  'classic',
+  30.2398,
+  120.1398,
+  '2025-01-10 13:00:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13800138000' AND j.name = '西湖十景探秘' AND p.name = '三潭印月'
+ON CONFLICT DO NOTHING;
+
+-- 用户1（探索者小明）的照片 - 灵隐禅踪
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user1_lingyin_1',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/lingyin-feilai-1.jpg',
+  '/uploads/photos/thumb/lingyin-feilai-1.jpg',
+  'zen',
+  30.2398,
+  120.0998,
+  '2025-01-15 10:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13800138000' AND j.name = '灵隐禅踪' AND p.name = '飞来峰'
+ON CONFLICT DO NOTHING;
+
+-- 用户2（文化行者）的照片 - 三坊七巷寻古
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user2_sanfang_1',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/sanfang-yijin-1.jpg',
+  '/uploads/photos/thumb/sanfang-yijin-1.jpg',
+  'retro',
+  26.0898,
+  119.2998,
+  '2025-01-12 14:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13900139000' AND j.name = '三坊七巷寻古' AND p.name = '衣锦坊'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user2_sanfang_2',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/sanfang-linzexu-1.jpg',
+  '/uploads/photos/thumb/sanfang-linzexu-1.jpg',
+  'classic',
+  26.0878,
+  119.2988,
+  '2025-01-12 15:15:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13900139000' AND j.name = '三坊七巷寻古' AND p.name = '林则徐纪念馆'
+ON CONFLICT DO NOTHING;
+
+-- 用户3（印记收藏家）的照片 - 西湖十景探秘
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_westlake_1',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-duanqiao-user3-1.jpg',
+  '/uploads/photos/thumb/westlake-duanqiao-user3-1.jpg',
+  'ink',
+  30.2597,
+  120.1484,
+  '2025-01-05 08:45:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '西湖十景探秘' AND p.name = '断桥残雪'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_westlake_2',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-leifeng-user3-1.jpg',
+  '/uploads/photos/thumb/westlake-leifeng-user3-1.jpg',
+  'vintage',
+  30.2319,
+  120.1490,
+  '2025-01-05 10:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '西湖十景探秘' AND p.name = '雷峰夕照'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_westlake_3',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-santan-user3-1.jpg',
+  '/uploads/photos/thumb/westlake-santan-user3-1.jpg',
+  'warm',
+  30.2399,
+  120.1399,
+  '2025-01-05 12:00:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '西湖十景探秘' AND p.name = '三潭印月'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_westlake_4',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/westlake-huagang-user3-1.jpg',
+  '/uploads/photos/thumb/westlake-huagang-user3-1.jpg',
+  'classic',
+  30.2358,
+  120.1358,
+  '2025-01-05 13:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '西湖十景探秘' AND p.name = '花港观鱼'
+ON CONFLICT DO NOTHING;
+
+-- 用户3（印记收藏家）的照片 - 灵隐禅踪
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_lingyin_1',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/lingyin-feilai-user3-1.jpg',
+  '/uploads/photos/thumb/lingyin-feilai-user3-1.jpg',
+  'zen',
+  30.2399,
+  120.0999,
+  '2025-01-06 09:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '灵隐禅踪' AND p.name = '飞来峰'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_lingyin_2',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/lingyin-temple-user3-1.jpg',
+  '/uploads/photos/thumb/lingyin-temple-user3-1.jpg',
+  'ink',
+  30.2378,
+  120.0978,
+  '2025-01-06 10:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '灵隐禅踪' AND p.name = '灵隐寺'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_lingyin_3',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/lingyin-yongfu-user3-1.jpg',
+  '/uploads/photos/thumb/lingyin-yongfu-user3-1.jpg',
+  'vintage',
+  30.2358,
+  120.0958,
+  '2025-01-06 11:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '灵隐禅踪' AND p.name = '永福禅寺'
+ON CONFLICT DO NOTHING;
+
+-- 用户3（印记收藏家）的照片 - 三坊七巷寻古
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_sanfang_1',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/sanfang-yijin-user3-1.jpg',
+  '/uploads/photos/thumb/sanfang-yijin-user3-1.jpg',
+  'retro',
+  26.0899,
+  119.2999,
+  '2025-01-20 10:30:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '三坊七巷寻古' AND p.name = '衣锦坊'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO exploration_photo (id, user_id, journey_id, point_id, photo_url, thumbnail_url, filter, latitude, longitude, taken_time, create_time)
+SELECT 
+  'photo_user3_sanfang_2',
+  u.id,
+  j.id,
+  p.id,
+  '/uploads/photos/sanfang-linzexu-user3-1.jpg',
+  '/uploads/photos/thumb/sanfang-linzexu-user3-1.jpg',
+  'classic',
+  26.0879,
+  119.2989,
+  '2025-01-20 11:15:00',
+  NOW()
+FROM app_user u, journey j, exploration_point p
+WHERE u.phone = '13700137000' AND j.name = '三坊七巷寻古' AND p.name = '林则徐纪念馆'
+ON CONFLICT DO NOTHING;
+
+
 -- 提示信息（更新）
 DO $
 DECLARE
@@ -1477,6 +2134,9 @@ DECLARE
   appuser_count INTEGER;
   progress_count INTEGER;
   userseal_count INTEGER;
+  completion_count INTEGER;
+  bgm_count INTEGER;
+  photo_count INTEGER;
 BEGIN
   SELECT COUNT(*) INTO city_count FROM city;
   SELECT COUNT(*) INTO journey_count FROM journey;
@@ -1485,6 +2145,9 @@ BEGIN
   SELECT COUNT(*) INTO appuser_count FROM app_user;
   SELECT COUNT(*) INTO progress_count FROM journey_progress;
   SELECT COUNT(*) INTO userseal_count FROM user_seal;
+  SELECT COUNT(*) INTO completion_count FROM point_completion;
+  SELECT COUNT(*) INTO bgm_count FROM background_music;
+  SELECT COUNT(*) INTO photo_count FROM exploration_photo;
   
   RAISE NOTICE '==============================================';
   RAISE NOTICE '寻印业务数据导入完成！';
@@ -1496,6 +2159,9 @@ BEGIN
   RAISE NOTICE '- 印记：% 个', seal_count;
   RAISE NOTICE '- App用户：% 个', appuser_count;
   RAISE NOTICE '- 用户进度：% 条', progress_count;
+  RAISE NOTICE '- 探索点完成：% 条', completion_count;
   RAISE NOTICE '- 用户印记：% 个', userseal_count;
+  RAISE NOTICE '- 背景音乐：% 条', bgm_count;
+  RAISE NOTICE '- 探索照片：% 张', photo_count;
   RAISE NOTICE '==============================================';
 END $;

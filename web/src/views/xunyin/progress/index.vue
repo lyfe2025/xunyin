@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import {
   Table,
   TableBody,
@@ -37,6 +37,7 @@ import {
   CheckCircle,
   XCircle,
   Loader,
+  Clock,
 } from 'lucide-vue-next'
 import {
   listProgress,
@@ -53,13 +54,50 @@ import { formatDate } from '@/utils/format'
 import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
 import { getResourceUrl } from '@/utils/url'
 
+// 计算进度百分比
+function getProgressPercent(completed: number, total: number): number {
+  if (total === 0) return 0
+  return Math.round((completed / total) * 100)
+}
+
+// 计算已用时间（对于进行中的状态）
+function getElapsedTime(startTime: string | Date): string {
+  const start = new Date(startTime).getTime()
+  const now = Date.now()
+  const diffMinutes = Math.floor((now - start) / (1000 * 60))
+  
+  if (diffMinutes < 60) {
+    return `${diffMinutes} 分钟`
+  } else if (diffMinutes < 1440) {
+    const hours = Math.floor(diffMinutes / 60)
+    const mins = diffMinutes % 60
+    return mins > 0 ? `${hours} 小时 ${mins} 分钟` : `${hours} 小时`
+  } else {
+    const days = Math.floor(diffMinutes / 1440)
+    const hours = Math.floor((diffMinutes % 1440) / 60)
+    return hours > 0 ? `${days} 天 ${hours} 小时` : `${days} 天`
+  }
+}
+
+// 格式化花费时间
+function formatTimeSpent(minutes: number | null | undefined): string {
+  if (!minutes) return '-'
+  if (minutes < 60) {
+    return `${minutes} 分钟`
+  } else {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return mins > 0 ? `${hours} 小时 ${mins} 分钟` : `${hours} 小时`
+  }
+}
+
 const loading = ref(true)
 const progressList = ref<JourneyProgress[]>([])
 const total = ref(0)
 const stats = ref<ProgressStats | null>(null)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   nickname: '',
   journeyName: '',
   status: undefined as string | undefined,
@@ -275,9 +313,15 @@ onMounted(() => {
             <TableCell>{{ item.cityName || '-' }}</TableCell>
             <TableCell>
               <div class="flex items-center gap-2">
-                <Progress :model-value="(item.completedPoints / item.totalPoints) * 100" class="w-20 h-2" />
-                <span class="text-sm text-muted-foreground">
+                <Progress 
+                  :model-value="getProgressPercent(item.completedPoints, item.totalPoints)" 
+                  class="w-20 h-2" 
+                />
+                <span class="text-sm text-muted-foreground whitespace-nowrap">
                   {{ item.completedPoints }}/{{ item.totalPoints }}
+                  <span v-if="getProgressPercent(item.completedPoints, item.totalPoints) < 100" class="text-xs ml-1">
+                    ({{ getProgressPercent(item.completedPoints, item.totalPoints) }}%)
+                  </span>
                 </span>
               </div>
             </TableCell>
@@ -288,8 +332,18 @@ onMounted(() => {
             </TableCell>
             <TableCell>{{ formatDate(item.startTime) }}</TableCell>
             <TableCell>
-              <span v-if="item.timeSpentMinutes">{{ item.timeSpentMinutes }} 分钟</span>
-              <span v-else class="text-muted-foreground">-</span>
+              <template v-if="item.status === 'completed' && item.timeSpentMinutes">
+                <span>{{ formatTimeSpent(item.timeSpentMinutes) }}</span>
+              </template>
+              <template v-else-if="item.status === 'in_progress'">
+                <span class="flex items-center gap-1 text-blue-600">
+                  <Clock class="w-3 h-3" />
+                  {{ getElapsedTime(item.startTime) }}
+                </span>
+              </template>
+              <template v-else>
+                <span class="text-muted-foreground">-</span>
+              </template>
             </TableCell>
             <TableCell class="text-right">
               <Button variant="ghost" size="icon" @click="handleViewDetail(item)">
@@ -332,14 +386,26 @@ onMounted(() => {
               {{ getStatusInfo(currentProgress.status).label }}
             </Badge>
           </div>
+          
+          <!-- 进度条 -->
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-muted-foreground">完成进度</span>
+              <span class="font-medium">
+                {{ currentProgress.completedPoints }}/{{ currentProgress.totalPoints }}
+                ({{ getProgressPercent(currentProgress.completedPoints, currentProgress.totalPoints) }}%)
+              </span>
+            </div>
+            <Progress 
+              :model-value="getProgressPercent(currentProgress.completedPoints, currentProgress.totalPoints)" 
+              class="h-3" 
+            />
+          </div>
+          
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span class="text-muted-foreground">城市：</span>
               {{ currentProgress.cityName || '-' }}
-            </div>
-            <div>
-              <span class="text-muted-foreground">进度：</span>
-              {{ currentProgress.completedPoints }}/{{ currentProgress.totalPoints }}
             </div>
             <div>
               <span class="text-muted-foreground">开始时间：</span>
@@ -351,20 +417,46 @@ onMounted(() => {
             </div>
             <div>
               <span class="text-muted-foreground">花费时间：</span>
-              {{ currentProgress.timeSpentMinutes ? `${currentProgress.timeSpentMinutes} 分钟` : '-' }}
+              <template v-if="currentProgress.status === 'completed' && currentProgress.timeSpentMinutes">
+                {{ formatTimeSpent(currentProgress.timeSpentMinutes) }}
+              </template>
+              <template v-else-if="currentProgress.status === 'in_progress'">
+                <span class="text-blue-600">{{ getElapsedTime(currentProgress.startTime) }}（进行中）</span>
+              </template>
+              <template v-else>-</template>
             </div>
           </div>
+          
           <!-- 探索点完成情况 -->
-          <div v-if="currentProgress.pointCompletions?.length > 0">
-            <div class="font-medium mb-2">已完成探索点</div>
+          <div class="border-t pt-4">
+            <div class="font-medium mb-3">探索点完成情况</div>
             <div class="space-y-2">
+              <!-- 已完成的探索点 -->
               <div
                 v-for="pc in currentProgress.pointCompletions"
                 :key="pc.id"
-                class="flex items-center justify-between p-2 bg-muted rounded"
+                class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-lg"
               >
-                <span>{{ pc.point?.name }}</span>
+                <div class="flex items-center gap-2">
+                  <CheckCircle class="w-4 h-4 text-green-600" />
+                  <span>{{ pc.point?.name }}</span>
+                  <Badge variant="outline" class="text-xs">+{{ pc.pointsEarned }} 积分</Badge>
+                </div>
                 <span class="text-sm text-muted-foreground">{{ formatDate(pc.completeTime) }}</span>
+              </div>
+              <!-- 未完成的探索点提示 -->
+              <div 
+                v-if="currentProgress.completedPoints < currentProgress.totalPoints"
+                class="p-3 bg-muted/50 border border-dashed rounded-lg text-center text-sm text-muted-foreground"
+              >
+                还有 {{ currentProgress.totalPoints - currentProgress.completedPoints }} 个探索点待完成
+              </div>
+              <!-- 无数据提示 -->
+              <div 
+                v-if="!currentProgress.pointCompletions?.length && currentProgress.completedPoints === 0"
+                class="p-3 bg-muted/50 border border-dashed rounded-lg text-center text-sm text-muted-foreground"
+              >
+                暂无完成记录
               </div>
             </div>
           </div>

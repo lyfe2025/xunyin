@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -28,6 +29,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/toast/use-toast'
 import {
   Search,
@@ -38,11 +40,13 @@ import {
   Link2Off,
   Copy,
   Loader,
+  LinkIcon,
 } from 'lucide-vue-next'
 import {
   listUserSeal,
   getUserSeal,
   getUserSealStats,
+  chainUserSeal,
   type UserSeal,
   type UserSealStats,
 } from '@/api/xunyin/user-seal'
@@ -60,7 +64,7 @@ const total = ref(0)
 const stats = ref<UserSealStats | null>(null)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   nickname: '',
   sealName: '',
   sealType: undefined as string | undefined,
@@ -133,6 +137,50 @@ async function handleViewDetail(row: UserSeal) {
 function copyTxHash(hash: string) {
   navigator.clipboard.writeText(hash)
   toast({ title: '已复制交易哈希' })
+}
+
+// 上链确认弹窗
+const showChainDialog = ref(false)
+const chainLoading = ref(false)
+const chainTarget = ref<UserSeal | null>(null)
+const selectedChain = ref<'antchain' | 'chainmaker' | 'zhixin'>('antchain')
+
+const chainOptions = [
+  { value: 'antchain', label: '蚂蚁链', description: '蚂蚁集团区块链平台' },
+  { value: 'chainmaker', label: '长安链', description: '国产自主可控区块链' },
+  { value: 'zhixin', label: '至信链', description: '腾讯区块链平台' },
+]
+
+function openChainDialog(item: UserSeal) {
+  if (item.isChained) return
+  chainTarget.value = item
+  selectedChain.value = 'antchain'
+  showChainDialog.value = true
+}
+
+async function confirmChain() {
+  if (!chainTarget.value) return
+  
+  chainLoading.value = true
+  try {
+    // TODO: 这里预留对接公链的接口
+    // 实际对接时，根据 selectedChain.value 调用不同的区块链 SDK
+    // 例如：
+    // - antchain: 调用蚂蚁链 SDK
+    // - chainmaker: 调用长安链 SDK
+    // - zhixin: 调用至信链 SDK
+    
+    await chainUserSeal(chainTarget.value.id, { chainName: selectedChain.value })
+    toast({ title: '上链成功', description: `已成功上链至${chainOptions.find(c => c.value === selectedChain.value)?.label}` })
+    showChainDialog.value = false
+    showDetailDialog.value = false
+    getList()
+    loadStats()
+  } catch (e: any) {
+    toast({ title: '上链失败', description: e.message, variant: 'destructive' })
+  } finally {
+    chainLoading.value = false
+  }
 }
 
 // 导出
@@ -340,9 +388,20 @@ onMounted(() => {
               <span v-else class="text-muted-foreground">-</span>
             </TableCell>
             <TableCell class="text-right">
-              <Button variant="ghost" size="icon" @click="handleViewDetail(item)">
-                <Eye class="w-4 h-4" />
-              </Button>
+              <div class="flex items-center justify-end gap-1">
+                <Button 
+                  v-if="!item.isChained" 
+                  variant="ghost" 
+                  size="icon"
+                  @click="openChainDialog(item)"
+                  title="上链"
+                >
+                  <LinkIcon class="w-4 h-4 text-blue-600" />
+                </Button>
+                <Button variant="ghost" size="icon" @click="handleViewDetail(item)" title="查看详情">
+                  <Eye class="w-4 h-4" />
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -433,7 +492,83 @@ onMounted(() => {
               </div>
             </div>
           </div>
+          <div v-else class="p-4 bg-muted/50 border border-dashed rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-medium">未上链</div>
+                <div class="text-sm text-muted-foreground">该印记尚未上链存证</div>
+              </div>
+              <Button @click="openChainDialog(currentUserSeal)">
+                <LinkIcon class="w-4 h-4 mr-2" />
+                立即上链
+              </Button>
+            </div>
+          </div>
         </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 上链确认弹窗 -->
+    <Dialog v-model:open="showChainDialog">
+      <DialogContent class="sm:max-w-[450px]">
+        <DialogHeader>
+          <DialogTitle>印记上链</DialogTitle>
+          <DialogDescription>
+            将印记数据上链存证，上链后不可撤销
+          </DialogDescription>
+        </DialogHeader>
+        <div v-if="chainTarget" class="space-y-4 py-4">
+          <!-- 印记信息 -->
+          <div class="flex items-center gap-3 p-3 bg-muted rounded-lg">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Award class="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <div class="font-medium">{{ chainTarget.sealName }}</div>
+              <div class="text-sm text-muted-foreground">{{ chainTarget.nickname }}</div>
+            </div>
+          </div>
+          
+          <!-- 选择区块链 -->
+          <div class="space-y-3">
+            <Label>选择区块链</Label>
+            <div class="grid gap-2">
+              <div
+                v-for="chain in chainOptions"
+                :key="chain.value"
+                class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+                :class="selectedChain === chain.value ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'"
+                @click="selectedChain = chain.value as any"
+              >
+                <div 
+                  class="w-4 h-4 rounded-full border-2 flex items-center justify-center"
+                  :class="selectedChain === chain.value ? 'border-primary' : 'border-muted-foreground'"
+                >
+                  <div v-if="selectedChain === chain.value" class="w-2 h-2 rounded-full bg-primary" />
+                </div>
+                <div class="flex-1">
+                  <div class="font-medium">{{ chain.label }}</div>
+                  <div class="text-xs text-muted-foreground">{{ chain.description }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 提示信息 -->
+          <div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg">
+            <div class="text-sm text-amber-800 dark:text-amber-200">
+              <strong>注意：</strong>上链操作将把印记数据永久存储到区块链上，此操作不可撤销。
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" @click="showChainDialog = false" :disabled="chainLoading">取消</Button>
+          <Button @click="confirmChain" :disabled="chainLoading">
+            <Loader v-if="chainLoading" class="w-4 h-4 mr-2 animate-spin" />
+            <LinkIcon v-else class="w-4 h-4 mr-2" />
+            确认上链
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   </div>

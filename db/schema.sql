@@ -767,11 +767,13 @@ CREATE TABLE IF NOT EXISTS exploration_point (
   cultural_knowledge TEXT,
   distance_from_prev DECIMAL(10, 2),
   points_reward INT DEFAULT 50,
+  bgm_id VARCHAR(30),
   order_num INT NOT NULL,
   status CHAR(1) DEFAULT '0',
   create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   update_time TIMESTAMP,
-  FOREIGN KEY (journey_id) REFERENCES journey(id)
+  FOREIGN KEY (journey_id) REFERENCES journey(id),
+  FOREIGN KEY (bgm_id) REFERENCES background_music(id)
 );
 COMMENT ON TABLE exploration_point IS '探索点表';
 COMMENT ON COLUMN exploration_point.id IS '探索点ID（CUID）';
@@ -787,10 +789,12 @@ COMMENT ON COLUMN exploration_point.cultural_background IS '文化背景';
 COMMENT ON COLUMN exploration_point.cultural_knowledge IS '文化小知识';
 COMMENT ON COLUMN exploration_point.distance_from_prev IS '距上一点距离（米）';
 COMMENT ON COLUMN exploration_point.points_reward IS '积分奖励';
+COMMENT ON COLUMN exploration_point.bgm_id IS '背景音乐ID';
 COMMENT ON COLUMN exploration_point.order_num IS '排序';
 COMMENT ON COLUMN exploration_point.status IS '状态（0正常 1停用）';
 
 CREATE INDEX IF NOT EXISTS idx_exploration_point_journey_id ON exploration_point(journey_id);
+CREATE INDEX IF NOT EXISTS idx_exploration_point_bgm_id ON exploration_point(bgm_id);
 CREATE INDEX IF NOT EXISTS idx_exploration_point_status ON exploration_point(status);
 
 -- ----------------------------

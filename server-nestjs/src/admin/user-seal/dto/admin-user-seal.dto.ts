@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsBoolean, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsInt, Min, IsIn } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 export class QueryUserSealDto {
@@ -97,4 +97,49 @@ export class UserSealListVo {
 
     @ApiProperty({ description: '上链时间' })
     chainTime: Date | null;
+}
+
+
+export class ChainSealDto {
+    @ApiPropertyOptional({ 
+        description: '区块链名称', 
+        enum: ['antchain', 'chainmaker', 'zhixin'],
+        default: 'antchain' 
+    })
+    @IsOptional()
+    @IsString()
+    @IsIn(['antchain', 'chainmaker', 'zhixin'])
+    chainName?: string = 'antchain';
+}
+
+export class ChainSealVo {
+    @ApiProperty({ description: '记录ID' })
+    id: string;
+
+    @ApiProperty({ description: '印记ID' })
+    sealId: string;
+
+    @ApiProperty({ description: '印记名称' })
+    sealName: string;
+
+    @ApiProperty({ description: '用户ID' })
+    userId: string;
+
+    @ApiProperty({ description: '用户昵称' })
+    nickname: string;
+
+    @ApiProperty({ description: '是否已上链' })
+    isChained: boolean;
+
+    @ApiProperty({ description: '链名称' })
+    chainName: string;
+
+    @ApiProperty({ description: '交易哈希' })
+    txHash: string;
+
+    @ApiProperty({ description: '区块高度' })
+    blockHeight: string;
+
+    @ApiProperty({ description: '上链时间' })
+    chainTime: Date;
 }

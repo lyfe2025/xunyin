@@ -63,3 +63,29 @@ export function getUserSealStats() {
         method: 'get',
     }).then((res: any) => res.data)
 }
+
+
+export interface ChainSealParams {
+    chainName?: 'antchain' | 'chainmaker' | 'zhixin'
+}
+
+export interface ChainSealResult {
+    id: string
+    sealId: string
+    sealName: string
+    userId: string
+    nickname: string
+    isChained: boolean
+    chainName: string
+    txHash: string
+    blockHeight: string
+    chainTime: string
+}
+
+export function chainUserSeal(id: string, params?: ChainSealParams) {
+    return request<{ data: ChainSealResult }>({
+        url: `/admin/user-seals/${id}/chain`,
+        method: 'post',
+        data: params || { chainName: 'antchain' },
+    }).then((res: any) => res.data)
+}

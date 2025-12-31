@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   Table,
@@ -74,7 +74,7 @@ const cityOptions = ref<City[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   cityId: (route.query.cityId as string) || undefined,
   name: '',
   status: undefined as string | undefined,
@@ -88,6 +88,7 @@ const submitLoading = ref(false)
 
 // 批量选择
 const selectedIds = ref<string[]>([])
+const selectAll = ref(false)
 const showBatchDeleteDialog = ref(false)
 
 const form = reactive<JourneyForm>({
@@ -115,6 +116,7 @@ async function getList() {
     journeyList.value = res.list
     total.value = res.total
     selectedIds.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -245,17 +247,28 @@ async function confirmBatchDelete() {
   } catch {}
 }
 
-function handleSelectAll(checked: boolean) {
-  selectedIds.value = checked ? journeyList.value.map((j) => j.id) : []
-}
-
-function handleSelectOne(id: string, checked: boolean) {
-  if (checked) {
-    selectedIds.value.push(id)
+function handleSelectOne(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
   } else {
-    selectedIds.value = selectedIds.value.filter((i) => i !== id)
+    selectedIds.value.push(id)
   }
 }
+
+// 监听全选状态变化
+watch(selectAll, (newVal) => {
+  if (newVal) {
+    selectedIds.value = journeyList.value.map((j) => j.id)
+  } else if (selectedIds.value.length === journeyList.value.length) {
+    selectedIds.value = []
+  }
+})
+
+// 监听选中项变化，更新全选状态
+watch(selectedIds, (newVal) => {
+  selectAll.value = journeyList.value.length > 0 && newVal.length === journeyList.value.length
+}, { deep: true })
 
 function goToPoints(journeyId: string) {
   router.push({ path: '/xunyin/point', query: { journeyId } })
@@ -387,10 +400,7 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">
-              <Checkbox
-                :checked="selectedIds.length === journeyList.length && journeyList.length > 0"
-                @update:checked="handleSelectAll"
-              />
+              <Checkbox v-model="selectAll" />
             </TableHead>
             <TableHead>名称</TableHead>
             <TableHead>所属城市</TableHead>
@@ -407,8 +417,8 @@ onMounted(() => {
           <TableRow v-for="journey in journeyList" :key="journey.id">
             <TableCell>
               <Checkbox
-                :checked="selectedIds.includes(journey.id)"
-                @update:checked="(checked: boolean) => handleSelectOne(journey.id, checked)"
+                :model-value="selectedIds.includes(journey.id)"
+                @update:model-value="() => handleSelectOne(journey.id)"
               />
             </TableCell>
             <TableCell>

@@ -36,6 +36,9 @@ export class AdminPointService {
           journey: {
             select: { id: true, name: true, city: { select: { name: true } } },
           },
+          bgm: {
+            select: { id: true, name: true, url: true },
+          },
         },
         orderBy: { orderNum: 'asc' },
         skip: (pageNum - 1) * pageSize,
@@ -54,6 +57,8 @@ export class AdminPointService {
           : null,
         journeyName: point.journey?.name,
         cityName: point.journey?.city?.name,
+        bgmName: point.bgm?.name,
+        bgmUrl: point.bgm?.url,
       })),
       total,
       pageNum,
@@ -67,6 +72,9 @@ export class AdminPointService {
       include: {
         journey: {
           select: { id: true, name: true, city: { select: { name: true } } },
+        },
+        bgm: {
+          select: { id: true, name: true, url: true },
         },
       },
     });
@@ -82,6 +90,8 @@ export class AdminPointService {
         : null,
       journeyName: point.journey?.name,
       cityName: point.journey?.city?.name,
+      bgmName: point.bgm?.name,
+      bgmUrl: point.bgm?.url,
     };
   }
 

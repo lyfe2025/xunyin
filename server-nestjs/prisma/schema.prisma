@@ -644,16 +644,19 @@ model ExplorationPoint {
   culturalKnowledge   String?   @map("cultural_knowledge") @db.Text  // 文化小知识
   distanceFromPrev    Decimal?  @map("distance_from_prev") @db.Decimal(10, 2)
   pointsReward        Int       @default(50) @map("points_reward")
+  bgmId               String?   @map("bgm_id")                       // 背景音乐ID
   orderNum            Int       @map("order_num")
   status              String    @default("0") @db.Char(1)
   createTime          DateTime  @default(now()) @map("create_time")
   updateTime          DateTime  @updatedAt @map("update_time")
 
   journey             Journey   @relation(fields: [journeyId], references: [id])
+  bgm                 BackgroundMusic? @relation(fields: [bgmId], references: [id])
   completions         PointCompletion[]
   photos              ExplorationPhoto[]
 
   @@index([journeyId])
+  @@index([bgmId])
   @@index([status])
   @@map("exploration_point")
 }
@@ -799,13 +802,15 @@ model BackgroundMusic {
   id              String    @id @default(cuid())
   name            String    @db.VarChar(100)
   url             String    @db.VarChar(255)
-  context         String    @db.VarChar(20)                          // home, city, journey
+  context         String    @db.VarChar(20)                          // home, city, journey, point
   contextId       String?   @map("context_id")                       // 城市ID或文化之旅ID
   duration        Int?                                               // 时长(秒)
   orderNum        Int       @default(0) @map("order_num")
   status          String    @default("0") @db.Char(1)
   createTime      DateTime  @default(now()) @map("create_time")
   updateTime      DateTime  @updatedAt @map("update_time")
+
+  points          ExplorationPoint[]
 
   @@index([context, contextId])
   @@index([status])

@@ -64,7 +64,7 @@ const jobList = ref<SysJob[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   jobName: '',
   jobGroup: '',
   status: undefined

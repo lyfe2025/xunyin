@@ -7,6 +7,8 @@ import { AdminDashboardModule } from './dashboard/admin-dashboard.module';
 import { AdminAppUserModule } from './appuser/admin-appuser.module';
 import { AdminProgressModule } from './progress/admin-progress.module';
 import { AdminUserSealModule } from './user-seal/admin-user-seal.module';
+import { AdminBgmModule } from './bgm/admin-bgm.module';
+import { AdminPhotoModule } from './photo/admin-photo.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { AdminUserSealModule } from './user-seal/admin-user-seal.module';
     AdminAppUserModule,
     AdminProgressModule,
     AdminUserSealModule,
+    AdminBgmModule,
+    AdminPhotoModule,
   ],
 })
 export class AdminModule { }

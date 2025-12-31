@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   Table,
@@ -72,7 +72,7 @@ const cityList = ref<City[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   name: '',
   province: '',
   status: undefined as string | undefined,
@@ -86,6 +86,7 @@ const submitLoading = ref(false)
 
 // 批量选择
 const selectedIds = ref<string[]>([])
+const selectAll = ref(false)
 const showBatchDeleteDialog = ref(false)
 const showMapPicker = ref(false)
 
@@ -111,6 +112,7 @@ async function getList() {
     cityList.value = res.list
     total.value = res.total
     selectedIds.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -262,18 +264,28 @@ async function confirmBatchDelete() {
   } catch {}
 }
 
-// 全选
-function handleSelectAll(checked: boolean) {
-  selectedIds.value = checked ? cityList.value.map((c) => c.id) : []
-}
-
-function handleSelectOne(id: string, checked: boolean) {
-  if (checked) {
-    selectedIds.value.push(id)
+function handleSelectOne(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
   } else {
-    selectedIds.value = selectedIds.value.filter((i) => i !== id)
+    selectedIds.value.push(id)
   }
 }
+
+// 监听全选状态变化
+watch(selectAll, (newVal) => {
+  if (newVal) {
+    selectedIds.value = cityList.value.map((c) => c.id)
+  } else if (selectedIds.value.length === cityList.value.length) {
+    selectedIds.value = []
+  }
+})
+
+// 监听选中项变化，更新全选状态
+watch(selectedIds, (newVal) => {
+  selectAll.value = cityList.value.length > 0 && newVal.length === cityList.value.length
+}, { deep: true })
 
 // 跳转到文化之旅页面并筛选
 function goToJourneys(cityId: string) {
@@ -410,10 +422,7 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">
-              <Checkbox
-                :checked="selectedIds.length === cityList.length && cityList.length > 0"
-                @update:checked="handleSelectAll"
-              />
+              <Checkbox v-model="selectAll" />
             </TableHead>
             <TableHead>城市</TableHead>
             <TableHead>省份</TableHead>
@@ -429,8 +438,8 @@ onMounted(() => {
           <TableRow v-for="city in cityList" :key="city.id">
             <TableCell>
               <Checkbox
-                :checked="selectedIds.includes(city.id)"
-                @update:checked="(checked: boolean) => handleSelectOne(city.id, checked)"
+                :model-value="selectedIds.includes(city.id)"
+                @update:model-value="() => handleSelectOne(city.id)"
               />
             </TableCell>
             <TableCell>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import {
   Table,
   TableBody,
@@ -66,7 +66,7 @@ const userList = ref<AppUser[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   phone: '',
   email: '',
   nickname: '',
@@ -96,7 +96,7 @@ function getLoginTypeInfo(type: string) {
 
 // 批量选择
 const selectedIds = ref<string[]>([])
-
+const selectAll = ref(false)
 // 详情弹窗
 const showDetailDialog = ref(false)
 const currentUser = ref<AppUser | null>(null)
@@ -120,6 +120,7 @@ async function getList() {
     userList.value = res.list
     total.value = res.total
     selectedIds.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -162,17 +163,28 @@ async function handleDetail(row: AppUser) {
 }
 
 // 批量选择
-function handleSelectAll(checked: boolean) {
-  selectedIds.value = checked ? userList.value.map((u) => u.id) : []
-}
-
-function handleSelectOne(id: string, checked: boolean) {
-  if (checked) {
-    selectedIds.value.push(id)
+function handleSelectOne(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
   } else {
-    selectedIds.value = selectedIds.value.filter((i) => i !== id)
+    selectedIds.value.push(id)
   }
 }
+
+// 监听全选状态变化
+watch(selectAll, (newVal) => {
+  if (newVal) {
+    selectedIds.value = userList.value.map((u) => u.id)
+  } else if (selectedIds.value.length === userList.value.length) {
+    selectedIds.value = []
+  }
+})
+
+// 监听选中项变化，更新全选状态
+watch(selectedIds, (newVal) => {
+  selectAll.value = userList.value.length > 0 && newVal.length === userList.value.length
+}, { deep: true })
 
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
@@ -211,7 +223,7 @@ const verificationList = ref<UserVerification[]>([])
 const verificationTotal = ref(0)
 const verificationQuery = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   realName: '',
   status: undefined as 'pending' | 'approved' | 'rejected' | undefined,
 })
@@ -401,10 +413,7 @@ onMounted(() => {
             <TableHeader>
               <TableRow>
                 <TableHead class="w-[50px]">
-                  <Checkbox
-                    :checked="selectedIds.length === userList.length && userList.length > 0"
-                    @update:checked="handleSelectAll"
-                  />
+                  <Checkbox v-model="selectAll" />
                 </TableHead>
                 <TableHead>用户</TableHead>
                 <TableHead>联系方式</TableHead>
@@ -421,8 +430,8 @@ onMounted(() => {
               <TableRow v-for="user in userList" :key="user.id">
                 <TableCell>
                   <Checkbox
-                    :checked="selectedIds.includes(user.id)"
-                    @update:checked="(checked: boolean) => handleSelectOne(user.id, checked)"
+                    :model-value="selectedIds.includes(user.id)"
+                    @update:model-value="() => handleSelectOne(user.id)"
                   />
                 </TableCell>
                 <TableCell>
