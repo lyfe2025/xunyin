@@ -347,7 +347,7 @@ CREATE TABLE IF NOT EXISTS sys_config (
   config_id BIGSERIAL PRIMARY KEY,
   config_name VARCHAR(100) DEFAULT '',
   config_key VARCHAR(100) DEFAULT '',
-  config_value VARCHAR(500) DEFAULT '',
+  config_value TEXT DEFAULT '',
   config_type CHAR(1) DEFAULT 'N',
   create_by VARCHAR(64) DEFAULT '',
   create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

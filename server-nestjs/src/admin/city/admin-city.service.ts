@@ -13,7 +13,7 @@ export class AdminCityService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAdminCityDto) {
-    const { name, province, status, pageNum = 1, pageSize = 10 } = query;
+    const { name, province, status, pageNum = 1, pageSize = 20 } = query;
 
     const where = {
       ...(name && { name: { contains: name } }),

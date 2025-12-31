@@ -19,7 +19,7 @@ export class DictDataService {
     if (query.dictLabel) where.dictLabel = { contains: query.dictLabel };
     if (query.status) where.status = query.status;
     const pageNum = Number(query.pageNum ?? 1);
-    const pageSize = Number(query.pageSize ?? 10);
+    const pageSize = Number(query.pageSize ?? 20);
     const [total, rows] = await Promise.all([
       this.prisma.sysDictData.count({ where }),
       this.prisma.sysDictData.findMany({

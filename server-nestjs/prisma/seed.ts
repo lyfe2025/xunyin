@@ -1118,12 +1118,42 @@ async function main() {
     icon: 'smartphone',
     isFrame: 1,
   });
+  // 用户进度管理
+  await ensureMenu({
+    menuName: '用户进度',
+    parentId: xunyinDir.menuId,
+    path: 'progress',
+    component: 'xunyin/progress/index',
+    orderNum: 6,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:progress:list',
+    icon: 'list-checks',
+    isFrame: 1,
+  });
+
+  // 用户印记管理
+  await ensureMenu({
+    menuName: '用户印记',
+    parentId: xunyinDir.menuId,
+    path: 'user-seal',
+    component: 'xunyin/user-seal/index',
+    orderNum: 7,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'xunyin:userseal:list',
+    icon: 'award',
+    isFrame: 1,
+  });
+
   await ensureMenu({
     menuName: '数据统计',
     parentId: xunyinDir.menuId,
     path: 'stats',
     component: 'xunyin/dashboard/index',
-    orderNum: 6,
+    orderNum: 8,
     menuType: 'C',
     visible: '0',
     status: '0',
@@ -1271,6 +1301,29 @@ async function main() {
       orderNum: 1,
     });
   }
+
+  // 用户进度按钮权限
+  const progressMenu = await getMenuByPath(xunyinDir.menuId, 'progress');
+  if (progressMenu) {
+    await ensureButton({
+      menuName: '用户进度查询',
+      parentId: progressMenu.menuId,
+      perms: 'xunyin:progress:query',
+      orderNum: 1,
+    });
+  }
+
+  // 用户印记按钮权限
+  const userSealMenu = await getMenuByPath(xunyinDir.menuId, 'user-seal');
+  if (userSealMenu) {
+    await ensureButton({
+      menuName: '用户印记查询',
+      parentId: userSealMenu.menuId,
+      perms: 'xunyin:userseal:query',
+      orderNum: 1,
+    });
+  }
+
   console.log('Initialized xunyin menus');
 
   // 6. 为不同角色分配菜单权限
@@ -2254,6 +2307,118 @@ async function main() {
       configValue: '',
       configType: 'Y',
     },
+    {
+      configName: '用户协议内容',
+      configKey: 'app.userAgreementContent',
+      configValue: `<h1>用户服务协议</h1>
+<p>欢迎使用寻印！在使用本应用前，请您仔细阅读以下协议条款。</p>
+
+<h2>一、服务说明</h2>
+<p>寻印是一款城市文化探索与数字印记收藏平台，为用户提供以下服务：</p>
+<ul>
+  <li>城市文化之旅探索</li>
+  <li>探索点打卡与任务完成</li>
+  <li>数字印记收集与展示</li>
+  <li>个人探索记录管理</li>
+</ul>
+
+<h2>二、用户账号</h2>
+<p>1. 您需要注册账号才能使用本应用的完整功能。</p>
+<p>2. 您应妥善保管账号信息，因账号泄露造成的损失由您自行承担。</p>
+<p>3. 禁止将账号转让、出借给他人使用。</p>
+
+<h2>三、用户行为规范</h2>
+<p>使用本应用时，您承诺：</p>
+<ul>
+  <li>遵守国家法律法规</li>
+  <li>不发布违法、有害信息</li>
+  <li>不干扰应用正常运行</li>
+  <li>尊重其他用户权益</li>
+</ul>
+
+<h2>四、知识产权</h2>
+<p>本应用的所有内容（包括但不限于文字、图片、音频、视频、软件）的知识产权归寻印所有，未经授权不得使用。</p>
+
+<h2>五、免责声明</h2>
+<p>1. 因不可抗力导致的服务中断，我们不承担责任。</p>
+<p>2. 用户在探索过程中应注意人身安全，因用户自身原因造成的损失由用户自行承担。</p>
+
+<h2>六、协议修改</h2>
+<p>我们保留随时修改本协议的权利，修改后的协议将在应用内公布。继续使用本应用即表示您接受修改后的协议。</p>
+
+<p><strong>如您对本协议有任何疑问，请联系我们。</strong></p>`,
+      configType: 'Y',
+    },
+    {
+      configName: '隐私政策内容',
+      configKey: 'app.privacyPolicyContent',
+      configValue: `<h1>隐私政策</h1>
+<p>寻印非常重视您的隐私保护。本隐私政策说明我们如何收集、使用和保护您的个人信息。</p>
+
+<h2>一、信息收集</h2>
+<p>我们可能收集以下类型的信息：</p>
+
+<h3>1. 您主动提供的信息</h3>
+<ul>
+  <li>注册信息：手机号、昵称、头像</li>
+  <li>个人资料：性别、生日、个性签名</li>
+</ul>
+
+<h3>2. 自动收集的信息</h3>
+<ul>
+  <li>设备信息：设备型号、操作系统版本</li>
+  <li>位置信息：用于探索点打卡功能（需您授权）</li>
+  <li>使用记录：探索记录、印记收集记录</li>
+</ul>
+
+<h2>二、信息使用</h2>
+<p>我们使用收集的信息用于：</p>
+<ul>
+  <li>提供、维护和改进我们的服务</li>
+  <li>验证您的身份和位置</li>
+  <li>记录您的探索进度和成就</li>
+  <li>向您发送服务通知</li>
+  <li>保障服务安全</li>
+</ul>
+
+<h2>三、信息共享</h2>
+<p>我们不会向第三方出售您的个人信息。仅在以下情况下可能共享：</p>
+<ul>
+  <li>获得您的明确同意</li>
+  <li>法律法规要求</li>
+  <li>保护我们或用户的合法权益</li>
+</ul>
+
+<h2>四、信息安全</h2>
+<p>我们采取多种安全措施保护您的信息：</p>
+<ul>
+  <li>数据加密传输和存储</li>
+  <li>访问权限控制</li>
+  <li>安全审计和监控</li>
+</ul>
+
+<h2>五、您的权利</h2>
+<p>您有权：</p>
+<ul>
+  <li>访问和更正您的个人信息</li>
+  <li>删除您的账号和数据</li>
+  <li>撤回授权同意</li>
+  <li>获取个人信息副本</li>
+</ul>
+
+<h2>六、未成年人保护</h2>
+<p>我们非常重视未成年人的隐私保护。如果您是未成年人，请在监护人指导下使用本应用。</p>
+
+<h2>七、政策更新</h2>
+<p>我们可能会更新本隐私政策。更新后的政策将在应用内公布，请定期查阅。</p>
+
+<h2>八、联系我们</h2>
+<p>如您对本隐私政策有任何疑问，请通过以下方式联系我们：</p>
+<p>邮箱：privacy@xunyin.app</p>
+
+<p><em>最后更新日期：2025年1月</em></p>`,
+      configType: 'Y',
+    },
   ];
   for (const cfg of configsToSeed) {
     const exists = await prisma.sysConfig.findFirst({
@@ -3154,11 +3319,175 @@ async function main() {
         nickname: '探索者小明',
         avatar: '',
         loginType: 'wechat',
-        totalPoints: 0,
+        totalPoints: 520,
         status: '0',
       },
     });
     console.log(`Created demo app user: ${demoUser.nickname}`);
+
+    // 创建第二个示例用户
+    const demoUser2 = await prisma.appUser.create({
+      data: {
+        phone: '13900139000',
+        nickname: '文化行者',
+        avatar: '',
+        loginType: 'email',
+        totalPoints: 320,
+        status: '0',
+      },
+    });
+    console.log(`Created demo app user: ${demoUser2.nickname}`);
+
+    // 创建第三个示例用户
+    const demoUser3 = await prisma.appUser.create({
+      data: {
+        phone: '13700137000',
+        nickname: '印记收藏家',
+        avatar: '',
+        loginType: 'wechat',
+        totalPoints: 850,
+        status: '0',
+      },
+    });
+    console.log(`Created demo app user: ${demoUser3.nickname}`);
+
+    // 获取已创建的印记
+    const allSeals = await prisma.seal.findMany();
+    const westLakeSeal = allSeals.find((s) => s.name === '西湖探秘者');
+    const lingyinSeal = allSeals.find((s) => s.name === '禅心悟道');
+    const hangzhouCitySeal = allSeals.find((s) => s.name === '杭州印记');
+
+    // 创建用户进度数据
+    // 用户1: 西湖十景探秘 - 已完成
+    await prisma.journeyProgress.create({
+      data: {
+        userId: demoUser.id,
+        journeyId: westLakeJourney.id,
+        status: 'completed',
+        startTime: new Date('2025-01-10T09:00:00Z'),
+        completeTime: new Date('2025-01-10T15:30:00Z'),
+        timeSpentMinutes: 390,
+      },
+    });
+
+    // 用户1: 灵隐禅踪 - 进行中
+    await prisma.journeyProgress.create({
+      data: {
+        userId: demoUser.id,
+        journeyId: lingyinJourney.id,
+        status: 'in_progress',
+        startTime: new Date('2025-01-15T10:00:00Z'),
+      },
+    });
+
+    // 用户2: 三坊七巷寻古 - 进行中
+    await prisma.journeyProgress.create({
+      data: {
+        userId: demoUser2.id,
+        journeyId: sanfangqixiangJourney.id,
+        status: 'in_progress',
+        startTime: new Date('2025-01-12T14:00:00Z'),
+      },
+    });
+
+    // 用户3: 西湖十景探秘 - 已完成
+    await prisma.journeyProgress.create({
+      data: {
+        userId: demoUser3.id,
+        journeyId: westLakeJourney.id,
+        status: 'completed',
+        startTime: new Date('2025-01-05T08:00:00Z'),
+        completeTime: new Date('2025-01-05T14:00:00Z'),
+        timeSpentMinutes: 360,
+      },
+    });
+
+    // 用户3: 灵隐禅踪 - 已完成
+    await prisma.journeyProgress.create({
+      data: {
+        userId: demoUser3.id,
+        journeyId: lingyinJourney.id,
+        status: 'completed',
+        startTime: new Date('2025-01-06T09:00:00Z'),
+        completeTime: new Date('2025-01-06T12:00:00Z'),
+        timeSpentMinutes: 180,
+      },
+    });
+
+    // 用户3: 三坊七巷寻古 - 进行中
+    await prisma.journeyProgress.create({
+      data: {
+        userId: demoUser3.id,
+        journeyId: sanfangqixiangJourney.id,
+        status: 'in_progress',
+        startTime: new Date('2025-01-20T10:00:00Z'),
+      },
+    });
+
+    console.log('Created journey progress data');
+
+    // 创建用户印记数据
+    // 用户1: 西湖探秘者印记 - 已上链
+    if (westLakeSeal) {
+      await prisma.userSeal.create({
+        data: {
+          userId: demoUser.id,
+          sealId: westLakeSeal.id,
+          earnedTime: new Date('2025-01-10T15:30:00Z'),
+          isChained: true,
+          chainName: 'antchain',
+          txHash: '0x' + 'a'.repeat(64),
+          blockHeight: BigInt(10234567),
+          chainTime: new Date('2025-01-10T16:00:00Z'),
+        },
+      });
+    }
+
+    // 用户3: 西湖探秘者印记 - 已上链
+    if (westLakeSeal) {
+      await prisma.userSeal.create({
+        data: {
+          userId: demoUser3.id,
+          sealId: westLakeSeal.id,
+          earnedTime: new Date('2025-01-05T14:00:00Z'),
+          isChained: true,
+          chainName: 'antchain',
+          txHash: '0x' + 'b'.repeat(64),
+          blockHeight: BigInt(10234123),
+          chainTime: new Date('2025-01-05T14:30:00Z'),
+        },
+      });
+    }
+
+    // 用户3: 禅心悟道印记 - 未上链
+    if (lingyinSeal) {
+      await prisma.userSeal.create({
+        data: {
+          userId: demoUser3.id,
+          sealId: lingyinSeal.id,
+          earnedTime: new Date('2025-01-06T12:00:00Z'),
+          isChained: false,
+        },
+      });
+    }
+
+    // 用户3: 杭州城市印记 - 已上链
+    if (hangzhouCitySeal) {
+      await prisma.userSeal.create({
+        data: {
+          userId: demoUser3.id,
+          sealId: hangzhouCitySeal.id,
+          earnedTime: new Date('2025-01-06T12:30:00Z'),
+          isChained: true,
+          chainName: 'chainmaker',
+          txHash: '0x' + 'c'.repeat(64),
+          blockHeight: BigInt(10235000),
+          chainTime: new Date('2025-01-06T13:00:00Z'),
+        },
+      });
+    }
+
+    console.log('Created user seal data');
 
     console.log('Xunyin business data seeding completed.');
   }

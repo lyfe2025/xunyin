@@ -114,7 +114,7 @@ export class UserService {
       status,
       deptId,
       pageNum = 1,
-      pageSize = 10,
+      pageSize = 20,
     } = query;
     const skip = (pageNum - 1) * pageSize;
 

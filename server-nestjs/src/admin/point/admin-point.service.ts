@@ -19,7 +19,7 @@ export class AdminPointService {
       taskType,
       status,
       pageNum = 1,
-      pageSize = 10,
+      pageSize = 20,
     } = query;
 
     const where = {

@@ -16,7 +16,7 @@ export class DictService {
   async listTypes(query: QueryDictTypeDto) {
     const { dictName, dictType, status } = query;
     const pageNum = Number(query.pageNum ?? 1);
-    const pageSize = Number(query.pageSize ?? 10);
+    const pageSize = Number(query.pageSize ?? 20);
     const where: Prisma.SysDictTypeWhereInput = {};
     if (dictName) where.dictName = { contains: dictName };
     if (dictType) where.dictType = { contains: dictType };

@@ -21,7 +21,7 @@ export class AdminAppUserService {
       isVerified,
       status,
       pageNum = 1,
-      pageSize = 10,
+      pageSize = 20,
     } = query;
 
     const where = {
@@ -78,7 +78,7 @@ export class AdminAppUserService {
   // ========== 实名认证管理 ==========
 
   async findVerifications(query: QueryVerificationDto) {
-    const { userId, realName, status, pageNum = 1, pageSize = 10 } = query;
+    const { userId, realName, status, pageNum = 1, pageSize = 20 } = query;
 
     const where = {
       ...(userId && { userId }),

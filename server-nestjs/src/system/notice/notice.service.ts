@@ -19,7 +19,7 @@ export class NoticeService {
     if (query.noticeTitle) where.noticeTitle = { contains: query.noticeTitle };
     if (query.noticeType) where.noticeType = query.noticeType;
     const pageNum = Number(query.pageNum ?? 1);
-    const pageSize = Number(query.pageSize ?? 10);
+    const pageSize = Number(query.pageSize ?? 20);
     const [total, rows] = await Promise.all([
       this.prisma.sysNotice.count({ where }),
       this.prisma.sysNotice.findMany({

@@ -945,7 +945,17 @@ FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-SELECT '数据统计', 'stats', 'xunyin/dashboard/index', 6, 'C', '0', '0', 'chart-bar', 1, menu_id, 'xunyin:stats:view'
+SELECT '用户进度', 'progress', 'xunyin/progress/index', 6, 'C', '0', '0', 'list-checks', 1, menu_id, 'xunyin:progress:list'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '用户印记', 'user-seal', 'xunyin/user-seal/index', 7, 'C', '0', '0', 'award', 1, menu_id, 'xunyin:userseal:list'
+FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
+ON CONFLICT DO NOTHING;
+
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '数据统计', 'stats', 'xunyin/dashboard/index', 8, 'C', '0', '0', 'chart-bar', 1, menu_id, 'xunyin:stats:view'
 FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL
 ON CONFLICT DO NOTHING;
 
@@ -1049,7 +1059,19 @@ SELECT 'App用户禁用', '', '', 3, 'F', '1', '0', '#', 1, menu_id, 'xunyin:app
 FROM sys_menu WHERE path = 'appuser' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
 ON CONFLICT DO NOTHING;
 
--- 18.8 为超级管理员分配寻印管理权限
+-- 18.8 用户进度按钮
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '用户进度查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'xunyin:progress:query'
+FROM sys_menu WHERE path = 'progress' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.9 用户印记按钮
+INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
+SELECT '用户印记查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'xunyin:userseal:query'
+FROM sys_menu WHERE path = 'user-seal' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'xunyin' AND parent_id IS NULL)
+ON CONFLICT DO NOTHING;
+
+-- 18.10 为超级管理员分配寻印管理权限
 INSERT INTO sys_role_menu (role_id, menu_id)
 SELECT r.role_id, m.menu_id
 FROM sys_role r, sys_menu m
@@ -1271,7 +1293,177 @@ ON CONFLICT DO NOTHING;
 
 -- 24. 示例 App 用户
 INSERT INTO app_user (phone, nickname, avatar, login_type, total_points, status, create_time)
-VALUES ('13800138000', '探索者小明', '', 'wechat', 0, '0', NOW())
+VALUES ('13800138000', '探索者小明', '', 'wechat', 520, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO app_user (phone, nickname, avatar, login_type, total_points, status, create_time)
+VALUES ('13900139000', '文化行者', '', 'email', 320, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO app_user (phone, nickname, avatar, login_type, total_points, status, create_time)
+VALUES ('13700137000', '印记收藏家', '', 'wechat', 850, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+
+-- 25. 用户进度数据
+-- 用户1: 西湖十景探秘 - 已完成
+INSERT INTO journey_progress (id, user_id, journey_id, status, start_time, complete_time, time_spent_minutes, create_time, update_time)
+SELECT 
+  'progress_demo_1',
+  u.id,
+  j.id,
+  'completed',
+  '2025-01-10 09:00:00',
+  '2025-01-10 15:30:00',
+  390,
+  NOW(),
+  NOW()
+FROM app_user u, journey j
+WHERE u.phone = '13800138000' AND j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+-- 用户1: 灵隐禅踪 - 进行中
+INSERT INTO journey_progress (id, user_id, journey_id, status, start_time, create_time, update_time)
+SELECT 
+  'progress_demo_2',
+  u.id,
+  j.id,
+  'in_progress',
+  '2025-01-15 10:00:00',
+  NOW(),
+  NOW()
+FROM app_user u, journey j
+WHERE u.phone = '13800138000' AND j.name = '灵隐禅踪'
+ON CONFLICT DO NOTHING;
+
+-- 用户2: 三坊七巷寻古 - 进行中
+INSERT INTO journey_progress (id, user_id, journey_id, status, start_time, create_time, update_time)
+SELECT 
+  'progress_demo_3',
+  u.id,
+  j.id,
+  'in_progress',
+  '2025-01-12 14:00:00',
+  NOW(),
+  NOW()
+FROM app_user u, journey j
+WHERE u.phone = '13900139000' AND j.name = '三坊七巷寻古'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 西湖十景探秘 - 已完成
+INSERT INTO journey_progress (id, user_id, journey_id, status, start_time, complete_time, time_spent_minutes, create_time, update_time)
+SELECT 
+  'progress_demo_4',
+  u.id,
+  j.id,
+  'completed',
+  '2025-01-05 08:00:00',
+  '2025-01-05 14:00:00',
+  360,
+  NOW(),
+  NOW()
+FROM app_user u, journey j
+WHERE u.phone = '13700137000' AND j.name = '西湖十景探秘'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 灵隐禅踪 - 已完成
+INSERT INTO journey_progress (id, user_id, journey_id, status, start_time, complete_time, time_spent_minutes, create_time, update_time)
+SELECT 
+  'progress_demo_5',
+  u.id,
+  j.id,
+  'completed',
+  '2025-01-06 09:00:00',
+  '2025-01-06 12:00:00',
+  180,
+  NOW(),
+  NOW()
+FROM app_user u, journey j
+WHERE u.phone = '13700137000' AND j.name = '灵隐禅踪'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 三坊七巷寻古 - 进行中
+INSERT INTO journey_progress (id, user_id, journey_id, status, start_time, create_time, update_time)
+SELECT 
+  'progress_demo_6',
+  u.id,
+  j.id,
+  'in_progress',
+  '2025-01-20 10:00:00',
+  NOW(),
+  NOW()
+FROM app_user u, journey j
+WHERE u.phone = '13700137000' AND j.name = '三坊七巷寻古'
+ON CONFLICT DO NOTHING;
+
+
+-- 26. 用户印记数据
+-- 用户1: 西湖探秘者印记 - 已上链
+INSERT INTO user_seal (id, user_id, seal_id, earned_time, is_chained, chain_name, tx_hash, block_height, chain_time, create_time, update_time)
+SELECT 
+  'userseal_demo_1',
+  u.id,
+  s.id,
+  '2025-01-10 15:30:00',
+  true,
+  'antchain',
+  '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  10234567,
+  '2025-01-10 16:00:00',
+  NOW(),
+  NOW()
+FROM app_user u, seal s
+WHERE u.phone = '13800138000' AND s.name = '西湖探秘者'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 西湖探秘者印记 - 已上链
+INSERT INTO user_seal (id, user_id, seal_id, earned_time, is_chained, chain_name, tx_hash, block_height, chain_time, create_time, update_time)
+SELECT 
+  'userseal_demo_2',
+  u.id,
+  s.id,
+  '2025-01-05 14:00:00',
+  true,
+  'antchain',
+  '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+  10234123,
+  '2025-01-05 14:30:00',
+  NOW(),
+  NOW()
+FROM app_user u, seal s
+WHERE u.phone = '13700137000' AND s.name = '西湖探秘者'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 禅心悟道印记 - 未上链
+INSERT INTO user_seal (id, user_id, seal_id, earned_time, is_chained, create_time, update_time)
+SELECT 
+  'userseal_demo_3',
+  u.id,
+  s.id,
+  '2025-01-06 12:00:00',
+  false,
+  NOW(),
+  NOW()
+FROM app_user u, seal s
+WHERE u.phone = '13700137000' AND s.name = '禅心悟道'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 杭州城市印记 - 已上链
+INSERT INTO user_seal (id, user_id, seal_id, earned_time, is_chained, chain_name, tx_hash, block_height, chain_time, create_time, update_time)
+SELECT 
+  'userseal_demo_4',
+  u.id,
+  s.id,
+  '2025-01-06 12:30:00',
+  true,
+  'chainmaker',
+  '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+  10235000,
+  '2025-01-06 13:00:00',
+  NOW(),
+  NOW()
+FROM app_user u, seal s
+WHERE u.phone = '13700137000' AND s.name = '杭州印记'
 ON CONFLICT DO NOTHING;
 
 
@@ -1283,12 +1475,16 @@ DECLARE
   point_count INTEGER;
   seal_count INTEGER;
   appuser_count INTEGER;
+  progress_count INTEGER;
+  userseal_count INTEGER;
 BEGIN
   SELECT COUNT(*) INTO city_count FROM city;
   SELECT COUNT(*) INTO journey_count FROM journey;
   SELECT COUNT(*) INTO point_count FROM exploration_point;
   SELECT COUNT(*) INTO seal_count FROM seal;
   SELECT COUNT(*) INTO appuser_count FROM app_user;
+  SELECT COUNT(*) INTO progress_count FROM journey_progress;
+  SELECT COUNT(*) INTO userseal_count FROM user_seal;
   
   RAISE NOTICE '==============================================';
   RAISE NOTICE '寻印业务数据导入完成！';
@@ -1299,5 +1495,7 @@ BEGIN
   RAISE NOTICE '- 探索点：% 个', point_count;
   RAISE NOTICE '- 印记：% 个', seal_count;
   RAISE NOTICE '- App用户：% 个', appuser_count;
+  RAISE NOTICE '- 用户进度：% 条', progress_count;
+  RAISE NOTICE '- 用户印记：% 个', userseal_count;
   RAISE NOTICE '==============================================';
 END $;

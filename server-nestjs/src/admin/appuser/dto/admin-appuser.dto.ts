@@ -59,7 +59,7 @@ export class QueryAppUserDto {
   @IsNumber()
   @Min(1)
   @Max(100)
-  pageSize?: number = 10;
+  pageSize?: number = 20;
 }
 
 export class ChangeStatusDto {
@@ -102,7 +102,7 @@ export class QueryVerificationDto {
   @IsNumber()
   @Min(1)
   @Max(100)
-  pageSize?: number = 10;
+  pageSize?: number = 20;
 }
 
 // 审核实名认证

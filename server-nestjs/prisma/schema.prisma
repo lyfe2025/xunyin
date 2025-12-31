@@ -383,7 +383,7 @@ model SysConfig {
   /// 参数键名
   configKey   String?   @default("") @map("config_key") @db.VarChar(100)
   /// 参数键值
-  configValue String?   @default("") @map("config_value") @db.VarChar(500)
+  configValue String?   @default("") @map("config_value") @db.Text
   /// 系统内置（Y是 N否）
   configType  String?   @default("N") @map("config_type") @db.Char(1)
   /// 创建者

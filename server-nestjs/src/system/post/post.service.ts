@@ -20,7 +20,7 @@ export class PostService {
     if (query.status) where.status = query.status;
 
     const pageNum = Number(query.pageNum ?? 1);
-    const pageSize = Number(query.pageSize ?? 10);
+    const pageSize = Number(query.pageSize ?? 20);
     const [total, rows] = await Promise.all([
       this.prisma.sysPost.count({ where }),
       this.prisma.sysPost.findMany({

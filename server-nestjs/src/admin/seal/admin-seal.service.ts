@@ -13,7 +13,7 @@ export class AdminSealService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAdminSealDto) {
-    const { type, name, status, pageNum = 1, pageSize = 10 } = query;
+    const { type, name, status, pageNum = 1, pageSize = 20 } = query;
 
     const where = {
       ...(type && { type }),

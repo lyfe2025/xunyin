@@ -39,7 +39,7 @@ export class QueryAdminJourneyDto {
   @IsNumber()
   @Min(1)
   @Max(100)
-  pageSize?: number = 10;
+  pageSize?: number = 20;
 }
 
 export class CreateJourneyDto {

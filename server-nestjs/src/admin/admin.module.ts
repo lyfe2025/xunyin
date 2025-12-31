@@ -5,6 +5,8 @@ import { AdminPointModule } from './point/admin-point.module';
 import { AdminSealModule } from './seal/admin-seal.module';
 import { AdminDashboardModule } from './dashboard/admin-dashboard.module';
 import { AdminAppUserModule } from './appuser/admin-appuser.module';
+import { AdminProgressModule } from './progress/admin-progress.module';
+import { AdminUserSealModule } from './user-seal/admin-user-seal.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { AdminAppUserModule } from './appuser/admin-appuser.module';
     AdminSealModule,
     AdminDashboardModule,
     AdminAppUserModule,
+    AdminProgressModule,
+    AdminUserSealModule,
   ],
 })
-export class AdminModule {}
+export class AdminModule { }
