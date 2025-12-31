@@ -61,6 +61,7 @@ import ProvinceCitySelect from '@/components/common/ProvinceCitySelect.vue'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import AudioUpload from '@/components/common/AudioUpload.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
+import MapPicker from '@/components/common/MapPicker.vue'
 import ExportButton from '@/components/common/ExportButton.vue'
 import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
 import { getResourceUrl } from '@/utils/url'
@@ -86,6 +87,7 @@ const submitLoading = ref(false)
 // 批量选择
 const selectedIds = ref<string[]>([])
 const showBatchDeleteDialog = ref(false)
+const showMapPicker = ref(false)
 
 const form = reactive<CityForm>({
   name: '',
@@ -298,6 +300,12 @@ async function handleCopy(row: City) {
   showDialog.value = true
 }
 
+// 地图选点回调
+function handleMapPickerConfirm(data: { latitude: number; longitude: number; address?: string }) {
+  form.latitude = data.latitude
+  form.longitude = data.longitude
+}
+
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
   const filename = getExportFilename('城市数据')
@@ -373,7 +381,7 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">状态</span>
-        <Select v-model="queryParams.status">
+        <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="0">正常</SelectItem>
@@ -546,6 +554,9 @@ onMounted(() => {
               />
             </div>
           </div>
+          <Button type="button" variant="outline" size="sm" @click="showMapPicker = true">
+            <MapPin class="w-4 h-4 mr-2" />地图选点
+          </Button>
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label>图标</Label>
@@ -606,6 +617,13 @@ onMounted(() => {
       confirm-text="删除"
       destructive
       @confirm="confirmBatchDelete"
+    />
+
+    <MapPicker
+      v-model:open="showMapPicker"
+      :latitude="form.latitude"
+      :longitude="form.longitude"
+      @confirm="handleMapPickerConfirm"
     />
   </div>
 </template>

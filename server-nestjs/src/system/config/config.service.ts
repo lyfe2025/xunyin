@@ -127,6 +127,79 @@ export class ConfigService {
   }
 
   /**
+   * 获取所有启用的地图服务配置
+   */
+  async getMapProviders(): Promise<{
+    providers: Array<{
+      name: string;
+      label: string;
+      key: string;
+    }>;
+  }> {
+    const configs = await this.prisma.sysConfig.findMany({
+      where: {
+        configKey: {
+          in: [
+            'map.amap.enabled',
+            'map.amap.webKey',
+            'map.tencent.enabled',
+            'map.tencent.key',
+            'map.google.enabled',
+            'map.google.key',
+          ],
+        },
+      },
+    });
+
+    const configMap: Record<string, string> = {};
+    configs.forEach((c) => {
+      if (c.configKey) {
+        configMap[c.configKey] = c.configValue ?? '';
+      }
+    });
+
+    const providers: Array<{ name: string; label: string; key: string }> = [];
+
+    // 高德地图
+    if (
+      configMap['map.amap.enabled'] === 'true' &&
+      configMap['map.amap.webKey']
+    ) {
+      providers.push({
+        name: 'amap',
+        label: '高德地图',
+        key: configMap['map.amap.webKey'],
+      });
+    }
+
+    // 腾讯地图
+    if (
+      configMap['map.tencent.enabled'] === 'true' &&
+      configMap['map.tencent.key']
+    ) {
+      providers.push({
+        name: 'tencent',
+        label: '腾讯地图',
+        key: configMap['map.tencent.key'],
+      });
+    }
+
+    // Google 地图
+    if (
+      configMap['map.google.enabled'] === 'true' &&
+      configMap['map.google.key']
+    ) {
+      providers.push({
+        name: 'google',
+        label: 'Google 地图',
+        key: configMap['map.google.key'],
+      });
+    }
+
+    return { providers };
+  }
+
+  /**
    * 获取网站公开配置（无需登录）
    */
   async getSiteConfig(): Promise<{

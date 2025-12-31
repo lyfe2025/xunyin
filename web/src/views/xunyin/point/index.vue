@@ -326,7 +326,7 @@ onMounted(() => {
     >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">所属文化之旅</span>
-        <Select v-model="queryParams.journeyId">
+        <Select v-model="queryParams.journeyId" @update:model-value="handleQuery">
           <SelectTrigger class="w-[180px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem v-for="j in journeyOptions" :key="j.id" :value="j.id">{{
@@ -346,7 +346,7 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">任务类型</span>
-        <Select v-model="queryParams.taskType">
+        <Select v-model="queryParams.taskType" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem v-for="t in taskTypeOptions" :key="t.value" :value="t.value">{{

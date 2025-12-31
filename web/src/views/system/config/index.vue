@@ -241,7 +241,7 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">系统内置</span>
-        <Select v-model="queryParams.configType">
+        <Select v-model="queryParams.configType" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
             <SelectValue placeholder="请选择" />
           </SelectTrigger>

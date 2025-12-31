@@ -58,3 +58,26 @@ export function refreshCache() {
     method: 'get'
   })
 }
+
+/** 获取高德地图 Web Key */
+export function getAmapWebKey() {
+  return request<{ data: { key: string } }>({
+    url: '/system/config/map/amap-key',
+    method: 'get'
+  }).then((res: any) => res.data.key as string)
+}
+
+/** 地图服务提供商 */
+export interface MapProvider {
+  name: string
+  label: string
+  key: string
+}
+
+/** 获取启用的地图服务列表 */
+export function getMapProviders() {
+  return request<{ data: { providers: MapProvider[] } }>({
+    url: '/system/config/map/providers',
+    method: 'get'
+  }).then((res: any) => res.data.providers as MapProvider[])
+}

@@ -21,7 +21,7 @@ import { UpdateConfigDto } from './dto/update-config.dto';
 @ApiTags('参数配置')
 @Controller('system/config')
 export class ConfigController {
-  constructor(private readonly service: ConfigService) {}
+  constructor(private readonly service: ConfigService) { }
 
   @Get('site')
   @ApiOperation({ summary: '获取网站公开配置（无需登录）' })
@@ -35,6 +35,26 @@ export class ConfigController {
     loginPath: string;
   }> {
     return await this.service.getSiteConfig();
+  }
+
+  @Get('map/amap-key')
+  @ApiOperation({ summary: '获取高德地图 Web Key（需登录）' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  async getAmapWebKey(): Promise<{ key: string }> {
+    const result = await this.service.getMapProviders();
+    const amap = result.providers.find((p) => p.name === 'amap');
+    return { key: amap?.key || '' };
+  }
+
+  @Get('map/providers')
+  @ApiOperation({ summary: '获取启用的地图服务列表（需登录）' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  async getMapProviders(): Promise<{
+    providers: Array<{ name: string; label: string; key: string }>;
+  }> {
+    return await this.service.getMapProviders();
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)

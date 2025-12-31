@@ -2335,6 +2335,23 @@ async function main() {
     });
     console.log(`Created city: ${nanjing.name}`);
 
+    // 创建福州
+    const fuzhou = await prisma.city.create({
+      data: {
+        name: '福州',
+        province: '福建省',
+        latitude: 26.0745,
+        longitude: 119.2965,
+        description:
+          '福州，别称榕城，是福建省省会，有着2200多年的建城史。三坊七巷、鼓山、西湖等名胜古迹众多，是中国历史文化名城。',
+        coverImage: '',
+        explorerCount: 0,
+        orderNum: 4,
+        status: '0',
+      },
+    });
+    console.log(`Created city: ${fuzhou.name}`);
+
     // 创建杭州的文化之旅
     const westLakeJourney = await prisma.journey.create({
       data: {
@@ -2393,6 +2410,66 @@ async function main() {
       },
     });
     console.log(`Created journey: ${gardenJourney.name}`);
+
+    // 创建福州的文化之旅 - 三坊七巷
+    const sanfangqixiangJourney = await prisma.journey.create({
+      data: {
+        cityId: fuzhou.id,
+        name: '三坊七巷寻古',
+        theme: '历史街区',
+        description:
+          '漫步中国都市仅存的"里坊制度活化石"，探访林则徐、严复、冰心等名人故居，感受明清古建筑的独特魅力。',
+        coverImage: '',
+        rating: 4,
+        estimatedMinutes: 150,
+        totalDistance: 3500,
+        completedCount: 0,
+        isLocked: false,
+        orderNum: 1,
+        status: '0',
+      },
+    });
+    console.log(`Created journey: ${sanfangqixiangJourney.name}`);
+
+    // 创建福州的文化之旅 - 鼓山
+    const gushanJourney = await prisma.journey.create({
+      data: {
+        cityId: fuzhou.id,
+        name: '鼓山禅意行',
+        theme: '佛教文化',
+        description:
+          '登临福州第一名山，参拜千年古刹涌泉寺，欣赏摩崖石刻，俯瞰榕城全景。',
+        coverImage: '',
+        rating: 4,
+        estimatedMinutes: 180,
+        totalDistance: 5000,
+        completedCount: 0,
+        isLocked: false,
+        orderNum: 2,
+        status: '0',
+      },
+    });
+    console.log(`Created journey: ${gushanJourney.name}`);
+
+    // 创建福州的文化之旅 - 闽江风光
+    const minjiangJourney = await prisma.journey.create({
+      data: {
+        cityId: fuzhou.id,
+        name: '闽江两岸',
+        theme: '城市风光',
+        description:
+          '沿闽江漫步，欣赏中洲岛、解放大桥、烟台山等标志性景观，感受福州的现代与历史交融。',
+        coverImage: '',
+        rating: 3,
+        estimatedMinutes: 120,
+        totalDistance: 4000,
+        completedCount: 0,
+        isLocked: false,
+        orderNum: 3,
+        status: '0',
+      },
+    });
+    console.log(`Created journey: ${minjiangJourney.name}`);
 
     // 创建西湖十景的探索点
     const westLakePoints = [
@@ -2541,6 +2618,258 @@ async function main() {
       `Created ${lingyinPoints.length} exploration points for ${lingyinJourney.name}`,
     );
 
+    // 创建三坊七巷的探索点
+    const sanfangqixiangPoints = [
+      {
+        name: '南后街',
+        latitude: 26.0856,
+        longitude: 119.2936,
+        taskType: 'photo',
+        taskDescription: '拍摄南后街的古朴街景',
+        culturalBackground:
+          '南后街是三坊七巷的中轴线，全长约1000米，是福州传统商业街的代表。',
+        culturalKnowledge:
+          '南后街自古以来就是福州的商业中心，有"正阳门外琉璃厂，衣锦坊前南后街"之称。',
+        pointsReward: 100,
+        orderNum: 1,
+      },
+      {
+        name: '林则徐纪念馆',
+        latitude: 26.0842,
+        longitude: 119.2928,
+        taskType: 'gesture',
+        taskDescription: '在林则徐塑像前做出敬礼手势',
+        targetGesture: 'salute',
+        culturalBackground:
+          '林则徐是中国近代史上著名的民族英雄，虎门销烟的主持者。',
+        culturalKnowledge:
+          '林则徐故居位于文藻山，纪念馆内陈列着他的生平事迹和珍贵文物。',
+        pointsReward: 120,
+        orderNum: 2,
+      },
+      {
+        name: '严复故居',
+        latitude: 26.0867,
+        longitude: 119.2941,
+        taskType: 'photo',
+        taskDescription: '拍摄严复故居的门楼',
+        culturalBackground:
+          '严复是中国近代著名的启蒙思想家、翻译家，《天演论》的译者。',
+        culturalKnowledge: '严复故居位于郎官巷，是典型的福州传统民居建筑。',
+        pointsReward: 100,
+        orderNum: 3,
+      },
+      {
+        name: '冰心故居',
+        latitude: 26.0851,
+        longitude: 119.2945,
+        taskType: 'photo',
+        taskDescription: '在冰心故居前留影',
+        culturalBackground:
+          '冰心是中国现代著名女作家，原名谢婉莹，代表作有《繁星》《春水》等。',
+        culturalKnowledge: '冰心故居位于杨桥巷，她在这里度过了童年时光。',
+        pointsReward: 100,
+        orderNum: 4,
+      },
+      {
+        name: '水榭戏台',
+        latitude: 26.0863,
+        longitude: 119.2932,
+        taskType: 'treasure',
+        taskDescription: '在水榭戏台找到AR宝藏',
+        culturalBackground:
+          '水榭戏台是三坊七巷内保存最完好的古戏台，建于清代。',
+        culturalKnowledge:
+          '戏台临水而建，观众可在对岸观看演出，是福州独特的戏曲文化载体。',
+        pointsReward: 150,
+        orderNum: 5,
+      },
+    ];
+
+    prevDistance = 0;
+    for (const point of sanfangqixiangPoints) {
+      await prisma.explorationPoint.create({
+        data: {
+          journeyId: sanfangqixiangJourney.id,
+          name: point.name,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          taskType: point.taskType,
+          taskDescription: point.taskDescription,
+          targetGesture: point.targetGesture || null,
+          culturalBackground: point.culturalBackground,
+          culturalKnowledge: point.culturalKnowledge,
+          distanceFromPrev: prevDistance,
+          pointsReward: point.pointsReward,
+          orderNum: point.orderNum,
+          status: '0',
+        },
+      });
+      prevDistance = 200 + Math.floor(Math.random() * 150);
+    }
+    console.log(
+      `Created ${sanfangqixiangPoints.length} exploration points for ${sanfangqixiangJourney.name}`,
+    );
+
+    // 创建鼓山的探索点
+    const gushanPoints = [
+      {
+        name: '鼓山登山古道',
+        latitude: 26.0712,
+        longitude: 119.3856,
+        taskType: 'photo',
+        taskDescription: '拍摄古道石阶',
+        culturalBackground:
+          '鼓山登山古道始建于宋代，全长约3.5公里，共有2145级石阶。',
+        culturalKnowledge: '古道沿途有众多摩崖石刻，是福州重要的文化遗产。',
+        pointsReward: 100,
+        orderNum: 1,
+      },
+      {
+        name: '涌泉寺',
+        latitude: 26.0689,
+        longitude: 119.3912,
+        taskType: 'gesture',
+        taskDescription: '双手合十，做出礼佛手势',
+        targetGesture: 'namaste',
+        culturalBackground:
+          '涌泉寺始建于唐建中四年（783年），是福建省著名的佛教古刹。',
+        culturalKnowledge: '寺内有千年铁树、血经等珍贵文物，被誉为"闽刹之冠"。',
+        pointsReward: 120,
+        orderNum: 2,
+      },
+      {
+        name: '喝水岩',
+        latitude: 26.0695,
+        longitude: 119.3923,
+        taskType: 'photo',
+        taskDescription: '拍摄喝水岩摩崖石刻',
+        culturalBackground:
+          '喝水岩是鼓山最著名的摩崖石刻群，有宋代以来的题刻200多处。',
+        culturalKnowledge:
+          '相传神僧喝退泉水，故名喝水岩。这里的石刻书法艺术价值极高。',
+        pointsReward: 100,
+        orderNum: 3,
+      },
+      {
+        name: '鼓山之巅',
+        latitude: 26.0678,
+        longitude: 119.3945,
+        taskType: 'photo',
+        taskDescription: '在山顶拍摄福州全景',
+        culturalBackground:
+          '鼓山海拔969米，是福州市区最高峰，登顶可俯瞰整个榕城。',
+        culturalKnowledge:
+          '鼓山因山顶有一巨石如鼓，每当风雨大作，便有隆隆鼓声，故名鼓山。',
+        pointsReward: 150,
+        orderNum: 4,
+      },
+    ];
+
+    prevDistance = 0;
+    for (const point of gushanPoints) {
+      await prisma.explorationPoint.create({
+        data: {
+          journeyId: gushanJourney.id,
+          name: point.name,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          taskType: point.taskType,
+          taskDescription: point.taskDescription,
+          targetGesture: point.targetGesture || null,
+          culturalBackground: point.culturalBackground,
+          culturalKnowledge: point.culturalKnowledge,
+          distanceFromPrev: prevDistance,
+          pointsReward: point.pointsReward,
+          orderNum: point.orderNum,
+          status: '0',
+        },
+      });
+      prevDistance = 500 + Math.floor(Math.random() * 300);
+    }
+    console.log(
+      `Created ${gushanPoints.length} exploration points for ${gushanJourney.name}`,
+    );
+
+    // 创建闽江两岸的探索点
+    const minjiangPoints = [
+      {
+        name: '中洲岛',
+        latitude: 26.0523,
+        longitude: 119.3012,
+        taskType: 'photo',
+        taskDescription: '拍摄中洲岛欧式建筑',
+        culturalBackground:
+          '中洲岛位于闽江中央，岛上建有欧式风格建筑群，是福州的地标之一。',
+        culturalKnowledge:
+          '中洲岛原为闽江中的沙洲，后经人工改造成为休闲观光岛。',
+        pointsReward: 100,
+        orderNum: 1,
+      },
+      {
+        name: '烟台山',
+        latitude: 26.0478,
+        longitude: 119.3089,
+        taskType: 'photo',
+        taskDescription: '拍摄烟台山历史建筑',
+        culturalBackground:
+          '烟台山是福州近代史的见证，曾是各国领事馆和洋行的聚集地。',
+        culturalKnowledge:
+          '山上保存有大量近代西式建筑，是福州开埠历史的重要遗存。',
+        pointsReward: 100,
+        orderNum: 2,
+      },
+      {
+        name: '解放大桥',
+        latitude: 26.0534,
+        longitude: 119.3045,
+        taskType: 'gesture',
+        taskDescription: '在桥上做出胜利手势',
+        targetGesture: 'victory',
+        culturalBackground:
+          '解放大桥原名万寿桥，始建于元代，是福州最古老的跨江大桥。',
+        culturalKnowledge: '现桥为1996年重建，保留了原桥的部分石构件。',
+        pointsReward: 120,
+        orderNum: 3,
+      },
+      {
+        name: '闽江公园',
+        latitude: 26.0512,
+        longitude: 119.3123,
+        taskType: 'treasure',
+        taskDescription: '在闽江公园找到AR宝藏',
+        culturalBackground: '闽江公园沿江而建，是福州市民休闲的好去处。',
+        culturalKnowledge: '公园内有多处观景平台，可欣赏闽江两岸的城市风光。',
+        pointsReward: 150,
+        orderNum: 4,
+      },
+    ];
+
+    prevDistance = 0;
+    for (const point of minjiangPoints) {
+      await prisma.explorationPoint.create({
+        data: {
+          journeyId: minjiangJourney.id,
+          name: point.name,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          taskType: point.taskType,
+          taskDescription: point.taskDescription,
+          targetGesture: point.targetGesture || null,
+          culturalBackground: point.culturalBackground,
+          culturalKnowledge: point.culturalKnowledge,
+          distanceFromPrev: prevDistance,
+          pointsReward: point.pointsReward,
+          orderNum: point.orderNum,
+          status: '0',
+        },
+      });
+      prevDistance = 400 + Math.floor(Math.random() * 200);
+    }
+    console.log(
+      `Created ${minjiangPoints.length} exploration points for ${minjiangJourney.name}`,
+    );
+
     // 创建印记
     const seals = [
       {
@@ -2571,6 +2900,33 @@ async function main() {
         orderNum: 3,
       },
       {
+        type: 'route',
+        name: '坊巷寻踪',
+        description: '完成三坊七巷寻古路线，获得此印记',
+        badgeTitle: '坊巷寻踪者',
+        journeyId: sanfangqixiangJourney.id,
+        cityId: null,
+        orderNum: 4,
+      },
+      {
+        type: 'route',
+        name: '鼓山禅心',
+        description: '完成鼓山禅意行路线，获得此印记',
+        badgeTitle: '鼓山禅心',
+        journeyId: gushanJourney.id,
+        cityId: null,
+        orderNum: 5,
+      },
+      {
+        type: 'route',
+        name: '闽江行者',
+        description: '完成闽江两岸路线，获得此印记',
+        badgeTitle: '闽江行者',
+        journeyId: minjiangJourney.id,
+        cityId: null,
+        orderNum: 6,
+      },
+      {
         type: 'city',
         name: '杭州印记',
         description: '完成杭州所有文化之旅，获得城市印记',
@@ -2598,6 +2954,15 @@ async function main() {
         orderNum: 12,
       },
       {
+        type: 'city',
+        name: '福州印记',
+        description: '完成福州所有文化之旅，获得城市印记',
+        badgeTitle: '榕城文化使者',
+        journeyId: null,
+        cityId: fuzhou.id,
+        orderNum: 13,
+      },
+      {
         type: 'special',
         name: '江南水乡',
         description: '完成杭州和苏州的所有路线，获得特殊印记',
@@ -2605,6 +2970,15 @@ async function main() {
         journeyId: null,
         cityId: null,
         orderNum: 20,
+      },
+      {
+        type: 'special',
+        name: '闽都风华',
+        description: '完成福州所有文化之旅，获得特殊印记',
+        badgeTitle: '闽都风华探索者',
+        journeyId: null,
+        cityId: null,
+        orderNum: 21,
       },
     ];
 

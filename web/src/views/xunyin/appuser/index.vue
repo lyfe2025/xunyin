@@ -216,7 +216,7 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">登录方式</span>
-        <Select v-model="queryParams.loginType">
+        <Select v-model="queryParams.loginType" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem v-for="opt in loginTypeOptions" :key="opt.value" :value="opt.value">
@@ -227,7 +227,7 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">状态</span>
-        <Select v-model="queryParams.status">
+        <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="0">正常</SelectItem>

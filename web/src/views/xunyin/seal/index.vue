@@ -323,7 +323,7 @@ onMounted(() => {
     >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">印记类型</span>
-        <Select v-model="queryParams.type">
+        <Select v-model="queryParams.type" @update:model-value="handleQuery">
           <SelectTrigger class="w-[130px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem v-for="t in sealTypeOptions" :key="t.value" :value="t.value">{{
@@ -343,7 +343,7 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">状态</span>
-        <Select v-model="queryParams.status">
+        <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="0">正常</SelectItem>
