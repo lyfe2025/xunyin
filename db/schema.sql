@@ -585,15 +585,25 @@ CREATE TABLE IF NOT EXISTS app_user (
   id VARCHAR(30) PRIMARY KEY,
   phone VARCHAR(20) UNIQUE,
   email VARCHAR(100) UNIQUE,
+  password VARCHAR(100),
   nickname VARCHAR(50) NOT NULL,
   avatar VARCHAR(255),
+  gender CHAR(1),
+  birthday DATE,
+  bio VARCHAR(255),
   open_id VARCHAR(100) UNIQUE,
   union_id VARCHAR(100),
   google_id VARCHAR(100) UNIQUE,
   apple_id VARCHAR(100) UNIQUE,
   login_type VARCHAR(20) DEFAULT 'wechat',
+  invite_code VARCHAR(20) UNIQUE,
+  invited_by VARCHAR(30),
   badge_title VARCHAR(50),
   total_points INT DEFAULT 0,
+  level INT DEFAULT 1,
+  is_verified BOOLEAN DEFAULT FALSE,
+  last_login_time TIMESTAMP,
+  last_login_ip VARCHAR(50),
   status CHAR(1) DEFAULT '0',
   create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   update_time TIMESTAMP
@@ -602,15 +612,25 @@ COMMENT ON TABLE app_user IS 'App用户表（与管理后台用户分离）';
 COMMENT ON COLUMN app_user.id IS '用户ID（CUID）';
 COMMENT ON COLUMN app_user.phone IS '手机号';
 COMMENT ON COLUMN app_user.email IS '邮箱';
+COMMENT ON COLUMN app_user.password IS '密码（邮箱登录用）';
 COMMENT ON COLUMN app_user.nickname IS '昵称';
 COMMENT ON COLUMN app_user.avatar IS '头像URL';
+COMMENT ON COLUMN app_user.gender IS '性别（0男 1女 2未知）';
+COMMENT ON COLUMN app_user.birthday IS '生日';
+COMMENT ON COLUMN app_user.bio IS '个人简介';
 COMMENT ON COLUMN app_user.open_id IS '微信openId';
 COMMENT ON COLUMN app_user.union_id IS '微信unionId';
 COMMENT ON COLUMN app_user.google_id IS 'Google登录ID';
 COMMENT ON COLUMN app_user.apple_id IS 'Apple登录ID';
 COMMENT ON COLUMN app_user.login_type IS '登录方式（wechat/email/google/apple）';
+COMMENT ON COLUMN app_user.invite_code IS '用户的邀请码';
+COMMENT ON COLUMN app_user.invited_by IS '邀请人用户ID';
 COMMENT ON COLUMN app_user.badge_title IS '当前称号';
 COMMENT ON COLUMN app_user.total_points IS '总积分';
+COMMENT ON COLUMN app_user.level IS '用户等级';
+COMMENT ON COLUMN app_user.is_verified IS '是否已实名认证';
+COMMENT ON COLUMN app_user.last_login_time IS '最后登录时间';
+COMMENT ON COLUMN app_user.last_login_ip IS '最后登录IP';
 COMMENT ON COLUMN app_user.status IS '状态（0正常 1禁用）';
 
 CREATE INDEX IF NOT EXISTS idx_app_user_phone ON app_user(phone);
@@ -619,9 +639,40 @@ CREATE INDEX IF NOT EXISTS idx_app_user_open_id ON app_user(open_id);
 CREATE INDEX IF NOT EXISTS idx_app_user_google_id ON app_user(google_id);
 CREATE INDEX IF NOT EXISTS idx_app_user_apple_id ON app_user(apple_id);
 CREATE INDEX IF NOT EXISTS idx_app_user_login_type ON app_user(login_type);
+CREATE INDEX IF NOT EXISTS idx_app_user_invite_code ON app_user(invite_code);
 
 -- ----------------------------
--- 19. 城市表
+-- 19. 用户实名认证表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS user_verification (
+  id VARCHAR(30) PRIMARY KEY,
+  user_id VARCHAR(30) NOT NULL UNIQUE,
+  real_name VARCHAR(50) NOT NULL,
+  id_card_no VARCHAR(100) NOT NULL,
+  id_card_front VARCHAR(255),
+  id_card_back VARCHAR(255),
+  status VARCHAR(20) DEFAULT 'pending',
+  reject_reason VARCHAR(255),
+  verified_at TIMESTAMP,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES app_user(id)
+);
+COMMENT ON TABLE user_verification IS '用户实名认证表';
+COMMENT ON COLUMN user_verification.id IS '认证ID（CUID）';
+COMMENT ON COLUMN user_verification.user_id IS '用户ID';
+COMMENT ON COLUMN user_verification.real_name IS '真实姓名';
+COMMENT ON COLUMN user_verification.id_card_no IS '身份证号（加密存储）';
+COMMENT ON COLUMN user_verification.id_card_front IS '身份证正面照';
+COMMENT ON COLUMN user_verification.id_card_back IS '身份证背面照';
+COMMENT ON COLUMN user_verification.status IS '状态（pending/approved/rejected）';
+COMMENT ON COLUMN user_verification.reject_reason IS '拒绝原因';
+COMMENT ON COLUMN user_verification.verified_at IS '认证通过时间';
+
+CREATE INDEX IF NOT EXISTS idx_user_verification_status ON user_verification(status);
+
+-- ----------------------------
+-- 20. 城市表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS city (
   id VARCHAR(30) PRIMARY KEY,
@@ -657,7 +708,7 @@ CREATE INDEX IF NOT EXISTS idx_city_province ON city(province);
 CREATE INDEX IF NOT EXISTS idx_city_status ON city(status);
 
 -- ----------------------------
--- 20. 文化之旅表
+-- 21. 文化之旅表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS journey (
   id VARCHAR(30) PRIMARY KEY,
@@ -700,7 +751,7 @@ CREATE INDEX IF NOT EXISTS idx_journey_city_id ON journey(city_id);
 CREATE INDEX IF NOT EXISTS idx_journey_status ON journey(status);
 
 -- ----------------------------
--- 21. 探索点表
+-- 22. 探索点表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS exploration_point (
   id VARCHAR(30) PRIMARY KEY,
@@ -743,7 +794,7 @@ CREATE INDEX IF NOT EXISTS idx_exploration_point_journey_id ON exploration_point
 CREATE INDEX IF NOT EXISTS idx_exploration_point_status ON exploration_point(status);
 
 -- ----------------------------
--- 22. 用户文化之旅进度表
+-- 23. 用户文化之旅进度表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS journey_progress (
   id VARCHAR(30) PRIMARY KEY,
@@ -773,7 +824,7 @@ CREATE INDEX IF NOT EXISTS idx_journey_progress_journey_id ON journey_progress(j
 CREATE INDEX IF NOT EXISTS idx_journey_progress_status ON journey_progress(status);
 
 -- ----------------------------
--- 23. 探索点完成记录表
+-- 24. 探索点完成记录表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS point_completion (
   id VARCHAR(30) PRIMARY KEY,
@@ -799,7 +850,7 @@ CREATE INDEX IF NOT EXISTS idx_point_completion_progress_id ON point_completion(
 CREATE INDEX IF NOT EXISTS idx_point_completion_point_id ON point_completion(point_id);
 
 -- ----------------------------
--- 24. 印记表
+-- 25. 印记表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS seal (
   id VARCHAR(30) PRIMARY KEY,
@@ -837,7 +888,7 @@ CREATE INDEX IF NOT EXISTS idx_seal_city_id ON seal(city_id);
 CREATE INDEX IF NOT EXISTS idx_seal_status ON seal(status);
 
 -- ----------------------------
--- 25. 用户印记表
+-- 26. 用户印记表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS user_seal (
   id VARCHAR(30) PRIMARY KEY,
@@ -875,7 +926,7 @@ CREATE INDEX IF NOT EXISTS idx_user_seal_seal_id ON user_seal(seal_id);
 CREATE INDEX IF NOT EXISTS idx_user_seal_is_chained ON user_seal(is_chained);
 
 -- ----------------------------
--- 26. 探索照片表
+-- 27. 探索照片表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS exploration_photo (
   id VARCHAR(30) PRIMARY KEY,
@@ -911,7 +962,7 @@ CREATE INDEX IF NOT EXISTS idx_exploration_photo_point_id ON exploration_photo(p
 CREATE INDEX IF NOT EXISTS idx_exploration_photo_taken_time ON exploration_photo(taken_time);
 
 -- ----------------------------
--- 27. 用户动态表
+-- 28. 用户动态表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS user_activity (
   id VARCHAR(30) PRIMARY KEY,
@@ -933,7 +984,7 @@ CREATE INDEX IF NOT EXISTS idx_user_activity_user_id ON user_activity(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_activity_create_time ON user_activity(create_time);
 
 -- ----------------------------
--- 28. 背景音乐表
+-- 29. 背景音乐表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS background_music (
   id VARCHAR(30) PRIMARY KEY,

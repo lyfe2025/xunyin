@@ -27,9 +27,31 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { Search, RefreshCw, Award, Eye, Coins, Calendar, Smartphone, Mail } from 'lucide-vue-next'
-import { listAppUser, getAppUser, changeAppUserStatus, type AppUser } from '@/api/xunyin/appuser'
+import {
+  Search,
+  RefreshCw,
+  Award,
+  Eye,
+  Coins,
+  Calendar,
+  Smartphone,
+  Mail,
+  ShieldCheck,
+  UserCheck,
+  Clock,
+} from 'lucide-vue-next'
+import BrandIcon from '@/components/icons/BrandIcons.vue'
+import {
+  listAppUser,
+  getAppUser,
+  changeAppUserStatus,
+  listVerifications,
+  auditVerification,
+  type AppUser,
+  type UserVerification,
+} from '@/api/xunyin/appuser'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -49,19 +71,27 @@ const queryParams = reactive({
   email: '',
   nickname: '',
   loginType: undefined as string | undefined,
+  isVerified: undefined as string | undefined,
   status: undefined as string | undefined,
 })
 
 // 登录方式配置
 const loginTypeOptions = [
-  { value: 'wechat', label: '微信', icon: '💬', color: 'text-green-500' },
-  { value: 'email', label: '邮箱', icon: '📧', color: 'text-blue-500' },
-  { value: 'google', label: 'Google', icon: '🔍', color: 'text-red-500' },
-  { value: 'apple', label: 'Apple', icon: '🍎', color: 'text-gray-700' },
+  { value: 'wechat', label: '微信', color: 'text-green-500' },
+  { value: 'email', label: '邮箱', color: 'text-blue-500' },
+  { value: 'google', label: 'Google', color: '' },
+  { value: 'apple', label: 'Apple', color: 'text-gray-700 dark:text-gray-300' },
 ]
 
+// 性别配置
+const genderOptions: Record<string, string> = {
+  '0': '男',
+  '1': '女',
+  '2': '未知',
+}
+
 function getLoginTypeInfo(type: string) {
-  return loginTypeOptions.find((o) => o.value === type) || { label: type, icon: '❓', color: '' }
+  return loginTypeOptions.find((o) => o.value === type) || { value: type, label: type, color: '' }
 }
 
 // 批量选择
@@ -77,7 +107,16 @@ const { toast } = useToast()
 async function getList() {
   loading.value = true
   try {
-    const res = await listAppUser(queryParams)
+    const params = {
+      ...queryParams,
+      isVerified:
+        queryParams.isVerified === 'true'
+          ? true
+          : queryParams.isVerified === 'false'
+            ? false
+            : undefined,
+    }
+    const res = await listAppUser(params)
     userList.value = res.list
     total.value = res.total
     selectedIds.value = []
@@ -96,6 +135,7 @@ function resetQuery() {
   queryParams.email = ''
   queryParams.nickname = ''
   queryParams.loginType = undefined
+  queryParams.isVerified = undefined
   queryParams.status = undefined
   handleQuery()
 }
@@ -146,8 +186,10 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
     { key: 'phone' as const, label: '手机号' },
     { key: 'email' as const, label: '邮箱' },
     { key: 'loginType' as const, label: '登录方式' },
+    { key: 'level' as const, label: '等级' },
     { key: 'badgeTitle' as const, label: '称号' },
     { key: 'totalPoints' as const, label: '总积分' },
+    { key: 'isVerified' as const, label: '实名认证' },
     { key: 'status' as const, label: '状态' },
     { key: 'createTime' as const, label: '注册时间' },
   ]
@@ -162,6 +204,96 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
   toast({ title: '导出成功' })
 }
 
+// ========== 实名认证管理 ==========
+const activeTab = ref('users')
+const verificationLoading = ref(false)
+const verificationList = ref<UserVerification[]>([])
+const verificationTotal = ref(0)
+const verificationQuery = reactive({
+  pageNum: 1,
+  pageSize: 10,
+  realName: '',
+  status: undefined as 'pending' | 'approved' | 'rejected' | undefined,
+})
+
+// 审核弹窗
+const showAuditDialog = ref(false)
+const currentVerification = ref<UserVerification | null>(null)
+const auditForm = reactive({
+  status: 'approved' as 'approved' | 'rejected',
+  rejectReason: '',
+})
+const auditLoading = ref(false)
+
+async function getVerificationList() {
+  verificationLoading.value = true
+  try {
+    const res = await listVerifications(verificationQuery)
+    verificationList.value = res.list
+    verificationTotal.value = res.total
+  } finally {
+    verificationLoading.value = false
+  }
+}
+
+function handleVerificationQuery() {
+  verificationQuery.pageNum = 1
+  getVerificationList()
+}
+
+function resetVerificationQuery() {
+  verificationQuery.realName = ''
+  verificationQuery.status = undefined
+  handleVerificationQuery()
+}
+
+function openAuditDialog(row: UserVerification) {
+  currentVerification.value = row
+  auditForm.status = 'approved'
+  auditForm.rejectReason = ''
+  showAuditDialog.value = true
+}
+
+async function handleAudit() {
+  if (!currentVerification.value) return
+  if (auditForm.status === 'rejected' && !auditForm.rejectReason.trim()) {
+    toast({ title: '请填写拒绝原因', variant: 'destructive' })
+    return
+  }
+  auditLoading.value = true
+  try {
+    await auditVerification(currentVerification.value.id, {
+      status: auditForm.status,
+      rejectReason: auditForm.status === 'rejected' ? auditForm.rejectReason : undefined,
+    })
+    toast({ title: '审核成功' })
+    showAuditDialog.value = false
+    getVerificationList()
+  } finally {
+    auditLoading.value = false
+  }
+}
+
+function getVerificationStatusBadge(status: string) {
+  switch (status) {
+    case 'pending':
+      return { label: '待审核', variant: 'outline' as const, class: 'text-yellow-600' }
+    case 'approved':
+      return { label: '已通过', variant: 'default' as const, class: 'bg-green-500' }
+    case 'rejected':
+      return { label: '已拒绝', variant: 'destructive' as const, class: '' }
+    default:
+      return { label: status, variant: 'outline' as const, class: '' }
+  }
+}
+
+function handleTabChange(tab: string) {
+  activeTab.value = tab
+  if (tab === 'verifications' && verificationList.value.length === 0) {
+    getVerificationList()
+  }
+}
+
 onMounted(() => {
   getList()
 })
@@ -174,182 +306,353 @@ onMounted(() => {
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">App用户管理</h2>
         <p class="text-sm text-muted-foreground">管理寻印 App 的注册用户</p>
       </div>
-      <div class="flex gap-2">
-        <ExportButton
-          v-if="userList.length > 0"
-          :formats="['xlsx', 'csv', 'json']"
-          :text="selectedIds.length > 0 ? `导出 (${selectedIds.length})` : '导出'"
-          @export="handleExport"
-        />
-      </div>
     </div>
 
-    <div
-      class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
-    >
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">手机号</span>
-        <Input
-          v-model="queryParams.phone"
-          placeholder="请输入"
-          class="w-[130px]"
-          @keyup.enter="handleQuery"
-        />
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">邮箱</span>
-        <Input
-          v-model="queryParams.email"
-          placeholder="请输入"
-          class="w-[150px]"
-          @keyup.enter="handleQuery"
-        />
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">昵称</span>
-        <Input
-          v-model="queryParams.nickname"
-          placeholder="请输入"
-          class="w-[120px]"
-          @keyup.enter="handleQuery"
-        />
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">登录方式</span>
-        <Select v-model="queryParams.loginType" @update:model-value="handleQuery">
-          <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem v-for="opt in loginTypeOptions" :key="opt.value" :value="opt.value">
-              {{ opt.icon }} {{ opt.label }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">状态</span>
-        <Select v-model="queryParams.status" @update:model-value="handleQuery">
-          <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="0">正常</SelectItem>
-            <SelectItem value="1">禁用</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div class="flex gap-2 ml-auto">
-        <Button @click="handleQuery"><Search class="w-4 h-4 mr-2" />搜索</Button>
-        <Button variant="outline" @click="resetQuery"
-          ><RefreshCw class="w-4 h-4 mr-2" />重置</Button
+    <Tabs :default-value="activeTab" @update:model-value="(val) => handleTabChange(String(val))">
+      <TabsList>
+        <TabsTrigger value="users">用户列表</TabsTrigger>
+        <TabsTrigger value="verifications">实名认证</TabsTrigger>
+      </TabsList>
+
+      <!-- 用户列表 Tab -->
+      <TabsContent value="users" class="space-y-4">
+        <div
+          class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
         >
-      </div>
-    </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">手机号</span>
+            <Input
+              v-model="queryParams.phone"
+              placeholder="请输入"
+              class="w-[130px]"
+              @keyup.enter="handleQuery"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">邮箱</span>
+            <Input
+              v-model="queryParams.email"
+              placeholder="请输入"
+              class="w-[150px]"
+              @keyup.enter="handleQuery"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">昵称</span>
+            <Input
+              v-model="queryParams.nickname"
+              placeholder="请输入"
+              class="w-[120px]"
+              @keyup.enter="handleQuery"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">登录方式</span>
+            <Select v-model="queryParams.loginType" @update:model-value="handleQuery">
+              <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="opt in loginTypeOptions" :key="opt.value" :value="opt.value">
+                  <div class="flex items-center gap-2">
+                    <BrandIcon :name="opt.value as any" class="w-4 h-4" :class="opt.color" />
+                    {{ opt.label }}
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">实名</span>
+            <Select v-model="queryParams.isVerified" @update:model-value="handleQuery">
+              <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">已认证</SelectItem>
+                <SelectItem value="false">未认证</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">状态</span>
+            <Select v-model="queryParams.status" @update:model-value="handleQuery">
+              <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">正常</SelectItem>
+                <SelectItem value="1">禁用</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex gap-2 ml-auto">
+            <Button @click="handleQuery"><Search class="w-4 h-4 mr-2" />搜索</Button>
+            <Button variant="outline" @click="resetQuery"
+              ><RefreshCw class="w-4 h-4 mr-2" />重置</Button
+            >
+            <ExportButton
+              v-if="userList.length > 0"
+              :formats="['xlsx', 'csv', 'json']"
+              :text="selectedIds.length > 0 ? `导出 (${selectedIds.length})` : '导出'"
+              @export="handleExport"
+            />
+          </div>
+        </div>
 
-    <div class="border rounded-md bg-card overflow-x-auto">
-      <TableSkeleton v-if="loading" :columns="9" :rows="10" show-checkbox />
-      <EmptyState v-else-if="userList.length === 0" title="暂无用户数据" />
-      <Table v-else class="min-w-[1000px]">
-        <TableHeader>
-          <TableRow>
-            <TableHead class="w-[50px]">
-              <Checkbox
-                :checked="selectedIds.length === userList.length && userList.length > 0"
-                @update:checked="handleSelectAll"
-              />
-            </TableHead>
-            <TableHead>用户</TableHead>
-            <TableHead>联系方式</TableHead>
-            <TableHead>登录方式</TableHead>
-            <TableHead>称号</TableHead>
-            <TableHead>总积分</TableHead>
-            <TableHead>状态</TableHead>
-            <TableHead>注册时间</TableHead>
-            <TableHead class="text-right">操作</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="user in userList" :key="user.id">
-            <TableCell>
-              <Checkbox
-                :checked="selectedIds.includes(user.id)"
-                @update:checked="(checked: boolean) => handleSelectOne(user.id, checked)"
-              />
-            </TableCell>
-            <TableCell>
-              <div class="flex items-center gap-3">
-                <Avatar class="h-9 w-9">
-                  <AvatarImage :src="getResourceUrl(user.avatar)" />
-                  <AvatarFallback>{{ user.nickname?.charAt(0) || 'U' }}</AvatarFallback>
-                </Avatar>
-                <span class="font-medium">{{ user.nickname }}</span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div class="space-y-1 text-sm">
-                <div v-if="user.phone" class="flex items-center gap-1">
-                  <Smartphone class="w-3 h-3 text-muted-foreground" />
-                  {{ user.phone }}
-                </div>
-                <div v-if="user.email" class="flex items-center gap-1">
-                  <Mail class="w-3 h-3 text-muted-foreground" />
-                  {{ user.email }}
-                </div>
-                <span v-if="!user.phone && !user.email" class="text-muted-foreground">-</span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline" :class="getLoginTypeInfo(user.loginType).color">
-                {{ getLoginTypeInfo(user.loginType).icon }}
-                {{ getLoginTypeInfo(user.loginType).label }}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <div v-if="user.badgeTitle" class="flex items-center gap-1">
-                <Award class="w-4 h-4 text-yellow-500" />
-                {{ user.badgeTitle }}
-              </div>
-              <span v-else class="text-muted-foreground">-</span>
-            </TableCell>
-            <TableCell>
-              <div class="flex items-center gap-1">
-                <Coins class="w-4 h-4 text-amber-500" />
-                {{ user.totalPoints }}
-              </div>
-            </TableCell>
-            <TableCell>
-              <StatusSwitch
-                :model-value="user.status"
-                :id="user.id"
-                active-text="正常"
-                inactive-text="禁用"
-                @change="handleStatusChange"
-              />
-            </TableCell>
-            <TableCell>{{ formatDate(user.createTime) }}</TableCell>
-            <TableCell class="text-right">
-              <Button variant="ghost" size="icon" @click="handleDetail(user)">
-                <Eye class="w-4 h-4" />
-              </Button>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
+        <div class="border rounded-md bg-card overflow-x-auto">
+          <TableSkeleton v-if="loading" :columns="10" :rows="10" show-checkbox />
+          <EmptyState v-else-if="userList.length === 0" title="暂无用户数据" />
+          <Table v-else class="min-w-[1100px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead class="w-[50px]">
+                  <Checkbox
+                    :checked="selectedIds.length === userList.length && userList.length > 0"
+                    @update:checked="handleSelectAll"
+                  />
+                </TableHead>
+                <TableHead>用户</TableHead>
+                <TableHead>联系方式</TableHead>
+                <TableHead>登录方式</TableHead>
+                <TableHead>等级/积分</TableHead>
+                <TableHead>实名认证</TableHead>
+                <TableHead>最后登录</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>注册时间</TableHead>
+                <TableHead class="text-right">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="user in userList" :key="user.id">
+                <TableCell>
+                  <Checkbox
+                    :checked="selectedIds.includes(user.id)"
+                    @update:checked="(checked: boolean) => handleSelectOne(user.id, checked)"
+                  />
+                </TableCell>
+                <TableCell>
+                  <div class="flex items-center gap-3">
+                    <Avatar class="h-9 w-9">
+                      <AvatarImage :src="getResourceUrl(user.avatar)" />
+                      <AvatarFallback>{{ user.nickname?.charAt(0) || 'U' }}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <span class="font-medium">{{ user.nickname }}</span>
+                      <div
+                        v-if="user.badgeTitle"
+                        class="flex items-center gap-1 text-xs text-muted-foreground"
+                      >
+                        <Award class="w-3 h-3 text-yellow-500" />{{ user.badgeTitle }}
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div class="space-y-1 text-sm">
+                    <div v-if="user.phone" class="flex items-center gap-1">
+                      <Smartphone class="w-3 h-3 text-muted-foreground" />{{ user.phone }}
+                    </div>
+                    <div v-if="user.email" class="flex items-center gap-1">
+                      <Mail class="w-3 h-3 text-muted-foreground" />{{ user.email }}
+                    </div>
+                    <span v-if="!user.phone && !user.email" class="text-muted-foreground">-</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" class="gap-1.5">
+                    <BrandIcon
+                      :name="user.loginType as any"
+                      class="w-3.5 h-3.5"
+                      :class="getLoginTypeInfo(user.loginType).color"
+                    />
+                    {{ getLoginTypeInfo(user.loginType).label }}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div class="space-y-1">
+                    <div class="text-sm">Lv.{{ user.level }}</div>
+                    <div class="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Coins class="w-3 h-3 text-amber-500" />{{ user.totalPoints }}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge v-if="user.isVerified" variant="default" class="bg-green-500">
+                    <ShieldCheck class="w-3 h-3 mr-1" />已认证
+                  </Badge>
+                  <Badge v-else variant="outline" class="text-muted-foreground">未认证</Badge>
+                </TableCell>
+                <TableCell>
+                  <div v-if="user.lastLoginTime" class="text-sm">
+                    <div>{{ formatDate(user.lastLoginTime) }}</div>
+                    <div v-if="user.lastLoginIp" class="text-xs text-muted-foreground">
+                      {{ user.lastLoginIp }}
+                    </div>
+                  </div>
+                  <span v-else class="text-muted-foreground">-</span>
+                </TableCell>
+                <TableCell>
+                  <StatusSwitch
+                    :model-value="user.status"
+                    :id="user.id"
+                    active-text="正常"
+                    inactive-text="禁用"
+                    @change="handleStatusChange"
+                  />
+                </TableCell>
+                <TableCell>{{ formatDate(user.createTime) }}</TableCell>
+                <TableCell class="text-right">
+                  <Button variant="ghost" size="icon" @click="handleDetail(user)"
+                    ><Eye class="w-4 h-4"
+                  /></Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+        <TablePagination
+          v-model:page-num="queryParams.pageNum"
+          v-model:page-size="queryParams.pageSize"
+          :total="total"
+          @change="getList"
+        />
+      </TabsContent>
 
-    <TablePagination
-      v-model:page-num="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      :total="total"
-      @change="getList"
-    />
+      <!-- 实名认证 Tab -->
+      <TabsContent value="verifications" class="space-y-4">
+        <div
+          class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
+        >
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">真实姓名</span>
+            <Input
+              v-model="verificationQuery.realName"
+              placeholder="请输入"
+              class="w-[130px]"
+              @keyup.enter="handleVerificationQuery"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">状态</span>
+            <Select
+              v-model="verificationQuery.status"
+              @update:model-value="handleVerificationQuery"
+            >
+              <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">待审核</SelectItem>
+                <SelectItem value="approved">已通过</SelectItem>
+                <SelectItem value="rejected">已拒绝</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex gap-2 ml-auto">
+            <Button @click="handleVerificationQuery"><Search class="w-4 h-4 mr-2" />搜索</Button>
+            <Button variant="outline" @click="resetVerificationQuery"
+              ><RefreshCw class="w-4 h-4 mr-2" />重置</Button
+            >
+          </div>
+        </div>
+
+        <div class="border rounded-md bg-card overflow-x-auto">
+          <TableSkeleton v-if="verificationLoading" :columns="7" :rows="10" />
+          <EmptyState v-else-if="verificationList.length === 0" title="暂无认证记录" />
+          <Table v-else class="min-w-[900px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>用户</TableHead>
+                <TableHead>真实姓名</TableHead>
+                <TableHead>身份证号</TableHead>
+                <TableHead>证件照片</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>提交时间</TableHead>
+                <TableHead class="text-right">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="item in verificationList" :key="item.id">
+                <TableCell>
+                  <div v-if="item.user" class="flex items-center gap-2">
+                    <Avatar class="h-8 w-8">
+                      <AvatarImage :src="getResourceUrl(item.user.avatar)" />
+                      <AvatarFallback>{{ item.user.nickname?.charAt(0) || 'U' }}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div class="font-medium">{{ item.user.nickname }}</div>
+                      <div class="text-xs text-muted-foreground">
+                        {{ item.user.phone || item.user.email || '-' }}
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{{ item.realName }}</TableCell>
+                <TableCell>
+                  <span class="font-mono">{{
+                    item.idCardNo.replace(/^(.{6})(.*)(.{4})$/, '$1****$3')
+                  }}</span>
+                </TableCell>
+                <TableCell>
+                  <div class="flex gap-2">
+                    <img
+                      v-if="item.idCardFront"
+                      :src="getResourceUrl(item.idCardFront)"
+                      class="w-16 h-10 object-cover rounded cursor-pointer hover:opacity-80"
+                    />
+                    <img
+                      v-if="item.idCardBack"
+                      :src="getResourceUrl(item.idCardBack)"
+                      class="w-16 h-10 object-cover rounded cursor-pointer hover:opacity-80"
+                    />
+                    <span v-if="!item.idCardFront && !item.idCardBack" class="text-muted-foreground"
+                      >-</span
+                    >
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    :variant="getVerificationStatusBadge(item.status).variant"
+                    :class="getVerificationStatusBadge(item.status).class"
+                  >
+                    {{ getVerificationStatusBadge(item.status).label }}
+                  </Badge>
+                  <div
+                    v-if="item.status === 'rejected' && item.rejectReason"
+                    class="text-xs text-red-500 mt-1"
+                  >
+                    {{ item.rejectReason }}
+                  </div>
+                </TableCell>
+                <TableCell>{{ formatDate(item.createTime) }}</TableCell>
+                <TableCell class="text-right">
+                  <Button
+                    v-if="item.status === 'pending'"
+                    variant="outline"
+                    size="sm"
+                    @click="openAuditDialog(item)"
+                  >
+                    <UserCheck class="w-4 h-4 mr-1" />审核
+                  </Button>
+                  <span v-else class="text-muted-foreground text-sm">{{
+                    item.verifiedAt ? formatDate(item.verifiedAt) : '-'
+                  }}</span>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+        <TablePagination
+          v-model:page-num="verificationQuery.pageNum"
+          v-model:page-size="verificationQuery.pageSize"
+          :total="verificationTotal"
+          @change="getVerificationList"
+        />
+      </TabsContent>
+    </Tabs>
 
     <!-- 用户详情弹窗 -->
     <Dialog v-model:open="showDetailDialog">
-      <DialogContent class="sm:max-w-[500px]">
+      <DialogContent class="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>用户详情</DialogTitle>
           <DialogDescription>查看 App 用户的详细信息</DialogDescription>
         </DialogHeader>
         <div v-if="detailLoading" class="py-8 text-center text-muted-foreground">加载中...</div>
-        <div v-else-if="currentUser" class="space-y-6 py-4">
+        <div v-else-if="currentUser" class="space-y-6 py-4 max-h-[60vh] overflow-y-auto">
           <!-- 用户基本信息 -->
           <div class="flex items-center gap-4">
             <Avatar class="h-16 w-16">
@@ -364,8 +667,13 @@ onMounted(() => {
                 v-if="currentUser.badgeTitle"
                 class="flex items-center gap-1 text-sm text-muted-foreground"
               >
-                <Award class="w-4 h-4 text-yellow-500" />
-                {{ currentUser.badgeTitle }}
+                <Award class="w-4 h-4 text-yellow-500" />{{ currentUser.badgeTitle }}
+              </div>
+              <div class="flex items-center gap-2 mt-1">
+                <Badge v-if="currentUser.isVerified" variant="default" class="bg-green-500 text-xs">
+                  <ShieldCheck class="w-3 h-3 mr-1" />已实名
+                </Badge>
+                <Badge variant="outline" class="text-xs">Lv.{{ currentUser.level }}</Badge>
               </div>
             </div>
           </div>
@@ -374,53 +682,162 @@ onMounted(() => {
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1">
               <div class="text-sm text-muted-foreground flex items-center gap-1">
-                <Smartphone class="w-4 h-4" /> 手机号
+                <Smartphone class="w-4 h-4" />手机号
               </div>
               <div class="font-medium">{{ currentUser.phone || '-' }}</div>
             </div>
             <div class="space-y-1">
               <div class="text-sm text-muted-foreground flex items-center gap-1">
-                <Coins class="w-4 h-4" /> 总积分
+                <Mail class="w-4 h-4" />邮箱
+              </div>
+              <div class="font-medium">{{ currentUser.email || '-' }}</div>
+            </div>
+            <div class="space-y-1">
+              <div class="text-sm text-muted-foreground">性别</div>
+              <div class="font-medium">
+                {{ currentUser.gender ? genderOptions[currentUser.gender] : '-' }}
+              </div>
+            </div>
+            <div class="space-y-1">
+              <div class="text-sm text-muted-foreground">生日</div>
+              <div class="font-medium">
+                {{ currentUser.birthday ? formatDate(currentUser.birthday, 'YYYY-MM-DD') : '-' }}
+              </div>
+            </div>
+            <div class="space-y-1">
+              <div class="text-sm text-muted-foreground flex items-center gap-1">
+                <Coins class="w-4 h-4" />总积分
               </div>
               <div class="font-medium text-amber-600">{{ currentUser.totalPoints }}</div>
             </div>
             <div class="space-y-1">
               <div class="text-sm text-muted-foreground">状态</div>
-              <Badge :variant="currentUser.status === '0' ? 'default' : 'destructive'">
-                {{ currentUser.status === '0' ? '正常' : '禁用' }}
-              </Badge>
+              <Badge :variant="currentUser.status === '0' ? 'default' : 'destructive'">{{
+                currentUser.status === '0' ? '正常' : '禁用'
+              }}</Badge>
+            </div>
+            <div class="space-y-1">
+              <div class="text-sm text-muted-foreground">邀请码</div>
+              <div class="font-medium font-mono">{{ currentUser.inviteCode || '-' }}</div>
+            </div>
+            <div class="space-y-1">
+              <div class="text-sm text-muted-foreground">邀请人</div>
+              <div class="font-medium">{{ currentUser.invitedBy || '-' }}</div>
             </div>
             <div class="space-y-1">
               <div class="text-sm text-muted-foreground flex items-center gap-1">
-                <Calendar class="w-4 h-4" /> 注册时间
+                <Calendar class="w-4 h-4" />注册时间
               </div>
               <div class="font-medium">{{ formatDate(currentUser.createTime) }}</div>
             </div>
+            <div class="space-y-1">
+              <div class="text-sm text-muted-foreground flex items-center gap-1">
+                <Clock class="w-4 h-4" />最后登录
+              </div>
+              <div class="font-medium">
+                {{ currentUser.lastLoginTime ? formatDate(currentUser.lastLoginTime) : '-' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- 个人简介 -->
+          <div v-if="currentUser.bio" class="pt-4 border-t">
+            <h4 class="text-sm font-medium mb-2">个人简介</h4>
+            <p class="text-sm text-muted-foreground">{{ currentUser.bio }}</p>
           </div>
 
           <!-- 登录方式信息 -->
           <div class="pt-4 border-t">
             <h4 class="text-sm font-medium mb-3">登录方式</h4>
-            <Badge
-              variant="outline"
-              :class="getLoginTypeInfo(currentUser.loginType).color"
-              class="mb-3"
-            >
-              {{ getLoginTypeInfo(currentUser.loginType).icon }}
+            <Badge variant="outline" class="mb-3 gap-1.5">
+              <BrandIcon
+                :name="currentUser.loginType as any"
+                class="w-4 h-4"
+                :class="getLoginTypeInfo(currentUser.loginType).color"
+              />
               {{ getLoginTypeInfo(currentUser.loginType).label }}
             </Badge>
             <div class="space-y-2 text-sm text-muted-foreground">
-              <div v-if="currentUser.email" class="flex items-center gap-2">
-                <Mail class="w-4 h-4" />
-                <span>邮箱: {{ currentUser.email }}</span>
-              </div>
               <div v-if="currentUser.openId">
-                <div>微信 OpenID: {{ currentUser.openId }}</div>
-                <div v-if="currentUser.unionId">微信 UnionID: {{ currentUser.unionId }}</div>
+                <span class="text-foreground">微信 OpenID:</span> {{ currentUser.openId }}
               </div>
-              <div v-if="currentUser.googleId">Google ID: {{ currentUser.googleId }}</div>
-              <div v-if="currentUser.appleId">Apple ID: {{ currentUser.appleId }}</div>
+              <div v-if="currentUser.unionId">
+                <span class="text-foreground">微信 UnionID:</span> {{ currentUser.unionId }}
+              </div>
+              <div v-if="currentUser.googleId">
+                <span class="text-foreground">Google ID:</span> {{ currentUser.googleId }}
+              </div>
+              <div v-if="currentUser.appleId">
+                <span class="text-foreground">Apple ID:</span> {{ currentUser.appleId }}
+              </div>
             </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 审核弹窗 -->
+    <Dialog v-model:open="showAuditDialog">
+      <DialogContent class="sm:max-w-[450px]">
+        <DialogHeader>
+          <DialogTitle>审核实名认证</DialogTitle>
+          <DialogDescription>请审核用户提交的实名认证信息</DialogDescription>
+        </DialogHeader>
+        <div v-if="currentVerification" class="space-y-4 py-4">
+          <div class="flex items-center gap-3 p-3 bg-muted rounded-lg">
+            <Avatar v-if="currentVerification.user" class="h-10 w-10">
+              <AvatarImage :src="getResourceUrl(currentVerification.user.avatar)" />
+              <AvatarFallback>{{
+                currentVerification.user.nickname?.charAt(0) || 'U'
+              }}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div class="font-medium">{{ currentVerification.user?.nickname }}</div>
+              <div class="text-sm text-muted-foreground">
+                {{ currentVerification.realName }} |
+                {{ currentVerification.idCardNo.replace(/^(.{6})(.*)(.{4})$/, '$1****$3') }}
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="currentVerification.idCardFront || currentVerification.idCardBack"
+            class="flex gap-3"
+          >
+            <img
+              v-if="currentVerification.idCardFront"
+              :src="getResourceUrl(currentVerification.idCardFront)"
+              class="flex-1 h-24 object-cover rounded"
+            />
+            <img
+              v-if="currentVerification.idCardBack"
+              :src="getResourceUrl(currentVerification.idCardBack)"
+              class="flex-1 h-24 object-cover rounded"
+            />
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-4">
+              <span class="text-sm font-medium">审核结果</span>
+              <Select v-model="auditForm.status">
+                <SelectTrigger class="w-[150px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="approved">通过</SelectItem>
+                  <SelectItem value="rejected">拒绝</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div v-if="auditForm.status === 'rejected'" class="space-y-2">
+              <span class="text-sm font-medium">拒绝原因</span>
+              <Input v-model="auditForm.rejectReason" placeholder="请输入拒绝原因" />
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <Button variant="outline" @click="showAuditDialog = false">取消</Button>
+            <Button :disabled="auditLoading" @click="handleAudit">
+              {{ auditLoading ? '提交中...' : '确认' }}
+            </Button>
           </div>
         </div>
       </DialogContent>

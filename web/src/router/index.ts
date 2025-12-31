@@ -62,6 +62,12 @@ const router = createRouter({
           meta: { title: '字典管理', icon: 'book' }
         },
         {
+          path: 'system/dict/data',
+          name: 'DictData',
+          component: () => import('@/views/system/dict/data.vue'),
+          meta: { title: '字典数据', icon: 'book', activeMenu: '/system/dict' }
+        },
+        {
           path: 'system/config',
           name: 'Config',
           component: () => import('@/views/system/config/index.vue'),
@@ -175,12 +181,12 @@ const router = createRouter({
  */
 export function setupLoginRoute(loginPath: string) {
   const path = loginPath || '/login'
-  
+
   // 移除已存在的登录路由
   if (router.hasRoute('Login')) {
     router.removeRoute('Login')
   }
-  
+
   // 添加登录路由
   const loginRoute: RouteRecordRaw = {
     path,

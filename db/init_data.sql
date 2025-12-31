@@ -1073,7 +1073,11 @@ VALUES
   ('印记类型', 'xunyin_seal_type', '0', NOW()),
   ('进度状态', 'xunyin_progress_status', '0', NOW()),
   ('动态类型', 'xunyin_activity_type', '0', NOW()),
-  ('音频场景', 'xunyin_audio_context', '0', NOW())
+  ('音频场景', 'xunyin_audio_context', '0', NOW()),
+  ('登录方式', 'xunyin_login_type', '0', NOW()),
+  ('性别', 'xunyin_gender', '0', NOW()),
+  ('照片滤镜', 'xunyin_photo_filter', '0', NOW()),
+  ('区块链', 'xunyin_chain_name', '0', NOW())
 ON CONFLICT (dict_type) DO NOTHING;
 
 -- 19.2 字典数据
@@ -1095,10 +1099,34 @@ VALUES
   ('xunyin_activity_type', '获得印记', 'seal_earned', 1, '0', 'N', NOW()),
   ('xunyin_activity_type', '完成文化之旅', 'journey_completed', 2, '0', 'N', NOW()),
   ('xunyin_activity_type', '开始文化之旅', 'journey_started', 3, '0', 'N', NOW()),
+  ('xunyin_activity_type', '完成探索点', 'point_completed', 4, '0', 'N', NOW()),
+  ('xunyin_activity_type', '升级', 'level_up', 5, '0', 'N', NOW()),
+  ('xunyin_activity_type', '获得称号', 'badge_earned', 6, '0', 'N', NOW()),
   -- 音频场景
   ('xunyin_audio_context', '首页', 'home', 1, '0', 'N', NOW()),
   ('xunyin_audio_context', '城市', 'city', 2, '0', 'N', NOW()),
-  ('xunyin_audio_context', '文化之旅', 'journey', 3, '0', 'N', NOW())
+  ('xunyin_audio_context', '文化之旅', 'journey', 3, '0', 'N', NOW()),
+  ('xunyin_audio_context', '探索点', 'point', 4, '0', 'N', NOW()),
+  -- 登录方式
+  ('xunyin_login_type', '微信登录', 'wechat', 1, '0', 'Y', NOW()),
+  ('xunyin_login_type', '邮箱登录', 'email', 2, '0', 'N', NOW()),
+  ('xunyin_login_type', 'Google登录', 'google', 3, '0', 'N', NOW()),
+  ('xunyin_login_type', 'Apple登录', 'apple', 4, '0', 'N', NOW()),
+  -- 性别
+  ('xunyin_gender', '男', '0', 1, '0', 'N', NOW()),
+  ('xunyin_gender', '女', '1', 2, '0', 'N', NOW()),
+  ('xunyin_gender', '未知', '2', 3, '0', 'Y', NOW()),
+  -- 照片滤镜
+  ('xunyin_photo_filter', '原图', 'original', 1, '0', 'Y', NOW()),
+  ('xunyin_photo_filter', '复古', 'vintage', 2, '0', 'N', NOW()),
+  ('xunyin_photo_filter', '黑白', 'mono', 3, '0', 'N', NOW()),
+  ('xunyin_photo_filter', '暖色', 'warm', 4, '0', 'N', NOW()),
+  ('xunyin_photo_filter', '冷色', 'cool', 5, '0', 'N', NOW()),
+  ('xunyin_photo_filter', '胶片', 'film', 6, '0', 'N', NOW()),
+  -- 区块链
+  ('xunyin_chain_name', '蚂蚁链', 'antchain', 1, '0', 'Y', NOW()),
+  ('xunyin_chain_name', '长安链', 'chainmaker', 2, '0', 'N', NOW()),
+  ('xunyin_chain_name', '至信链', 'zhixin', 3, '0', 'N', NOW())
 ON CONFLICT DO NOTHING;
 
 

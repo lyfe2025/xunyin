@@ -48,6 +48,5 @@ coverage/
 uploads/
 
 # 备份文件
-*.sql
 *.bak
 backups/

@@ -1,22 +1,11 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { Search, Plus, Edit, Trash2, RefreshCw, BookOpen, List } from 'lucide-vue-next'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { Search, Plus, Edit, Trash2, RefreshCw, ArrowLeft } from 'lucide-vue-next'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { formatDate } from '@/utils/format'
 import {
   Table,
   TableBody,
@@ -44,99 +33,103 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { listType, getType, delType, addType, updateType, type DictType } from '@/api/system/dict'
+import {
+  listData,
+  getData,
+  delData,
+  addData,
+  updateData,
+  type DictData,
+  type DictDataForm,
+} from '@/api/system/dict'
 
+const route = useRoute()
 const router = useRouter()
 const { toast } = useToast()
 
-// Query parameters
+const dictType = computed(() => (route.query.dictType as string) || '')
+const dictName = computed(() => (route.query.dictName as string) || '字典数据')
+
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
-  dictName: '',
   dictType: '',
-  status: undefined
+  dictLabel: '',
+  status: undefined as string | undefined,
 })
 
 const loading = ref(true)
 const total = ref(0)
-const typeList = ref<DictType[]>([])
+const dataList = ref<DictData[]>([])
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
-const dictToDelete = ref<DictType | null>(null)
+const dataToDelete = ref<DictData | null>(null)
 const dialogTitle = ref('')
-const form = reactive<Partial<DictType>>({
-  dictId: undefined,
-  dictName: '',
+const form = reactive<DictDataForm>({
+  dictCode: undefined,
+  dictSort: 0,
+  dictLabel: '',
+  dictValue: '',
   dictType: '',
+  cssClass: '',
+  listClass: 'default',
+  isDefault: 'N',
   status: '0',
-  remark: ''
+  remark: '',
 })
 
-// Fetch data
 async function getList() {
   loading.value = true
   try {
-    const response = await listType(queryParams)
-    typeList.value = response.rows
+    queryParams.dictType = dictType.value
+    const response = await listData(queryParams)
+    dataList.value = response.rows
     total.value = response.total
   } finally {
     loading.value = false
   }
 }
 
-// Search operations
 function handleQuery() {
   queryParams.pageNum = 1
   getList()
 }
 
 function resetQuery() {
-  queryParams.dictName = ''
-  queryParams.dictType = ''
+  queryParams.dictLabel = ''
   queryParams.status = undefined
   handleQuery()
 }
 
-// Add/Edit operations
 function handleAdd() {
   resetForm()
-  dialogTitle.value = '添加字典类型'
+  form.dictType = dictType.value
+  dialogTitle.value = '添加字典数据'
   showDialog.value = true
 }
 
-async function handleUpdate(row: DictType) {
+async function handleUpdate(row: DictData) {
   try {
     resetForm()
-    const res = await getType(row.dictId)
+    const res = await getData(row.dictCode)
     Object.assign(form, res)
-    dialogTitle.value = '修改字典类型'
+    dialogTitle.value = '修改字典数据'
     showDialog.value = true
   } catch (error) {
     console.error('获取数据失败:', error)
   }
 }
 
-function handleDelete(row: DictType) {
-  dictToDelete.value = row
+function handleDelete(row: DictData) {
+  dataToDelete.value = row
   showDeleteDialog.value = true
 }
 
-function handleDictData(row: DictType) {
-  router.push({
-    path: '/system/dict/data',
-    query: { dictType: row.dictType, dictName: row.dictName }
-  })
-}
-
 async function confirmDelete() {
-  if (!dictToDelete.value) return
+  if (!dataToDelete.value) return
   try {
-    await delType([dictToDelete.value.dictId])
-    toast({
-      title: "删除成功",
-      description: "字典类型已删除",
-    })
+    await delData([dataToDelete.value.dictCode])
+    toast({ title: '删除成功', description: '字典数据已删除' })
     getList()
   } finally {
     showDeleteDialog.value = false
@@ -144,28 +137,22 @@ async function confirmDelete() {
 }
 
 async function submitForm() {
-  if (!form.dictName || !form.dictType) {
+  if (!form.dictLabel || !form.dictValue) {
     toast({
-      title: "验证失败",
-      description: "字典名称和类型不能为空",
-      variant: "destructive"
+      title: '验证失败',
+      description: '字典标签和键值不能为空',
+      variant: 'destructive',
     })
     return
   }
-  
+
   try {
-    if (form.dictId) {
-      await updateType(form)
-      toast({
-        title: "修改成功",
-        description: "字典类型已更新",
-      })
+    if (form.dictCode) {
+      await updateData(form)
+      toast({ title: '修改成功', description: '字典数据已更新' })
     } else {
-      await addType(form)
-      toast({
-        title: "添加成功",
-        description: "字典类型已添加",
-      })
+      await addData(form)
+      toast({ title: '添加成功', description: '字典数据已添加' })
     }
     showDialog.value = false
     getList()
@@ -175,15 +162,26 @@ async function submitForm() {
 }
 
 function resetForm() {
-  form.dictId = undefined
-  form.dictName = ''
+  form.dictCode = undefined
+  form.dictSort = 0
+  form.dictLabel = ''
+  form.dictValue = ''
   form.dictType = ''
+  form.cssClass = ''
+  form.listClass = 'default'
+  form.isDefault = 'N'
   form.status = '0'
   form.remark = ''
 }
 
+function goBack() {
+  router.push('/system/dict')
+}
+
 onMounted(() => {
-  getList()
+  if (dictType.value) {
+    getList()
+  }
 })
 </script>
 
@@ -191,36 +189,32 @@ onMounted(() => {
   <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h2 class="text-xl sm:text-2xl font-bold tracking-tight">字典管理</h2>
-        <p class="text-muted-foreground">
-          管理系统字典数据，用于界面下拉框选项等
-        </p>
-      </div>
-      <div class="flex items-center gap-2">
-        <Button @click="handleAdd">
-          <Plus class="mr-2 h-4 w-4" />
-          新增字典
+      <div class="flex items-center gap-3">
+        <Button variant="ghost" size="icon" @click="goBack">
+          <ArrowLeft class="h-4 w-4" />
         </Button>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold tracking-tight">{{ dictName }}</h2>
+          <p class="text-muted-foreground">
+            字典类型：<Badge variant="outline">{{ dictType }}</Badge>
+          </p>
+        </div>
       </div>
+      <Button @click="handleAdd">
+        <Plus class="mr-2 h-4 w-4" />
+        新增数据
+      </Button>
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">字典名称</span>
-        <Input 
-          v-model="queryParams.dictName" 
-          placeholder="请输入字典名称" 
-          class="w-[150px]" 
-          @keyup.enter="handleQuery"
-        />
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">字典类型</span>
-        <Input 
-          v-model="queryParams.dictType" 
-          placeholder="请输入字典类型" 
+        <span class="text-sm font-medium">字典标签</span>
+        <Input
+          v-model="queryParams.dictLabel"
+          placeholder="请输入字典标签"
           class="w-[150px]"
           @keyup.enter="handleQuery"
         />
@@ -251,53 +245,54 @@ onMounted(() => {
 
     <!-- Table -->
     <div class="border rounded-md bg-card overflow-x-auto">
-      <!-- 骨架屏 -->
-      <TableSkeleton v-if="loading" :columns="6" :rows="10" />
-      
-      <!-- 空状态 -->
+      <TableSkeleton v-if="loading" :columns="7" :rows="10" />
+
       <EmptyState
-        v-else-if="typeList.length === 0"
+        v-else-if="dataList.length === 0"
         title="暂无字典数据"
-        description="点击新增字典按钮添加第一个字典类型"
-        action-text="新增字典"
+        description="点击新增数据按钮添加第一条字典数据"
+        action-text="新增数据"
         @action="handleAdd"
       />
-      
-      <!-- 数据表格 -->
+
       <Table v-else>
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[100px]">字典编号</TableHead>
-            <TableHead>字典名称</TableHead>
-            <TableHead>字典类型</TableHead>
+            <TableHead class="w-[80px]">字典编码</TableHead>
+            <TableHead>字典标签</TableHead>
+            <TableHead>字典键值</TableHead>
+            <TableHead class="w-[80px]">排序</TableHead>
             <TableHead>状态</TableHead>
             <TableHead>备注</TableHead>
-            <TableHead>创建时间</TableHead>
             <TableHead class="text-right">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="item in typeList" :key="item.dictId">
-            <TableCell>{{ item.dictId }}</TableCell>
-            <TableCell>{{ item.dictName }}</TableCell>
+          <TableRow v-for="item in dataList" :key="item.dictCode">
+            <TableCell>{{ item.dictCode }}</TableCell>
             <TableCell>
-              <Badge variant="outline">{{ item.dictType }}</Badge>
+              <Badge :class="item.listClass ? `badge-${item.listClass}` : ''">
+                {{ item.dictLabel }}
+              </Badge>
             </TableCell>
+            <TableCell>{{ item.dictValue }}</TableCell>
+            <TableCell>{{ item.dictSort }}</TableCell>
             <TableCell>
               <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
                 {{ item.status === '0' ? '正常' : '停用' }}
               </Badge>
             </TableCell>
             <TableCell class="text-muted-foreground">{{ item.remark }}</TableCell>
-            <TableCell>{{ formatDate(item.createTime) }}</TableCell>
             <TableCell class="text-right space-x-2">
-              <Button variant="ghost" size="icon" @click="handleDictData(item)" title="字典数据">
-                <List class="w-4 h-4" />
-              </Button>
               <Button variant="ghost" size="icon" @click="handleUpdate(item)">
                 <Edit class="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" class="text-destructive" @click="handleDelete(item)">
+              <Button
+                variant="ghost"
+                size="icon"
+                class="text-destructive"
+                @click="handleDelete(item)"
+              >
                 <Trash2 class="w-4 h-4" />
               </Button>
             </TableCell>
@@ -316,21 +311,42 @@ onMounted(() => {
 
     <!-- Add/Edit Dialog -->
     <Dialog v-model:open="showDialog">
-      <DialogContent class="sm:max-w-[425px]">
+      <DialogContent class="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{{ dialogTitle }}</DialogTitle>
-          <DialogDescription>
-            请填写字典类型信息
-          </DialogDescription>
+          <DialogDescription>请填写字典数据信息</DialogDescription>
         </DialogHeader>
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
-            <span class="text-right text-sm">字典名称</span>
-            <Input v-model="form.dictName" class="col-span-3" />
+            <span class="text-right text-sm">字典类型</span>
+            <Input v-model="form.dictType" class="col-span-3" disabled />
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
-            <span class="text-right text-sm">字典类型</span>
-            <Input v-model="form.dictType" class="col-span-3" />
+            <span class="text-right text-sm">字典标签</span>
+            <Input v-model="form.dictLabel" class="col-span-3" placeholder="显示的文本" />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4">
+            <span class="text-right text-sm">字典键值</span>
+            <Input v-model="form.dictValue" class="col-span-3" placeholder="存储的值" />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4">
+            <span class="text-right text-sm">显示排序</span>
+            <Input v-model.number="form.dictSort" type="number" class="col-span-3" />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4">
+            <span class="text-right text-sm">回显样式</span>
+            <Select v-model="form.listClass">
+              <SelectTrigger class="col-span-3">
+                <SelectValue placeholder="请选择" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">默认</SelectItem>
+                <SelectItem value="primary">主要</SelectItem>
+                <SelectItem value="success">成功</SelectItem>
+                <SelectItem value="warning">警告</SelectItem>
+                <SelectItem value="danger">危险</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div class="grid grid-cols-4 items-center gap-4">
             <span class="text-right text-sm">状态</span>
@@ -360,7 +376,7 @@ onMounted(() => {
     <ConfirmDialog
       v-model:open="showDeleteDialog"
       title="确认删除"
-      :description="`您确定要删除字典类型 &quot;${dictToDelete?.dictName}&quot; 吗？此操作无法撤销。`"
+      :description="`您确定要删除字典数据 &quot;${dataToDelete?.dictLabel}&quot; 吗？此操作无法撤销。`"
       confirm-text="删除"
       destructive
       @confirm="confirmDelete"
