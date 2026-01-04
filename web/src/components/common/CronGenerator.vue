@@ -159,7 +159,7 @@ const cronDescription = computed(() => {
 })
 
 // 计算下次执行时间（简化版）
-const nextExecutions = computed(() => {
+const _nextExecutions = computed(() => {
   const results: string[] = []
   const now = new Date()
 

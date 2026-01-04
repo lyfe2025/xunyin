@@ -27,7 +27,6 @@ import { LogOut, RefreshCw, Search, Loader2, Copy } from 'lucide-vue-next'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { listOnline, forceLogout, type SysUserOnline } from '@/api/monitor/online'
 import { useUserStore } from '@/stores/modules/user'
 

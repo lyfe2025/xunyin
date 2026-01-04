@@ -30,18 +30,12 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Trash2, RefreshCw, Search } from 'lucide-vue-next'
-import {
-  listLogininfor,
-  delLogininfor,
-  cleanLogininfor,
-  type LogininforQuery,
-} from '@/api/monitor/logininfor'
+import { listLogininfor, cleanLogininfor, type LogininforQuery } from '@/api/monitor/logininfor'
 import type { SysLoginLog } from '@/api/system/types'
 import { formatDate } from '@/utils/format'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { toast } = useToast()
 
@@ -59,8 +53,6 @@ const queryParams = reactive<LogininforQuery>({
   endTime: undefined,
 })
 const showCleanDialog = ref(false)
-const showDeleteDialog = ref(false)
-const deleteTarget = ref<SysLoginLog | null>(null)
 
 // Fetch Data
 async function getList() {
@@ -91,20 +83,6 @@ function resetQuery() {
   queryParams.beginTime = undefined
   queryParams.endTime = undefined
   handleQuery()
-}
-
-function confirmDelete(row: SysLoginLog) {
-  deleteTarget.value = row
-  showDeleteDialog.value = true
-}
-
-async function handleDelete() {
-  if (!deleteTarget.value) return
-  await delLogininfor([deleteTarget.value.infoId])
-  toast({ title: '删除成功', description: '日志已删除' })
-  showDeleteDialog.value = false
-  deleteTarget.value = null
-  getList()
 }
 
 async function handleClean() {

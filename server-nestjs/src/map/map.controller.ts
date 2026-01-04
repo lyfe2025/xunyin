@@ -6,7 +6,6 @@ import {
   WalkingRouteDto,
   SearchPoiDto,
   WalkingRouteVo,
-  PoiVo,
   MapConfigVo,
 } from './dto/route.dto';
 

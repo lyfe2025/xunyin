@@ -41,7 +41,7 @@ async function getData() {
     const res = await getServer()
     server.value = res
     lastUpdateTime.value = new Date().toLocaleTimeString('zh-CN')
-  } catch (error) {
+  } catch {
     toast({
       title: '获取服务器信息失败',
       description: '请检查网络连接或稍后重试',

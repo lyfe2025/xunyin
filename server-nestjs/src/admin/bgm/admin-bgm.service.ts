@@ -11,7 +11,7 @@ import type {
 
 @Injectable()
 export class AdminBgmService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(query: QueryBgmDto) {
     const { name, context, status, pageNum = 1, pageSize = 20 } = query;
@@ -38,19 +38,34 @@ export class AdminBgmService {
     const journeyIds = list
       .filter((b) => b.context === 'journey' && b.contextId)
       .map((b) => b.contextId!);
+    const pointIds = list
+      .filter((b) => b.context === 'point' && b.contextId)
+      .map((b) => b.contextId!);
 
-    const [cities, journeys] = await Promise.all([
+    const [cities, journeys, points] = await Promise.all([
       cityIds.length > 0
         ? this.prisma.city.findMany({
-            where: { id: { in: cityIds } },
-            select: { id: true, name: true },
-          })
+          where: { id: { in: cityIds } },
+          select: { id: true, name: true },
+        })
         : [],
       journeyIds.length > 0
         ? this.prisma.journey.findMany({
-            where: { id: { in: journeyIds } },
-            select: { id: true, name: true, city: { select: { name: true } } },
-          })
+          where: { id: { in: journeyIds } },
+          select: { id: true, name: true, city: { select: { name: true } } },
+        })
+        : [],
+      pointIds.length > 0
+        ? this.prisma.explorationPoint.findMany({
+          where: { id: { in: pointIds } },
+          select: {
+            id: true,
+            name: true,
+            journey: {
+              select: { name: true, city: { select: { name: true } } },
+            },
+          },
+        })
         : [],
     ]);
 
@@ -58,10 +73,21 @@ export class AdminBgmService {
     const journeyMap = new Map(
       journeys.map((j) => [j.id, { name: j.name, cityName: j.city?.name }]),
     );
+    const pointMap = new Map(
+      points.map((p) => [
+        p.id,
+        {
+          name: p.name,
+          journeyName: p.journey?.name,
+          cityName: p.journey?.city?.name,
+        },
+      ]),
+    );
 
     return {
       list: list.map((b) => {
         const journeyInfo = journeyMap.get(b.contextId!);
+        const pointInfo = pointMap.get(b.contextId!);
         return {
           ...b,
           contextName:
@@ -69,9 +95,17 @@ export class AdminBgmService {
               ? cityMap.get(b.contextId!) || null
               : b.context === 'journey'
                 ? journeyInfo?.name || null
-                : null,
+                : b.context === 'point'
+                  ? pointInfo?.name || null
+                  : null,
           contextCityName:
-            b.context === 'journey' ? journeyInfo?.cityName || null : null,
+            b.context === 'journey'
+              ? journeyInfo?.cityName || null
+              : b.context === 'point'
+                ? pointInfo?.cityName || null
+                : null,
+          contextJourneyName:
+            b.context === 'point' ? pointInfo?.journeyName || null : null,
         };
       }),
       total,
@@ -121,6 +155,12 @@ export class AdminBgmService {
       });
       if (!journey)
         throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在');
+    } else if (dto.context === 'point' && dto.contextId) {
+      const point = await this.prisma.explorationPoint.findUnique({
+        where: { id: dto.contextId },
+      });
+      if (!point)
+        throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '探索点不存在');
     }
 
     return this.prisma.backgroundMusic.create({
@@ -159,6 +199,12 @@ export class AdminBgmService {
       });
       if (!journey)
         throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在');
+    } else if (context === 'point' && contextId) {
+      const point = await this.prisma.explorationPoint.findUnique({
+        where: { id: contextId },
+      });
+      if (!point)
+        throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '探索点不存在');
     }
 
     return this.prisma.backgroundMusic.update({
@@ -186,14 +232,15 @@ export class AdminBgmService {
   }
 
   async getStats() {
-    const [total, home, city, journey] = await Promise.all([
+    const [total, home, city, journey, point] = await Promise.all([
       this.prisma.backgroundMusic.count(),
       this.prisma.backgroundMusic.count({ where: { context: 'home' } }),
       this.prisma.backgroundMusic.count({ where: { context: 'city' } }),
       this.prisma.backgroundMusic.count({ where: { context: 'journey' } }),
+      this.prisma.backgroundMusic.count({ where: { context: 'point' } }),
     ]);
 
-    return { total, home, city, journey };
+    return { total, home, city, journey, point };
   }
 
   async updateStatus(id: string, status: string) {

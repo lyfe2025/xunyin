@@ -51,7 +51,6 @@ import { Trash2, Plus, RefreshCw, Search, Edit, Play, MoreHorizontal } from 'luc
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import CronGenerator from '@/components/common/CronGenerator.vue'
 import {
   listJob,

@@ -577,11 +577,7 @@ onMounted(() => {
                   v-for="option in chainProviderInfo.options"
                   :key="option.value"
                   class="flex items-center gap-3 p-3 border rounded-lg transition-colors"
-                  :class="
-                    option.isCurrent
-                      ? 'border-primary bg-primary/5'
-                      : 'border-muted'
-                  "
+                  :class="option.isCurrent ? 'border-primary bg-primary/5' : 'border-muted'"
                 >
                   <!-- 选中指示器 -->
                   <div
@@ -594,18 +590,10 @@ onMounted(() => {
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                       <span class="font-medium">{{ option.label }}</span>
-                      <Badge
-                        v-if="option.isCurrent"
-                        variant="default"
-                        class="text-xs"
-                      >
+                      <Badge v-if="option.isCurrent" variant="default" class="text-xs">
                         当前
                       </Badge>
-                      <Badge
-                        v-if="!option.isConfigured"
-                        variant="secondary"
-                        class="text-xs"
-                      >
+                      <Badge v-if="!option.isConfigured" variant="secondary" class="text-xs">
                         未配置
                       </Badge>
                     </div>
@@ -643,7 +631,8 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <Link2Off class="w-4 h-4 text-red-600" />
                 <span class="text-sm text-red-600 dark:text-red-400">
-                  当前链服务 <strong>{{ chainProviderInfo.currentProviderName }}</strong> 未配置，请先完成配置
+                  当前链服务
+                  <strong>{{ chainProviderInfo.currentProviderName }}</strong> 未配置，请先完成配置
                 </span>
               </div>
             </div>

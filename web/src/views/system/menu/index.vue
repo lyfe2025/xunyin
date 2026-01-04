@@ -40,7 +40,6 @@ import {
   Loader2,
   Maximize2,
   Minimize2,
-  Menu as MenuIcon,
 } from 'lucide-vue-next'
 import IconPicker from '@/components/common/IconPicker.vue'
 import * as icons from 'lucide-vue-next'
@@ -54,20 +53,10 @@ function getIconComponent(name: string) {
     .join('')
   return (icons as any)[pascalName]
 }
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { listMenu, getMenu, delMenu, addMenu, updateMenu } from '@/api/system/menu'
+import { listMenu, delMenu, addMenu, updateMenu } from '@/api/system/menu'
 import type { SysMenu } from '@/api/system/types'
 
 const { toast } = useToast()

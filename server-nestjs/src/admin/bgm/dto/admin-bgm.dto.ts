@@ -55,9 +55,12 @@ export class CreateBgmDto {
   @MaxLength(255)
   url: string;
 
-  @ApiProperty({ description: '上下文类型', enum: ['home', 'city', 'journey'] })
+  @ApiProperty({
+    description: '上下文类型',
+    enum: ['home', 'city', 'journey', 'point'],
+  })
   @IsString()
-  @IsIn(['home', 'city', 'journey'])
+  @IsIn(['home', 'city', 'journey', 'point'])
   context: string;
 
   @ApiPropertyOptional({ description: '关联ID（城市ID或文化之旅ID）' })
@@ -100,11 +103,11 @@ export class UpdateBgmDto {
 
   @ApiPropertyOptional({
     description: '上下文类型',
-    enum: ['home', 'city', 'journey'],
+    enum: ['home', 'city', 'journey', 'point'],
   })
   @IsOptional()
   @IsString()
-  @IsIn(['home', 'city', 'journey'])
+  @IsIn(['home', 'city', 'journey', 'point'])
   context?: string;
 
   @ApiPropertyOptional({ description: '关联ID' })
@@ -172,11 +175,14 @@ export class BgmListVo {
   @ApiProperty({ description: '关联ID' })
   contextId: string | null;
 
-  @ApiProperty({ description: '关联名称（城市名或文化之旅名）' })
+  @ApiProperty({ description: '关联名称（城市名、文化之旅名或探索点名）' })
   contextName: string | null;
 
-  @ApiProperty({ description: '关联城市名（仅文化之旅类型）' })
+  @ApiProperty({ description: '关联城市名（文化之旅或探索点类型）' })
   contextCityName: string | null;
+
+  @ApiProperty({ description: '关联文化之旅名（仅探索点类型）' })
+  contextJourneyName: string | null;
 
   @ApiProperty({ description: '时长（秒）' })
   duration: number | null;

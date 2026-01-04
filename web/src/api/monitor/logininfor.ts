@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import { type SysLoginLog, type PageResult, type PageQuery } from '@/api/system/types'
+import { type SysLoginLog, type PageResult } from '@/api/system/types'
 
 /** 登录日志查询参数 */
 export interface LogininforQuery {

@@ -134,13 +134,17 @@ const chartType = ref<'bar' | 'line'>('bar')
 async function fetchStats() {
   try {
     stats.value = await getDashboardStats()
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
 
 async function fetchTrends() {
   try {
     trends.value = await getDashboardTrends(Number(trendDays.value))
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
 
 async function handleTrendDaysChange() {

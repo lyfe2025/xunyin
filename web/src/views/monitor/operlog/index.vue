@@ -37,13 +37,12 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Trash2, RefreshCw, Search, Eye } from 'lucide-vue-next'
-import { listOperLog, delOperLog, cleanOperLog } from '@/api/monitor/operlog'
+import { listOperLog, cleanOperLog } from '@/api/monitor/operlog'
 import type { SysOperLog } from '@/api/system/types'
 import { formatDate } from '@/utils/format'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { toast } = useToast()
 
@@ -63,8 +62,6 @@ const queryParams = reactive({
 const showDetail = ref(false)
 const currentLog = ref<SysOperLog | null>(null)
 const showCleanDialog = ref(false)
-const showDeleteDialog = ref(false)
-const deleteTarget = ref<SysOperLog | null>(null)
 
 // Fetch Data
 async function getList() {
@@ -95,20 +92,6 @@ function resetQuery() {
   queryParams.businessType = undefined
   queryParams.status = undefined
   handleQuery()
-}
-
-function confirmDelete(row: SysOperLog) {
-  deleteTarget.value = row
-  showDeleteDialog.value = true
-}
-
-async function handleDelete() {
-  if (!deleteTarget.value) return
-  await delOperLog([deleteTarget.value.operId])
-  toast({ title: '删除成功', description: '日志已删除' })
-  showDeleteDialog.value = false
-  deleteTarget.value = null
-  getList()
 }
 
 async function handleClean() {

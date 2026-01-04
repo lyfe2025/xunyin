@@ -353,7 +353,7 @@ ${fields
       <TabsList>
         ${f.options?.map((o) => `<TabsTrigger value="${o.value}">${o.label}</TabsTrigger>`).join('\n        ')}
       </TabsList>
-      ${f.options?.map((o) => `<TabsContent value="${o.value}"><div class=\"border rounded-md p-4\">标签 ${o.label} 内容占位</div></TabsContent>`).join('\n      ')}
+      ${f.options?.map((o) => `<TabsContent value="${o.value}"><div class="border rounded-md p-4">标签 ${o.label} 内容占位</div></TabsContent>`).join('\n      ')}
     </Tabs>`
     } else if (f.type === 'alert-dialog') {
       return `    <AlertDialog>
@@ -389,14 +389,14 @@ ${fields
     } else if (f.type === 'hover-card') {
       return `    <HoverCard>
       <HoverCardTrigger as-child>
-        <Button variant=\"outline\" size=\"sm\">悬浮查看</Button>
+        <Button variant="outline" size="sm">悬浮查看</Button>
       </HoverCardTrigger>
       <HoverCardContent>悬浮内容占位</HoverCardContent>
     </HoverCard>`
     } else if (f.type === 'dropdown-menu') {
       return `    <DropdownMenu>
       <DropdownMenuTrigger as-child>
-        <Button variant=\"outline\" size=\"sm\">下拉菜单</Button>
+        <Button variant="outline" size="sm">下拉菜单</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>操作</DropdownMenuLabel>
@@ -428,7 +428,7 @@ ${fields
         <NavigationMenuItem>
           <NavigationMenuTrigger>${o.label}</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div class=\"p-4\">内容占位</div>
+            <div class="p-4">内容占位</div>
           </NavigationMenuContent>
         </NavigationMenuItem>`
           )
@@ -438,7 +438,7 @@ ${fields
     } else if (f.type === 'context-menu') {
       return `    <ContextMenu>
       <ContextMenuTrigger>
-        <div class=\"border rounded-md p-4 text-sm text-muted-foreground\">右键打开菜单</div>
+        <div class="border rounded-md p-4 text-sm text-muted-foreground">右键打开菜单</div>
       </ContextMenuTrigger>
       <ContextMenuContent>
         ${f.options?.map((o) => `<ContextMenuItem>${o.label}</ContextMenuItem>`).join('\n        ')}
@@ -470,23 +470,23 @@ ${fields
     } else if (f.type === 'collapsible') {
       return `    <Collapsible>
       <CollapsibleTrigger as-child>
-        <Button variant=\"outline\" size=\"sm\">${f.options?.[0]?.label || '展开/收起'}</Button>
+        <Button variant="outline" size="sm">${f.options?.[0]?.label || '展开/收起'}</Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div class=\"border rounded-md p-4 mt-2\">折叠内容占位</div>
+        <div class="border rounded-md p-4 mt-2">折叠内容占位</div>
       </CollapsibleContent>
     </Collapsible>`
     } else if (f.type === 'carousel') {
-      return `    <Carousel class=\"w-full max-w-sm\">
+      return `    <Carousel class="w-full max-w-sm">
       <CarouselContent>
-        ${f.options?.map((o) => `<CarouselItem><div class=\"h-32 rounded-md bg-muted flex items-center justify-center\">${o.label}</div></CarouselItem>`).join('\n        ')}
+        ${f.options?.map((o) => `<CarouselItem><div class="h-32 rounded-md bg-muted flex items-center justify-center">${o.label}</div></CarouselItem>`).join('\n        ')}
       </CarouselContent>
       <CarouselPrevious />
       <CarouselNext />
     </Carousel>`
     } else if (f.type === 'aspect-ratio') {
-      return `    <AspectRatio ratio=${(f as any).ratio || 1.7778} class=\"bg-muted rounded-md\">
-      <div class=\"w-full h-full flex items-center justify-center text-sm text-muted-foreground\">比例 ${(f as any).ratio || 1.7778}</div>
+      return `    <AspectRatio ratio=${(f as any).ratio || 1.7778} class="bg-muted rounded-md">
+      <div class="w-full h-full flex items-center justify-center text-sm text-muted-foreground">比例 ${(f as any).ratio || 1.7778}</div>
     </AspectRatio>`
     } else if (f.type === 'table') {
       return `    <Table>

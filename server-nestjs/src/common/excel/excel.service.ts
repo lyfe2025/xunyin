@@ -110,7 +110,11 @@ export class ExcelService {
     headerRow.eachCell((cell, colNumber) => {
       const val = cell.value;
       headers[colNumber] =
-        typeof val === 'string' ? val.trim() : val != null ? String(val) : '';
+        typeof val === 'string'
+          ? val.trim()
+          : val != null
+            ? String(val as string | number | boolean)
+            : '';
     });
 
     // 读取数据行

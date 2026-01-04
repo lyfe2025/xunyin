@@ -4,10 +4,11 @@ export interface Bgm {
   id: string
   name: string
   url: string
-  context: 'home' | 'city' | 'journey'
+  context: 'home' | 'city' | 'journey' | 'point'
   contextId: string | null
   contextName: string | null
   contextCityName: string | null
+  contextJourneyName: string | null
   duration: number | null
   orderNum: number
   status: string
@@ -27,12 +28,13 @@ export interface BgmStats {
   home: number
   city: number
   journey: number
+  point: number
 }
 
 export interface CreateBgmDto {
   name: string
   url: string
-  context: 'home' | 'city' | 'journey'
+  context: 'home' | 'city' | 'journey' | 'point'
   contextId?: string
   duration?: number
   orderNum?: number
@@ -42,7 +44,7 @@ export interface CreateBgmDto {
 export interface UpdateBgmDto {
   name?: string
   url?: string
-  context?: 'home' | 'city' | 'journey'
+  context?: 'home' | 'city' | 'journey' | 'point'
   contextId?: string
   duration?: number
   orderNum?: number

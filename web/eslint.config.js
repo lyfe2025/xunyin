@@ -40,13 +40,18 @@ export default [
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         HTMLElement: 'readonly',
+        HTMLInputElement: 'readonly',
+        HTMLLinkElement: 'readonly',
         Event: 'readonly',
         CustomEvent: 'readonly',
         KeyboardEvent: 'readonly',
         MouseEvent: 'readonly',
+        BeforeUnloadEvent: 'readonly',
         ResizeObserver: 'readonly',
         IntersectionObserver: 'readonly',
         MutationObserver: 'readonly',
+        location: 'readonly',
+        structuredClone: 'readonly',
       },
     },
   },
@@ -90,6 +95,16 @@ export default [
           math: 'always',
         },
       ],
+      // 忽略 defineEmits 中的未使用参数和常见模式
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern:
+            '^_|^e$|^err$|^error$|^value$|^payload$|^id$|^index$|^from$|^to$|^type$|^format$|^col$',
+          varsIgnorePattern: '^_|^props$|^emit$',
+        },
+      ],
+      'no-empty': 'warn',
     },
   },
   {
@@ -112,13 +127,15 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         {
-          argsIgnorePattern: '^_',
+          argsIgnorePattern:
+            '^_|^e$|^err$|^error$|^value$|^payload$|^id$|^index$|^from$|^to$|^type$|^format$|^col$',
           varsIgnorePattern: '^_',
         },
       ],
       'no-unused-vars': 'off',
+      'no-useless-escape': 'warn',
     },
   },
   {

@@ -5,13 +5,13 @@ import { reactiveOmit } from '@vueuse/core'
 import { CalendarHeading, useForwardProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<CalendarHeadingProps & { class?: HTMLAttributes['class'] }>()
+const _props = defineProps<CalendarHeadingProps & { class?: HTMLAttributes['class'] }>()
 
 defineSlots<{
-  default: (props: { headingValue: string }) => any
+  default: (_props: { headingValue: string }) => any
 }>()
 
-const delegatedProps = reactiveOmit(props, 'class')
+const delegatedProps = reactiveOmit(_props, 'class')
 
 const forwardedProps = useForwardProps(delegatedProps)
 </script>
@@ -19,7 +19,7 @@ const forwardedProps = useForwardProps(delegatedProps)
 <template>
   <CalendarHeading
     v-slot="{ headingValue }"
-    :class="cn('text-sm font-medium', props.class)"
+    :class="cn('text-sm font-medium', _props.class)"
     v-bind="forwardedProps"
   >
     <slot :heading-value>

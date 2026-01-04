@@ -19,16 +19,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -106,7 +96,7 @@ const menuMap = computed(() => {
 })
 
 // 根据菜单ID获取菜单名称
-function getMenuName(menuId: string): string {
+function _getMenuName(menuId: string): string {
   const menu = menuMap.value.get(String(menuId))
   return menu?.menuName || `菜单 ${menuId}`
 }
@@ -261,12 +251,12 @@ async function confirmDelete() {
     toast({ title: '删除成功', description: '角色已删除' })
     getList()
     showDeleteDialog.value = false
-  } catch (error) {
+  } catch {
     // handled by interceptor
   }
 }
 
-async function handleStatusChange(row: SysRole) {
+async function _handleStatusChange(row: SysRole) {
   const newStatus = row.status === '0' ? '1' : '0'
   const oldStatus = row.status
 

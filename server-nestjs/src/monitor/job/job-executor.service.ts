@@ -92,7 +92,7 @@ export class JobExecutorService implements OnModuleInit, OnModuleDestroy {
       // 创建 CronJob
       const cronJob = new CronJob(
         task.cronExpression,
-        () => this.executeJob(task),
+        () => void this.executeJob(task),
         null,
         false, // 不自动启动
         'Asia/Shanghai',
@@ -283,7 +283,7 @@ export class JobExecutorService implements OnModuleInit, OnModuleDestroy {
     const jobKey = this.getJobKey(jobId);
     try {
       const job = this.schedulerRegistry.getCronJob(jobKey);
-      job.start();
+      void job.start();
       this.logger.log(`任务已启动: ${jobKey}`, 'JobExecutor');
       return true;
     } catch {
@@ -298,7 +298,7 @@ export class JobExecutorService implements OnModuleInit, OnModuleDestroy {
     const jobKey = this.getJobKey(jobId);
     try {
       const job = this.schedulerRegistry.getCronJob(jobKey);
-      job.stop();
+      void job.stop();
       this.logger.log(`任务已停止: ${jobKey}`, 'JobExecutor');
       return true;
     } catch {
@@ -328,7 +328,7 @@ export class JobExecutorService implements OnModuleInit, OnModuleDestroy {
   private stopAllJobs() {
     const jobs = this.schedulerRegistry.getCronJobs();
     jobs.forEach((job, key) => {
-      job.stop();
+      void job.stop();
       this.logger.debug(`停止任务: ${key}`, 'JobExecutor');
     });
   }

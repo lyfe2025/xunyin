@@ -1,12 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsOptional,
-  IsString,
-  IsBoolean,
-  IsInt,
-  Min,
-  IsIn,
-} from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsInt, Min } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 export class QueryUserSealDto {

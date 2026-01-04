@@ -48,6 +48,7 @@ import {
   Square,
   ChevronRight,
   Upload,
+  MapPin,
 } from 'lucide-vue-next'
 import {
   listBgm,
@@ -64,6 +65,7 @@ import {
 } from '@/api/xunyin/bgm'
 import { listCity } from '@/api/xunyin/city'
 import { listJourney } from '@/api/xunyin/journey'
+import { listPoint } from '@/api/xunyin/point'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -85,6 +87,7 @@ const contextOptions = [
   { value: 'home', label: '首页', icon: Home },
   { value: 'city', label: '城市', icon: Building },
   { value: 'journey', label: '文化之旅', icon: Route },
+  { value: 'point', label: '探索点', icon: MapPin },
 ]
 
 function getContextLabel(context: string) {
@@ -93,6 +96,9 @@ function getContextLabel(context: string) {
 
 const cityOptions = ref<{ id: string; name: string }[]>([])
 const journeyOptions = ref<{ id: string; name: string; cityName?: string }[]>([])
+const pointOptions = ref<{ id: string; name: string; journeyName?: string; cityName?: string }[]>(
+  []
+)
 
 const showFormDialog = ref(false)
 const formLoading = ref(false)
@@ -121,7 +127,7 @@ const audioDuration = ref(0)
 const isPlaying = ref(false)
 
 // 文件上传
-// eslint-disable-next-line no-undef
+
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const uploadLoading = ref(false)
 
@@ -189,15 +195,22 @@ async function loadStats() {
 
 async function loadOptions() {
   try {
-    const [cities, journeys] = await Promise.all([
+    const [cities, journeys, points] = await Promise.all([
       listCity({ pageNum: 1, pageSize: 100 }),
       listJourney({ pageNum: 1, pageSize: 100 }),
+      listPoint({ pageNum: 1, pageSize: 200 }),
     ])
     cityOptions.value = cities.list.map((c: any) => ({ id: c.id, name: c.name }))
     journeyOptions.value = journeys.list.map((j: any) => ({
       id: j.id,
       name: j.name,
       cityName: j.cityName,
+    }))
+    pointOptions.value = points.list.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      journeyName: p.journeyName,
+      cityName: p.cityName,
     }))
   } catch {
     /* ignore */
@@ -254,8 +267,11 @@ async function handleSubmit() {
     toast({ title: '请填写必填项', variant: 'destructive' })
     return
   }
-  // 城市和文化之旅类型必须选择关联
-  if ((form.context === 'city' || form.context === 'journey') && !form.contextId) {
+  // 城市、文化之旅和探索点类型必须选择关联
+  if (
+    (form.context === 'city' || form.context === 'journey' || form.context === 'point') &&
+    !form.contextId
+  ) {
     toast({ title: '请选择关联项', variant: 'destructive' })
     return
   }
@@ -406,6 +422,13 @@ function getContextDisplay(item: Bgm): string {
       return `${item.contextCityName} > ${item.contextName}`
     return item.contextName || '-'
   }
+  if (item.context === 'point') {
+    const parts = []
+    if (item.contextCityName) parts.push(item.contextCityName)
+    if (item.contextJourneyName) parts.push(item.contextJourneyName)
+    if (item.contextName) parts.push(item.contextName)
+    return parts.length > 0 ? parts.join(' > ') : '-'
+  }
   return '-'
 }
 
@@ -416,7 +439,6 @@ function triggerFileInput() {
 
 // 处理文件上传
 async function handleFileChange(event: Event) {
-  // eslint-disable-next-line no-undef
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
@@ -510,7 +532,7 @@ onUnmounted(() => {
     </div>
 
     <!-- 统计卡片 -->
-    <div class="grid gap-4 md:grid-cols-4" v-if="stats">
+    <div class="grid gap-4 md:grid-cols-5" v-if="stats">
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium">总数</CardTitle>
@@ -545,6 +567,15 @@ onUnmounted(() => {
         </CardHeader>
         <CardContent
           ><div class="text-2xl font-bold text-orange-600">{{ stats.journey }}</div></CardContent
+        >
+      </Card>
+      <Card>
+        <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle class="text-sm font-medium">探索点音乐</CardTitle>
+          <MapPin class="h-4 w-4 text-purple-500" />
+        </CardHeader>
+        <CardContent
+          ><div class="text-2xl font-bold text-purple-600">{{ stats.point }}</div></CardContent
         >
       </Card>
     </div>
@@ -783,6 +814,23 @@ onUnmounted(() => {
                 <SelectItem v-for="j in journeyOptions" :key="j.id" :value="j.id">
                   <span v-if="j.cityName" class="text-muted-foreground">{{ j.cityName }} > </span
                   >{{ j.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div v-if="form.context === 'point'" class="grid gap-2">
+            <Label>关联探索点 <span class="text-destructive">*</span></Label>
+            <Select v-model="form.contextId">
+              <SelectTrigger><SelectValue placeholder="请选择探索点" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="p in pointOptions" :key="p.id" :value="p.id">
+                  <span v-if="p.cityName || p.journeyName" class="text-muted-foreground">
+                    <template v-if="p.cityName">{{ p.cityName }}</template>
+                    <template v-if="p.cityName && p.journeyName"> > </template>
+                    <template v-if="p.journeyName">{{ p.journeyName }}</template>
+                    {{ ' > ' }}
+                  </span>
+                  {{ p.name }}
                 </SelectItem>
               </SelectContent>
             </Select>

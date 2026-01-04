@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-vue-next'
+import { X, Loader2, Image as ImageIcon } from 'lucide-vue-next'
 import { uploadImage } from '@/api/upload'
 import { getResourceUrl } from '@/utils/url'
 

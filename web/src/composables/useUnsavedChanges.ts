@@ -55,7 +55,7 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}): UseUn
   const showLeaveDialog = ref(false)
 
   // 存储路由守卫的 next 函数
-  let pendingNext: ((value?: boolean) => void) | null = null
+  let _pendingNext: ((value?: boolean) => void) | null = null
   // 存储 tryLeave 的 resolve 函数
   let pendingResolve: ((value: boolean) => void) | null = null
 
@@ -78,7 +78,7 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}): UseUn
     if (pendingTo && router) {
       const target = pendingTo
       pendingTo = null
-      pendingNext = null
+      _pendingNext = null
       router.push(target)
     }
 
@@ -92,7 +92,7 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}): UseUn
   const cancelLeave = () => {
     showLeaveDialog.value = false
     pendingTo = null
-    pendingNext = null
+    _pendingNext = null
     if (pendingResolve) {
       pendingResolve(false)
       pendingResolve = null
@@ -138,7 +138,7 @@ export function useUnsavedChanges(options: UseUnsavedChangesOptions = {}): UseUn
     onBeforeRouteLeave((to, _from, next) => {
       if (isDirty.value) {
         pendingTo = to
-        pendingNext = next
+        _pendingNext = next
         showLeaveDialog.value = true
         // 返回 false 阻止导航，等待用户确认
         return false

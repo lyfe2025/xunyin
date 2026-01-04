@@ -132,7 +132,7 @@ async function getCityOptions() {
     const res = await listCity({ pageSize: 100 })
     cityOptions.value = res.list
   } catch {
-    // 忽略错误
+    // ignore
   }
 }
 
@@ -220,7 +220,9 @@ async function confirmDelete() {
     toast({ title: '删除成功' })
     getList()
     showDeleteDialog.value = false
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
 
 // 批量删除
@@ -249,7 +251,9 @@ async function confirmBatchDelete() {
     toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
     getList()
     showBatchDeleteDialog.value = false
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
 
 function handleSelectOne(id: string) {

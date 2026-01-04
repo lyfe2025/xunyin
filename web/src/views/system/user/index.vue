@@ -52,7 +52,6 @@ import {
 import {
   Plus,
   Search,
-  FileDown,
   FileUp,
   Trash2,
   Loader2,
@@ -81,7 +80,7 @@ import {
 import { listDeptTree } from '@/api/system/dept'
 import { listRole } from '@/api/system/role'
 import { listPost } from '@/api/system/post'
-import type { SysUser, SysDept, SysRole, SysPost } from '@/api/system/types'
+import type { SysUser, SysRole, SysPost } from '@/api/system/types'
 import DeptTreeSelect from '@/components/business/DeptTreeSelect.vue'
 import UserForm from '@/components/business/UserForm.vue'
 import UserDetailDialog from '@/components/business/UserDetailDialog.vue'
@@ -181,12 +180,6 @@ function isColumnVisible(key: string): boolean {
 
 // 计算属性:是否有选中的行
 const hasSelectedRows = computed(() => selectedRows.value.length > 0)
-
-// 计算属性:可见列数量(用于空数据colspan)
-const visibleColumnCount = computed(() => {
-  // 选择框列 + 可见数据列 + 操作列
-  return 1 + columns.value.filter((c) => c.visible).length + 1
-})
 
 const deptOptions = ref<any[]>([])
 const roleOptions = ref<SysRole[]>([])
@@ -318,7 +311,7 @@ async function handleSubmit() {
     }
     showDialog.value = false
     getList()
-  } catch (error) {
+  } catch {
     // 错误已由请求拦截器处理
   } finally {
     submitLoading.value = false
@@ -364,7 +357,7 @@ async function confirmBatchDelete() {
     selectAll.value = false
     getList()
     showBatchDeleteDialog.value = false
-  } catch (error) {
+  } catch {
     // Error handled by interceptor
   }
 }
@@ -402,7 +395,7 @@ async function confirmBatchStatus() {
     selectAll.value = false
     getList()
     showBatchStatusDialog.value = false
-  } catch (error) {
+  } catch {
     // Error handled by interceptor
   }
 }
@@ -511,7 +504,7 @@ async function confirmDelete() {
     toast({ title: '删除成功', description: '用户已删除' })
     getList()
     showDeleteDialog.value = false
-  } catch (error) {
+  } catch {
     // Error handled by interceptor
   }
 }
@@ -533,12 +526,12 @@ async function confirmResetPwd() {
     await resetUserPwd(userToResetPwd.value.userId, newPassword.value)
     toast({ title: '操作成功', description: '密码已重置' })
     showResetPwdDialog.value = false
-  } catch (error) {
+  } catch {
     // Error handled by interceptor
   }
 }
 
-async function handleStatusChange(row: SysUser) {
+async function _handleStatusChange(row: SysUser) {
   try {
     await changeUserStatus(row.userId, row.status === '0' ? '1' : '0')
     row.status = row.status === '0' ? '1' : '0'
@@ -565,7 +558,7 @@ function resetForm() {
 
 // Dept Tree Helper
 // 将部门树扁平化为下拉选项，确保拥有有效的 id 与 label 字段
-const flattenedDepts = computed(() => {
+const _flattenedDepts = computed(() => {
   const result: Array<{ id: string; label: string }> = []
   const traverse = (
     nodes: Array<{ deptId: string; deptName: string; children?: any[] }>,

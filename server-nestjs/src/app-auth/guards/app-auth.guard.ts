@@ -13,7 +13,11 @@ export class AppAuthGuard extends AuthGuard('app-jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest<TUser = any>(err: any, user: TUser, info: any): TUser {
+  handleRequest<TUser = any>(
+    err: Error | null,
+    user: TUser,
+    info: { name?: string } | null,
+  ): TUser {
     // Token 验证失败
     if (err || !user) {
       if (info?.name === 'TokenExpiredError') {

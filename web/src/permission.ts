@@ -88,7 +88,7 @@ router.beforeEach(async (to, _from, next) => {
 
           // 路由已动态添加，需要用 path 重新导航让新路由生效
           next({ path: to.path, query: to.query, replace: true })
-        } catch (error) {
+        } catch {
           await userStore.logout()
           next(`${loginPath}?redirect=${to.path}`)
           NProgress.done()
