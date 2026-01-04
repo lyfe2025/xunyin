@@ -231,7 +231,9 @@ async function confirmDelete() {
     toast({ title: '删除成功' })
     getList()
     showDeleteDialog.value = false
-  } catch {}
+  } catch {
+    // 忽略错误
+  }
 }
 
 // 批量删除
@@ -261,7 +263,9 @@ async function confirmBatchDelete() {
     toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
     getList()
     showBatchDeleteDialog.value = false
-  } catch {}
+  } catch {
+    // 忽略错误
+  }
 }
 
 function handleSelectOne(id: string) {
@@ -283,9 +287,13 @@ watch(selectAll, (newVal) => {
 })
 
 // 监听选中项变化，更新全选状态
-watch(selectedIds, (newVal) => {
-  selectAll.value = cityList.value.length > 0 && newVal.length === cityList.value.length
-}, { deep: true })
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = cityList.value.length > 0 && newVal.length === cityList.value.length
+  },
+  { deep: true }
+)
 
 // 跳转到文化之旅页面并筛选
 function goToJourneys(cityId: string) {
@@ -539,6 +547,9 @@ onMounted(() => {
             show-label
             @change="handleProvinceCityChange"
           />
+          <Button type="button" variant="outline" size="sm" @click="showMapPicker = true">
+            <MapPin class="w-4 h-4 mr-2" />地图选点
+          </Button>
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label>经度 (-180 ~ 180)</Label>
@@ -563,9 +574,6 @@ onMounted(() => {
               />
             </div>
           </div>
-          <Button type="button" variant="outline" size="sm" @click="showMapPicker = true">
-            <MapPin class="w-4 h-4 mr-2" />地图选点
-          </Button>
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label>图标</Label>

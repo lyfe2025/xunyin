@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   Dialog,
   DialogContent,
@@ -34,12 +35,15 @@ const emit = defineEmits<{
 }>()
 
 const { toast } = useToast()
+const router = useRouter()
 const loading = ref(true)
 const mapContainer = ref<HTMLElement>()
 const searchInput = ref('')
 const selectedLat = ref(props.latitude || 39.9042)
 const selectedLng = ref(props.longitude || 116.4074)
 const selectedAddress = ref('')
+const noProvider = ref(false)
+const errorMessage = ref('')
 
 // 地图服务相关
 const providers = ref<MapProvider[]>([])
@@ -324,13 +328,15 @@ function searchGoogle() {
 // 初始化地图
 async function initMap() {
   loading.value = true
+  noProvider.value = false
+  errorMessage.value = ''
   try {
     // 获取可用的地图服务
     providers.value = await getMapProviders()
 
     if (providers.value.length === 0) {
-      toast({ title: '请先在系统设置中配置地图服务', variant: 'destructive' })
-      emit('update:open', false)
+      noProvider.value = true
+      loading.value = false
       return
     }
 
@@ -341,8 +347,7 @@ async function initMap() {
 
     await switchProvider(currentProvider.value)
   } catch (error: any) {
-    toast({ title: error.message || '地图加载失败', variant: 'destructive' })
-  } finally {
+    errorMessage.value = error.message || '地图加载失败'
     loading.value = false
   }
 }
@@ -391,6 +396,12 @@ function handleConfirm() {
   emit('update:open', false)
 }
 
+// 跳转到地图配置页面
+function goToMapSetting() {
+  emit('update:open', false)
+  router.push({ path: '/system/setting', query: { tab: 'map' } })
+}
+
 // 监听弹窗打开
 watch(
   () => props.open,
@@ -426,7 +437,7 @@ onUnmounted(() => {
 
       <div class="space-y-4">
         <!-- 地图服务选择 + 搜索框 -->
-        <div class="flex gap-2">
+        <div v-if="!noProvider && !errorMessage" class="flex gap-2">
           <Select v-if="providers.length > 1" v-model="currentProvider" class="w-[140px]">
             <SelectTrigger>
               <SelectValue placeholder="选择地图" />
@@ -451,16 +462,44 @@ onUnmounted(() => {
         <!-- 地图容器 -->
         <div class="relative">
           <div ref="mapContainer" class="w-full h-[400px] rounded-lg border bg-muted" />
+          <!-- 加载中 -->
           <div
             v-if="loading"
-            class="absolute inset-0 flex items-center justify-center bg-background/80"
+            class="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg"
           >
             <Loader2 class="w-8 h-8 animate-spin text-primary" />
+          </div>
+          <!-- 未配置地图服务 -->
+          <div
+            v-else-if="noProvider"
+            class="absolute inset-0 flex flex-col items-center justify-center bg-background rounded-lg"
+          >
+            <MapPin class="w-12 h-12 text-muted-foreground mb-4" />
+            <p class="text-muted-foreground mb-2">尚未配置地图服务</p>
+            <p class="text-sm text-muted-foreground">
+              请前往
+              <a
+                class="text-primary underline cursor-pointer hover:text-primary/80"
+                @click="goToMapSetting"
+              >
+                系统设置 → 地图配置
+              </a>
+              配置地图 API Key
+            </p>
+          </div>
+          <!-- 加载失败 -->
+          <div
+            v-else-if="errorMessage"
+            class="absolute inset-0 flex flex-col items-center justify-center bg-background rounded-lg"
+          >
+            <MapPin class="w-12 h-12 text-destructive mb-4" />
+            <p class="text-destructive mb-2">{{ errorMessage }}</p>
+            <Button variant="outline" size="sm" @click="initMap">重试</Button>
           </div>
         </div>
 
         <!-- 选中信息 -->
-        <div class="grid grid-cols-2 gap-4">
+        <div v-if="!noProvider && !errorMessage" class="grid grid-cols-2 gap-4">
           <div class="grid gap-2">
             <Label>经度</Label>
             <Input :model-value="selectedLng.toFixed(6)" readonly />
@@ -470,7 +509,10 @@ onUnmounted(() => {
             <Input :model-value="selectedLat.toFixed(6)" readonly />
           </div>
         </div>
-        <div v-if="selectedAddress" class="flex items-start gap-2 text-sm text-muted-foreground">
+        <div
+          v-if="selectedAddress && !noProvider && !errorMessage"
+          class="flex items-start gap-2 text-sm text-muted-foreground"
+        >
           <MapPin class="w-4 h-4 mt-0.5 shrink-0" />
           <span>{{ selectedAddress }}</span>
         </div>
@@ -478,7 +520,7 @@ onUnmounted(() => {
 
       <DialogFooter>
         <Button variant="outline" @click="emit('update:open', false)">取消</Button>
-        <Button @click="handleConfirm">确定</Button>
+        <Button :disabled="noProvider || !!errorMessage" @click="handleConfirm">确定</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

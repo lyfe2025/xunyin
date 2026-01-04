@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,6 +43,10 @@ import {
 
 const { toast } = useToast()
 const appStore = useAppStore()
+const route = useRoute()
+
+// 当前激活的 tab，支持通过 query 参数指定
+const activeTab = ref((route.query.tab as string) || 'site')
 
 // 未保存更改提示（页面级表单，启用路由守卫）
 const { isDirty, markClean, showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges()
@@ -590,7 +595,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <Tabs default-value="site" class="space-y-4">
+    <Tabs v-model="activeTab" class="space-y-4">
       <TabsList class="flex-wrap h-auto gap-1">
         <TabsTrigger value="site"><Globe class="h-4 w-4 mr-2" />网站设置</TabsTrigger>
         <TabsTrigger value="security"><Shield class="h-4 w-4 mr-2" />安全设置</TabsTrigger>

@@ -47,6 +47,7 @@ import ImageUpload from '@/components/common/ImageUpload.vue'
 import RichTextEditor from '@/components/common/RichTextEditor.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import ExportButton from '@/components/common/ExportButton.vue'
+import MapPicker from '@/components/common/MapPicker.vue'
 import {
   listPoint,
   getPoint,
@@ -90,6 +91,7 @@ const submitLoading = ref(false)
 // 批量选择
 const selectedIds = ref<string[]>([])
 const showBatchDeleteDialog = ref(false)
+const showMapPicker = ref(false)
 
 const taskTypeOptions = [
   { value: 'gesture', label: '手势识别' },
@@ -110,7 +112,7 @@ const form = reactive<PointForm>({
   culturalKnowledge: '',
   distanceFromPrev: 0,
   pointsReward: 50,
-  bgmId: '',
+  bgmId: 'none',
   orderNum: 0,
   status: '0',
 })
@@ -174,7 +176,7 @@ function resetForm() {
   form.culturalKnowledge = ''
   form.distanceFromPrev = 0
   form.pointsReward = 50
-  form.bgmId = ''
+  form.bgmId = 'none'
   form.orderNum = 0
   form.status = '0'
 }
@@ -190,6 +192,8 @@ async function handleUpdate(row: ExplorationPoint) {
   isEdit.value = true
   const data = await getPoint(row.id)
   Object.assign(form, data)
+  // 空字符串转为 "none" 以便 Select 显示
+  if (!form.bgmId) form.bgmId = 'none'
   showDialog.value = true
 }
 
@@ -200,11 +204,13 @@ async function handleSubmit() {
   }
   submitLoading.value = true
   try {
+    // 处理 bgmId，"none" 转为空字符串
+    const submitData = { ...form, bgmId: form.bgmId === 'none' ? '' : form.bgmId }
     if (form.id) {
-      await updatePoint(form)
+      await updatePoint(submitData)
       toast({ title: '修改成功' })
     } else {
-      await addPoint(form)
+      await addPoint(submitData)
       toast({ title: '新增成功' })
     }
     showDialog.value = false
@@ -226,7 +232,9 @@ async function confirmDelete() {
     toast({ title: '删除成功' })
     getList()
     showDeleteDialog.value = false
-  } catch {}
+  } catch {
+    // 忽略错误
+  }
 }
 
 // 批量删除
@@ -244,7 +252,9 @@ async function confirmBatchDelete() {
     toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
     getList()
     showBatchDeleteDialog.value = false
-  } catch {}
+  } catch {
+    // 忽略错误
+  }
 }
 
 function handleSelectAll(checked: boolean) {
@@ -269,6 +279,12 @@ async function handleStatusChange(id: string, status: string) {
   toast({ title: '状态更新成功' })
   const point = pointList.value.find((p) => p.id === id)
   if (point) point.status = status
+}
+
+// 地图选点回调
+function handleMapPickerConfirm(data: { latitude: number; longitude: number; address?: string }) {
+  form.latitude = data.latitude
+  form.longitude = data.longitude
 }
 
 // 复制数据
@@ -516,6 +532,9 @@ onMounted(() => {
               <Input v-model="form.name" placeholder="如：断桥残雪" />
             </div>
           </div>
+          <Button type="button" variant="outline" size="sm" @click="showMapPicker = true">
+            <MapPin class="w-4 h-4 mr-2" />地图选点
+          </Button>
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label>经度</Label>
@@ -588,7 +607,7 @@ onMounted(() => {
               <Select v-model="form.bgmId">
                 <SelectTrigger><SelectValue placeholder="不设置（继承旅程音乐）" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">不设置（继承旅程音乐）</SelectItem>
+                  <SelectItem value="none">不设置（继承旅程音乐）</SelectItem>
                   <SelectItem v-for="bgm in bgmOptions" :key="bgm.id" :value="bgm.id">
                     {{ bgm.name }}
                   </SelectItem>
@@ -632,6 +651,13 @@ onMounted(() => {
       confirm-text="删除"
       destructive
       @confirm="confirmBatchDelete"
+    />
+
+    <MapPicker
+      v-model:open="showMapPicker"
+      :latitude="form.latitude"
+      :longitude="form.longitude"
+      @confirm="handleMapPickerConfirm"
     />
   </div>
 </template>

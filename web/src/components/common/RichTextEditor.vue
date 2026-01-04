@@ -13,11 +13,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { Separator } from '@/components/ui/separator'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -66,12 +62,28 @@ const showImagePopover = ref(false)
 
 // 颜色选项
 const textColors = [
-  '#000000', '#374151', '#6B7280', '#EF4444', '#F97316', '#EAB308',
-  '#22C55E', '#14B8A6', '#3B82F6', '#8B5CF6', '#EC4899', '#F43F5E'
+  '#000000',
+  '#374151',
+  '#6B7280',
+  '#EF4444',
+  '#F97316',
+  '#EAB308',
+  '#22C55E',
+  '#14B8A6',
+  '#3B82F6',
+  '#8B5CF6',
+  '#EC4899',
+  '#F43F5E',
 ]
 
 const highlightColors = [
-  '#FEF08A', '#FED7AA', '#FECACA', '#BBF7D0', '#A5F3FC', '#DDD6FE', '#FBCFE8'
+  '#FEF08A',
+  '#FED7AA',
+  '#FECACA',
+  '#BBF7D0',
+  '#A5F3FC',
+  '#DDD6FE',
+  '#FBCFE8',
 ]
 
 const editor = useEditor({
@@ -80,7 +92,7 @@ const editor = useEditor({
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },
     }),
-    Link.configure({
+    Link.extend({ name: 'customLink' }).configure({
       openOnClick: false,
       HTMLAttributes: { class: 'text-primary underline cursor-pointer' },
     }),
@@ -88,7 +100,7 @@ const editor = useEditor({
       HTMLAttributes: { class: 'max-w-full h-auto rounded-md' },
     }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    Underline.configure(),
+    Underline.extend({ name: 'customUnderline' }),
     TextStyle,
     Color,
     Highlight.configure({ multicolor: true }),
@@ -126,7 +138,12 @@ function setLink() {
   if (!linkUrl.value) {
     editor.value?.chain().focus().unsetLink().run()
   } else {
-    editor.value?.chain().focus().extendMarkRange('link').setLink({ href: linkUrl.value }).run()
+    editor.value
+      ?.chain()
+      .focus()
+      .extendMarkRange('customLink')
+      .setLink({ href: linkUrl.value })
+      .run()
   }
   showLinkPopover.value = false
   linkUrl.value = ''
@@ -218,7 +235,7 @@ function setHighlight(color: string) {
       </Toggle>
       <Toggle
         size="sm"
-        :pressed="editor.isActive('underline')"
+        :pressed="editor.isActive('customUnderline')"
         @click="editor.chain().focus().toggleUnderline().run()"
       >
         <UnderlineIcon class="h-4 w-4" />
@@ -247,7 +264,7 @@ function setHighlight(color: string) {
             <Palette class="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent class="w-auto p-2">
+        <PopoverContent class="w-auto p-2" @pointerDownOutside.stop>
           <div class="grid grid-cols-6 gap-1">
             <button
               v-for="color in textColors"
@@ -266,7 +283,7 @@ function setHighlight(color: string) {
             <Highlighter class="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent class="w-auto p-2">
+        <PopoverContent class="w-auto p-2" @pointerDownOutside.stop>
           <div class="flex gap-1">
             <button
               v-for="color in highlightColors"
@@ -335,11 +352,7 @@ function setHighlight(color: string) {
       >
         <Quote class="h-4 w-4" />
       </Toggle>
-      <Toggle
-        size="sm"
-        :pressed="false"
-        @click="editor.chain().focus().setHorizontalRule().run()"
-      >
+      <Toggle size="sm" :pressed="false" @click="editor.chain().focus().setHorizontalRule().run()">
         <Minus class="h-4 w-4" />
       </Toggle>
 
@@ -348,11 +361,11 @@ function setHighlight(color: string) {
       <!-- 链接 -->
       <Popover v-model:open="showLinkPopover">
         <PopoverTrigger as-child>
-          <Toggle size="sm" :pressed="editor.isActive('link')">
+          <Toggle size="sm" :pressed="editor.isActive('customLink')">
             <LinkIcon class="h-4 w-4" />
           </Toggle>
         </PopoverTrigger>
-        <PopoverContent class="w-80">
+        <PopoverContent class="w-80" @pointerDownOutside.stop>
           <div class="grid gap-4">
             <div class="space-y-2">
               <Label>链接地址</Label>
@@ -373,7 +386,7 @@ function setHighlight(color: string) {
             <ImageIcon class="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent class="w-80">
+        <PopoverContent class="w-80" @pointerDownOutside.stop>
           <div class="grid gap-4">
             <div class="space-y-2">
               <Label>图片地址</Label>
