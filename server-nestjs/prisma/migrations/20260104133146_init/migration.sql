@@ -199,7 +199,7 @@ CREATE TABLE "sys_config" (
     "config_id" BIGSERIAL NOT NULL,
     "config_name" VARCHAR(100) DEFAULT '',
     "config_key" VARCHAR(100) DEFAULT '',
-    "config_value" VARCHAR(500) DEFAULT '',
+    "config_value" TEXT DEFAULT '',
     "config_type" CHAR(1) DEFAULT 'N',
     "create_by" VARCHAR(64) DEFAULT '',
     "create_time" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
@@ -279,20 +279,47 @@ CREATE TABLE "app_user" (
     "id" TEXT NOT NULL,
     "phone" VARCHAR(20),
     "email" VARCHAR(100),
+    "password" VARCHAR(100),
     "nickname" VARCHAR(50) NOT NULL,
     "avatar" VARCHAR(255),
+    "gender" CHAR(1),
+    "birthday" DATE,
+    "bio" VARCHAR(255),
     "open_id" VARCHAR(100),
     "union_id" VARCHAR(100),
     "google_id" VARCHAR(100),
     "apple_id" VARCHAR(100),
     "login_type" VARCHAR(20) NOT NULL DEFAULT 'wechat',
+    "invite_code" VARCHAR(20),
+    "invited_by" VARCHAR(30),
     "badge_title" VARCHAR(50),
     "total_points" INTEGER NOT NULL DEFAULT 0,
+    "level" INTEGER NOT NULL DEFAULT 1,
+    "is_verified" BOOLEAN NOT NULL DEFAULT false,
+    "last_login_time" TIMESTAMP(3),
+    "last_login_ip" VARCHAR(50),
     "status" CHAR(1) NOT NULL DEFAULT '0',
     "create_time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_time" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "app_user_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_verification" (
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "real_name" VARCHAR(50) NOT NULL,
+    "id_card_no" VARCHAR(100) NOT NULL,
+    "id_card_front" VARCHAR(255),
+    "id_card_back" VARCHAR(255),
+    "status" VARCHAR(20) NOT NULL DEFAULT 'pending',
+    "reject_reason" VARCHAR(255),
+    "verified_at" TIMESTAMP(3),
+    "create_time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "update_time" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_verification_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -353,6 +380,7 @@ CREATE TABLE "exploration_point" (
     "cultural_knowledge" TEXT,
     "distance_from_prev" DECIMAL(10,2),
     "points_reward" INTEGER NOT NULL DEFAULT 50,
+    "bgm_id" TEXT,
     "order_num" INTEGER NOT NULL,
     "status" CHAR(1) NOT NULL DEFAULT '0',
     "create_time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -421,6 +449,7 @@ CREATE TABLE "user_seal" (
     "tx_hash" VARCHAR(100),
     "block_height" BIGINT,
     "chain_time" TIMESTAMP(3),
+    "chain_certificate" JSONB,
     "create_time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_time" TIMESTAMP(3) NOT NULL,
 
@@ -587,6 +616,9 @@ CREATE UNIQUE INDEX "app_user_google_id_key" ON "app_user"("google_id");
 CREATE UNIQUE INDEX "app_user_apple_id_key" ON "app_user"("apple_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "app_user_invite_code_key" ON "app_user"("invite_code");
+
+-- CreateIndex
 CREATE INDEX "app_user_phone_idx" ON "app_user"("phone");
 
 -- CreateIndex
@@ -605,6 +637,15 @@ CREATE INDEX "app_user_apple_id_idx" ON "app_user"("apple_id");
 CREATE INDEX "app_user_login_type_idx" ON "app_user"("login_type");
 
 -- CreateIndex
+CREATE INDEX "app_user_invite_code_idx" ON "app_user"("invite_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_verification_user_id_key" ON "user_verification"("user_id");
+
+-- CreateIndex
+CREATE INDEX "user_verification_status_idx" ON "user_verification"("status");
+
+-- CreateIndex
 CREATE INDEX "city_province_idx" ON "city"("province");
 
 -- CreateIndex
@@ -618,6 +659,9 @@ CREATE INDEX "journey_status_idx" ON "journey"("status");
 
 -- CreateIndex
 CREATE INDEX "exploration_point_journey_id_idx" ON "exploration_point"("journey_id");
+
+-- CreateIndex
+CREATE INDEX "exploration_point_bgm_id_idx" ON "exploration_point"("bgm_id");
 
 -- CreateIndex
 CREATE INDEX "exploration_point_status_idx" ON "exploration_point"("status");
@@ -725,10 +769,16 @@ ALTER TABLE "sys_user_post" ADD CONSTRAINT "sys_user_post_post_id_fkey" FOREIGN 
 ALTER TABLE "sys_user_post" ADD CONSTRAINT "sys_user_post_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "sys_user"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "user_verification" ADD CONSTRAINT "user_verification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "app_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "journey" ADD CONSTRAINT "journey_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "city"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "exploration_point" ADD CONSTRAINT "exploration_point_journey_id_fkey" FOREIGN KEY ("journey_id") REFERENCES "journey"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "exploration_point" ADD CONSTRAINT "exploration_point_bgm_id_fkey" FOREIGN KEY ("bgm_id") REFERENCES "background_music"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "journey_progress" ADD CONSTRAINT "journey_progress_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "app_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -765,6 +815,7 @@ ALTER TABLE "exploration_photo" ADD CONSTRAINT "exploration_photo_point_id_fkey"
 
 -- AddForeignKey
 ALTER TABLE "user_activity" ADD CONSTRAINT "user_activity_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "app_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
 -- ============================================================================
 -- 表和字段中文注释
 -- ============================================================================
@@ -1003,18 +1054,42 @@ COMMENT ON TABLE app_user IS 'App用户表';
 COMMENT ON COLUMN app_user.id IS '用户ID';
 COMMENT ON COLUMN app_user.phone IS '手机号';
 COMMENT ON COLUMN app_user.email IS '邮箱';
+COMMENT ON COLUMN app_user.password IS '密码（邮箱登录用）';
 COMMENT ON COLUMN app_user.nickname IS '昵称';
 COMMENT ON COLUMN app_user.avatar IS '头像URL';
+COMMENT ON COLUMN app_user.gender IS '性别（0男 1女 2未知）';
+COMMENT ON COLUMN app_user.birthday IS '生日';
+COMMENT ON COLUMN app_user.bio IS '个人简介';
 COMMENT ON COLUMN app_user.open_id IS '微信OpenID';
 COMMENT ON COLUMN app_user.union_id IS '微信UnionID';
 COMMENT ON COLUMN app_user.google_id IS 'Google登录ID';
 COMMENT ON COLUMN app_user.apple_id IS 'Apple登录ID';
 COMMENT ON COLUMN app_user.login_type IS '登录方式（wechat/email/google/apple）';
+COMMENT ON COLUMN app_user.invite_code IS '用户的邀请码';
+COMMENT ON COLUMN app_user.invited_by IS '邀请人用户ID';
 COMMENT ON COLUMN app_user.badge_title IS '当前称号';
 COMMENT ON COLUMN app_user.total_points IS '总积分';
+COMMENT ON COLUMN app_user.level IS '用户等级';
+COMMENT ON COLUMN app_user.is_verified IS '是否已实名认证';
+COMMENT ON COLUMN app_user.last_login_time IS '最后登录时间';
+COMMENT ON COLUMN app_user.last_login_ip IS '最后登录IP';
 COMMENT ON COLUMN app_user.status IS '状态（0正常 1禁用）';
 COMMENT ON COLUMN app_user.create_time IS '创建时间';
 COMMENT ON COLUMN app_user.update_time IS '更新时间';
+
+-- 用户实名认证表
+COMMENT ON TABLE user_verification IS '用户实名认证表';
+COMMENT ON COLUMN user_verification.id IS '认证ID';
+COMMENT ON COLUMN user_verification.user_id IS '用户ID';
+COMMENT ON COLUMN user_verification.real_name IS '真实姓名';
+COMMENT ON COLUMN user_verification.id_card_no IS '身份证号（加密存储）';
+COMMENT ON COLUMN user_verification.id_card_front IS '身份证正面照';
+COMMENT ON COLUMN user_verification.id_card_back IS '身份证背面照';
+COMMENT ON COLUMN user_verification.status IS '状态（pending/approved/rejected）';
+COMMENT ON COLUMN user_verification.reject_reason IS '拒绝原因';
+COMMENT ON COLUMN user_verification.verified_at IS '认证通过时间';
+COMMENT ON COLUMN user_verification.create_time IS '创建时间';
+COMMENT ON COLUMN user_verification.update_time IS '更新时间';
 
 -- 城市表
 COMMENT ON TABLE city IS '城市表';
@@ -1068,6 +1143,7 @@ COMMENT ON COLUMN exploration_point.cultural_background IS '文化背景';
 COMMENT ON COLUMN exploration_point.cultural_knowledge IS '文化知识';
 COMMENT ON COLUMN exploration_point.distance_from_prev IS '距上一点距离（米）';
 COMMENT ON COLUMN exploration_point.points_reward IS '积分奖励';
+COMMENT ON COLUMN exploration_point.bgm_id IS '背景音乐ID';
 COMMENT ON COLUMN exploration_point.order_num IS '顺序号';
 COMMENT ON COLUMN exploration_point.status IS '状态（0正常 1停用）';
 COMMENT ON COLUMN exploration_point.create_time IS '创建时间';
@@ -1120,10 +1196,11 @@ COMMENT ON COLUMN user_seal.earned_time IS '获得时间';
 COMMENT ON COLUMN user_seal.time_spent_minutes IS '花费时间（分钟）';
 COMMENT ON COLUMN user_seal.points_earned IS '获得积分';
 COMMENT ON COLUMN user_seal.is_chained IS '是否已上链';
-COMMENT ON COLUMN user_seal.chain_name IS '区块链名称';
+COMMENT ON COLUMN user_seal.chain_name IS '链名称: LocalChain(本地哈希存证)/Timestamp(时间戳存证)/AntChain(蚂蚁链)/ZhixinChain(腾讯至信链)/BSN(BSN开放联盟链)/Polygon(Polygon公链)';
 COMMENT ON COLUMN user_seal.tx_hash IS '交易哈希';
 COMMENT ON COLUMN user_seal.block_height IS '区块高度';
 COMMENT ON COLUMN user_seal.chain_time IS '上链时间';
+COMMENT ON COLUMN user_seal.chain_certificate IS '存证原始数据，用于验证';
 COMMENT ON COLUMN user_seal.create_time IS '创建时间';
 COMMENT ON COLUMN user_seal.update_time IS '更新时间';
 
@@ -1155,7 +1232,7 @@ COMMENT ON TABLE background_music IS '背景音乐表';
 COMMENT ON COLUMN background_music.id IS '音乐ID';
 COMMENT ON COLUMN background_music.name IS '音乐名称';
 COMMENT ON COLUMN background_music.url IS '音乐URL';
-COMMENT ON COLUMN background_music.context IS '使用场景（home/city/journey）';
+COMMENT ON COLUMN background_music.context IS '使用场景（home/city/journey/point）';
 COMMENT ON COLUMN background_music.context_id IS '场景关联ID';
 COMMENT ON COLUMN background_music.duration IS '时长（秒）';
 COMMENT ON COLUMN background_music.order_num IS '显示顺序';
@@ -1202,11 +1279,14 @@ COMMENT ON INDEX app_user_open_id_idx IS 'App用户微信OpenID索引';
 COMMENT ON INDEX app_user_google_id_idx IS 'App用户Google ID索引';
 COMMENT ON INDEX app_user_apple_id_idx IS 'App用户Apple ID索引';
 COMMENT ON INDEX app_user_login_type_idx IS 'App用户登录方式索引';
+COMMENT ON INDEX app_user_invite_code_idx IS 'App用户邀请码索引';
+COMMENT ON INDEX user_verification_status_idx IS '用户认证状态索引';
 COMMENT ON INDEX city_province_idx IS '城市省份索引';
 COMMENT ON INDEX city_status_idx IS '城市状态索引';
 COMMENT ON INDEX journey_city_id_idx IS '路线城市索引';
 COMMENT ON INDEX journey_status_idx IS '路线状态索引';
 COMMENT ON INDEX exploration_point_journey_id_idx IS '探索点路线索引';
+COMMENT ON INDEX exploration_point_bgm_id_idx IS '探索点背景音乐索引';
 COMMENT ON INDEX exploration_point_status_idx IS '探索点状态索引';
 COMMENT ON INDEX journey_progress_user_id_idx IS '进度用户索引';
 COMMENT ON INDEX journey_progress_journey_id_idx IS '进度路线索引';

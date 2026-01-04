@@ -920,7 +920,7 @@ COMMENT ON COLUMN user_seal.earned_time IS '获得时间';
 COMMENT ON COLUMN user_seal.time_spent_minutes IS '花费时间（分钟）';
 COMMENT ON COLUMN user_seal.points_earned IS '获得积分';
 COMMENT ON COLUMN user_seal.is_chained IS '是否已上链';
-COMMENT ON COLUMN user_seal.chain_name IS '链名称';
+COMMENT ON COLUMN user_seal.chain_name IS '链名称: LocalChain(本地哈希存证)/Timestamp(时间戳存证)/AntChain(蚂蚁链)/ZhixinChain(腾讯至信链)/BSN(BSN开放联盟链)/Polygon(Polygon公链)';
 COMMENT ON COLUMN user_seal.tx_hash IS '交易哈希';
 COMMENT ON COLUMN user_seal.block_height IS '区块高度';
 COMMENT ON COLUMN user_seal.chain_time IS '上链时间';

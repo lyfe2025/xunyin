@@ -8,10 +8,7 @@
   基于 Vue 3 + NestJS + Prisma 的现代化权限管理系统
 </p>
 
-<p align="center">
-  <a href="https://xunyin.zeabur.app/login" target="_blank">🌐 在线演示</a> |
-  <a href="https://api-xunyin.zeabur.app/api-docs" target="_blank">📖 API 文档</a>
-</p>
+
 
 <p align="center">
   <img src="https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js" alt="Vue">

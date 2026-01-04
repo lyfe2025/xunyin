@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Query,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -17,11 +9,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionGuard } from '../../common/guards/permission.guard';
 import { RequirePermission } from '../../common/decorators/permission.decorator';
 import { AdminUserSealService } from './admin-user-seal.service';
-import {
-  QueryUserSealDto,
-  UserSealListVo,
-  ChainSealDto,
-} from './dto/admin-user-seal.dto';
+import { QueryUserSealDto, UserSealListVo } from './dto/admin-user-seal.dto';
 
 @ApiTags('管理端-用户印记管理')
 @ApiBearerAuth()
@@ -56,7 +44,7 @@ export class AdminUserSealController {
   @ApiOperation({ summary: '手动上链' })
   @RequirePermission('xunyin:userseal:chain')
   @ApiResponse({ status: 200, description: '上链成功' })
-  async chainSeal(@Param('id') id: string, @Body() dto: ChainSealDto) {
-    return this.service.chainSeal(id, dto.chainName);
+  async chainSeal(@Param('id') id: string) {
+    return this.service.chainSeal(id);
   }
 }

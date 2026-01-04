@@ -2502,6 +2502,102 @@ async function main() {
 <p><em>最后更新日期：2025年1月</em></p>`,
       configType: 'Y',
     },
+    // 区块链存证配置
+    {
+      configName: '链服务提供者',
+      configKey: 'chain.provider',
+      configValue: 'local',
+      configType: 'Y',
+    },
+    // 时间戳存证
+    {
+      configName: '时间戳服务API Key',
+      configKey: 'chain.timestamp.apiKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '时间戳服务端点',
+      configKey: 'chain.timestamp.endpoint',
+      configValue: 'https://tsa.example.com/timestamp',
+      configType: 'Y',
+    },
+    // 蚂蚁链
+    {
+      configName: '蚂蚁链AppID',
+      configKey: 'chain.antchain.appId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '蚂蚁链私钥',
+      configKey: 'chain.antchain.privateKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '蚂蚁链端点',
+      configKey: 'chain.antchain.endpoint',
+      configValue: 'https://rest.antchain.alipay.com',
+      configType: 'Y',
+    },
+    // 腾讯至信链
+    {
+      configName: '至信链SecretId',
+      configKey: 'chain.zhixin.secretId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '至信链SecretKey',
+      configKey: 'chain.zhixin.secretKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '至信链端点',
+      configKey: 'chain.zhixin.endpoint',
+      configValue: 'https://tbaas.tencentcloudapi.com',
+      configType: 'Y',
+    },
+    // BSN
+    {
+      configName: 'BSN API Key',
+      configKey: 'chain.bsn.apiKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'BSN项目ID',
+      configKey: 'chain.bsn.projectId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'BSN端点',
+      configKey: 'chain.bsn.endpoint',
+      configValue: 'https://api.bsngate.com',
+      configType: 'Y',
+    },
+    // Polygon
+    {
+      configName: 'Polygon RPC URL',
+      configKey: 'chain.polygon.rpcUrl',
+      configValue: 'https://polygon-rpc.com',
+      configType: 'Y',
+    },
+    {
+      configName: 'Polygon私钥',
+      configKey: 'chain.polygon.privateKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: 'Polygon合约地址',
+      configKey: 'chain.polygon.contractAddress',
+      configValue: '',
+      configType: 'Y',
+    },
   ];
   for (const cfg of configsToSeed) {
     const exists = await prisma.sysConfig.findFirst({

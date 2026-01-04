@@ -88,3 +88,26 @@ export function chainUserSeal(id: string, params?: ChainSealParams) {
     data: params || { chainName: 'antchain' },
   }).then((res: any) => res.data)
 }
+
+// 区块链配置信息
+export interface ChainProviderOption {
+  value: string
+  label: string
+  description: string
+  isConfigured: boolean
+  isCurrent: boolean
+}
+
+export interface ChainProviderInfo {
+  currentProvider: string
+  currentProviderName: string
+  isConfigured: boolean
+  options: ChainProviderOption[]
+}
+
+export function getChainProviderInfo() {
+  return request<{ data: ChainProviderInfo }>({
+    url: '/admin/blockchain/provider-info',
+    method: 'get',
+  }).then((res: any) => res.data)
+}

@@ -1,13 +1,19 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { BusinessException } from '../common/exceptions';
 import { ErrorCode } from '../common/enums';
+import type { ChainProvider } from './interfaces/chain-provider.interface';
+import { CHAIN_PROVIDER } from './interfaces/chain-provider.interface';
+import type { Prisma } from '@prisma/client';
 
 @Injectable()
 export class BlockchainService {
   private readonly logger = new Logger(BlockchainService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CHAIN_PROVIDER) private chainProvider: ChainProvider,
+  ) {}
 
   /**
    * 印记上链
@@ -26,23 +32,30 @@ export class BlockchainService {
       throw new BusinessException(ErrorCode.DATA_ALREADY_EXISTS, '印记已上链');
     }
 
-    // TODO: 调用区块链 API 进行上链
-    // 模拟上链结果
-    const txHash = `0x${Date.now().toString(16)}${Math.random().toString(16).slice(2, 10)}`;
-    const blockHeight = BigInt(Math.floor(Math.random() * 1000000) + 10000000);
+    // 调用链服务上链
+    const chainResult = await this.chainProvider.chain({
+      sealId: userSeal.sealId,
+      userId: userSeal.userId,
+      sealName: userSeal.seal.name,
+      earnedTime: userSeal.earnedTime,
+    });
 
+    // 更新数据库
     const updated = await this.prisma.userSeal.update({
       where: { id: userSeal.id },
       data: {
         isChained: true,
-        chainName: 'BSN',
-        txHash,
-        blockHeight,
-        chainTime: new Date(),
+        chainName: chainResult.chainName,
+        txHash: chainResult.txHash,
+        blockHeight: BigInt(chainResult.blockHeight),
+        chainTime: chainResult.chainTime,
+        chainCertificate: chainResult.certificate as Prisma.InputJsonValue,
       },
     });
 
-    this.logger.log(`印记上链成功: ${sealId}, txHash: ${txHash}`);
+    this.logger.log(
+      `印记上链成功: sealId=${sealId}, chain=${chainResult.chainName}, txHash=${chainResult.txHash.slice(0, 20)}...`,
+    );
 
     return {
       sealId: updated.sealId,
@@ -66,10 +79,14 @@ export class BlockchainService {
       throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到链上记录');
     }
 
-    // TODO: 调用区块链 API 验证
-    // 模拟验证结果
+    // 调用链服务验证
+    const verifyResult = await this.chainProvider.verify(
+      txHash,
+      userSeal.chainCertificate as Record<string, unknown> | undefined,
+    );
+
     return {
-      valid: true,
+      valid: verifyResult.valid,
       txHash: userSeal.txHash,
       blockHeight: userSeal.blockHeight?.toString(),
       chainTime: userSeal.chainTime,

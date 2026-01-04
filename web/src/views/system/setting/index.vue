@@ -39,6 +39,7 @@ import {
   Unlock,
   HelpCircle,
   ChevronDown,
+  Link2,
 } from 'lucide-vue-next'
 
 const { toast } = useToast()
@@ -47,6 +48,16 @@ const route = useRoute()
 
 // 当前激活的 tab，支持通过 query 参数指定
 const activeTab = ref((route.query.tab as string) || 'site')
+
+// 监听路由参数变化，切换到对应标签页
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab && typeof newTab === 'string') {
+      activeTab.value = newTab
+    }
+  },
+)
 
 // 未保存更改提示（页面级表单，启用路由守卫）
 const { isDirty, markClean, showLeaveDialog, confirmLeave, cancelLeave } = useUnsavedChanges()
@@ -132,6 +143,18 @@ const form = reactive({
   'app.privacyPolicyUrl': '',
   'app.userAgreementContent': '',
   'app.privacyPolicyContent': '',
+
+  // ========== 区块链存证配置 ==========
+  'chain.provider': 'local',
+  'chain.antchain.appId': '',
+  'chain.antchain.privateKey': '',
+  'chain.antchain.endpoint': 'https://rest.antchain.alipay.com',
+  'chain.bsn.apiKey': '',
+  'chain.bsn.projectId': '',
+  'chain.bsn.endpoint': 'https://api.bsngate.com',
+  'chain.polygon.rpcUrl': 'https://polygon-rpc.com',
+  'chain.polygon.privateKey': '',
+  'chain.polygon.contractAddress': '',
 })
 
 const configMap = ref<Record<string, SysConfig>>({})
@@ -164,6 +187,7 @@ async function getData() {
       'oauth.',
       'map.',
       'app.',
+      'chain.',
     ]
     const results = await Promise.all(
       prefixes.map((p) => listConfig({ configKey: p, pageSize: 50 }))
@@ -344,6 +368,17 @@ function getConfigName(key: string): string {
     'app.privacyPolicyUrl': '隐私政策URL',
     'app.userAgreementContent': '用户协议内容',
     'app.privacyPolicyContent': '隐私政策内容',
+    // 区块链存证
+    'chain.provider': '链服务提供者',
+    'chain.antchain.appId': '蚂蚁链AppID',
+    'chain.antchain.privateKey': '蚂蚁链私钥',
+    'chain.antchain.endpoint': '蚂蚁链端点',
+    'chain.bsn.apiKey': 'BSN API Key',
+    'chain.bsn.projectId': 'BSN项目ID',
+    'chain.bsn.endpoint': 'BSN端点',
+    'chain.polygon.rpcUrl': 'Polygon RPC URL',
+    'chain.polygon.privateKey': 'Polygon私钥',
+    'chain.polygon.contractAddress': 'Polygon合约地址',
   }
   return names[key] || key
 }
@@ -604,6 +639,7 @@ onMounted(() => {
         <TabsTrigger value="oauth"><KeyRound class="h-4 w-4 mr-2" />三方登录</TabsTrigger>
         <TabsTrigger value="map"><Globe class="h-4 w-4 mr-2" />地图配置</TabsTrigger>
         <TabsTrigger value="app"><Globe class="h-4 w-4 mr-2" />App配置</TabsTrigger>
+        <TabsTrigger value="chain"><Link2 class="h-4 w-4 mr-2" />区块链存证</TabsTrigger>
         <TabsTrigger value="agreement"><Shield class="h-4 w-4 mr-2" />协议与政策</TabsTrigger>
       </TabsList>
 
@@ -1520,6 +1556,131 @@ onMounted(() => {
               <div class="grid gap-2">
                 <Label>App 下载地址</Label>
                 <Input v-model="form['app.downloadUrl']" placeholder="https://..." />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <!-- 区块链存证配置 -->
+      <TabsContent value="chain" class="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>区块链存证配置</CardTitle>
+            <CardDescription>配置印记上链使用的区块链服务，将印记数据永久存储到区块链上</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="grid gap-2">
+              <Label>链服务提供者</Label>
+              <Select v-model="form['chain.provider']">
+                <SelectTrigger><SelectValue placeholder="选择链服务" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="local">本地存证（开发/演示）</SelectItem>
+                  <SelectItem value="antchain">蚂蚁链开放联盟链</SelectItem>
+                  <SelectItem value="bsn">BSN 开放联盟链</SelectItem>
+                  <SelectItem value="polygon">Polygon 公链（海外）</SelectItem>
+                </SelectContent>
+              </Select>
+              <p class="text-xs text-muted-foreground">
+                本地存证仅生成哈希凭证，不具备第三方背书；正式上线建议使用蚂蚁链或 BSN
+              </p>
+            </div>
+
+            <!-- 本地存证说明 -->
+            <div v-if="form['chain.provider'] === 'local'" class="rounded-lg bg-muted/50 p-4">
+              <p class="text-sm font-medium mb-2">本地存证模式</p>
+              <ul class="text-xs text-muted-foreground space-y-1">
+                <li>• 零成本，无需配置第三方服务</li>
+                <li>• 生成 SHA256 哈希作为存证凭证</li>
+                <li>• 适合开发测试和产品演示阶段</li>
+                <li>• 不具备法律效力和第三方背书</li>
+              </ul>
+            </div>
+
+            <!-- 蚂蚁链配置 -->
+            <div v-if="form['chain.provider'] === 'antchain'" class="space-y-4">
+              <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+                <p>1. 登录 <a href="https://antchain.antgroup.com" target="_blank" class="text-primary hover:underline">蚂蚁链开放平台</a> 注册账号</p>
+                <p>2. 创建应用，获取 AppID 和私钥</p>
+                <p>3. 免费额度：1000 次/月，超出约 0.1 元/次</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>App ID</Label>
+                  <Input v-model="form['chain.antchain.appId']" placeholder="蚂蚁链应用ID" />
+                </div>
+                <div class="grid gap-2">
+                  <Label>API 端点</Label>
+                  <Input v-model="form['chain.antchain.endpoint']" placeholder="https://rest.antchain.alipay.com" />
+                </div>
+              </div>
+              <div class="grid gap-2">
+                <Label>私钥</Label>
+                <Textarea
+                  v-model="form['chain.antchain.privateKey']"
+                  placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"
+                  rows="4"
+                  class="font-mono text-xs"
+                />
+              </div>
+            </div>
+
+            <!-- BSN 配置 -->
+            <div v-if="form['chain.provider'] === 'bsn'" class="space-y-4">
+              <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+                <p>1. 登录 <a href="https://www.bsnbase.com" target="_blank" class="text-primary hover:underline">BSN 门户</a> 注册账号</p>
+                <p>2. 选择开放联盟链（如文昌链），创建项目</p>
+                <p>3. 获取 API Key 和项目 ID</p>
+                <p>4. 费用：约 0.05-0.2 元/次</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>API Key</Label>
+                  <Input v-model="form['chain.bsn.apiKey']" placeholder="BSN API Key" />
+                </div>
+                <div class="grid gap-2">
+                  <Label>项目 ID</Label>
+                  <Input v-model="form['chain.bsn.projectId']" placeholder="BSN 项目ID" />
+                </div>
+              </div>
+              <div class="grid gap-2">
+                <Label>API 端点</Label>
+                <Input v-model="form['chain.bsn.endpoint']" placeholder="https://api.bsngate.com" />
+              </div>
+            </div>
+
+            <!-- Polygon 配置 -->
+            <div v-if="form['chain.provider'] === 'polygon'" class="space-y-4">
+              <div class="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                <p class="font-medium">⚠️ 注意事项</p>
+                <p>• Polygon 是公链，国内使用可能存在合规风险</p>
+                <p>• 需要钱包私钥和少量 MATIC 作为 Gas 费</p>
+                <p>• 适合海外用户或去中心化需求场景</p>
+              </div>
+              <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+                <p>1. 创建以太坊钱包（MetaMask 等），切换到 Polygon 网络</p>
+                <p>2. 获取少量 MATIC 作为 Gas 费（约 0.01 MATIC/笔）</p>
+                <p>3. 导出钱包私钥填入下方（请妥善保管）</p>
+                <p>4. RPC 推荐：polygon-rpc.com 或 Alchemy/Infura</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>RPC URL</Label>
+                  <Input v-model="form['chain.polygon.rpcUrl']" placeholder="https://polygon-rpc.com" />
+                </div>
+                <div class="grid gap-2">
+                  <Label>合约地址（可选）</Label>
+                  <Input v-model="form['chain.polygon.contractAddress']" placeholder="0x... 留空则直接写入交易" />
+                </div>
+              </div>
+              <div class="grid gap-2">
+                <Label>钱包私钥</Label>
+                <Input
+                  v-model="form['chain.polygon.privateKey']"
+                  type="password"
+                  placeholder="0x... 请妥善保管，不要泄露"
+                />
+                <p class="text-xs text-destructive">私钥泄露将导致钱包资产被盗，请确保服务器安全</p>
               </div>
             </div>
           </CardContent>

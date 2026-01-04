@@ -29,7 +29,6 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/toast/use-toast'
 import {
   Search,
@@ -47,8 +46,10 @@ import {
   getUserSeal,
   getUserSealStats,
   chainUserSeal,
+  getChainProviderInfo,
   type UserSeal,
   type UserSealStats,
+  type ChainProviderInfo,
 } from '@/api/xunyin/user-seal'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
@@ -151,37 +152,34 @@ function copyTxHash(hash: string) {
 const showChainDialog = ref(false)
 const chainLoading = ref(false)
 const chainTarget = ref<UserSeal | null>(null)
-const selectedChain = ref<'antchain' | 'chainmaker' | 'zhixin'>('antchain')
+const chainProviderInfo = ref<ChainProviderInfo | null>(null)
+const chainProviderLoading = ref(false)
 
-const chainOptions = [
-  { value: 'antchain', label: '蚂蚁链', description: '蚂蚁集团区块链平台' },
-  { value: 'chainmaker', label: '长安链', description: '国产自主可控区块链' },
-  { value: 'zhixin', label: '至信链', description: '腾讯区块链平台' },
-]
-
-function openChainDialog(item: UserSeal) {
+async function openChainDialog(item: UserSeal) {
   if (item.isChained) return
   chainTarget.value = item
-  selectedChain.value = 'antchain'
   showChainDialog.value = true
+
+  // 获取链服务配置信息
+  chainProviderLoading.value = true
+  try {
+    chainProviderInfo.value = await getChainProviderInfo()
+  } catch (e: any) {
+    toast({ title: '获取链配置失败', description: e.message, variant: 'destructive' })
+  } finally {
+    chainProviderLoading.value = false
+  }
 }
 
 async function confirmChain() {
-  if (!chainTarget.value) return
+  if (!chainTarget.value || !chainProviderInfo.value?.isConfigured) return
 
   chainLoading.value = true
   try {
-    // TODO: 这里预留对接公链的接口
-    // 实际对接时，根据 selectedChain.value 调用不同的区块链 SDK
-    // 例如：
-    // - antchain: 调用蚂蚁链 SDK
-    // - chainmaker: 调用长安链 SDK
-    // - zhixin: 调用至信链 SDK
-
-    await chainUserSeal(chainTarget.value.id, { chainName: selectedChain.value })
+    await chainUserSeal(chainTarget.value.id)
     toast({
       title: '上链成功',
-      description: `已成功上链至${chainOptions.find((c) => c.value === selectedChain.value)?.label}`,
+      description: `已成功上链至${chainProviderInfo.value.currentProviderName}`,
     })
     showChainDialog.value = false
     showDetailDialog.value = false
@@ -549,7 +547,7 @@ onMounted(() => {
 
     <!-- 上链确认弹窗 -->
     <Dialog v-model:open="showChainDialog">
-      <DialogContent class="sm:max-w-[450px]">
+      <DialogContent class="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>印记上链</DialogTitle>
           <DialogDescription> 将印记数据上链存证，上链后不可撤销 </DialogDescription>
@@ -566,42 +564,94 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- 选择区块链 -->
-          <div class="space-y-3">
-            <Label>选择区块链</Label>
-            <div class="grid gap-2">
-              <div
-                v-for="chain in chainOptions"
-                :key="chain.value"
-                class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
-                :class="
-                  selectedChain === chain.value
-                    ? 'border-primary bg-primary/5'
-                    : 'hover:bg-muted/50'
-                "
-                @click="selectedChain = chain.value as any"
-              >
+          <!-- 链服务配置状态 -->
+          <div v-if="chainProviderLoading" class="flex justify-center py-4">
+            <Loader class="w-5 h-5 animate-spin" />
+          </div>
+          <div v-else-if="chainProviderInfo" class="space-y-3">
+            <!-- 链服务选项列表 -->
+            <div class="space-y-2">
+              <div class="text-sm font-medium text-muted-foreground">可用链服务</div>
+              <div class="grid gap-2">
                 <div
-                  class="w-4 h-4 rounded-full border-2 flex items-center justify-center"
+                  v-for="option in chainProviderInfo.options"
+                  :key="option.value"
+                  class="flex items-center gap-3 p-3 border rounded-lg transition-colors"
                   :class="
-                    selectedChain === chain.value ? 'border-primary' : 'border-muted-foreground'
+                    option.isCurrent
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted'
                   "
                 >
+                  <!-- 选中指示器 -->
                   <div
-                    v-if="selectedChain === chain.value"
-                    class="w-2 h-2 rounded-full bg-primary"
-                  />
+                    class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                    :class="option.isCurrent ? 'border-primary' : 'border-muted-foreground/30'"
+                  >
+                    <div v-if="option.isCurrent" class="w-2 h-2 rounded-full bg-primary" />
+                  </div>
+                  <!-- 链服务信息 -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">{{ option.label }}</span>
+                      <Badge
+                        v-if="option.isCurrent"
+                        variant="default"
+                        class="text-xs"
+                      >
+                        当前
+                      </Badge>
+                      <Badge
+                        v-if="!option.isConfigured"
+                        variant="secondary"
+                        class="text-xs"
+                      >
+                        未配置
+                      </Badge>
+                    </div>
+                    <div class="text-xs text-muted-foreground">{{ option.description }}</div>
+                  </div>
+                  <!-- 配置按钮 -->
+                  <Button
+                    v-if="!option.isConfigured"
+                    variant="outline"
+                    size="sm"
+                    @click="$router.push('/system/setting?tab=chain')"
+                  >
+                    去配置
+                  </Button>
                 </div>
-                <div class="flex-1">
-                  <div class="font-medium">{{ chain.label }}</div>
-                  <div class="text-xs text-muted-foreground">{{ chain.description }}</div>
-                </div>
+              </div>
+            </div>
+
+            <!-- 当前链服务状态提示 -->
+            <div
+              v-if="chainProviderInfo.isConfigured"
+              class="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-lg"
+            >
+              <div class="flex items-center gap-2">
+                <Link class="w-4 h-4 text-green-600" />
+                <span class="text-sm text-green-700 dark:text-green-300">
+                  将使用 <strong>{{ chainProviderInfo.currentProviderName }}</strong> 进行上链
+                </span>
+              </div>
+            </div>
+            <div
+              v-else
+              class="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg"
+            >
+              <div class="flex items-center gap-2">
+                <Link2Off class="w-4 h-4 text-red-600" />
+                <span class="text-sm text-red-600 dark:text-red-400">
+                  当前链服务 <strong>{{ chainProviderInfo.currentProviderName }}</strong> 未配置，请先完成配置
+                </span>
               </div>
             </div>
           </div>
 
           <!-- 提示信息 -->
           <div
+            v-if="chainProviderInfo?.isConfigured"
             class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg"
           >
             <div class="text-sm text-amber-800 dark:text-amber-200">
@@ -613,7 +663,10 @@ onMounted(() => {
           <Button variant="outline" @click="showChainDialog = false" :disabled="chainLoading"
             >取消</Button
           >
-          <Button @click="confirmChain" :disabled="chainLoading">
+          <Button
+            @click="confirmChain"
+            :disabled="chainLoading || !chainProviderInfo?.isConfigured"
+          >
             <Loader v-if="chainLoading" class="w-4 h-4 mr-2 animate-spin" />
             <LinkIcon v-else class="w-4 h-4 mr-2" />
             确认上链

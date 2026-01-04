@@ -9,6 +9,7 @@ import { AdminProgressModule } from './progress/admin-progress.module';
 import { AdminUserSealModule } from './user-seal/admin-user-seal.module';
 import { AdminBgmModule } from './bgm/admin-bgm.module';
 import { AdminPhotoModule } from './photo/admin-photo.module';
+import { AdminBlockchainModule } from './blockchain/admin-blockchain.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AdminPhotoModule } from './photo/admin-photo.module';
     AdminUserSealModule,
     AdminBgmModule,
     AdminPhotoModule,
+    AdminBlockchainModule,
   ],
 })
 export class AdminModule {}

@@ -211,10 +211,7 @@ export class AdminAppUserService {
     });
 
     if (verifications.length === 0) {
-      throw new BusinessException(
-        ErrorCode.INVALID_PARAMS,
-        '没有可审核的记录',
-      );
+      throw new BusinessException(ErrorCode.INVALID_PARAMS, '没有可审核的记录');
     }
 
     // 使用事务批量更新

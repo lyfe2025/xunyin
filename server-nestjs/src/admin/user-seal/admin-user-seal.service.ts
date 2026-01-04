@@ -1,13 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BusinessException } from '../../common/exceptions';
 import { ErrorCode } from '../../common/enums';
+import { BlockchainService } from '../../blockchain/blockchain.service';
 import type { QueryUserSealDto } from './dto/admin-user-seal.dto';
 
 @Injectable()
 export class AdminUserSealService {
   private readonly logger = new Logger(AdminUserSealService.name);
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private blockchainService: BlockchainService,
+  ) {}
 
   async findAll(query: QueryUserSealDto) {
     const {
@@ -21,18 +26,18 @@ export class AdminUserSealService {
       pageSize = 20,
     } = query;
 
-    const where: any = {};
+    const where: Prisma.UserSealWhereInput = {};
     if (userId) where.userId = userId;
     if (sealId) where.sealId = sealId;
     if (isChained !== undefined) where.isChained = isChained;
     if (nickname) {
       where.user = { nickname: { contains: nickname } };
     }
-    if (sealName) {
-      where.seal = { ...where.seal, name: { contains: sealName } };
-    }
-    if (sealType) {
-      where.seal = { ...where.seal, type: sealType };
+    if (sealName || sealType) {
+      where.seal = {
+        ...(sealName && { name: { contains: sealName } }),
+        ...(sealType && { type: sealType }),
+      };
     }
 
     const [list, total] = await Promise.all([
@@ -146,7 +151,7 @@ export class AdminUserSealService {
   /**
    * 手动上链
    */
-  async chainSeal(id: string, chainName: string = 'antchain') {
+  async chainSeal(id: string) {
     const userSeal = await this.prisma.userSeal.findUnique({
       where: { id },
       include: { seal: true, user: true },
@@ -160,36 +165,27 @@ export class AdminUserSealService {
       throw new BusinessException(ErrorCode.DATA_ALREADY_EXISTS, '印记已上链');
     }
 
-    // TODO: 调用区块链 API 进行上链
-    // 模拟上链结果
-    const txHash = `0x${Date.now().toString(16)}${Math.random().toString(16).slice(2, 10)}`;
-    const blockHeight = BigInt(Math.floor(Math.random() * 1000000) + 10000000);
-    const chainTime = new Date();
+    // 调用区块链服务上链（使用系统配置的链服务）
+    const result = await this.blockchainService.chainSeal(
+      userSeal.userId,
+      userSeal.sealId,
+    );
 
-    const updated = await this.prisma.userSeal.update({
-      where: { id },
-      data: {
-        isChained: true,
-        chainName,
-        txHash,
-        blockHeight,
-        chainTime,
-      },
-    });
-
-    this.logger.log(`管理员手动上链成功: ${id}, txHash: ${txHash}`);
+    this.logger.log(
+      `管理员手动上链成功: ${id}, chain=${result.chainName}, txHash: ${result.txHash}`,
+    );
 
     return {
-      id: updated.id,
-      sealId: updated.sealId,
+      id: userSeal.id,
+      sealId: userSeal.sealId,
       sealName: userSeal.seal.name,
-      userId: updated.userId,
+      userId: userSeal.userId,
       nickname: userSeal.user.nickname,
-      isChained: updated.isChained,
-      chainName: updated.chainName,
-      txHash: updated.txHash,
-      blockHeight: updated.blockHeight?.toString(),
-      chainTime: updated.chainTime,
+      isChained: true,
+      chainName: result.chainName,
+      txHash: result.txHash,
+      blockHeight: result.blockHeight,
+      chainTime: result.chainTime,
     };
   }
 }
