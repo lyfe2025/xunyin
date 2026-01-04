@@ -53,7 +53,15 @@ import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import CronGenerator from '@/components/common/CronGenerator.vue'
-import { listJob, getJob, delJob, addJob, updateJob, runJob, changeJobStatus } from '@/api/monitor/job'
+import {
+  listJob,
+  getJob,
+  delJob,
+  addJob,
+  updateJob,
+  runJob,
+  changeJobStatus,
+} from '@/api/monitor/job'
 import type { SysJob } from '@/api/system/types'
 
 const { toast } = useToast()
@@ -67,7 +75,7 @@ const queryParams = reactive({
   pageSize: 20,
   jobName: '',
   jobGroup: '',
-  status: undefined
+  status: undefined,
 })
 
 const showDialog = ref(false)
@@ -83,7 +91,7 @@ const form = reactive<Partial<SysJob>>({
   misfirePolicy: '1',
   concurrent: '1',
   status: '0',
-  remark: ''
+  remark: '',
 })
 
 // 确认框状态
@@ -91,14 +99,19 @@ const confirmDialog = reactive({
   open: false,
   title: '',
   description: '',
-  action: null as (() => Promise<void>) | null
+  action: null as (() => Promise<void>) | null,
 })
 
 // Fetch Data
 async function getList() {
   loading.value = true
   try {
-    const res = await listJob(queryParams)
+    const params = {
+      ...queryParams,
+      jobGroup: queryParams.jobGroup === 'all' ? undefined : queryParams.jobGroup,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listJob(params)
     jobList.value = res.rows
     total.value = res.total
   } finally {
@@ -139,7 +152,7 @@ function handleDelete(row: SysJob) {
   confirmDialog.description = `确认要删除定时任务"${row.jobName}"吗？`
   confirmDialog.action = async () => {
     await delJob([row.jobId])
-    toast({ title: "删除成功", description: "任务已删除" })
+    toast({ title: '删除成功', description: '任务已删除' })
     getList()
   }
   confirmDialog.open = true
@@ -150,7 +163,7 @@ function handleRun(row: SysJob) {
   confirmDialog.description = `确认要立即执行一次任务"${row.jobName}"吗？`
   confirmDialog.action = async () => {
     await runJob(row.jobId)
-    toast({ title: "执行成功", description: "任务已下发执行" })
+    toast({ title: '执行成功', description: '任务已下发执行' })
   }
   confirmDialog.open = true
 }
@@ -167,9 +180,9 @@ function handleSwitchClick(row: SysJob) {
   confirmDialog.action = async () => {
     await changeJobStatus(jobId, newStatus)
     // 更新列表中对应项的状态
-    const job = jobList.value.find(j => j.jobId === jobId)
+    const job = jobList.value.find((j) => j.jobId === jobId)
     if (job) job.status = newStatus
-    toast({ title: "操作成功", description: "任务状态已变更" })
+    toast({ title: '操作成功', description: '任务状态已变更' })
   }
   confirmDialog.open = true
 }
@@ -185,11 +198,13 @@ async function handleConfirm() {
   confirmDialog.open = false
 }
 
-
-
 async function handleSubmit() {
   if (!form.jobName || !form.invokeTarget || !form.cronExpression) {
-    toast({ title: "验证失败", description: "任务名称、调用目标和Cron表达式不能为空", variant: "destructive" })
+    toast({
+      title: '验证失败',
+      description: '任务名称、调用目标和Cron表达式不能为空',
+      variant: 'destructive',
+    })
     return
   }
 
@@ -197,10 +212,10 @@ async function handleSubmit() {
   try {
     if (form.jobId) {
       await updateJob(form)
-      toast({ title: "修改成功", description: "任务信息已更新" })
+      toast({ title: '修改成功', description: '任务信息已更新' })
     } else {
       await addJob(form)
-      toast({ title: "新增成功", description: "任务已创建" })
+      toast({ title: '新增成功', description: '任务已创建' })
     }
     showDialog.value = false
     getList()
@@ -234,9 +249,7 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">定时任务</h2>
-        <p class="text-muted-foreground">
-          管理系统定时调度任务
-        </p>
+        <p class="text-muted-foreground">管理系统定时调度任务</p>
       </div>
       <div class="flex items-center gap-2">
         <Button @click="handleAdd">
@@ -247,12 +260,14 @@ onMounted(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">任务名称</span>
-        <Input 
-          v-model="queryParams.jobName" 
-          placeholder="请输入任务名称" 
+        <Input
+          v-model="queryParams.jobName"
+          placeholder="请输入任务名称"
           class="w-[150px]"
           @keyup.enter="handleQuery"
         />
@@ -261,9 +276,10 @@ onMounted(() => {
         <span class="text-sm font-medium">任务组名</span>
         <Select v-model="queryParams.jobGroup" @update:model-value="handleQuery">
           <SelectTrigger class="w-[150px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="DEFAULT">默认</SelectItem>
             <SelectItem value="SYSTEM">系统</SelectItem>
           </SelectContent>
@@ -273,9 +289,10 @@ onMounted(() => {
         <span class="text-sm font-medium">状态</span>
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">暂停</SelectItem>
           </SelectContent>
@@ -297,7 +314,7 @@ onMounted(() => {
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
       <TableSkeleton v-if="loading" :columns="7" :rows="10" />
-      
+
       <!-- 空状态 -->
       <EmptyState
         v-else-if="jobList.length === 0"
@@ -306,7 +323,7 @@ onMounted(() => {
         action-text="新增任务"
         @action="handleAdd"
       />
-      
+
       <!-- 数据表格 -->
       <Table v-else>
         <TableHeader>
@@ -327,12 +344,14 @@ onMounted(() => {
             <TableCell>{{ item.jobName }}</TableCell>
             <TableCell>{{ item.jobGroup }}</TableCell>
             <TableCell class="max-w-[200px] truncate">{{ item.invokeTarget }}</TableCell>
-            <TableCell><Badge variant="outline">{{ item.cronExpression }}</Badge></TableCell>
+            <TableCell
+              ><Badge variant="outline">{{ item.cronExpression }}</Badge></TableCell
+            >
             <TableCell>
-               <Switch 
-                 :checked="String(item.status) === '0'"
-                 @click.prevent="handleSwitchClick(item)"
-               />
+              <Switch
+                :checked="String(item.status) === '0'"
+                @click.prevent="handleSwitchClick(item)"
+              />
             </TableCell>
             <TableCell>{{ item.createTime }}</TableCell>
             <TableCell class="text-right">
@@ -375,7 +394,7 @@ onMounted(() => {
     />
 
     <!-- Confirm Dialog -->
-    <AlertDialog :open="confirmDialog.open" @update:open="(v) => confirmDialog.open = v">
+    <AlertDialog :open="confirmDialog.open" @update:open="(v) => (confirmDialog.open = v)">
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{{ confirmDialog.title }}</AlertDialogTitle>
@@ -393,11 +412,9 @@ onMounted(() => {
       <DialogContent class="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{{ isEdit ? '修改任务' : '新增任务' }}</DialogTitle>
-          <DialogDescription>
-            请填写定时任务信息
-          </DialogDescription>
+          <DialogDescription> 请填写定时任务信息 </DialogDescription>
         </DialogHeader>
-        
+
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
@@ -417,20 +434,24 @@ onMounted(() => {
               </Select>
             </div>
           </div>
-          
+
           <div class="grid gap-2">
             <Label for="invokeTarget">调用方法 *</Label>
-            <Input id="invokeTarget" v-model="form.invokeTarget" placeholder="请输入调用目标字符串" />
+            <Input
+              id="invokeTarget"
+              v-model="form.invokeTarget"
+              placeholder="请输入调用目标字符串"
+            />
             <p class="text-xs text-muted-foreground">Bean调用示例：ryTask.ryParams('ry')</p>
           </div>
 
           <div class="grid gap-2">
-             <Label for="cronExpression">Cron表达式 *</Label>
-             <CronGenerator v-model="form.cronExpression" />
+            <Label for="cronExpression">Cron表达式 *</Label>
+            <CronGenerator v-model="form.cronExpression" />
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-             <div class="grid gap-2">
+            <div class="grid gap-2">
               <Label for="misfirePolicy">错误策略</Label>
               <Select v-model="form.misfirePolicy">
                 <SelectTrigger>
@@ -460,20 +481,20 @@ onMounted(() => {
           <div class="grid gap-2">
             <Label for="status">状态</Label>
             <div class="flex items-center space-x-2">
-               <Switch 
-                 :checked="String(form.status) === '0'"
-                 @update:checked="(v: boolean) => form.status = v ? '0' : '1'"
-               />
-               <span class="text-sm text-muted-foreground">{{ String(form.status) === '0' ? '正常' : '暂停' }}</span>
+              <Switch
+                :checked="String(form.status) === '0'"
+                @update:checked="(v: boolean) => (form.status = v ? '0' : '1')"
+              />
+              <span class="text-sm text-muted-foreground">{{
+                String(form.status) === '0' ? '正常' : '暂停'
+              }}</span>
             </div>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" @click="showDialog = false">取消</Button>
-          <Button @click="handleSubmit" :disabled="submitLoading">
-            确定
-          </Button>
+          <Button @click="handleSubmit" :disabled="submitLoading"> 确定 </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -28,9 +28,9 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { useToast } from '@/components/ui/toast/use-toast'
 import {
   Search,
@@ -166,7 +166,12 @@ async function getList() {
   selectedIds.value = []
   selectAll.value = false
   try {
-    const res = await listBgm(queryParams)
+    const params = {
+      ...queryParams,
+      context: queryParams.context === 'all' ? undefined : queryParams.context,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listBgm(params)
     bgmList.value = res.list
     total.value = res.total
   } finally {
@@ -298,15 +303,10 @@ async function confirmDelete() {
   }
 }
 
-async function handleStatusChange(row: Bgm, checked: boolean) {
-  const newStatus = checked ? '0' : '1'
-  try {
-    await updateBgmStatus(row.id, newStatus)
-    row.status = newStatus
-    toast({ title: checked ? '已启用' : '已停用' })
-  } catch (e: any) {
-    toast({ title: '操作失败', description: e.message, variant: 'destructive' })
-  }
+async function handleStatusChange(id: string, status: string) {
+  await updateBgmStatus(id, status)
+  const bgm = bgmList.value.find((b) => b.id === id)
+  if (bgm) bgm.status = status
 }
 
 function handleBatchDelete() {
@@ -567,6 +567,7 @@ onUnmounted(() => {
         <Select v-model="queryParams.context" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="c in contextOptions" :key="c.value" :value="c.value">{{
               c.label
             }}</SelectItem>
@@ -578,6 +579,7 @@ onUnmounted(() => {
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>
@@ -690,10 +692,7 @@ onUnmounted(() => {
             <TableCell>{{ formatDuration(item.duration) }}</TableCell>
             <TableCell>{{ item.orderNum }}</TableCell>
             <TableCell>
-              <Switch
-                :checked="item.status === '0'"
-                @update:checked="(checked) => handleStatusChange(item, checked)"
-              />
+              <StatusSwitch :model-value="item.status" :id="item.id" @change="handleStatusChange" />
             </TableCell>
             <TableCell class="text-right">
               <div class="flex items-center justify-end gap-1">

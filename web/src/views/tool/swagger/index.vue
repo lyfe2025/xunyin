@@ -2,10 +2,7 @@
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { ExternalLink } from 'lucide-vue-next'
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/components/ui/toggle-group'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 type DocType = 'swagger' | 'redoc'
 const docType = ref<DocType>('redoc')
@@ -17,9 +14,13 @@ const apiBaseUrl = computed(() => {
 
 const docUrl = computed(() => {
   const base = apiBaseUrl.value
-  return docType.value === 'swagger' 
-    ? (base ? `${base}/api-docs` : '/api-docs')
-    : (base ? `${base}/redoc` : '/redoc')
+  return docType.value === 'swagger'
+    ? base
+      ? `${base}/api-docs`
+      : '/api-docs'
+    : base
+      ? `${base}/redoc`
+      : '/redoc'
 })
 
 const docTitle = computed(() => {
@@ -53,11 +54,7 @@ function openInNewWindow() {
 
     <!-- Doc iframe -->
     <div class="flex-1 min-h-0">
-      <iframe
-        :src="docUrl"
-        class="w-full h-full border-0"
-        :title="`${docTitle} API 文档`"
-      />
+      <iframe :src="docUrl" class="w-full h-full border-0" :title="`${docTitle} API 文档`" />
     </div>
   </div>
 </template>

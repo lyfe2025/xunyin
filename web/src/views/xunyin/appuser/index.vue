@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import {
   Table,
   TableBody,
@@ -28,6 +28,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast/use-toast'
 import {
   Search,
@@ -41,6 +42,14 @@ import {
   ShieldCheck,
   UserCheck,
   Clock,
+  Users,
+  UserX,
+  FileCheck,
+  FileClock,
+  FileX,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-vue-next'
 import BrandIcon from '@/components/icons/BrandIcons.vue'
 import {
@@ -49,8 +58,13 @@ import {
   changeAppUserStatus,
   listVerifications,
   auditVerification,
+  getAppUserStats,
+  getVerificationStats,
+  batchAuditVerifications,
   type AppUser,
   type UserVerification,
+  type AppUserStats,
+  type VerificationStats,
 } from '@/api/xunyin/appuser'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
@@ -61,9 +75,15 @@ import { formatDate } from '@/utils/format'
 import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
 import { getResourceUrl } from '@/utils/url'
 
+// 工具函数：处理 "all" 值转 undefined
+function normalizeQueryValue<T>(value: T | 'all' | undefined): T | undefined {
+  return value === 'all' ? undefined : value
+}
+
 const loading = ref(true)
 const userList = ref<AppUser[]>([])
 const total = ref(0)
+const userStats = ref<AppUserStats | null>(null)
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 20,
@@ -102,6 +122,11 @@ const showDetailDialog = ref(false)
 const currentUser = ref<AppUser | null>(null)
 const detailLoading = ref(false)
 
+// 图片预览
+const showImagePreview = ref(false)
+const previewImages = ref<string[]>([])
+const currentImageIndex = ref(0)
+
 const { toast } = useToast()
 
 async function getList() {
@@ -109,12 +134,16 @@ async function getList() {
   try {
     const params = {
       ...queryParams,
+      loginType: normalizeQueryValue(queryParams.loginType),
+      status: normalizeQueryValue(queryParams.status),
       isVerified:
-        queryParams.isVerified === 'true'
-          ? true
-          : queryParams.isVerified === 'false'
-            ? false
-            : undefined,
+        queryParams.isVerified === 'all'
+          ? undefined
+          : queryParams.isVerified === 'true'
+            ? true
+            : queryParams.isVerified === 'false'
+              ? false
+              : undefined,
     }
     const res = await listAppUser(params)
     userList.value = res.list
@@ -123,6 +152,14 @@ async function getList() {
     selectAll.value = false
   } finally {
     loading.value = false
+  }
+}
+
+async function loadUserStats() {
+  try {
+    userStats.value = await getAppUserStats()
+  } catch {
+    // ignore
   }
 }
 
@@ -144,9 +181,9 @@ function resetQuery() {
 // 状态切换
 async function handleStatusChange(id: string, status: string) {
   await changeAppUserStatus(id, status)
-  toast({ title: '状态更新成功' })
   const user = userList.value.find((u) => u.id === id)
   if (user) user.status = status
+  loadUserStats()
 }
 
 // 查看详情
@@ -182,9 +219,13 @@ watch(selectAll, (newVal) => {
 })
 
 // 监听选中项变化，更新全选状态
-watch(selectedIds, (newVal) => {
-  selectAll.value = userList.value.length > 0 && newVal.length === userList.value.length
-}, { deep: true })
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = userList.value.length > 0 && newVal.length === userList.value.length
+  },
+  { deep: true }
+)
 
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
@@ -216,17 +257,41 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
   toast({ title: '导出成功' })
 }
 
+// 图片预览
+function openImagePreview(images: string[], index: number = 0) {
+  previewImages.value = images.filter(Boolean).map(getResourceUrl)
+  currentImageIndex.value = index
+  showImagePreview.value = true
+}
+
+function prevImage() {
+  if (currentImageIndex.value > 0) {
+    currentImageIndex.value--
+  }
+}
+
+function nextImage() {
+  if (currentImageIndex.value < previewImages.value.length - 1) {
+    currentImageIndex.value++
+  }
+}
+
 // ========== 实名认证管理 ==========
 const activeTab = ref('users')
 const verificationLoading = ref(false)
 const verificationList = ref<UserVerification[]>([])
 const verificationTotal = ref(0)
+const verificationStats = ref<VerificationStats | null>(null)
 const verificationQuery = reactive({
   pageNum: 1,
   pageSize: 20,
   realName: '',
-  status: undefined as 'pending' | 'approved' | 'rejected' | undefined,
+  status: undefined as 'pending' | 'approved' | 'rejected' | 'all' | undefined,
 })
+
+// 批量选择（实名认证）
+const selectedVerificationIds = ref<string[]>([])
+const selectAllVerifications = ref(false)
 
 // 审核弹窗
 const showAuditDialog = ref(false)
@@ -236,15 +301,34 @@ const auditForm = reactive({
   rejectReason: '',
 })
 const auditLoading = ref(false)
+const isBatchAudit = ref(false)
 
 async function getVerificationList() {
   verificationLoading.value = true
   try {
-    const res = await listVerifications(verificationQuery)
+    const params = {
+      ...verificationQuery,
+      status: normalizeQueryValue(verificationQuery.status) as
+        | 'pending'
+        | 'approved'
+        | 'rejected'
+        | undefined,
+    }
+    const res = await listVerifications(params)
     verificationList.value = res.list
     verificationTotal.value = res.total
+    selectedVerificationIds.value = []
+    selectAllVerifications.value = false
   } finally {
     verificationLoading.value = false
+  }
+}
+
+async function loadVerificationStats() {
+  try {
+    verificationStats.value = await getVerificationStats()
+  } catch {
+    // ignore
   }
 }
 
@@ -259,28 +343,83 @@ function resetVerificationQuery() {
   handleVerificationQuery()
 }
 
+// 批量选择（实名认证）
+function handleSelectVerification(id: string) {
+  const index = selectedVerificationIds.value.indexOf(id)
+  if (index > -1) {
+    selectedVerificationIds.value.splice(index, 1)
+  } else {
+    selectedVerificationIds.value.push(id)
+  }
+}
+
+// 只选择待审核的记录
+const pendingVerifications = computed(() =>
+  verificationList.value.filter((v) => v.status === 'pending')
+)
+
+watch(selectAllVerifications, (newVal) => {
+  if (newVal) {
+    selectedVerificationIds.value = pendingVerifications.value.map((v) => v.id)
+  } else if (selectedVerificationIds.value.length === pendingVerifications.value.length) {
+    selectedVerificationIds.value = []
+  }
+})
+
+watch(
+  selectedVerificationIds,
+  (newVal) => {
+    selectAllVerifications.value =
+      pendingVerifications.value.length > 0 && newVal.length === pendingVerifications.value.length
+  },
+  { deep: true }
+)
+
 function openAuditDialog(row: UserVerification) {
   currentVerification.value = row
   auditForm.status = 'approved'
   auditForm.rejectReason = ''
+  isBatchAudit.value = false
+  showAuditDialog.value = true
+}
+
+function openBatchAuditDialog() {
+  if (selectedVerificationIds.value.length === 0) {
+    toast({ title: '请选择要审核的记录', variant: 'destructive' })
+    return
+  }
+  currentVerification.value = null
+  auditForm.status = 'approved'
+  auditForm.rejectReason = ''
+  isBatchAudit.value = true
   showAuditDialog.value = true
 }
 
 async function handleAudit() {
-  if (!currentVerification.value) return
   if (auditForm.status === 'rejected' && !auditForm.rejectReason.trim()) {
     toast({ title: '请填写拒绝原因', variant: 'destructive' })
     return
   }
   auditLoading.value = true
   try {
-    await auditVerification(currentVerification.value.id, {
-      status: auditForm.status,
-      rejectReason: auditForm.status === 'rejected' ? auditForm.rejectReason : undefined,
-    })
-    toast({ title: '审核成功' })
+    if (isBatchAudit.value) {
+      await batchAuditVerifications({
+        ids: selectedVerificationIds.value,
+        status: auditForm.status,
+        rejectReason: auditForm.status === 'rejected' ? auditForm.rejectReason : undefined,
+      })
+      toast({ title: `批量审核成功，共 ${selectedVerificationIds.value.length} 条` })
+    } else if (currentVerification.value) {
+      await auditVerification(currentVerification.value.id, {
+        status: auditForm.status,
+        rejectReason: auditForm.status === 'rejected' ? auditForm.rejectReason : undefined,
+      })
+      toast({ title: '审核成功' })
+    }
     showAuditDialog.value = false
     getVerificationList()
+    loadVerificationStats()
+    loadUserStats()
   } finally {
     auditLoading.value = false
   }
@@ -303,11 +442,13 @@ function handleTabChange(tab: string) {
   activeTab.value = tab
   if (tab === 'verifications' && verificationList.value.length === 0) {
     getVerificationList()
+    loadVerificationStats()
   }
 }
 
 onMounted(() => {
   getList()
+  loadUserStats()
 })
 </script>
 
@@ -328,6 +469,47 @@ onMounted(() => {
 
       <!-- 用户列表 Tab -->
       <TabsContent value="users" class="space-y-4">
+        <!-- 统计卡片 -->
+        <div class="grid gap-4 md:grid-cols-4" v-if="userStats">
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">总用户数</CardTitle>
+              <Users class="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold">{{ userStats.total }}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">已实名</CardTitle>
+              <ShieldCheck class="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold text-green-600">{{ userStats.verified }}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">正常状态</CardTitle>
+              <UserCheck class="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold text-blue-600">{{ userStats.active }}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">已禁用</CardTitle>
+              <UserX class="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold text-red-600">{{ userStats.disabled }}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <!-- 筛选 -->
         <div
           class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
         >
@@ -363,6 +545,7 @@ onMounted(() => {
             <Select v-model="queryParams.loginType" @update:model-value="handleQuery">
               <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
                 <SelectItem v-for="opt in loginTypeOptions" :key="opt.value" :value="opt.value">
                   <div class="flex items-center gap-2">
                     <BrandIcon :name="opt.value as any" class="w-4 h-4" :class="opt.color" />
@@ -377,6 +560,7 @@ onMounted(() => {
             <Select v-model="queryParams.isVerified" @update:model-value="handleQuery">
               <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
                 <SelectItem value="true">已认证</SelectItem>
                 <SelectItem value="false">未认证</SelectItem>
               </SelectContent>
@@ -387,6 +571,7 @@ onMounted(() => {
             <Select v-model="queryParams.status" @update:model-value="handleQuery">
               <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
                 <SelectItem value="0">正常</SelectItem>
                 <SelectItem value="1">禁用</SelectItem>
               </SelectContent>
@@ -406,15 +591,14 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- 表格 -->
         <div class="border rounded-md bg-card overflow-x-auto">
           <TableSkeleton v-if="loading" :columns="10" :rows="10" show-checkbox />
           <EmptyState v-else-if="userList.length === 0" title="暂无用户数据" />
           <Table v-else class="min-w-[1100px]">
             <TableHeader>
               <TableRow>
-                <TableHead class="w-[50px]">
-                  <Checkbox v-model="selectAll" />
-                </TableHead>
+                <TableHead class="w-[50px]"><Checkbox v-model="selectAll" /></TableHead>
                 <TableHead>用户</TableHead>
                 <TableHead>联系方式</TableHead>
                 <TableHead>登录方式</TableHead>
@@ -481,9 +665,9 @@ onMounted(() => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge v-if="user.isVerified" variant="default" class="bg-green-500">
-                    <ShieldCheck class="w-3 h-3 mr-1" />已认证
-                  </Badge>
+                  <Badge v-if="user.isVerified" variant="default" class="bg-green-500"
+                    ><ShieldCheck class="w-3 h-3 mr-1" />已认证</Badge
+                  >
                   <Badge v-else variant="outline" class="text-muted-foreground">未认证</Badge>
                 </TableCell>
                 <TableCell>
@@ -524,6 +708,47 @@ onMounted(() => {
 
       <!-- 实名认证 Tab -->
       <TabsContent value="verifications" class="space-y-4">
+        <!-- 统计卡片 -->
+        <div class="grid gap-4 md:grid-cols-4" v-if="verificationStats">
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">总认证数</CardTitle>
+              <FileCheck class="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold">{{ verificationStats.total }}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">待审核</CardTitle>
+              <FileClock class="h-4 w-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold text-yellow-600">{{ verificationStats.pending }}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">已通过</CardTitle>
+              <ShieldCheck class="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold text-green-600">{{ verificationStats.approved }}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle class="text-sm font-medium">已拒绝</CardTitle>
+              <FileX class="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold text-red-600">{{ verificationStats.rejected }}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <!-- 筛选 -->
         <div
           class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
         >
@@ -544,6 +769,7 @@ onMounted(() => {
             >
               <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
                 <SelectItem value="pending">待审核</SelectItem>
                 <SelectItem value="approved">已通过</SelectItem>
                 <SelectItem value="rejected">已拒绝</SelectItem>
@@ -551,6 +777,13 @@ onMounted(() => {
             </Select>
           </div>
           <div class="flex gap-2 ml-auto">
+            <Button
+              v-if="selectedVerificationIds.length > 0"
+              variant="default"
+              @click="openBatchAuditDialog"
+            >
+              <UserCheck class="w-4 h-4 mr-2" />批量审核 ({{ selectedVerificationIds.length }})
+            </Button>
             <Button @click="handleVerificationQuery"><Search class="w-4 h-4 mr-2" />搜索</Button>
             <Button variant="outline" @click="resetVerificationQuery"
               ><RefreshCw class="w-4 h-4 mr-2" />重置</Button
@@ -558,12 +791,19 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- 表格 -->
         <div class="border rounded-md bg-card overflow-x-auto">
-          <TableSkeleton v-if="verificationLoading" :columns="7" :rows="10" />
+          <TableSkeleton v-if="verificationLoading" :columns="8" :rows="10" show-checkbox />
           <EmptyState v-else-if="verificationList.length === 0" title="暂无认证记录" />
-          <Table v-else class="min-w-[900px]">
+          <Table v-else class="min-w-[1000px]">
             <TableHeader>
               <TableRow>
+                <TableHead class="w-[50px]">
+                  <Checkbox
+                    v-model="selectAllVerifications"
+                    :disabled="pendingVerifications.length === 0"
+                  />
+                </TableHead>
                 <TableHead>用户</TableHead>
                 <TableHead>真实姓名</TableHead>
                 <TableHead>身份证号</TableHead>
@@ -575,6 +815,13 @@ onMounted(() => {
             </TableHeader>
             <TableBody>
               <TableRow v-for="item in verificationList" :key="item.id">
+                <TableCell>
+                  <Checkbox
+                    v-if="item.status === 'pending'"
+                    :model-value="selectedVerificationIds.includes(item.id)"
+                    @update:model-value="() => handleSelectVerification(item.id)"
+                  />
+                </TableCell>
                 <TableCell>
                   <div v-if="item.user" class="flex items-center gap-2">
                     <Avatar class="h-8 w-8">
@@ -600,12 +847,14 @@ onMounted(() => {
                     <img
                       v-if="item.idCardFront"
                       :src="getResourceUrl(item.idCardFront)"
-                      class="w-16 h-10 object-cover rounded cursor-pointer hover:opacity-80"
+                      class="w-16 h-10 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                      @click="openImagePreview([item.idCardFront, item.idCardBack], 0)"
                     />
                     <img
                       v-if="item.idCardBack"
                       :src="getResourceUrl(item.idCardBack)"
-                      class="w-16 h-10 object-cover rounded cursor-pointer hover:opacity-80"
+                      class="w-16 h-10 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                      @click="openImagePreview([item.idCardFront, item.idCardBack], 1)"
                     />
                     <span v-if="!item.idCardFront && !item.idCardBack" class="text-muted-foreground"
                       >-</span
@@ -789,11 +1038,21 @@ onMounted(() => {
     <Dialog v-model:open="showAuditDialog">
       <DialogContent class="sm:max-w-[450px]">
         <DialogHeader>
-          <DialogTitle>审核实名认证</DialogTitle>
-          <DialogDescription>请审核用户提交的实名认证信息</DialogDescription>
+          <DialogTitle>{{ isBatchAudit ? '批量审核实名认证' : '审核实名认证' }}</DialogTitle>
+          <DialogDescription>
+            {{
+              isBatchAudit
+                ? `已选择 ${selectedVerificationIds.length} 条待审核记录`
+                : '请审核用户提交的实名认证信息'
+            }}
+          </DialogDescription>
         </DialogHeader>
-        <div v-if="currentVerification" class="space-y-4 py-4">
-          <div class="flex items-center gap-3 p-3 bg-muted rounded-lg">
+        <div class="space-y-4 py-4">
+          <!-- 单条审核时显示用户信息 -->
+          <div
+            v-if="!isBatchAudit && currentVerification"
+            class="flex items-center gap-3 p-3 bg-muted rounded-lg"
+          >
             <Avatar v-if="currentVerification.user" class="h-10 w-10">
               <AvatarImage :src="getResourceUrl(currentVerification.user.avatar)" />
               <AvatarFallback>{{
@@ -809,19 +1068,36 @@ onMounted(() => {
             </div>
           </div>
 
+          <!-- 单条审核时显示证件照片 -->
           <div
-            v-if="currentVerification.idCardFront || currentVerification.idCardBack"
+            v-if="
+              !isBatchAudit &&
+              currentVerification &&
+              (currentVerification.idCardFront || currentVerification.idCardBack)
+            "
             class="flex gap-3"
           >
             <img
               v-if="currentVerification.idCardFront"
               :src="getResourceUrl(currentVerification.idCardFront)"
-              class="flex-1 h-24 object-cover rounded"
+              class="flex-1 h-24 object-cover rounded cursor-pointer hover:opacity-80"
+              @click="
+                openImagePreview(
+                  [currentVerification.idCardFront, currentVerification.idCardBack],
+                  0
+                )
+              "
             />
             <img
               v-if="currentVerification.idCardBack"
               :src="getResourceUrl(currentVerification.idCardBack)"
-              class="flex-1 h-24 object-cover rounded"
+              class="flex-1 h-24 object-cover rounded cursor-pointer hover:opacity-80"
+              @click="
+                openImagePreview(
+                  [currentVerification.idCardFront, currentVerification.idCardBack],
+                  1
+                )
+              "
             />
           </div>
 
@@ -847,6 +1123,64 @@ onMounted(() => {
             <Button :disabled="auditLoading" @click="handleAudit">
               {{ auditLoading ? '提交中...' : '确认' }}
             </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 图片预览弹窗 -->
+    <Dialog v-model:open="showImagePreview">
+      <DialogContent class="sm:max-w-[800px] p-0 bg-black/95">
+        <div class="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
+            @click="showImagePreview = false"
+          >
+            <X class="w-5 h-5" />
+          </Button>
+          <div class="flex items-center justify-center min-h-[400px] p-4">
+            <img
+              :src="previewImages[currentImageIndex]"
+              class="max-w-full max-h-[70vh] object-contain"
+            />
+          </div>
+          <!-- 导航按钮 -->
+          <div
+            v-if="previewImages.length > 1"
+            class="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none"
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              class="pointer-events-auto text-white hover:bg-white/20 disabled:opacity-30"
+              :disabled="currentImageIndex === 0"
+              @click="prevImage"
+            >
+              <ChevronLeft class="w-6 h-6" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="pointer-events-auto text-white hover:bg-white/20 disabled:opacity-30"
+              :disabled="currentImageIndex === previewImages.length - 1"
+              @click="nextImage"
+            >
+              <ChevronRight class="w-6 h-6" />
+            </Button>
+          </div>
+          <!-- 图片指示器 -->
+          <div
+            v-if="previewImages.length > 1"
+            class="absolute bottom-4 left-0 right-0 flex justify-center gap-2"
+          >
+            <span
+              v-for="(_, idx) in previewImages"
+              :key="idx"
+              class="w-2 h-2 rounded-full transition-colors"
+              :class="idx === currentImageIndex ? 'bg-white' : 'bg-white/40'"
+            />
           </div>
         </div>
       </DialogContent>

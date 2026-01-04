@@ -57,7 +57,7 @@ const queryParams = reactive({
   title: '',
   operName: '',
   businessType: undefined,
-  status: undefined
+  status: undefined,
 })
 
 const showDetail = ref(false)
@@ -70,7 +70,12 @@ const deleteTarget = ref<SysOperLog | null>(null)
 async function getList() {
   loading.value = true
   try {
-    const res = await listOperLog(queryParams)
+    const params = {
+      ...queryParams,
+      businessType: queryParams.businessType === 'all' ? undefined : queryParams.businessType,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listOperLog(params)
     logList.value = res.rows
     total.value = res.total
   } finally {
@@ -100,7 +105,7 @@ function confirmDelete(row: SysOperLog) {
 async function handleDelete() {
   if (!deleteTarget.value) return
   await delOperLog([deleteTarget.value.operId])
-  toast({ title: "删除成功", description: "日志已删除" })
+  toast({ title: '删除成功', description: '日志已删除' })
   showDeleteDialog.value = false
   deleteTarget.value = null
   getList()
@@ -108,7 +113,7 @@ async function handleDelete() {
 
 async function handleClean() {
   await cleanOperLog()
-  toast({ title: "清空成功", description: "日志已清空" })
+  toast({ title: '清空成功', description: '日志已清空' })
   showCleanDialog.value = false
   getList()
 }
@@ -123,7 +128,7 @@ function getBusinessTypeLabel(type: number) {
     0: '其它',
     1: '新增',
     2: '修改',
-    3: '删除'
+    3: '删除',
   }
   return map[type] || '未知'
 }
@@ -139,9 +144,7 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">操作日志</h2>
-        <p class="text-muted-foreground">
-          记录系统操作日志信息
-        </p>
+        <p class="text-muted-foreground">记录系统操作日志信息</p>
       </div>
       <div class="flex items-center gap-2">
         <AlertDialog v-model:open="showCleanDialog">
@@ -166,21 +169,23 @@ onMounted(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">系统模块</span>
-        <Input 
-          v-model="queryParams.title" 
-          placeholder="请输入系统模块" 
+        <Input
+          v-model="queryParams.title"
+          placeholder="请输入系统模块"
           class="w-[150px]"
           @keyup.enter="handleQuery"
         />
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">操作人员</span>
-        <Input 
-          v-model="queryParams.operName" 
-          placeholder="请输入操作人员" 
+        <Input
+          v-model="queryParams.operName"
+          placeholder="请输入操作人员"
           class="w-[150px]"
           @keyup.enter="handleQuery"
         />
@@ -189,9 +194,10 @@ onMounted(() => {
         <span class="text-sm font-medium">类型</span>
         <Select v-model="queryParams.businessType" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="1">新增</SelectItem>
             <SelectItem value="2">修改</SelectItem>
             <SelectItem value="3">删除</SelectItem>
@@ -202,9 +208,10 @@ onMounted(() => {
         <span class="text-sm font-medium">状态</span>
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">成功</SelectItem>
             <SelectItem value="1">失败</SelectItem>
           </SelectContent>
@@ -226,14 +233,14 @@ onMounted(() => {
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
       <TableSkeleton v-if="loading" :columns="8" :rows="10" :show-actions="false" />
-      
+
       <!-- 空状态 -->
       <EmptyState
         v-else-if="logList.length === 0"
         title="暂无操作日志"
         description="系统操作日志将在此显示"
       />
-      
+
       <!-- 数据表格 -->
       <Table v-else>
         <TableHeader>
@@ -288,31 +295,38 @@ onMounted(() => {
       <DialogContent class="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>操作日志详情</DialogTitle>
-          <DialogDescription>
-            查看操作日志的详细信息
-          </DialogDescription>
+          <DialogDescription> 查看操作日志的详细信息 </DialogDescription>
         </DialogHeader>
-        
+
         <div class="grid gap-4 py-4 text-sm" v-if="currentLog">
           <div class="grid grid-cols-2 gap-4">
             <div><span class="font-medium">操作模块：</span>{{ currentLog.title }}</div>
             <div><span class="font-medium">请求方式：</span>{{ currentLog.requestMethod }}</div>
           </div>
           <div class="grid grid-cols-2 gap-4">
-             <div><span class="font-medium">登录信息：</span>{{ currentLog.operName }} / {{ currentLog.operIp }} / {{ currentLog.operLocation }}</div>
-             <div><span class="font-medium">操作方法：</span>{{ currentLog.method }}</div>
+            <div>
+              <span class="font-medium">登录信息：</span>{{ currentLog.operName }} /
+              {{ currentLog.operIp }} / {{ currentLog.operLocation }}
+            </div>
+            <div><span class="font-medium">操作方法：</span>{{ currentLog.method }}</div>
           </div>
           <div>
             <div class="font-medium mb-1">请求参数：</div>
-            <div class="bg-muted p-2 rounded text-xs break-all font-mono">{{ currentLog.operParam }}</div>
+            <div class="bg-muted p-2 rounded text-xs break-all font-mono">
+              {{ currentLog.operParam }}
+            </div>
           </div>
           <div>
             <div class="font-medium mb-1">返回参数：</div>
-            <div class="bg-muted p-2 rounded text-xs break-all font-mono">{{ currentLog.jsonResult }}</div>
+            <div class="bg-muted p-2 rounded text-xs break-all font-mono">
+              {{ currentLog.jsonResult }}
+            </div>
           </div>
           <div v-if="currentLog.status === 1">
             <div class="font-medium mb-1 text-destructive">异常信息：</div>
-            <div class="bg-destructive/10 text-destructive p-2 rounded text-xs break-all">{{ currentLog.errorMsg }}</div>
+            <div class="bg-destructive/10 text-destructive p-2 rounded text-xs break-all">
+              {{ currentLog.errorMsg }}
+            </div>
           </div>
         </div>
       </DialogContent>

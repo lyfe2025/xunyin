@@ -112,7 +112,12 @@ const { toast } = useToast()
 async function getList() {
   loading.value = true
   try {
-    const res = await listJourney(queryParams)
+    const params = {
+      ...queryParams,
+      cityId: queryParams.cityId === 'all' ? undefined : queryParams.cityId,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listJourney(params)
     journeyList.value = res.list
     total.value = res.total
     selectedIds.value = []
@@ -266,9 +271,13 @@ watch(selectAll, (newVal) => {
 })
 
 // 监听选中项变化，更新全选状态
-watch(selectedIds, (newVal) => {
-  selectAll.value = journeyList.value.length > 0 && newVal.length === journeyList.value.length
-}, { deep: true })
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = journeyList.value.length > 0 && newVal.length === journeyList.value.length
+  },
+  { deep: true }
+)
 
 function goToPoints(journeyId: string) {
   router.push({ path: '/xunyin/point', query: { journeyId } })
@@ -277,7 +286,6 @@ function goToPoints(journeyId: string) {
 // 状态切换
 async function handleStatusChange(id: string, status: string) {
   await updateJourneyStatus(id, status)
-  toast({ title: '状态更新成功' })
   const journey = journeyList.value.find((j) => j.id === id)
   if (journey) journey.status = status
 }
@@ -355,6 +363,7 @@ onMounted(() => {
         <Select v-model="queryParams.cityId" @update:model-value="handleQuery">
           <SelectTrigger class="w-[150px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="city in cityOptions" :key="city.id" :value="city.id">{{
               city.name
             }}</SelectItem>
@@ -375,6 +384,7 @@ onMounted(() => {
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>

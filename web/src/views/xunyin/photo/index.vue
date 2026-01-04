@@ -97,7 +97,13 @@ const { toast } = useToast()
 async function getList() {
   loading.value = true
   try {
-    const res = await listPhoto(queryParams)
+    const params = {
+      ...queryParams,
+      cityId: queryParams.cityId === 'all' ? undefined : queryParams.cityId,
+      journeyId: queryParams.journeyId === 'all' ? undefined : queryParams.journeyId,
+      filter: queryParams.filter === 'all' ? undefined : queryParams.filter,
+    }
+    const res = await listPhoto(params)
     photoList.value = res.list
     total.value = res.total
   } finally {
@@ -266,6 +272,7 @@ onMounted(() => {
         <Select v-model="queryParams.cityId" @update:model-value="handleQuery">
           <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="c in cityOptions" :key="c.id" :value="c.id">{{ c.name }}</SelectItem>
           </SelectContent>
         </Select>
@@ -275,6 +282,7 @@ onMounted(() => {
         <Select v-model="queryParams.journeyId" @update:model-value="handleQuery">
           <SelectTrigger class="w-[130px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="j in journeyOptions" :key="j.id" :value="j.id">{{
               j.name
             }}</SelectItem>
@@ -286,6 +294,7 @@ onMounted(() => {
         <Select v-model="queryParams.filter" @update:model-value="handleQuery">
           <SelectTrigger class="w-[100px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="f in filterOptions" :key="f.value" :value="f.value">{{
               f.label
             }}</SelectItem>

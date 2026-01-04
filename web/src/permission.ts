@@ -60,13 +60,18 @@ router.beforeEach(async (to, _from, next) => {
         }
 
         const requiredRoles = (to.meta && (to.meta as any).roles) as string[] | undefined
-        if (requiredRoles && !requiredRoles.some(r => userStore.roles.includes(r))) {
+        if (requiredRoles && !requiredRoles.some((r) => userStore.roles.includes(r))) {
           next('/403')
           NProgress.done()
           return
         }
         const requiredPerms = (to.meta && (to.meta as any).perms) as string[] | undefined
-        if (requiredPerms && !requiredPerms.some(p => userStore.permissions.includes(p) || userStore.permissions.includes('*:*:*'))) {
+        if (
+          requiredPerms &&
+          !requiredPerms.some(
+            (p) => userStore.permissions.includes(p) || userStore.permissions.includes('*:*:*')
+          )
+        ) {
           next('/403')
           NProgress.done()
           return

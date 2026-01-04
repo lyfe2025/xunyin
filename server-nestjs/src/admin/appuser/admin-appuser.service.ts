@@ -10,7 +10,7 @@ import type {
 
 @Injectable()
 export class AdminAppUserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAppUserDto) {
     const {
@@ -109,7 +109,13 @@ export class AdminAppUserService {
       where: { id },
       include: {
         user: {
-          select: { id: true, nickname: true, avatar: true, phone: true, email: true },
+          select: {
+            id: true,
+            nickname: true,
+            avatar: true,
+            phone: true,
+            email: true,
+          },
         },
       },
     });
@@ -130,7 +136,10 @@ export class AdminAppUserService {
       throw new BusinessException(ErrorCode.INVALID_PARAMS, '该认证已审核');
     }
     if (dto.status === 'rejected' && !dto.rejectReason) {
-      throw new BusinessException(ErrorCode.INVALID_PARAMS, '拒绝时必须填写原因');
+      throw new BusinessException(
+        ErrorCode.INVALID_PARAMS,
+        '拒绝时必须填写原因',
+      );
     }
 
     // 使用事务更新认证状态和用户实名标记
@@ -153,6 +162,86 @@ export class AdminAppUserService {
       }
 
       return updated;
+    });
+  }
+
+  // ========== 统计接口 ==========
+
+  async getAppUserStats() {
+    const [total, verified, unverified, active, disabled] = await Promise.all([
+      this.prisma.appUser.count(),
+      this.prisma.appUser.count({ where: { isVerified: true } }),
+      this.prisma.appUser.count({ where: { isVerified: false } }),
+      this.prisma.appUser.count({ where: { status: '0' } }),
+      this.prisma.appUser.count({ where: { status: '1' } }),
+    ]);
+    return { total, verified, unverified, active, disabled };
+  }
+
+  async getVerificationStats() {
+    const [total, pending, approved, rejected] = await Promise.all([
+      this.prisma.userVerification.count(),
+      this.prisma.userVerification.count({ where: { status: 'pending' } }),
+      this.prisma.userVerification.count({ where: { status: 'approved' } }),
+      this.prisma.userVerification.count({ where: { status: 'rejected' } }),
+    ]);
+    return { total, pending, approved, rejected };
+  }
+
+  // ========== 批量审核 ==========
+
+  async batchAuditVerifications(dto: {
+    ids: string[];
+    status: 'approved' | 'rejected';
+    rejectReason?: string;
+  }) {
+    if (dto.status === 'rejected' && !dto.rejectReason) {
+      throw new BusinessException(
+        ErrorCode.INVALID_PARAMS,
+        '拒绝时必须填写原因',
+      );
+    }
+
+    // 查找所有待审核的记录
+    const verifications = await this.prisma.userVerification.findMany({
+      where: {
+        id: { in: dto.ids },
+        status: 'pending',
+      },
+    });
+
+    if (verifications.length === 0) {
+      throw new BusinessException(
+        ErrorCode.INVALID_PARAMS,
+        '没有可审核的记录',
+      );
+    }
+
+    // 使用事务批量更新
+    return this.prisma.$transaction(async (tx) => {
+      // 更新认证状态
+      await tx.userVerification.updateMany({
+        where: {
+          id: { in: verifications.map((v) => v.id) },
+        },
+        data: {
+          status: dto.status,
+          rejectReason: dto.status === 'rejected' ? dto.rejectReason : null,
+          verifiedAt: dto.status === 'approved' ? new Date() : null,
+        },
+      });
+
+      // 如果通过，批量更新用户的实名状态
+      if (dto.status === 'approved') {
+        await tx.appUser.updateMany({
+          where: {
+            id: { in: verifications.map((v) => v.userId) },
+          },
+          data: { isVerified: true },
+        });
+      }
+
+      return { count: verifications.length };
     });
   }
 }

@@ -5,7 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { Loader2, Shield, Users, Settings, BarChart3, RefreshCw, KeyRound, Eye, EyeOff } from 'lucide-vue-next'
+import {
+  Loader2,
+  Shield,
+  Users,
+  Settings,
+  BarChart3,
+  RefreshCw,
+  KeyRound,
+  Eye,
+  EyeOff,
+} from 'lucide-vue-next'
 import { useUserStore } from '@/stores/modules/user'
 import { useAppStore } from '@/stores/modules/app'
 import { getCaptchaImage, verifyTwoFactor, type CaptchaResult, type LoginResult } from '@/api/login'
@@ -18,8 +28,12 @@ const appStore = useAppStore()
 
 // 网站配置
 const siteName = computed(() => appStore.siteConfig.name || '寻印管理后台')
-const siteDescription = computed(() => appStore.siteConfig.description || '城市文化探索与数字印记收藏平台')
-const siteCopyright = computed(() => appStore.siteConfig.copyright || '© 2025 Xunyin. All rights reserved.')
+const siteDescription = computed(
+  () => appStore.siteConfig.description || '城市文化探索与数字印记收藏平台'
+)
+const siteCopyright = computed(
+  () => appStore.siteConfig.copyright || '© 2025 Xunyin. All rights reserved.'
+)
 const siteIcp = computed(() => appStore.siteConfig.icp || '')
 const siteLogo = computed(() => {
   const logo = appStore.siteConfig.logo
@@ -98,7 +112,9 @@ const handleLogin = async () => {
       loginData.uuid = uuid.value
     }
 
-    const response = (await userStore.loginWithoutToken(loginData)) as unknown as { data: LoginResult }
+    const response = (await userStore.loginWithoutToken(loginData)) as unknown as {
+      data: LoginResult
+    }
     const result = response.data
 
     // 检查是否需要两步验证
@@ -170,14 +186,18 @@ const backToLogin = () => {
 <template>
   <div class="min-h-screen flex">
     <!-- 左侧品牌区 -->
-    <div class="hidden lg:flex lg:w-1/2 bg-primary text-primary-foreground flex-col justify-between p-12">
+    <div
+      class="hidden lg:flex lg:w-1/2 bg-primary text-primary-foreground flex-col justify-between p-12"
+    >
       <div>
         <div class="flex items-center gap-3 mb-2">
           <template v-if="siteLogo">
             <img :src="siteLogo" :alt="siteName" class="h-10 max-w-[200px] object-contain" />
           </template>
           <template v-else>
-            <div class="w-10 h-10 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
+            <div
+              class="w-10 h-10 rounded-lg bg-primary-foreground/20 flex items-center justify-center"
+            >
               <Shield class="w-6 h-6" />
             </div>
           </template>
@@ -210,7 +230,12 @@ const backToLogin = () => {
       <div class="text-sm text-primary-foreground/50 space-y-1">
         <p>{{ siteCopyright }}</p>
         <p v-if="siteIcp">
-          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-primary-foreground/70">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-primary-foreground/70"
+          >
             {{ siteIcp }}
           </a>
         </p>
@@ -227,7 +252,9 @@ const backToLogin = () => {
               <img :src="siteLogo" :alt="siteName" class="h-10 max-w-[200px] object-contain" />
             </template>
             <template v-else>
-              <div class="w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
+              <div
+                class="w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center"
+              >
                 <Shield class="w-6 h-6" />
               </div>
             </template>
@@ -246,7 +273,9 @@ const backToLogin = () => {
             <div class="space-y-2">
               <Label for="twoFactorCode">验证码</Label>
               <div class="relative">
-                <KeyRound class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <KeyRound
+                  class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+                />
                 <Input
                   id="twoFactorCode"
                   v-model="twoFactorCode"
@@ -261,9 +290,7 @@ const backToLogin = () => {
               <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
               {{ isLoading ? '验证中...' : '验证' }}
             </Button>
-            <Button variant="outline" class="w-full h-11" @click="backToLogin">
-              返回登录
-            </Button>
+            <Button variant="outline" class="w-full h-11" @click="backToLogin"> 返回登录 </Button>
           </div>
         </template>
 
@@ -314,8 +341,16 @@ const backToLogin = () => {
                   class="h-11 w-[120px] rounded-md border cursor-pointer flex items-center justify-center overflow-hidden bg-muted"
                   @click="loadCaptcha"
                 >
-                  <RefreshCw v-if="captchaLoading" class="h-5 w-5 animate-spin text-muted-foreground" />
-                  <img v-else-if="captchaImg" :src="captchaImg" alt="验证码" class="h-full w-full object-contain" />
+                  <RefreshCw
+                    v-if="captchaLoading"
+                    class="h-5 w-5 animate-spin text-muted-foreground"
+                  />
+                  <img
+                    v-else-if="captchaImg"
+                    :src="captchaImg"
+                    alt="验证码"
+                    class="h-full w-full object-contain"
+                  />
                   <span v-else class="text-sm text-muted-foreground">点击获取</span>
                 </div>
               </div>
@@ -326,9 +361,7 @@ const backToLogin = () => {
             </Button>
           </div>
 
-          <p class="text-center text-sm text-muted-foreground">
-            默认账号：admin / admin123
-          </p>
+          <p class="text-center text-sm text-muted-foreground">默认账号：admin / admin123</p>
         </template>
       </div>
     </div>

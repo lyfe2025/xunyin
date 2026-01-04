@@ -128,27 +128,28 @@ export class AdminPhotoService {
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - 7);
 
-    const [totalPhotos, todayPhotos, weekPhotos, activeUsers] = await Promise.all([
-      this.prisma.explorationPhoto.count(),
-      this.prisma.explorationPhoto.count({
-        where: {
-          createTime: {
-            gte: todayStart,
+    const [totalPhotos, todayPhotos, weekPhotos, activeUsers] =
+      await Promise.all([
+        this.prisma.explorationPhoto.count(),
+        this.prisma.explorationPhoto.count({
+          where: {
+            createTime: {
+              gte: todayStart,
+            },
           },
-        },
-      }),
-      this.prisma.explorationPhoto.count({
-        where: {
-          createTime: {
-            gte: weekStart,
+        }),
+        this.prisma.explorationPhoto.count({
+          where: {
+            createTime: {
+              gte: weekStart,
+            },
           },
-        },
-      }),
-      this.prisma.explorationPhoto.groupBy({
-        by: ['userId'],
-        _count: true,
-      }),
-    ]);
+        }),
+        this.prisma.explorationPhoto.groupBy({
+          by: ['userId'],
+          _count: true,
+        }),
+      ]);
 
     return {
       totalPhotos,

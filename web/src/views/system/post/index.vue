@@ -29,16 +29,6 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Plus, Edit, Trash2, RefreshCw, Search, Loader2 } from 'lucide-vue-next'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -58,7 +48,7 @@ const queryParams = reactive({
   pageSize: 20,
   postCode: '',
   postName: '',
-  status: undefined
+  status: undefined,
 })
 
 const showDialog = ref(false)
@@ -73,14 +63,18 @@ const form = reactive<Partial<SysPost>>({
   postName: '',
   postSort: 0,
   status: '0',
-  remark: ''
+  remark: '',
 })
 
 // Fetch Data
 async function getList() {
   loading.value = true
   try {
-    const res = await listPost(queryParams)
+    const params = {
+      ...queryParams,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listPost(params)
     postList.value = res.rows
     total.value = res.total
   } finally {
@@ -125,7 +119,7 @@ async function confirmDelete() {
   if (!postToDelete.value) return
   try {
     await delPost([postToDelete.value.postId])
-    toast({ title: "删除成功", description: "岗位已删除" })
+    toast({ title: '删除成功', description: '岗位已删除' })
     getList()
   } finally {
     showDeleteDialog.value = false
@@ -134,7 +128,7 @@ async function confirmDelete() {
 
 async function handleSubmit() {
   if (!form.postName || !form.postCode) {
-    toast({ title: "验证失败", description: "岗位名称和编码不能为空", variant: "destructive" })
+    toast({ title: '验证失败', description: '岗位名称和编码不能为空', variant: 'destructive' })
     return
   }
 
@@ -142,10 +136,10 @@ async function handleSubmit() {
   try {
     if (form.postId) {
       await updatePost(form)
-      toast({ title: "修改成功", description: "岗位信息已更新" })
+      toast({ title: '修改成功', description: '岗位信息已更新' })
     } else {
       await addPost(form)
-      toast({ title: "新增成功", description: "岗位已创建" })
+      toast({ title: '新增成功', description: '岗位已创建' })
     }
     showDialog.value = false
     getList()
@@ -176,9 +170,7 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">岗位管理</h2>
-        <p class="text-muted-foreground">
-          管理系统岗位信息
-        </p>
+        <p class="text-muted-foreground">管理系统岗位信息</p>
       </div>
       <div class="flex items-center gap-2">
         <Button @click="handleAdd">
@@ -189,21 +181,23 @@ onMounted(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">岗位编码</span>
-        <Input 
-          v-model="queryParams.postCode" 
-          placeholder="请输入岗位编码" 
+        <Input
+          v-model="queryParams.postCode"
+          placeholder="请输入岗位编码"
           class="w-[200px]"
           @keyup.enter="handleQuery"
         />
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">岗位名称</span>
-        <Input 
-          v-model="queryParams.postName" 
-          placeholder="请输入岗位名称" 
+        <Input
+          v-model="queryParams.postName"
+          placeholder="请输入岗位名称"
           class="w-[200px]"
           @keyup.enter="handleQuery"
         />
@@ -212,9 +206,10 @@ onMounted(() => {
         <span class="text-sm font-medium">状态</span>
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>
@@ -236,7 +231,7 @@ onMounted(() => {
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
       <TableSkeleton v-if="loading" :columns="6" :rows="10" />
-      
+
       <!-- 空状态 -->
       <EmptyState
         v-else-if="postList.length === 0"
@@ -245,7 +240,7 @@ onMounted(() => {
         action-text="新增岗位"
         @action="handleAdd"
       />
-      
+
       <!-- 数据表格 -->
       <Table v-else>
         <TableHeader>
@@ -262,7 +257,9 @@ onMounted(() => {
         <TableBody>
           <TableRow v-for="item in postList" :key="item.postId">
             <TableCell>{{ item.postId }}</TableCell>
-            <TableCell><Badge variant="outline">{{ item.postCode }}</Badge></TableCell>
+            <TableCell
+              ><Badge variant="outline">{{ item.postCode }}</Badge></TableCell
+            >
             <TableCell>{{ item.postName }}</TableCell>
             <TableCell>{{ item.postSort }}</TableCell>
             <TableCell>
@@ -275,7 +272,12 @@ onMounted(() => {
               <Button variant="ghost" size="icon" @click="handleUpdate(item)">
                 <Edit class="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" class="text-destructive" @click="handleDelete(item)">
+              <Button
+                variant="ghost"
+                size="icon"
+                class="text-destructive"
+                @click="handleDelete(item)"
+              >
                 <Trash2 class="w-4 h-4" />
               </Button>
             </TableCell>
@@ -297,11 +299,9 @@ onMounted(() => {
       <DialogContent class="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{{ isEdit ? '修改岗位' : '新增岗位' }}</DialogTitle>
-          <DialogDescription>
-            请填写岗位信息
-          </DialogDescription>
+          <DialogDescription> 请填写岗位信息 </DialogDescription>
         </DialogHeader>
-        
+
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
@@ -313,7 +313,7 @@ onMounted(() => {
               <Input id="postCode" v-model="form.postCode" placeholder="请输入岗位编码" />
             </div>
           </div>
-          
+
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label for="postSort">显示顺序</Label>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import {
   Table,
   TableBody,
@@ -28,7 +28,6 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useToast } from '@/components/ui/toast/use-toast'
 import {
   Search,
   RefreshCw,
@@ -46,6 +45,7 @@ import {
   type JourneyProgress,
   type ProgressStats,
 } from '@/api/xunyin/progress'
+import { listCity, type City } from '@/api/xunyin/city'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -65,7 +65,7 @@ function getElapsedTime(startTime: string | Date): string {
   const start = new Date(startTime).getTime()
   const now = Date.now()
   const diffMinutes = Math.floor((now - start) / (1000 * 60))
-  
+
   if (diffMinutes < 60) {
     return `${diffMinutes} 分钟`
   } else if (diffMinutes < 1440) {
@@ -95,11 +95,13 @@ const loading = ref(true)
 const progressList = ref<JourneyProgress[]>([])
 const total = ref(0)
 const stats = ref<ProgressStats | null>(null)
+const cityOptions = ref<City[]>([])
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 20,
   nickname: '',
   journeyName: '',
+  cityId: undefined as string | undefined,
   status: undefined as string | undefined,
 })
 
@@ -118,12 +120,15 @@ const showDetailDialog = ref(false)
 const currentProgress = ref<any>(null)
 const detailLoading = ref(false)
 
-const { toast: _toast } = useToast()
-
 async function getList() {
   loading.value = true
   try {
-    const res = await listProgress(queryParams)
+    const params = {
+      ...queryParams,
+      cityId: queryParams.cityId === 'all' ? undefined : queryParams.cityId,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listProgress(params)
     progressList.value = res.list
     total.value = res.total
   } finally {
@@ -139,6 +144,15 @@ async function loadStats() {
   }
 }
 
+async function loadCityOptions() {
+  try {
+    const res = await listCity({ pageSize: 100 })
+    cityOptions.value = res.list
+  } catch {
+    // ignore
+  }
+}
+
 function handleQuery() {
   queryParams.pageNum = 1
   getList()
@@ -147,6 +161,7 @@ function handleQuery() {
 function resetQuery() {
   queryParams.nickname = ''
   queryParams.journeyName = ''
+  queryParams.cityId = undefined
   queryParams.status = undefined
   handleQuery()
 }
@@ -187,6 +202,7 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
 onMounted(() => {
   getList()
   loadStats()
+  loadCityOptions()
 })
 </script>
 
@@ -245,7 +261,9 @@ onMounted(() => {
     </div>
 
     <!-- 筛选 -->
-    <div class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg">
+    <div
+      class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
+    >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">用户昵称</span>
         <Input
@@ -265,10 +283,23 @@ onMounted(() => {
         />
       </div>
       <div class="flex items-center gap-2">
+        <span class="text-sm font-medium">所属城市</span>
+        <Select v-model="queryParams.cityId" @update:model-value="handleQuery">
+          <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
+            <SelectItem v-for="c in cityOptions" :key="c.id" :value="c.id">
+              {{ c.name }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div class="flex items-center gap-2">
         <span class="text-sm font-medium">状态</span>
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="s in statusOptions" :key="s.value" :value="s.value">
               {{ s.label }}
             </SelectItem>
@@ -277,7 +308,9 @@ onMounted(() => {
       </div>
       <div class="flex gap-2 ml-auto">
         <Button @click="handleQuery"><Search class="w-4 h-4 mr-2" />搜索</Button>
-        <Button variant="outline" @click="resetQuery"><RefreshCw class="w-4 h-4 mr-2" />重置</Button>
+        <Button variant="outline" @click="resetQuery"
+          ><RefreshCw class="w-4 h-4 mr-2" />重置</Button
+        >
       </div>
     </div>
 
@@ -313,13 +346,16 @@ onMounted(() => {
             <TableCell>{{ item.cityName || '-' }}</TableCell>
             <TableCell>
               <div class="flex items-center gap-2">
-                <Progress 
-                  :model-value="getProgressPercent(item.completedPoints, item.totalPoints)" 
-                  class="w-20 h-2" 
+                <Progress
+                  :model-value="getProgressPercent(item.completedPoints, item.totalPoints)"
+                  class="w-20 h-2"
                 />
                 <span class="text-sm text-muted-foreground whitespace-nowrap">
                   {{ item.completedPoints }}/{{ item.totalPoints }}
-                  <span v-if="getProgressPercent(item.completedPoints, item.totalPoints) < 100" class="text-xs ml-1">
+                  <span
+                    v-if="getProgressPercent(item.completedPoints, item.totalPoints) < 100"
+                    class="text-xs ml-1"
+                  >
                     ({{ getProgressPercent(item.completedPoints, item.totalPoints) }}%)
                   </span>
                 </span>
@@ -330,7 +366,7 @@ onMounted(() => {
                 {{ getStatusInfo(item.status).label }}
               </Badge>
             </TableCell>
-            <TableCell>{{ formatDate(item.startTime) }}</TableCell>
+            <TableCell>{{ formatDate(item.startTime, 'YYYY-MM-DD HH:mm') }}</TableCell>
             <TableCell>
               <template v-if="item.status === 'completed' && item.timeSpentMinutes">
                 <span>{{ formatTimeSpent(item.timeSpentMinutes) }}</span>
@@ -386,22 +422,25 @@ onMounted(() => {
               {{ getStatusInfo(currentProgress.status).label }}
             </Badge>
           </div>
-          
+
           <!-- 进度条 -->
           <div class="space-y-2">
             <div class="flex justify-between text-sm">
               <span class="text-muted-foreground">完成进度</span>
               <span class="font-medium">
-                {{ currentProgress.completedPoints }}/{{ currentProgress.totalPoints }}
-                ({{ getProgressPercent(currentProgress.completedPoints, currentProgress.totalPoints) }}%)
+                {{ currentProgress.completedPoints }}/{{ currentProgress.totalPoints }} ({{
+                  getProgressPercent(currentProgress.completedPoints, currentProgress.totalPoints)
+                }}%)
               </span>
             </div>
-            <Progress 
-              :model-value="getProgressPercent(currentProgress.completedPoints, currentProgress.totalPoints)" 
-              class="h-3" 
+            <Progress
+              :model-value="
+                getProgressPercent(currentProgress.completedPoints, currentProgress.totalPoints)
+              "
+              class="h-3"
             />
           </div>
-          
+
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span class="text-muted-foreground">城市：</span>
@@ -417,16 +456,20 @@ onMounted(() => {
             </div>
             <div>
               <span class="text-muted-foreground">花费时间：</span>
-              <template v-if="currentProgress.status === 'completed' && currentProgress.timeSpentMinutes">
+              <template
+                v-if="currentProgress.status === 'completed' && currentProgress.timeSpentMinutes"
+              >
                 {{ formatTimeSpent(currentProgress.timeSpentMinutes) }}
               </template>
               <template v-else-if="currentProgress.status === 'in_progress'">
-                <span class="text-blue-600">{{ getElapsedTime(currentProgress.startTime) }}（进行中）</span>
+                <span class="text-blue-600"
+                  >{{ getElapsedTime(currentProgress.startTime) }}（进行中）</span
+                >
               </template>
               <template v-else>-</template>
             </div>
           </div>
-          
+
           <!-- 探索点完成情况 -->
           <div class="border-t pt-4">
             <div class="font-medium mb-3">探索点完成情况</div>
@@ -445,15 +488,18 @@ onMounted(() => {
                 <span class="text-sm text-muted-foreground">{{ formatDate(pc.completeTime) }}</span>
               </div>
               <!-- 未完成的探索点提示 -->
-              <div 
+              <div
                 v-if="currentProgress.completedPoints < currentProgress.totalPoints"
                 class="p-3 bg-muted/50 border border-dashed rounded-lg text-center text-sm text-muted-foreground"
               >
-                还有 {{ currentProgress.totalPoints - currentProgress.completedPoints }} 个探索点待完成
+                还有
+                {{ currentProgress.totalPoints - currentProgress.completedPoints }} 个探索点待完成
               </div>
               <!-- 无数据提示 -->
-              <div 
-                v-if="!currentProgress.pointCompletions?.length && currentProgress.completedPoints === 0"
+              <div
+                v-if="
+                  !currentProgress.pointCompletions?.length && currentProgress.completedPoints === 0
+                "
                 class="p-3 bg-muted/50 border border-dashed rounded-lg text-center text-sm text-muted-foreground"
               >
                 暂无完成记录

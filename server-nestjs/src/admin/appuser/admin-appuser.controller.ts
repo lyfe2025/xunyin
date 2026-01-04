@@ -16,6 +16,7 @@ import {
   ChangeStatusDto,
   QueryVerificationDto,
   AuditVerificationDto,
+  BatchAuditVerificationDto,
 } from './dto/admin-appuser.dto';
 
 @ApiTags('管理端-App用户管理')
@@ -23,13 +24,20 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/appusers')
 export class AdminAppUserController {
-  constructor(private readonly adminAppUserService: AdminAppUserService) { }
+  constructor(private readonly adminAppUserService: AdminAppUserService) {}
 
   @Get()
   @ApiOperation({ summary: 'App用户列表（分页）' })
   @RequirePermission('xunyin:appuser:query')
   async findAll(@Query() query: QueryAppUserDto) {
     return this.adminAppUserService.findAll(query);
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'App用户统计' })
+  @RequirePermission('xunyin:appuser:query')
+  async getAppUserStats() {
+    return this.adminAppUserService.getAppUserStats();
   }
 
   @Get(':id')
@@ -53,6 +61,20 @@ export class AdminAppUserController {
   @RequirePermission('xunyin:appuser:query')
   async findVerifications(@Query() query: QueryVerificationDto) {
     return this.adminAppUserService.findVerifications(query);
+  }
+
+  @Get('verifications/stats')
+  @ApiOperation({ summary: '实名认证统计' })
+  @RequirePermission('xunyin:appuser:query')
+  async getVerificationStats() {
+    return this.adminAppUserService.getVerificationStats();
+  }
+
+  @Put('verifications/batch-audit')
+  @ApiOperation({ summary: '批量审核实名认证' })
+  @RequirePermission('xunyin:appuser:edit')
+  async batchAuditVerifications(@Body() dto: BatchAuditVerificationDto) {
+    return this.adminAppUserService.batchAuditVerifications(dto);
   }
 
   @Get('verifications/:id')

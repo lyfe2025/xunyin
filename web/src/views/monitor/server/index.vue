@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { getServer, type ServerInfo } from '@/api/monitor/server'
@@ -101,19 +95,13 @@ onUnmounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">服务监控</h2>
-        <p class="text-muted-foreground">
-          监控服务器 CPU、内存、Node.js 进程等运行状态
-        </p>
+        <p class="text-muted-foreground">监控服务器 CPU、内存、Node.js 进程等运行状态</p>
       </div>
       <div class="flex items-center gap-2">
         <span v-if="lastUpdateTime" class="text-xs text-muted-foreground">
           更新于 {{ lastUpdateTime }}
         </span>
-        <Button 
-          :variant="autoRefresh ? 'default' : 'outline'" 
-          size="sm"
-          @click="toggleAutoRefresh"
-        >
+        <Button :variant="autoRefresh ? 'default' : 'outline'" size="sm" @click="toggleAutoRefresh">
           <Activity class="mr-2 h-4 w-4" :class="{ 'animate-pulse': autoRefresh }" />
           {{ autoRefresh ? '自动刷新中' : '自动刷新' }}
         </Button>
@@ -140,17 +128,15 @@ onUnmounted(() => {
           <CardContent>
             <div class="text-xl sm:text-2xl font-bold">{{ server.cpu.cpuNum }} 核心</div>
             <p class="text-xs text-muted-foreground mt-1">
-              用户: {{ Number(server.cpu.used).toFixed(1) }}% | 系统: {{ Number(server.cpu.sys).toFixed(1) }}%
+              用户: {{ Number(server.cpu.used).toFixed(1) }}% | 系统:
+              {{ Number(server.cpu.sys).toFixed(1) }}%
             </p>
             <div class="mt-4 space-y-2">
               <div class="flex justify-between text-xs">
                 <span>总使用率</span>
                 <span :class="getUsageColor(cpuTotalUsage)">{{ cpuTotalUsage.toFixed(1) }}%</span>
               </div>
-              <Progress 
-                :model-value="cpuTotalUsage" 
-                :class="getProgressVariant(cpuTotalUsage)"
-              />
+              <Progress :model-value="cpuTotalUsage" :class="getProgressVariant(cpuTotalUsage)" />
             </div>
           </CardContent>
         </Card>
@@ -161,17 +147,22 @@ onUnmounted(() => {
             <Database class="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div class="text-xl sm:text-2xl font-bold">{{ Number(server.mem.total).toFixed(1) }} GB</div>
+            <div class="text-xl sm:text-2xl font-bold">
+              {{ Number(server.mem.total).toFixed(1) }} GB
+            </div>
             <p class="text-xs text-muted-foreground mt-1">
-              已用: {{ Number(server.mem.used).toFixed(1) }} GB | 剩余: {{ Number(server.mem.free).toFixed(1) }} GB
+              已用: {{ Number(server.mem.used).toFixed(1) }} GB | 剩余:
+              {{ Number(server.mem.free).toFixed(1) }} GB
             </p>
             <div class="mt-4 space-y-2">
               <div class="flex justify-between text-xs">
                 <span>使用率</span>
-                <span :class="getUsageColor(Number(server.mem.usage))">{{ Number(server.mem.usage).toFixed(1) }}%</span>
+                <span :class="getUsageColor(Number(server.mem.usage))"
+                  >{{ Number(server.mem.usage).toFixed(1) }}%</span
+                >
               </div>
-              <Progress 
-                :model-value="Number(server.mem.usage)" 
+              <Progress
+                :model-value="Number(server.mem.usage)"
                 :class="getProgressVariant(Number(server.mem.usage))"
               />
             </div>
@@ -202,7 +193,7 @@ onUnmounted(() => {
               <span class="truncate" :title="server.sys.userDir">{{ server.sys.userDir }}</span>
             </div>
           </div>
-           
+
           <div>
             <h4 class="text-sm font-medium text-muted-foreground mb-4">Node.js 信息</h4>
             <div class="grid grid-cols-2 gap-2 text-sm">
@@ -218,12 +209,15 @@ onUnmounted(() => {
           </div>
         </CardContent>
       </Card>
-      
+
       <!-- Node.js Memory -->
       <Card>
         <CardHeader>
           <CardTitle>Node.js 进程内存</CardTitle>
-          <CardDescription>V8 堆内存使用情况（堆内存会根据应用负载动态扩展，默认最大约 1.4GB - 4GB）</CardDescription>
+          <CardDescription
+            >V8 堆内存使用情况（堆内存会根据应用负载动态扩展，默认最大约 1.4GB -
+            4GB）</CardDescription
+          >
         </CardHeader>
         <CardContent>
           <div class="space-y-4">
@@ -246,16 +240,19 @@ onUnmounted(() => {
             <div class="space-y-2">
               <div class="flex justify-between text-xs">
                 <span>使用率</span>
-                <span :class="getUsageColor(Number(server.jvm.usage))">{{ Number(server.jvm.usage) }}%</span>
+                <span :class="getUsageColor(Number(server.jvm.usage))"
+                  >{{ Number(server.jvm.usage) }}%</span
+                >
               </div>
-              <Progress 
-                :model-value="Number(server.jvm.usage)" 
+              <Progress
+                :model-value="Number(server.jvm.usage)"
                 class="h-2"
                 :class="getProgressVariant(Number(server.jvm.usage))"
               />
             </div>
             <p class="text-xs text-muted-foreground mt-2">
-              💡 堆总量为 V8 引擎当前分配的内存，会随负载自动增长。可通过 --max-old-space-size 参数调整上限。
+              💡 堆总量为 V8 引擎当前分配的内存，会随负载自动增长。可通过 --max-old-space-size
+              参数调整上限。
             </p>
           </div>
         </CardContent>
@@ -278,10 +275,12 @@ onUnmounted(() => {
                   <span class="font-medium text-sm">{{ file.dirName }}</span>
                   <span class="text-xs text-muted-foreground">({{ file.typeName }})</span>
                 </div>
-                <span class="text-sm text-muted-foreground">{{ file.used }} / {{ file.total }}</span>
+                <span class="text-sm text-muted-foreground"
+                  >{{ file.used }} / {{ file.total }}</span
+                >
               </div>
-              <Progress 
-                :model-value="Number(file.usage)" 
+              <Progress
+                :model-value="Number(file.usage)"
                 class="h-2"
                 :class="getProgressVariant(Number(file.usage))"
               />

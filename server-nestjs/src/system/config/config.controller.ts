@@ -21,7 +21,7 @@ import { UpdateConfigDto } from './dto/update-config.dto';
 @ApiTags('参数配置')
 @Controller('system/config')
 export class ConfigController {
-  constructor(private readonly service: ConfigService) { }
+  constructor(private readonly service: ConfigService) {}
 
   @Get('site')
   @ApiOperation({ summary: '获取网站公开配置（无需登录）' })

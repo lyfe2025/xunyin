@@ -115,9 +115,57 @@ export function getVerification(id: string) {
   }).then((res: any) => res.data)
 }
 
-export function auditVerification(id: string, data: { status: 'approved' | 'rejected'; rejectReason?: string }) {
+export function auditVerification(
+  id: string,
+  data: { status: 'approved' | 'rejected'; rejectReason?: string }
+) {
   return request({
     url: `/admin/appusers/verifications/${id}/audit`,
+    method: 'put',
+    data,
+  })
+}
+
+// ========== 统计接口 ==========
+
+export interface AppUserStats {
+  total: number
+  verified: number
+  unverified: number
+  active: number
+  disabled: number
+}
+
+export interface VerificationStats {
+  total: number
+  pending: number
+  approved: number
+  rejected: number
+}
+
+export function getAppUserStats() {
+  return request<{ data: AppUserStats }>({
+    url: '/admin/appusers/stats',
+    method: 'get',
+  }).then((res: any) => res.data)
+}
+
+export function getVerificationStats() {
+  return request<{ data: VerificationStats }>({
+    url: '/admin/appusers/verifications/stats',
+    method: 'get',
+  }).then((res: any) => res.data)
+}
+
+// ========== 批量审核 ==========
+
+export function batchAuditVerifications(data: {
+  ids: string[]
+  status: 'approved' | 'rejected'
+  rejectReason?: string
+}) {
+  return request({
+    url: '/admin/appusers/verifications/batch-audit',
     method: 'put',
     data,
   })

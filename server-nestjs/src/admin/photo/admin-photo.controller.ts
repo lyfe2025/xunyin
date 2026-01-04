@@ -6,7 +6,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RequirePermission } from '../../common/decorators/permission.decorator';
 import { AdminPhotoService } from './admin-photo.service';
@@ -20,7 +25,10 @@ export class AdminPhotoController {
   constructor(private readonly adminPhotoService: AdminPhotoService) {}
 
   @Get()
-  @ApiOperation({ summary: '照片列表（分页）', description: '支持按用户/文化之旅/探索点/城市/时间筛选' })
+  @ApiOperation({
+    summary: '照片列表（分页）',
+    description: '支持按用户/文化之旅/探索点/城市/时间筛选',
+  })
   @ApiResponse({ status: 200, description: '成功' })
   @RequirePermission('xunyin:photo:query')
   async findAll(@Query() query: QueryPhotoDto) {

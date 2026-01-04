@@ -3,7 +3,7 @@ import { AdminUserSealController } from './admin-user-seal.controller';
 import { AdminUserSealService } from './admin-user-seal.service';
 
 @Module({
-    controllers: [AdminUserSealController],
-    providers: [AdminUserSealService],
+  controllers: [AdminUserSealController],
+  providers: [AdminUserSealService],
 })
-export class AdminUserSealModule { }
+export class AdminUserSealModule {}

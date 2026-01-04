@@ -102,7 +102,12 @@ const { toast } = useToast()
 async function getList() {
   loading.value = true
   try {
-    const res = await listSeal(queryParams)
+    const params = {
+      ...queryParams,
+      type: queryParams.type === 'all' ? undefined : queryParams.type,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listSeal(params)
     sealList.value = res.list
     total.value = res.total
     selectedIds.value = []
@@ -270,7 +275,6 @@ function getSealTypeVariant(type: string) {
 // 状态切换
 async function handleStatusChange(id: string, status: string) {
   await updateSealStatus(id, status)
-  toast({ title: '状态更新成功' })
   const seal = sealList.value.find((s) => s.id === id)
   if (seal) seal.status = status
 }
@@ -347,6 +351,7 @@ onMounted(() => {
         <Select v-model="queryParams.type" @update:model-value="handleQuery">
           <SelectTrigger class="w-[130px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="t in sealTypeOptions" :key="t.value" :value="t.value">{{
               t.label
             }}</SelectItem>
@@ -367,6 +372,7 @@ onMounted(() => {
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>

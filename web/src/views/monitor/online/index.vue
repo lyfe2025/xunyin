@@ -21,12 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { LogOut, RefreshCw, Search, Loader2, Copy } from 'lucide-vue-next'
 import TablePagination from '@/components/common/TablePagination.vue'
@@ -104,7 +99,6 @@ function formatDuration(ms: number) {
   }
   return `${seconds}秒`
 }
-
 
 // 截断显示 tokenId（前6位...后6位）
 function truncateToken(token: string) {
@@ -223,7 +217,6 @@ onUnmounted(() => {
 })
 </script>
 
-
 <template>
   <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
     <!-- Header -->
@@ -294,15 +287,20 @@ onUnmounted(() => {
     <!-- Table -->
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
-      <TableSkeleton v-if="loading && onlineList.length === 0" :columns="8" :rows="10" show-checkbox />
-      
+      <TableSkeleton
+        v-if="loading && onlineList.length === 0"
+        :columns="8"
+        :rows="10"
+        show-checkbox
+      />
+
       <!-- 空状态 -->
       <EmptyState
         v-else-if="!loading && onlineList.length === 0"
         title="暂无在线用户"
         description="当前没有活跃的在线用户"
       />
-      
+
       <!-- 数据表格 -->
       <Table v-else>
         <TableHeader>
@@ -373,7 +371,9 @@ onUnmounted(() => {
             <TableCell>{{ item.os || '-' }}</TableCell>
             <TableCell>{{ formatTime(item.loginTime) }}</TableCell>
             <TableCell>
-              <span class="text-sm text-muted-foreground">{{ formatDuration(item.onlineDuration) }}</span>
+              <span class="text-sm text-muted-foreground">{{
+                formatDuration(item.onlineDuration)
+              }}</span>
             </TableCell>
             <TableCell class="text-right">
               <Button

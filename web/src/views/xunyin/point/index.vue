@@ -122,7 +122,12 @@ const { toast } = useToast()
 async function getList() {
   loading.value = true
   try {
-    const res = await listPoint(queryParams)
+    const params = {
+      ...queryParams,
+      journeyId: queryParams.journeyId === 'all' ? undefined : queryParams.journeyId,
+      taskType: queryParams.taskType === 'all' ? undefined : queryParams.taskType,
+    }
+    const res = await listPoint(params)
     pointList.value = res.list
     total.value = res.total
     selectedIds.value = []
@@ -276,7 +281,6 @@ function getTaskTypeLabel(type: string) {
 // 状态切换
 async function handleStatusChange(id: string, status: string) {
   await updatePointStatus(id, status)
-  toast({ title: '状态更新成功' })
   const point = pointList.value.find((p) => p.id === id)
   if (point) point.status = status
 }
@@ -360,6 +364,7 @@ onMounted(() => {
         <Select v-model="queryParams.journeyId" @update:model-value="handleQuery">
           <SelectTrigger class="w-[180px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="j in journeyOptions" :key="j.id" :value="j.id">{{
               j.name
             }}</SelectItem>
@@ -380,6 +385,7 @@ onMounted(() => {
         <Select v-model="queryParams.taskType" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="t in taskTypeOptions" :key="t.value" :value="t.value">{{
               t.label
             }}</SelectItem>

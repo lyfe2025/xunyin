@@ -1099,7 +1099,8 @@ VALUES
   ('登录方式', 'xunyin_login_type', '0', NOW()),
   ('性别', 'xunyin_gender', '0', NOW()),
   ('照片滤镜', 'xunyin_photo_filter', '0', NOW()),
-  ('区块链', 'xunyin_chain_name', '0', NOW())
+  ('区块链', 'xunyin_chain_name', '0', NOW()),
+  ('实名认证状态', 'xunyin_verification_status', '0', NOW())
 ON CONFLICT (dict_type) DO NOTHING;
 
 -- 19.2 字典数据
@@ -1148,7 +1149,11 @@ VALUES
   -- 区块链
   ('xunyin_chain_name', '蚂蚁链', 'antchain', 1, '0', 'Y', NOW()),
   ('xunyin_chain_name', '长安链', 'chainmaker', 2, '0', 'N', NOW()),
-  ('xunyin_chain_name', '至信链', 'zhixin', 3, '0', 'N', NOW())
+  ('xunyin_chain_name', '至信链', 'zhixin', 3, '0', 'N', NOW()),
+  -- 实名认证状态
+  ('xunyin_verification_status', '待审核', 'pending', 1, '0', 'Y', NOW()),
+  ('xunyin_verification_status', '已通过', 'approved', 2, '0', 'N', NOW()),
+  ('xunyin_verification_status', '已拒绝', 'rejected', 3, '0', 'N', NOW())
 ON CONFLICT DO NOTHING;
 
 
@@ -1302,6 +1307,61 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO app_user (phone, nickname, avatar, login_type, total_points, status, create_time)
 VALUES ('13700137000', '印记收藏家', '', 'wechat', 850, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+
+-- 24.1 用户实名认证数据
+-- 用户1: 已通过认证
+INSERT INTO user_verification (id, user_id, real_name, id_card_no, id_card_front, id_card_back, status, verified_at, create_time, update_time)
+SELECT 
+  'verification_demo_1',
+  u.id,
+  '张明',
+  'ENCRYPTED_330102199001011234',
+  '/uploads/idcard/front-demo1.jpg',
+  '/uploads/idcard/back-demo1.jpg',
+  'approved',
+  '2025-01-08 10:00:00',
+  NOW(),
+  NOW()
+FROM app_user u
+WHERE u.phone = '13800138000'
+ON CONFLICT DO NOTHING;
+
+-- 同步更新用户1的 is_verified 状态
+UPDATE app_user SET is_verified = TRUE WHERE phone = '13800138000';
+
+-- 用户2: 待审核
+INSERT INTO user_verification (id, user_id, real_name, id_card_no, id_card_front, id_card_back, status, create_time, update_time)
+SELECT 
+  'verification_demo_2',
+  u.id,
+  '李文化',
+  'ENCRYPTED_350102199205052345',
+  '/uploads/idcard/front-demo2.jpg',
+  '/uploads/idcard/back-demo2.jpg',
+  'pending',
+  NOW(),
+  NOW()
+FROM app_user u
+WHERE u.phone = '13900139000'
+ON CONFLICT DO NOTHING;
+
+-- 用户3: 已拒绝（照片模糊）
+INSERT INTO user_verification (id, user_id, real_name, id_card_no, id_card_front, id_card_back, status, reject_reason, create_time, update_time)
+SELECT 
+  'verification_demo_3',
+  u.id,
+  '王收藏',
+  'ENCRYPTED_330106198812123456',
+  '/uploads/idcard/front-demo3.jpg',
+  '/uploads/idcard/back-demo3.jpg',
+  'rejected',
+  '身份证照片模糊，请重新上传清晰照片',
+  NOW(),
+  NOW()
+FROM app_user u
+WHERE u.phone = '13700137000'
 ON CONFLICT DO NOTHING;
 
 

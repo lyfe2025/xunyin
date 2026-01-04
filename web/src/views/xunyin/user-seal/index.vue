@@ -93,7 +93,15 @@ async function getList() {
   try {
     const params = {
       ...queryParams,
-      isChained: queryParams.isChained === 'true' ? true : queryParams.isChained === 'false' ? false : undefined,
+      sealType: queryParams.sealType === 'all' ? undefined : queryParams.sealType,
+      isChained:
+        queryParams.isChained === 'all'
+          ? undefined
+          : queryParams.isChained === 'true'
+            ? true
+            : queryParams.isChained === 'false'
+              ? false
+              : undefined,
     }
     const res = await listUserSeal(params)
     userSealList.value = res.list
@@ -160,7 +168,7 @@ function openChainDialog(item: UserSeal) {
 
 async function confirmChain() {
   if (!chainTarget.value) return
-  
+
   chainLoading.value = true
   try {
     // TODO: 这里预留对接公链的接口
@@ -169,9 +177,12 @@ async function confirmChain() {
     // - antchain: 调用蚂蚁链 SDK
     // - chainmaker: 调用长安链 SDK
     // - zhixin: 调用至信链 SDK
-    
+
     await chainUserSeal(chainTarget.value.id, { chainName: selectedChain.value })
-    toast({ title: '上链成功', description: `已成功上链至${chainOptions.find(c => c.value === selectedChain.value)?.label}` })
+    toast({
+      title: '上链成功',
+      description: `已成功上链至${chainOptions.find((c) => c.value === selectedChain.value)?.label}`,
+    })
     showChainDialog.value = false
     showDetailDialog.value = false
     getList()
@@ -269,7 +280,9 @@ onMounted(() => {
     </div>
 
     <!-- 筛选 -->
-    <div class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg">
+    <div
+      class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
+    >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">用户昵称</span>
         <Input
@@ -293,6 +306,7 @@ onMounted(() => {
         <Select v-model="queryParams.sealType" @update:model-value="handleQuery">
           <SelectTrigger class="w-[130px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="t in sealTypeOptions" :key="t.value" :value="t.value">
               {{ t.label }}
             </SelectItem>
@@ -304,6 +318,7 @@ onMounted(() => {
         <Select v-model="queryParams.isChained" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="true">已上链</SelectItem>
             <SelectItem value="false">未上链</SelectItem>
           </SelectContent>
@@ -311,7 +326,9 @@ onMounted(() => {
       </div>
       <div class="flex gap-2 ml-auto">
         <Button @click="handleQuery"><Search class="w-4 h-4 mr-2" />搜索</Button>
-        <Button variant="outline" @click="resetQuery"><RefreshCw class="w-4 h-4 mr-2" />重置</Button>
+        <Button variant="outline" @click="resetQuery"
+          ><RefreshCw class="w-4 h-4 mr-2" />重置</Button
+        >
       </div>
     </div>
 
@@ -381,7 +398,12 @@ onMounted(() => {
             <TableCell>
               <div v-if="item.txHash" class="flex items-center gap-1">
                 <span class="text-xs font-mono truncate max-w-[120px]">{{ item.txHash }}</span>
-                <Button variant="ghost" size="icon" class="h-6 w-6" @click="copyTxHash(item.txHash!)">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-6 w-6"
+                  @click="copyTxHash(item.txHash!)"
+                >
                   <Copy class="w-3 h-3" />
                 </Button>
               </div>
@@ -389,16 +411,21 @@ onMounted(() => {
             </TableCell>
             <TableCell class="text-right">
               <div class="flex items-center justify-end gap-1">
-                <Button 
-                  v-if="!item.isChained" 
-                  variant="ghost" 
+                <Button
+                  v-if="!item.isChained"
+                  variant="ghost"
                   size="icon"
                   @click="openChainDialog(item)"
                   title="上链"
                 >
                   <LinkIcon class="w-4 h-4 text-blue-600" />
                 </Button>
-                <Button variant="ghost" size="icon" @click="handleViewDetail(item)" title="查看详情">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  @click="handleViewDetail(item)"
+                  title="查看详情"
+                >
                   <Eye class="w-4 h-4" />
                 </Button>
               </div>
@@ -459,7 +486,9 @@ onMounted(() => {
             </div>
             <div>
               <span class="text-muted-foreground">花费时间：</span>
-              {{ currentUserSeal.timeSpentMinutes ? `${currentUserSeal.timeSpentMinutes} 分钟` : '-' }}
+              {{
+                currentUserSeal.timeSpentMinutes ? `${currentUserSeal.timeSpentMinutes} 分钟` : '-'
+              }}
             </div>
             <div>
               <span class="text-muted-foreground">上链状态：</span>
@@ -468,7 +497,10 @@ onMounted(() => {
               </Badge>
             </div>
           </div>
-          <div v-if="currentUserSeal.isChained" class="space-y-2 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+          <div
+            v-if="currentUserSeal.isChained"
+            class="space-y-2 p-4 bg-green-50 dark:bg-green-950 rounded-lg"
+          >
             <div class="font-medium text-green-700 dark:text-green-300">区块链信息</div>
             <div class="grid gap-2 text-sm">
               <div>
@@ -485,8 +517,15 @@ onMounted(() => {
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-muted-foreground">交易哈希：</span>
-                <code class="text-xs bg-muted px-2 py-1 rounded break-all">{{ currentUserSeal.txHash }}</code>
-                <Button variant="ghost" size="icon" class="h-6 w-6" @click="copyTxHash(currentUserSeal.txHash!)">
+                <code class="text-xs bg-muted px-2 py-1 rounded break-all">{{
+                  currentUserSeal.txHash
+                }}</code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-6 w-6"
+                  @click="copyTxHash(currentUserSeal.txHash!)"
+                >
                   <Copy class="w-3 h-3" />
                 </Button>
               </div>
@@ -513,9 +552,7 @@ onMounted(() => {
       <DialogContent class="sm:max-w-[450px]">
         <DialogHeader>
           <DialogTitle>印记上链</DialogTitle>
-          <DialogDescription>
-            将印记数据上链存证，上链后不可撤销
-          </DialogDescription>
+          <DialogDescription> 将印记数据上链存证，上链后不可撤销 </DialogDescription>
         </DialogHeader>
         <div v-if="chainTarget" class="space-y-4 py-4">
           <!-- 印记信息 -->
@@ -528,7 +565,7 @@ onMounted(() => {
               <div class="text-sm text-muted-foreground">{{ chainTarget.nickname }}</div>
             </div>
           </div>
-          
+
           <!-- 选择区块链 -->
           <div class="space-y-3">
             <Label>选择区块链</Label>
@@ -537,14 +574,23 @@ onMounted(() => {
                 v-for="chain in chainOptions"
                 :key="chain.value"
                 class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
-                :class="selectedChain === chain.value ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'"
+                :class="
+                  selectedChain === chain.value
+                    ? 'border-primary bg-primary/5'
+                    : 'hover:bg-muted/50'
+                "
                 @click="selectedChain = chain.value as any"
               >
-                <div 
+                <div
                   class="w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                  :class="selectedChain === chain.value ? 'border-primary' : 'border-muted-foreground'"
+                  :class="
+                    selectedChain === chain.value ? 'border-primary' : 'border-muted-foreground'
+                  "
                 >
-                  <div v-if="selectedChain === chain.value" class="w-2 h-2 rounded-full bg-primary" />
+                  <div
+                    v-if="selectedChain === chain.value"
+                    class="w-2 h-2 rounded-full bg-primary"
+                  />
                 </div>
                 <div class="flex-1">
                   <div class="font-medium">{{ chain.label }}</div>
@@ -553,16 +599,20 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          
+
           <!-- 提示信息 -->
-          <div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg">
+          <div
+            class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg"
+          >
             <div class="text-sm text-amber-800 dark:text-amber-200">
               <strong>注意：</strong>上链操作将把印记数据永久存储到区块链上，此操作不可撤销。
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" @click="showChainDialog = false" :disabled="chainLoading">取消</Button>
+          <Button variant="outline" @click="showChainDialog = false" :disabled="chainLoading"
+            >取消</Button
+          >
           <Button @click="confirmChain" :disabled="chainLoading">
             <Loader v-if="chainLoading" class="w-4 h-4 mr-2 animate-spin" />
             <LinkIcon v-else class="w-4 h-4 mr-2" />

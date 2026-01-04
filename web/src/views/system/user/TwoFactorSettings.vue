@@ -139,7 +139,9 @@ onMounted(() => {
 
         <!-- 已启用状态 -->
         <div v-else-if="userEnabled" class="space-y-4">
-          <div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div
+            class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4"
+          >
             <div class="flex items-center gap-2 text-green-700 dark:text-green-300">
               <ShieldCheck class="h-5 w-5" />
               <span class="font-medium">两步验证已启用</span>
@@ -161,7 +163,8 @@ onMounted(() => {
             <div class="space-y-4">
               <h4 class="font-medium">1. 扫描二维码</h4>
               <p class="text-sm text-muted-foreground">
-                使用 Google Authenticator、Microsoft Authenticator 或其他 TOTP 验证器应用扫描下方二维码
+                使用 Google Authenticator、Microsoft Authenticator 或其他 TOTP
+                验证器应用扫描下方二维码
               </p>
               <div class="flex justify-center p-4 bg-white rounded-lg border">
                 <img v-if="qrCode" :src="qrCode" alt="两步验证二维码" class="w-48 h-48" />
@@ -186,9 +189,7 @@ onMounted(() => {
 
               <div class="pt-4 space-y-4">
                 <h4 class="font-medium">2. 输入验证码</h4>
-                <p class="text-sm text-muted-foreground">
-                  输入验证器应用显示的6位验证码以完成设置
-                </p>
+                <p class="text-sm text-muted-foreground">输入验证器应用显示的6位验证码以完成设置</p>
                 <div class="space-y-2">
                   <Label for="verifyCode">验证码</Label>
                   <Input

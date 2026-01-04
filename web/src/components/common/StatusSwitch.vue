@@ -11,6 +11,7 @@ interface Props {
   inactiveValue?: string
   activeText?: string
   inactiveText?: string
+  showText?: boolean
 }
 
 interface Emits {
@@ -23,6 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
   inactiveValue: '1',
   activeText: '正常',
   inactiveText: '停用',
+  showText: false,
 })
 
 const emit = defineEmits<Emits>()
@@ -38,6 +40,7 @@ async function handleChange(checked: boolean) {
   try {
     await emit('change', props.id, newValue)
     emit('update:modelValue', newValue)
+    toast({ title: checked ? '已启用' : '已停用' })
   } catch (error: any) {
     toast({
       title: '操作失败',
@@ -58,7 +61,11 @@ async function handleChange(checked: boolean) {
     </div>
     <template v-else>
       <Switch :checked="isActive()" @update:checked="handleChange" />
-      <span class="text-xs" :class="isActive() ? 'text-green-600' : 'text-muted-foreground'">
+      <span
+        v-if="showText"
+        class="text-xs"
+        :class="isActive() ? 'text-green-600' : 'text-muted-foreground'"
+      >
         {{ isActive() ? activeText : inactiveText }}
       </span>
     </template>

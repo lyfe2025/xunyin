@@ -81,11 +81,7 @@ const changelog: ChangelogEntry[] = [
         </CardHeader>
         <CardContent>
           <ul class="space-y-3">
-            <li
-              v-for="(change, idx) in entry.changes"
-              :key="idx"
-              class="flex items-start gap-3"
-            >
+            <li v-for="(change, idx) in entry.changes" :key="idx" class="flex items-start gap-3">
               <Badge :variant="typeConfig[change.type].variant" class="shrink-0 mt-0.5">
                 <component :is="typeConfig[change.type].icon" class="h-3 w-3 mr-1" />
                 {{ typeConfig[change.type].label }}

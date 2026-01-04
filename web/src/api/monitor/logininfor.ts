@@ -16,7 +16,7 @@ export function listLogininfor(query: LogininforQuery): Promise<PageResult<SysLo
   return request<{ data: PageResult<SysLoginLog> }>({
     url: '/monitor/logininfor',
     method: 'get',
-    params: query
+    params: query,
   }).then((res: unknown) => (res as { data: PageResult<SysLoginLog> }).data)
 }
 
@@ -24,13 +24,13 @@ export function delLogininfor(infoIds: string[]) {
   return request<{ msg: string }>({
     url: '/monitor/logininfor',
     method: 'delete',
-    params: { ids: infoIds.join(',') }
+    params: { ids: infoIds.join(',') },
   })
 }
 
 export function cleanLogininfor() {
   return request<{ msg: string }>({
     url: '/monitor/logininfor/clean',
-    method: 'get'
+    method: 'get',
   })
 }

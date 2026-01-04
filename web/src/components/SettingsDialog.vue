@@ -25,9 +25,7 @@ const emit = defineEmits<{
     <DialogContent class="sm:max-w-[500px]">
       <DialogHeader>
         <DialogTitle>系统设置</DialogTitle>
-        <DialogDescription>
-          自定义您的系统偏好设置
-        </DialogDescription>
+        <DialogDescription> 自定义您的系统偏好设置 </DialogDescription>
       </DialogHeader>
       <div class="space-y-6 py-4">
         <div class="space-y-4">

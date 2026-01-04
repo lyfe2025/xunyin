@@ -1,17 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, Plus, Edit, Trash2, RefreshCw, BookOpen, List } from 'lucide-vue-next'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { Search, Plus, Edit, Trash2, RefreshCw, List } from 'lucide-vue-next'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -55,7 +45,7 @@ const queryParams = reactive({
   pageSize: 20,
   dictName: '',
   dictType: '',
-  status: undefined
+  status: undefined,
 })
 
 const loading = ref(true)
@@ -70,14 +60,18 @@ const form = reactive<Partial<DictType>>({
   dictName: '',
   dictType: '',
   status: '0',
-  remark: ''
+  remark: '',
 })
 
 // Fetch data
 async function getList() {
   loading.value = true
   try {
-    const response = await listType(queryParams)
+    const params = {
+      ...queryParams,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const response = await listType(params)
     typeList.value = response.rows
     total.value = response.total
   } finally {
@@ -125,7 +119,7 @@ function handleDelete(row: DictType) {
 function handleDictData(row: DictType) {
   router.push({
     path: '/system/dict/data',
-    query: { dictType: row.dictType, dictName: row.dictName }
+    query: { dictType: row.dictType, dictName: row.dictName },
   })
 }
 
@@ -134,8 +128,8 @@ async function confirmDelete() {
   try {
     await delType([dictToDelete.value.dictId])
     toast({
-      title: "删除成功",
-      description: "字典类型已删除",
+      title: '删除成功',
+      description: '字典类型已删除',
     })
     getList()
   } finally {
@@ -146,25 +140,25 @@ async function confirmDelete() {
 async function submitForm() {
   if (!form.dictName || !form.dictType) {
     toast({
-      title: "验证失败",
-      description: "字典名称和类型不能为空",
-      variant: "destructive"
+      title: '验证失败',
+      description: '字典名称和类型不能为空',
+      variant: 'destructive',
     })
     return
   }
-  
+
   try {
     if (form.dictId) {
       await updateType(form)
       toast({
-        title: "修改成功",
-        description: "字典类型已更新",
+        title: '修改成功',
+        description: '字典类型已更新',
       })
     } else {
       await addType(form)
       toast({
-        title: "添加成功",
-        description: "字典类型已添加",
+        title: '添加成功',
+        description: '字典类型已添加',
       })
     }
     showDialog.value = false
@@ -193,9 +187,7 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">字典管理</h2>
-        <p class="text-muted-foreground">
-          管理系统字典数据，用于界面下拉框选项等
-        </p>
+        <p class="text-muted-foreground">管理系统字典数据，用于界面下拉框选项等</p>
       </div>
       <div class="flex items-center gap-2">
         <Button @click="handleAdd">
@@ -206,21 +198,23 @@ onMounted(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">字典名称</span>
-        <Input 
-          v-model="queryParams.dictName" 
-          placeholder="请输入字典名称" 
-          class="w-[150px]" 
+        <Input
+          v-model="queryParams.dictName"
+          placeholder="请输入字典名称"
+          class="w-[150px]"
           @keyup.enter="handleQuery"
         />
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">字典类型</span>
-        <Input 
-          v-model="queryParams.dictType" 
-          placeholder="请输入字典类型" 
+        <Input
+          v-model="queryParams.dictType"
+          placeholder="请输入字典类型"
           class="w-[150px]"
           @keyup.enter="handleQuery"
         />
@@ -229,9 +223,10 @@ onMounted(() => {
         <span class="text-sm font-medium">状态</span>
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>
@@ -253,7 +248,7 @@ onMounted(() => {
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
       <TableSkeleton v-if="loading" :columns="6" :rows="10" />
-      
+
       <!-- 空状态 -->
       <EmptyState
         v-else-if="typeList.length === 0"
@@ -262,7 +257,7 @@ onMounted(() => {
         action-text="新增字典"
         @action="handleAdd"
       />
-      
+
       <!-- 数据表格 -->
       <Table v-else>
         <TableHeader>
@@ -297,7 +292,12 @@ onMounted(() => {
               <Button variant="ghost" size="icon" @click="handleUpdate(item)">
                 <Edit class="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" class="text-destructive" @click="handleDelete(item)">
+              <Button
+                variant="ghost"
+                size="icon"
+                class="text-destructive"
+                @click="handleDelete(item)"
+              >
                 <Trash2 class="w-4 h-4" />
               </Button>
             </TableCell>
@@ -319,9 +319,7 @@ onMounted(() => {
       <DialogContent class="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{{ dialogTitle }}</DialogTitle>
-          <DialogDescription>
-            请填写字典类型信息
-          </DialogDescription>
+          <DialogDescription> 请填写字典类型信息 </DialogDescription>
         </DialogHeader>
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">

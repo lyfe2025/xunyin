@@ -81,8 +81,12 @@ const form = reactive<DictDataForm>({
 async function getList() {
   loading.value = true
   try {
-    queryParams.dictType = dictType.value
-    const response = await listData(queryParams)
+    const params = {
+      ...queryParams,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    params.dictType = dictType.value
+    const response = await listData(params)
     dataList.value = response.rows
     total.value = response.total
   } finally {
@@ -223,9 +227,10 @@ onMounted(() => {
         <span class="text-sm font-medium">状态</span>
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>

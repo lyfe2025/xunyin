@@ -175,7 +175,9 @@ const handleChangePassword = async () => {
                   v-model="userInfo.avatar"
                   accept=".png,.jpg,.jpeg,image/png,image/jpeg"
                 />
-                <p class="text-xs text-muted-foreground mt-2">支持 JPG、PNG 格式，建议尺寸 200x200</p>
+                <p class="text-xs text-muted-foreground mt-2">
+                  支持 JPG、PNG 格式，建议尺寸 200x200
+                </p>
               </div>
             </div>
 

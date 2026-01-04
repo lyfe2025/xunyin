@@ -3995,6 +3995,53 @@ async function main() {
     }
     console.log(`Created ${photoData.length} exploration photos`);
 
+    // 创建用户实名认证数据（三种状态示例）
+    // 用户1: 已通过认证
+    await prisma.userVerification.create({
+      data: {
+        userId: demoUser.id,
+        realName: '张明',
+        idCardNo: 'ENCRYPTED_330102199001011234', // 加密存储的身份证号
+        idCardFront: '/uploads/idcard/front-demo1.jpg',
+        idCardBack: '/uploads/idcard/back-demo1.jpg',
+        status: 'approved',
+        verifiedAt: new Date('2025-01-08T10:00:00Z'),
+      },
+    });
+    // 同步更新用户的 isVerified 状态
+    await prisma.appUser.update({
+      where: { id: demoUser.id },
+      data: { isVerified: true },
+    });
+    console.log(`Created verification for ${demoUser.nickname}: approved`);
+
+    // 用户2: 待审核
+    await prisma.userVerification.create({
+      data: {
+        userId: demoUser2.id,
+        realName: '李文化',
+        idCardNo: 'ENCRYPTED_350102199205052345', // 加密存储的身份证号
+        idCardFront: '/uploads/idcard/front-demo2.jpg',
+        idCardBack: '/uploads/idcard/back-demo2.jpg',
+        status: 'pending',
+      },
+    });
+    console.log(`Created verification for ${demoUser2.nickname}: pending`);
+
+    // 用户3: 已拒绝（照片模糊）
+    await prisma.userVerification.create({
+      data: {
+        userId: demoUser3.id,
+        realName: '王收藏',
+        idCardNo: 'ENCRYPTED_330106198812123456', // 加密存储的身份证号
+        idCardFront: '/uploads/idcard/front-demo3.jpg',
+        idCardBack: '/uploads/idcard/back-demo3.jpg',
+        status: 'rejected',
+        rejectReason: '身份证照片模糊，请重新上传清晰照片',
+      },
+    });
+    console.log(`Created verification for ${demoUser3.nickname}: rejected`);
+
     console.log('Xunyin business data seeding completed.');
   }
 

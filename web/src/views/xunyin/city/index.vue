@@ -108,7 +108,11 @@ const { toast } = useToast()
 async function getList() {
   loading.value = true
   try {
-    const res = await listCity(queryParams)
+    const params = {
+      ...queryParams,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listCity(params)
     cityList.value = res.list
     total.value = res.total
     selectedIds.value = []
@@ -303,7 +307,6 @@ function goToJourneys(cityId: string) {
 // 状态切换
 async function handleStatusChange(id: string, status: string) {
   await updateCityStatus(id, status)
-  toast({ title: '状态更新成功' })
   // 更新本地数据
   const city = cityList.value.find((c) => c.id === id)
   if (city) city.status = status
@@ -404,6 +407,7 @@ onMounted(() => {
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>

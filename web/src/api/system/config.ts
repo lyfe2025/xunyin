@@ -17,14 +17,14 @@ export function listConfig(query: ConfigQuery) {
   return request<{ data: PageResult<SysConfig> }>({
     url: '/system/config',
     method: 'get',
-    params: query
+    params: query,
   }).then((res: any) => res.data)
 }
 
 export function getConfig(configId: string) {
   return request<{ data: SysConfig }>({
     url: `/system/config/${configId}`,
-    method: 'get'
+    method: 'get',
   }).then((res: any) => res.data)
 }
 
@@ -32,7 +32,7 @@ export function addConfig(data: ConfigForm) {
   return request({
     url: '/system/config',
     method: 'post',
-    data
+    data,
   })
 }
 
@@ -40,7 +40,7 @@ export function updateConfig(data: ConfigForm) {
   return request({
     url: `/system/config/${data.configId}`,
     method: 'put',
-    data
+    data,
   })
 }
 
@@ -48,14 +48,14 @@ export function delConfig(configIds: string[]) {
   return request({
     url: '/system/config',
     method: 'delete',
-    params: { ids: configIds.join(',') }
+    params: { ids: configIds.join(',') },
   })
 }
 
 export function refreshCache() {
   return request({
     url: '/system/config/refreshCache',
-    method: 'get'
+    method: 'get',
   })
 }
 
@@ -63,7 +63,7 @@ export function refreshCache() {
 export function getAmapWebKey() {
   return request<{ data: { key: string } }>({
     url: '/system/config/map/amap-key',
-    method: 'get'
+    method: 'get',
   }).then((res: any) => res.data.key as string)
 }
 
@@ -78,6 +78,6 @@ export interface MapProvider {
 export function getMapProviders() {
   return request<{ data: { providers: MapProvider[] } }>({
     url: '/system/config/map/providers',
-    method: 'get'
+    method: 'get',
   }).then((res: any) => res.data.providers as MapProvider[])
 }

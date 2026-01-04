@@ -117,3 +117,20 @@ export class AuditVerificationDto {
   @IsString()
   rejectReason?: string;
 }
+
+// 批量审核实名认证
+export class BatchAuditVerificationDto {
+  @ApiProperty({ description: '认证记录ID列表', type: [String] })
+  @IsString({ each: true })
+  ids: string[];
+
+  @ApiProperty({ description: '审核结果', enum: ['approved', 'rejected'] })
+  @IsString()
+  @IsIn(['approved', 'rejected'])
+  status: 'approved' | 'rejected';
+
+  @ApiPropertyOptional({ description: '拒绝原因（拒绝时必填）' })
+  @IsOptional()
+  @IsString()
+  rejectReason?: string;
+}

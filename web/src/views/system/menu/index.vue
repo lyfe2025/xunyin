@@ -29,7 +29,19 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { Plus, Edit, Trash2, ChevronDown, ChevronRight, RefreshCw, Search, Loader2, Maximize2, Minimize2, Menu as MenuIcon } from 'lucide-vue-next'
+import {
+  Plus,
+  Edit,
+  Trash2,
+  ChevronDown,
+  ChevronRight,
+  RefreshCw,
+  Search,
+  Loader2,
+  Maximize2,
+  Minimize2,
+  Menu as MenuIcon,
+} from 'lucide-vue-next'
 import IconPicker from '@/components/common/IconPicker.vue'
 import * as icons from 'lucide-vue-next'
 
@@ -38,7 +50,7 @@ function getIconComponent(name: string) {
   if (!name) return null
   const pascalName = name
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join('')
   return (icons as any)[pascalName]
 }
@@ -65,7 +77,7 @@ const loading = ref(true)
 const menuList = ref<SysMenu[]>([])
 const queryParams = reactive({
   menuName: '',
-  status: undefined
+  status: undefined,
 })
 const isExpanded = ref<Record<string, boolean>>({})
 const expandedAll = ref(true) // 默认展开第一级
@@ -90,18 +102,22 @@ const form = reactive<Partial<SysMenu>>({
   visible: '0',
   status: '0',
   perms: '',
-  icon: ''
+  icon: '',
 })
 
 // Fetch Data
 async function getList() {
   loading.value = true
   try {
-    const res = await listMenu(queryParams)
+    const params = {
+      ...queryParams,
+      status: queryParams.status === 'all' ? undefined : queryParams.status,
+    }
+    const res = await listMenu(params)
     menuList.value = toTreeMenu(res)
     // Default expand first level
     if (expandedAll.value) {
-      menuList.value.forEach(m => isExpanded.value[m.menuId] = true)
+      menuList.value.forEach((m) => (isExpanded.value[m.menuId] = true))
     }
   } finally {
     loading.value = false
@@ -109,7 +125,7 @@ async function getList() {
 }
 
 function expandAllMenus(menus: SysMenu[]) {
-  menus.forEach(menu => {
+  menus.forEach((menu) => {
     isExpanded.value[menu.menuId] = true
     if (menu.children) {
       expandAllMenus(menu.children)
@@ -118,7 +134,7 @@ function expandAllMenus(menus: SysMenu[]) {
 }
 
 function collapseAllMenus(menus: SysMenu[]) {
-  menus.forEach(menu => {
+  menus.forEach((menu) => {
     isExpanded.value[menu.menuId] = false
     if (menu.children) {
       collapseAllMenus(menu.children)
@@ -143,9 +159,9 @@ async function getMenuTree() {
 
 // Helper to flatten tree for table display with expansion control
 const flattenMenus = computed(() => {
-  const result: (SysMenu & { level: number, hasChildren: boolean })[] = []
+  const result: (SysMenu & { level: number; hasChildren: boolean })[] = []
   const traverse = (nodes: SysMenu[], level = 0) => {
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       const hasChildren = !!(node.children && node.children.length > 0)
       result.push({ ...node, level, hasChildren })
       if (hasChildren && isExpanded.value[node.menuId]) {
@@ -160,7 +176,10 @@ const flattenMenus = computed(() => {
 // Helper for Select options (flattened with indentation)
 const flattenedOptions = computed(() => {
   const result: Array<{ id: string; label: string }> = []
-  const traverse = (nodes: Array<{ menuId: string; menuName: string; children?: any[] }>, prefix = '') => {
+  const traverse = (
+    nodes: Array<{ menuId: string; menuName: string; children?: any[] }>,
+    prefix = ''
+  ) => {
     for (const node of nodes || []) {
       result.push({ id: node.menuId, label: prefix + node.menuName })
       if (node.children && node.children.length) {
@@ -213,7 +232,7 @@ async function confirmDelete() {
   if (!menuToDelete.value) return
   try {
     await delMenu(menuToDelete.value.menuId)
-    toast({ title: "删除成功", description: "菜单已删除" })
+    toast({ title: '删除成功', description: '菜单已删除' })
     getList()
     showDeleteDialog.value = false
   } catch (error) {
@@ -223,7 +242,7 @@ async function confirmDelete() {
 
 async function handleSubmit() {
   if (!form.menuName) {
-    toast({ title: "验证失败", description: "菜单名称不能为空", variant: "destructive" })
+    toast({ title: '验证失败', description: '菜单名称不能为空', variant: 'destructive' })
     return
   }
 
@@ -231,10 +250,10 @@ async function handleSubmit() {
   try {
     if (form.menuId) {
       await updateMenu(form)
-      toast({ title: "修改成功", description: "菜单信息已更新" })
+      toast({ title: '修改成功', description: '菜单信息已更新' })
     } else {
       await addMenu(form)
-      toast({ title: "新增成功", description: "菜单已创建" })
+      toast({ title: '新增成功', description: '菜单已创建' })
     }
     showDialog.value = false
     getList()
@@ -296,9 +315,7 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">菜单管理</h2>
-        <p class="text-muted-foreground">
-          管理系统菜单、路由及按钮权限
-        </p>
+        <p class="text-muted-foreground">管理系统菜单、路由及按钮权限</p>
       </div>
       <div class="flex items-center gap-2">
         <Button variant="outline" size="sm" @click="toggleExpandAll">
@@ -314,12 +331,14 @@ onMounted(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-background/95 p-4 border rounded-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">菜单名称</span>
-        <Input 
-          v-model="queryParams.menuName" 
-          placeholder="请输入菜单名称" 
+        <Input
+          v-model="queryParams.menuName"
+          placeholder="请输入菜单名称"
           class="w-[200px]"
           @keyup.enter="handleQuery"
         />
@@ -328,9 +347,10 @@ onMounted(() => {
         <span class="text-sm font-medium">状态</span>
         <Select v-model="queryParams.status" @update:model-value="handleQuery">
           <SelectTrigger class="w-[120px]">
-            <SelectValue placeholder="请选择" />
+            <SelectValue placeholder="全部" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">全部</SelectItem>
             <SelectItem value="0">正常</SelectItem>
             <SelectItem value="1">停用</SelectItem>
           </SelectContent>
@@ -352,7 +372,7 @@ onMounted(() => {
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
       <TableSkeleton v-if="loading" :columns="6" :rows="10" />
-      
+
       <!-- 空状态 -->
       <EmptyState
         v-else-if="flattenMenus.length === 0"
@@ -361,7 +381,7 @@ onMounted(() => {
         action-text="新增菜单"
         @action="handleAdd()"
       />
-      
+
       <!-- 数据表格 -->
       <Table v-else>
         <TableHeader>
@@ -378,20 +398,28 @@ onMounted(() => {
         <TableBody>
           <TableRow v-for="item in flattenMenus" :key="item.menuId">
             <TableCell>
-               <div class="flex items-center" :style="{ paddingLeft: `${item.level * 24}px` }">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  class="h-6 w-6 mr-1 p-0 hover:bg-transparent" 
+              <div class="flex items-center" :style="{ paddingLeft: `${item.level * 24}px` }">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-6 w-6 mr-1 p-0 hover:bg-transparent"
                   @click="toggleExpand(item.menuId)"
-                  :class="{ 'invisible': !item.hasChildren }"
+                  :class="{ invisible: !item.hasChildren }"
                 >
                   <ChevronDown v-if="isExpanded[item.menuId]" class="h-4 w-4" />
                   <ChevronRight v-else class="h-4 w-4" />
                 </Button>
                 <span class="mr-2 font-medium">{{ item.menuName }}</span>
-                <Badge :variant="item.menuType === 'M' ? 'default' : (item.menuType === 'C' ? 'secondary' : 'outline')">
-                  {{ item.menuType === 'M' ? '目录' : (item.menuType === 'C' ? '菜单' : '按钮') }}
+                <Badge
+                  :variant="
+                    item.menuType === 'M'
+                      ? 'default'
+                      : item.menuType === 'C'
+                        ? 'secondary'
+                        : 'outline'
+                  "
+                >
+                  {{ item.menuType === 'M' ? '目录' : item.menuType === 'C' ? '菜单' : '按钮' }}
                 </Badge>
               </div>
             </TableCell>
@@ -406,7 +434,9 @@ onMounted(() => {
               </div>
             </TableCell>
             <TableCell>{{ item.orderNum }}</TableCell>
-            <TableCell><Badge variant="outline" v-if="item.perms">{{ item.perms }}</Badge></TableCell>
+            <TableCell
+              ><Badge variant="outline" v-if="item.perms">{{ item.perms }}</Badge></TableCell
+            >
             <TableCell class="max-w-[200px] truncate">{{ item.component }}</TableCell>
             <TableCell>
               <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
@@ -417,10 +447,20 @@ onMounted(() => {
               <Button variant="ghost" size="icon" @click="handleUpdate(item)">
                 <Edit class="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" @click="handleAdd(item.menuId)" v-if="item.menuType !== 'F'">
+              <Button
+                variant="ghost"
+                size="icon"
+                @click="handleAdd(item.menuId)"
+                v-if="item.menuType !== 'F'"
+              >
                 <Plus class="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" class="text-destructive" @click="handleDelete(item)">
+              <Button
+                variant="ghost"
+                size="icon"
+                class="text-destructive"
+                @click="handleDelete(item)"
+              >
                 <Trash2 class="w-4 h-4" />
               </Button>
             </TableCell>
@@ -434,11 +474,9 @@ onMounted(() => {
       <DialogContent class="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{{ isEdit ? '修改菜单' : '新增菜单' }}</DialogTitle>
-          <DialogDescription>
-            请填写菜单信息
-          </DialogDescription>
+          <DialogDescription> 请填写菜单信息 </DialogDescription>
         </DialogHeader>
-        
+
         <div class="grid gap-4 py-4">
           <div class="grid gap-2">
             <Label for="parentId">上级菜单</Label>
@@ -447,8 +485,8 @@ onMounted(() => {
                 <SelectValue placeholder="选择上级菜单" />
               </SelectTrigger>
               <SelectContent>
-                 <SelectItem value="0">主类目</SelectItem>
-                 <SelectItem v-for="menu in flattenedOptions" :key="menu.id" :value="menu.id">
+                <SelectItem value="0">主类目</SelectItem>
+                <SelectItem v-for="menu in flattenedOptions" :key="menu.id" :value="menu.id">
                   {{ menu.label }}
                 </SelectItem>
               </SelectContent>
@@ -490,7 +528,7 @@ onMounted(() => {
           </div>
 
           <div class="grid grid-cols-2 gap-4" v-if="form.menuType !== 'F'">
-             <div class="grid gap-2">
+            <div class="grid gap-2">
               <Label for="path">路由地址</Label>
               <Input id="path" v-model="form.path" placeholder="请输入路由地址" />
             </div>
@@ -506,7 +544,7 @@ onMounted(() => {
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-             <div class="grid gap-2">
+            <div class="grid gap-2">
               <Label for="visible">显示状态</Label>
               <Select v-model="form.visible">
                 <SelectTrigger>

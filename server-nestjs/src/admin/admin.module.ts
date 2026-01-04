@@ -24,4 +24,4 @@ import { AdminPhotoModule } from './photo/admin-photo.module';
     AdminPhotoModule,
   ],
 })
-export class AdminModule { }
+export class AdminModule {}
