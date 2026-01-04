@@ -4,6 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { SecurityConfigService } from './security-config.service';
+import { UserStatusCacheService } from './user-status-cache.service';
 import type { ExecutionContext } from '@nestjs/common';
 import type { Response, Request } from 'express';
 
@@ -69,10 +70,42 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw error;
     }
 
+    // 校验用户状态（是否存在、是否启用）
+    if (req.user?.sub) {
+      await this.checkUserStatus(req.user.sub);
+    }
+
     // 滑动过期：检查 Token 是否快过期，如果是则刷新
     await this.checkAndRefreshToken(req.user, res);
 
     return ok;
+  }
+
+  /**
+   * 校验用户状态
+   * 检查用户是否存在、是否被删除、是否被停用
+   */
+  private async checkUserStatus(userId: string): Promise<void> {
+    const userStatusCache = this.moduleRef.get(UserStatusCacheService, {
+      strict: false,
+    });
+
+    if (!userStatusCache) {
+      this.logger.warn('UserStatusCacheService 未注入，跳过用户状态校验');
+      return;
+    }
+
+    const statusInfo = await userStatusCache.getUserStatus(userId);
+
+    if (!statusInfo.exists || statusInfo.delFlag === '2') {
+      this.logger.warn(`用户不存在或已删除: ${userId}`);
+      throw new UnauthorizedException('用户不存在或已被删除，请重新登录');
+    }
+
+    if (statusInfo.status === '1') {
+      this.logger.warn(`用户已被停用: ${userId}`);
+      throw new UnauthorizedException('账号已被停用，请联系管理员');
+    }
   }
 
   /**

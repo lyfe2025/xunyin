@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
+import Redis from 'ioredis';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -3649,7 +3650,7 @@ async function main() {
           pointId: westLakePointsDb[i].id,
           completeTime: new Date(
             new Date('2025-01-10T09:00:00Z').getTime() +
-              (i + 1) * 90 * 60 * 1000,
+            (i + 1) * 90 * 60 * 1000,
           ), // 每90分钟完成一个
           pointsEarned: westLakePointsDb[i].pointsReward,
         },
@@ -3674,7 +3675,7 @@ async function main() {
           pointId: sanfangPointsDb[i].id,
           completeTime: new Date(
             new Date('2025-01-12T14:00:00Z').getTime() +
-              (i + 1) * 45 * 60 * 1000,
+            (i + 1) * 45 * 60 * 1000,
           ), // 每45分钟完成一个
           pointsEarned: sanfangPointsDb[i].pointsReward,
         },
@@ -3689,7 +3690,7 @@ async function main() {
           pointId: westLakePointsDb[i].id,
           completeTime: new Date(
             new Date('2025-01-05T08:00:00Z').getTime() +
-              (i + 1) * 90 * 60 * 1000,
+            (i + 1) * 90 * 60 * 1000,
           ),
           pointsEarned: westLakePointsDb[i].pointsReward,
         },
@@ -3704,7 +3705,7 @@ async function main() {
           pointId: lingyinPointsDb[i].id,
           completeTime: new Date(
             new Date('2025-01-06T09:00:00Z').getTime() +
-              (i + 1) * 60 * 60 * 1000,
+            (i + 1) * 60 * 60 * 1000,
           ), // 每60分钟完成一个
           pointsEarned: lingyinPointsDb[i].pointsReward,
         },
@@ -3719,7 +3720,7 @@ async function main() {
           pointId: sanfangPointsDb[i].id,
           completeTime: new Date(
             new Date('2025-01-20T10:00:00Z').getTime() +
-              (i + 1) * 45 * 60 * 1000,
+            (i + 1) * 45 * 60 * 1000,
           ),
           pointsEarned: sanfangPointsDb[i].pointsReward,
         },
@@ -4114,7 +4115,6 @@ async function main() {
 
     // 创建用户实名认证数据（三种状态示例）
     // 用户1: 已通过认证
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await prisma.userVerification.create({
       data: {
         userId: demoUser.id,
@@ -4134,7 +4134,6 @@ async function main() {
     console.log(`Created verification for ${demoUser.nickname}: approved`);
 
     // 用户2: 待审核
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await prisma.userVerification.create({
       data: {
         userId: demoUser2.id,
@@ -4148,7 +4147,6 @@ async function main() {
     console.log(`Created verification for ${demoUser2.nickname}: pending`);
 
     // 用户3: 已拒绝（照片模糊）
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await prisma.userVerification.create({
       data: {
         userId: demoUser3.id,
@@ -4165,7 +4163,54 @@ async function main() {
     console.log('Xunyin business data seeding completed.');
   }
 
+  // 清除 Redis 用户状态缓存，避免重新初始化数据后无法登录
+  await clearUserStatusCache();
+
   console.log('Seeding finished.');
+}
+
+/**
+ * 清除 Redis 中的用户状态缓存
+ */
+async function clearUserStatusCache() {
+  const redisEnabled = process.env.REDIS_ENABLED?.toLowerCase() === 'true';
+  if (!redisEnabled) {
+    console.log('Redis 未启用，跳过缓存清除');
+    return;
+  }
+
+  const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+  const redis = new Redis(redisUrl);
+
+  try {
+    const pattern = 'user:status:*';
+    const keys: string[] = [];
+
+    // 使用 scan 遍历匹配的 key
+    let cursor = '0';
+    do {
+      const [nextCursor, matchedKeys] = await redis.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100,
+      );
+      cursor = nextCursor;
+      keys.push(...matchedKeys);
+    } while (cursor !== '0');
+
+    if (keys.length > 0) {
+      await redis.del(...keys);
+      console.log(`已清除 ${keys.length} 个用户状态缓存`);
+    } else {
+      console.log('没有需要清除的用户状态缓存');
+    }
+  } catch (error) {
+    console.warn('清除 Redis 缓存失败:', (error as Error).message);
+  } finally {
+    redis.disconnect();
+  }
 }
 
 main()

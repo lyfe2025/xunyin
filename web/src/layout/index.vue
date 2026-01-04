@@ -44,42 +44,18 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import {
-  LayoutDashboard,
-  Settings,
-  Settings2,
-  Monitor,
-  PenTool,
-  User,
-  Shield,
-  Menu,
-  Network,
-  Briefcase,
-  Book,
-  Bell,
-  FileText,
-  LogIn,
-  Users,
-  Server,
-  Database,
-  Activity,
-  Code,
-  Layout as LayoutIcon,
-  Link,
-  Clock,
-  PanelLeft,
-  Package2,
-  Home,
-  LogOut,
-  ChevronsUpDown,
-} from 'lucide-vue-next'
+import { LayoutDashboard, User, PanelLeft, Package2, LogOut, ChevronsUpDown } from 'lucide-vue-next'
 import * as icons from 'lucide-vue-next'
 import UserMenuButton from '@/components/UserMenuButton.vue'
 import DynamicMenu from '@/components/DynamicMenu.vue'
 import TabsView from '@/components/TabsView.vue'
+
+// localStorage key for sidebar collapsed state
+const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed'
 
 const route = useRoute()
 const router = useRouter()
@@ -88,7 +64,14 @@ const appStore = useAppStore()
 const menuStore = useMenuStore()
 const themeStore = useThemeStore()
 const { toast } = useToast()
-const isCollapsed = ref(false)
+
+// 从 localStorage 读取初始折叠状态
+const isCollapsed = ref(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true')
+
+// 监听折叠状态变化，持久化到 localStorage
+watch(isCollapsed, (newValue) => {
+  localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newValue))
+})
 
 // 菜单模式
 const isNormalMode = computed(() => themeStore.menuMode === 'normal')
@@ -147,6 +130,7 @@ const sidebarStyle = computed(() => ({
     : `${themeStore.sidebarExpandedWidth}px`,
 }))
 
+// eslint-disable-next-line no-unused-vars
 const sidebarWidthClass = computed(() =>
   isCollapsed.value
     ? `w-[${themeStore.sidebarCollapsedWidth}px]`
@@ -221,6 +205,7 @@ const handleProfile = () => {
 
 // 打开设置
 const showSettings = ref(false)
+// eslint-disable-next-line no-unused-vars
 const handleSettings = () => {
   showSettings.value = true
 }
@@ -265,52 +250,86 @@ const handleOpenEditDialog = (userId: string) => {
           <!-- Normal 模式：完整菜单 -->
           <template v-if="isNormalMode">
             <div v-if="!isCollapsed" class="space-y-1">
+              <router-link
+                to="/dashboard"
+                :class="
+                  cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:text-primary',
+                    isActive('/dashboard') ? 'bg-muted text-primary' : 'text-muted-foreground'
+                  )
+                "
+              >
+                <LayoutDashboard class="h-4 w-4" />
+                <span>仪表盘</span>
+              </router-link>
+              <DynamicMenu />
+            </div>
+            <!-- 折叠状态：使用 HoverCard 显示子菜单 -->
+            <div v-else class="flex flex-col gap-1 items-center">
+              <!-- 仪表盘 -->
               <Tooltip :delay-duration="0">
                 <TooltipTrigger as-child>
                   <router-link
                     to="/dashboard"
                     :class="
                       cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:text-primary',
-                        isActive('/dashboard') ? 'bg-muted text-primary' : 'text-muted-foreground',
-                        isCollapsed ? 'justify-center h-9 w-9 p-0' : ''
+                        'h-9 w-9 flex items-center justify-center rounded-lg transition-colors',
+                        isActive('/dashboard')
+                          ? 'bg-muted text-primary'
+                          : 'text-muted-foreground hover:text-primary hover:bg-muted/50'
                       )
                     "
                   >
                     <LayoutDashboard class="h-4 w-4" />
-                    <span v-if="!isCollapsed">仪表盘</span>
-                    <span v-else class="sr-only">仪表盘</span>
                   </router-link>
                 </TooltipTrigger>
-                <TooltipContent side="right" v-if="isCollapsed">仪表盘</TooltipContent>
+                <TooltipContent side="right">仪表盘</TooltipContent>
               </Tooltip>
-              <DynamicMenu />
-            </div>
-            <div v-else class="flex flex-col gap-4 items-center">
-              <Tooltip :delay-duration="0">
-                <TooltipTrigger as-child>
-                  <div class="h-9 w-9 flex items-center justify-center text-muted-foreground">
-                    <Settings class="h-4 w-4" />
+              <!-- 动态菜单项 -->
+              <HoverCard
+                v-for="menu in menuStore.menuList"
+                :key="menu.path"
+                :open-delay="100"
+                :close-delay="100"
+              >
+                <HoverCardTrigger as-child>
+                  <div
+                    :class="
+                      cn(
+                        'h-9 w-9 flex items-center justify-center rounded-lg cursor-pointer transition-colors',
+                        route.path.startsWith(menu.path)
+                          ? 'bg-muted text-primary'
+                          : 'text-muted-foreground hover:text-primary hover:bg-muted/50'
+                      )
+                    "
+                  >
+                    <component :is="getIcon(menu.meta?.icon)" class="h-4 w-4" />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent side="right">系统管理 (展开查看更多)</TooltipContent>
-              </Tooltip>
-              <Tooltip :delay-duration="0">
-                <TooltipTrigger as-child>
-                  <div class="h-9 w-9 flex items-center justify-center text-muted-foreground">
-                    <Monitor class="h-4 w-4" />
+                </HoverCardTrigger>
+                <HoverCardContent side="right" align="start" class="w-48 p-2">
+                  <div class="font-medium text-sm mb-2 px-2">{{ menu.meta?.title }}</div>
+                  <div class="space-y-1">
+                    <router-link
+                      v-for="child in menu.children"
+                      :key="child.path"
+                      :to="child.path.startsWith('/') ? child.path : `${menu.path}/${child.path}`"
+                      :class="
+                        cn(
+                          'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted',
+                          isActive(
+                            child.path.startsWith('/') ? child.path : `${menu.path}/${child.path}`
+                          )
+                            ? 'bg-muted text-primary'
+                            : 'text-muted-foreground'
+                        )
+                      "
+                    >
+                      <component :is="getIcon(child.meta?.icon)" class="h-4 w-4" />
+                      {{ child.meta?.title }}
+                    </router-link>
                   </div>
-                </TooltipTrigger>
-                <TooltipContent side="right">系统监控 (展开查看更多)</TooltipContent>
-              </Tooltip>
-              <Tooltip :delay-duration="0">
-                <TooltipTrigger as-child>
-                  <div class="h-9 w-9 flex items-center justify-center text-muted-foreground">
-                    <PenTool class="h-4 w-4" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="right">系统工具 (展开查看更多)</TooltipContent>
-              </Tooltip>
+                </HoverCardContent>
+              </HoverCard>
             </div>
           </template>
 
@@ -696,7 +715,7 @@ const handleOpenEditDialog = (userId: string) => {
         </NavigationMenu>
 
         <div class="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-          <div class="ml-auto flex-1 sm:flex-initial"></div>
+          <div class="ml-auto flex-1 sm:flex-initial" />
           <ThemeCustomizer />
           <ThemeToggle />
           <UserMenuButton />
