@@ -15,7 +15,7 @@ export class DictDataService {
 
   async list(query: QueryDictDataDto) {
     const where: Prisma.SysDictDataWhereInput = {};
-    if (query.dictType) where.dictType = { contains: query.dictType };
+    if (query.dictType) where.dictType = query.dictType; // 精确匹配
     if (query.dictLabel) where.dictLabel = { contains: query.dictLabel };
     if (query.status) where.status = query.status;
     const pageNum = Number(query.pageNum ?? 1);

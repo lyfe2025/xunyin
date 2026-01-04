@@ -20,6 +20,7 @@ import ImageUpload from '@/components/common/ImageUpload.vue'
 import LeaveConfirmDialog from '@/components/common/LeaveConfirmDialog.vue'
 import RichTextEditor from '@/components/common/RichTextEditor.vue'
 import { listConfig, updateConfig, addConfig, type SysConfig } from '@/api/system/config'
+import { getDictDataByType, type DictData } from '@/api/system/dict'
 import { testMail } from '@/api/system/mail'
 import { getLockedAccounts, unlockAccount, type LockedAccount } from '@/api/system/locked'
 import { useAppStore } from '@/stores/modules/app'
@@ -49,6 +50,9 @@ const route = useRoute()
 // 当前激活的 tab，支持通过 query 参数指定
 const activeTab = ref((route.query.tab as string) || 'site')
 
+// 区块链存证服务提供者选项（从字典获取）
+const chainProviderOptions = ref<DictData[]>([])
+
 // 监听路由参数变化，切换到对应标签页
 watch(
   () => route.query.tab,
@@ -56,7 +60,7 @@ watch(
     if (newTab && typeof newTab === 'string') {
       activeTab.value = newTab
     }
-  },
+  }
 )
 
 // 未保存更改提示（页面级表单，启用路由守卫）
@@ -146,9 +150,14 @@ const form = reactive({
 
   // ========== 区块链存证配置 ==========
   'chain.provider': 'local',
+  'chain.timestamp.apiKey': '',
+  'chain.timestamp.endpoint': 'https://tsa.example.com/timestamp',
   'chain.antchain.appId': '',
   'chain.antchain.privateKey': '',
   'chain.antchain.endpoint': 'https://rest.antchain.alipay.com',
+  'chain.zhixin.secretId': '',
+  'chain.zhixin.secretKey': '',
+  'chain.zhixin.endpoint': 'https://tbaas.tencentcloudapi.com',
   'chain.bsn.apiKey': '',
   'chain.bsn.projectId': '',
   'chain.bsn.endpoint': 'https://api.bsngate.com',
@@ -176,6 +185,10 @@ async function getData() {
   loading.value = true
   isInitializing.value = true // 开始初始化
   try {
+    // 获取区块链存证服务提供者字典数据
+    const chainOptions = await getDictDataByType('xunyin_chain_name')
+    chainProviderOptions.value = chainOptions
+
     const prefixes = [
       'sys.app.',
       'sys.account.',
@@ -1567,7 +1580,9 @@ onMounted(() => {
         <Card>
           <CardHeader>
             <CardTitle>区块链存证配置</CardTitle>
-            <CardDescription>配置印记上链使用的区块链服务，将印记数据永久存储到区块链上</CardDescription>
+            <CardDescription
+              >配置印记上链使用的区块链服务，将印记数据永久存储到区块链上</CardDescription
+            >
           </CardHeader>
           <CardContent class="space-y-4">
             <div class="grid gap-2">
@@ -1575,10 +1590,13 @@ onMounted(() => {
               <Select v-model="form['chain.provider']">
                 <SelectTrigger><SelectValue placeholder="选择链服务" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="local">本地存证（开发/演示）</SelectItem>
-                  <SelectItem value="antchain">蚂蚁链开放联盟链</SelectItem>
-                  <SelectItem value="bsn">BSN 开放联盟链</SelectItem>
-                  <SelectItem value="polygon">Polygon 公链（海外）</SelectItem>
+                  <SelectItem
+                    v-for="option in chainProviderOptions"
+                    :key="option.dictValue"
+                    :value="option.dictValue"
+                  >
+                    {{ option.dictLabel }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p class="text-xs text-muted-foreground">
@@ -1597,10 +1615,30 @@ onMounted(() => {
               </ul>
             </div>
 
+            <!-- 时间戳存证说明 -->
+            <div v-if="form['chain.provider'] === 'timestamp'" class="rounded-lg bg-muted/50 p-4">
+              <p class="text-sm font-medium mb-2">时间戳存证模式</p>
+              <ul class="text-xs text-muted-foreground space-y-1">
+                <li>• 通过可信时间戳服务进行存证</li>
+                <li>• 具备一定的法律效力</li>
+                <li>• 成本较低，适合中小规模应用</li>
+                <li>• 需要配置时间戳服务 API</li>
+              </ul>
+            </div>
+
             <!-- 蚂蚁链配置 -->
             <div v-if="form['chain.provider'] === 'antchain'" class="space-y-4">
               <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
-                <p>1. 登录 <a href="https://antchain.antgroup.com" target="_blank" class="text-primary hover:underline">蚂蚁链开放平台</a> 注册账号</p>
+                <p>
+                  1. 登录
+                  <a
+                    href="https://antchain.antgroup.com"
+                    target="_blank"
+                    class="text-primary hover:underline"
+                    >蚂蚁链开放平台</a
+                  >
+                  注册账号
+                </p>
                 <p>2. 创建应用，获取 AppID 和私钥</p>
                 <p>3. 免费额度：1000 次/月，超出约 0.1 元/次</p>
               </div>
@@ -1611,7 +1649,10 @@ onMounted(() => {
                 </div>
                 <div class="grid gap-2">
                   <Label>API 端点</Label>
-                  <Input v-model="form['chain.antchain.endpoint']" placeholder="https://rest.antchain.alipay.com" />
+                  <Input
+                    v-model="form['chain.antchain.endpoint']"
+                    placeholder="https://rest.antchain.alipay.com"
+                  />
                 </div>
               </div>
               <div class="grid gap-2">
@@ -1625,10 +1666,83 @@ onMounted(() => {
               </div>
             </div>
 
+            <!-- 时间戳存证配置 -->
+            <div v-if="form['chain.provider'] === 'timestamp'" class="space-y-4">
+              <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+                <p>1. 选择可信时间戳服务商（如联合信任、天威诚信等）</p>
+                <p>2. 注册账号并获取 API Key</p>
+                <p>3. 费用：约 0.5-2 元/次，具备一定法律效力</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>API Key</Label>
+                  <Input
+                    v-model="form['chain.timestamp.apiKey']"
+                    placeholder="时间戳服务 API Key"
+                  />
+                </div>
+                <div class="grid gap-2">
+                  <Label>API 端点</Label>
+                  <Input
+                    v-model="form['chain.timestamp.endpoint']"
+                    placeholder="https://tsa.example.com/timestamp"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- 腾讯至信链配置 -->
+            <div v-if="form['chain.provider'] === 'zhixin'" class="space-y-4">
+              <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+                <p>
+                  1. 登录
+                  <a
+                    href="https://cloud.tencent.com/product/tbaas"
+                    target="_blank"
+                    class="text-primary hover:underline"
+                    >腾讯云区块链服务</a
+                  >
+                  开通至信链
+                </p>
+                <p>2. 创建应用，获取 SecretId 和 SecretKey</p>
+                <p>3. 费用：按调用次数计费，约 0.1-0.3 元/次</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>Secret ID</Label>
+                  <Input v-model="form['chain.zhixin.secretId']" placeholder="腾讯云 SecretId" />
+                </div>
+                <div class="grid gap-2">
+                  <Label>Secret Key</Label>
+                  <Input
+                    v-model="form['chain.zhixin.secretKey']"
+                    type="password"
+                    placeholder="腾讯云 SecretKey"
+                  />
+                </div>
+              </div>
+              <div class="grid gap-2">
+                <Label>API 端点</Label>
+                <Input
+                  v-model="form['chain.zhixin.endpoint']"
+                  placeholder="https://tbaas.tencentcloudapi.com"
+                />
+              </div>
+            </div>
+
             <!-- BSN 配置 -->
             <div v-if="form['chain.provider'] === 'bsn'" class="space-y-4">
               <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
-                <p>1. 登录 <a href="https://www.bsnbase.com" target="_blank" class="text-primary hover:underline">BSN 门户</a> 注册账号</p>
+                <p>
+                  1. 登录
+                  <a
+                    href="https://www.bsnbase.com"
+                    target="_blank"
+                    class="text-primary hover:underline"
+                    >BSN 门户</a
+                  >
+                  注册账号
+                </p>
                 <p>2. 选择开放联盟链（如文昌链），创建项目</p>
                 <p>3. 获取 API Key 和项目 ID</p>
                 <p>4. 费用：约 0.05-0.2 元/次</p>
@@ -1651,7 +1765,9 @@ onMounted(() => {
 
             <!-- Polygon 配置 -->
             <div v-if="form['chain.provider'] === 'polygon'" class="space-y-4">
-              <div class="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+              <div
+                class="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-200 space-y-1"
+              >
                 <p class="font-medium">⚠️ 注意事项</p>
                 <p>• Polygon 是公链，国内使用可能存在合规风险</p>
                 <p>• 需要钱包私钥和少量 MATIC 作为 Gas 费</p>
@@ -1666,11 +1782,17 @@ onMounted(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="grid gap-2">
                   <Label>RPC URL</Label>
-                  <Input v-model="form['chain.polygon.rpcUrl']" placeholder="https://polygon-rpc.com" />
+                  <Input
+                    v-model="form['chain.polygon.rpcUrl']"
+                    placeholder="https://polygon-rpc.com"
+                  />
                 </div>
                 <div class="grid gap-2">
                   <Label>合约地址（可选）</Label>
-                  <Input v-model="form['chain.polygon.contractAddress']" placeholder="0x... 留空则直接写入交易" />
+                  <Input
+                    v-model="form['chain.polygon.contractAddress']"
+                    placeholder="0x... 留空则直接写入交易"
+                  />
                 </div>
               </div>
               <div class="grid gap-2">

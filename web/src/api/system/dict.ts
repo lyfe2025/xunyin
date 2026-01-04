@@ -110,3 +110,15 @@ export function delData(dictCodes: string[]) {
     params: { ids: dictCodes.join(',') },
   })
 }
+
+/**
+ * 根据字典类型获取字典数据列表（用于下拉选择）
+ * @param dictType 字典类型
+ */
+export function getDictDataByType(dictType: string) {
+  return request<{ data: { rows: DictData[] } }>({
+    url: '/system/dict/data',
+    method: 'get',
+    params: { dictType, pageSize: 100 },
+  }).then((res: any) => res.data?.rows || [])
+}

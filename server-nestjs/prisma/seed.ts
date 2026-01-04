@@ -8,7 +8,7 @@ const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({ adapter }) as PrismaClient;
 
 async function main() {
   console.log('Start seeding ...');
@@ -2011,26 +2011,47 @@ async function main() {
       dictSort: 6,
       isDefault: 'N',
     },
-    // 区块链
+    // 区块链存证服务提供者
     {
       dictType: 'xunyin_chain_name',
-      dictLabel: '蚂蚁链',
-      dictValue: 'antchain',
+      dictLabel: '本地存证（开发/演示）',
+      dictValue: 'local',
       dictSort: 1,
       isDefault: 'Y',
     },
     {
       dictType: 'xunyin_chain_name',
-      dictLabel: '长安链',
-      dictValue: 'chainmaker',
+      dictLabel: '时间戳存证',
+      dictValue: 'timestamp',
       dictSort: 2,
       isDefault: 'N',
     },
     {
       dictType: 'xunyin_chain_name',
-      dictLabel: '至信链',
-      dictValue: 'zhixin',
+      dictLabel: '蚂蚁链开放联盟链',
+      dictValue: 'antchain',
       dictSort: 3,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_chain_name',
+      dictLabel: '腾讯至信链',
+      dictValue: 'zhixin',
+      dictSort: 4,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_chain_name',
+      dictLabel: 'BSN开放联盟链',
+      dictValue: 'bsn',
+      dictSort: 5,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_chain_name',
+      dictLabel: 'Polygon公链（海外）',
+      dictValue: 'polygon',
+      dictSort: 6,
       isDefault: 'N',
     },
   ];
@@ -4093,6 +4114,7 @@ async function main() {
 
     // 创建用户实名认证数据（三种状态示例）
     // 用户1: 已通过认证
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await prisma.userVerification.create({
       data: {
         userId: demoUser.id,
@@ -4112,6 +4134,7 @@ async function main() {
     console.log(`Created verification for ${demoUser.nickname}: approved`);
 
     // 用户2: 待审核
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await prisma.userVerification.create({
       data: {
         userId: demoUser2.id,
@@ -4125,6 +4148,7 @@ async function main() {
     console.log(`Created verification for ${demoUser2.nickname}: pending`);
 
     // 用户3: 已拒绝（照片模糊）
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await prisma.userVerification.create({
       data: {
         userId: demoUser3.id,

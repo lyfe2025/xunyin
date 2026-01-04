@@ -1146,10 +1146,13 @@ VALUES
   ('xunyin_photo_filter', '暖色', 'warm', 4, '0', 'N', NOW()),
   ('xunyin_photo_filter', '冷色', 'cool', 5, '0', 'N', NOW()),
   ('xunyin_photo_filter', '胶片', 'film', 6, '0', 'N', NOW()),
-  -- 区块链
-  ('xunyin_chain_name', '蚂蚁链', 'antchain', 1, '0', 'Y', NOW()),
-  ('xunyin_chain_name', '长安链', 'chainmaker', 2, '0', 'N', NOW()),
-  ('xunyin_chain_name', '至信链', 'zhixin', 3, '0', 'N', NOW()),
+  -- 区块链存证服务提供者
+  ('xunyin_chain_name', '本地存证（开发/演示）', 'local', 1, '0', 'Y', NOW()),
+  ('xunyin_chain_name', '时间戳存证', 'timestamp', 2, '0', 'N', NOW()),
+  ('xunyin_chain_name', '蚂蚁链开放联盟链', 'antchain', 3, '0', 'N', NOW()),
+  ('xunyin_chain_name', '腾讯至信链', 'zhixin', 4, '0', 'N', NOW()),
+  ('xunyin_chain_name', 'BSN开放联盟链', 'bsn', 5, '0', 'N', NOW()),
+  ('xunyin_chain_name', 'Polygon公链（海外）', 'polygon', 6, '0', 'N', NOW()),
   -- 实名认证状态
   ('xunyin_verification_status', '待审核', 'pending', 1, '0', 'Y', NOW()),
   ('xunyin_verification_status', '已通过', 'approved', 2, '0', 'N', NOW()),

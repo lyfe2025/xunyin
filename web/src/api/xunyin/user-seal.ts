@@ -65,7 +65,7 @@ export function getUserSealStats() {
 }
 
 export interface ChainSealParams {
-  chainName?: 'antchain' | 'chainmaker' | 'zhixin'
+  chainName?: string // 从字典 xunyin_chain_name 获取: local, timestamp, antchain, zhixin, bsn, polygon
 }
 
 export interface ChainSealResult {
@@ -85,7 +85,7 @@ export function chainUserSeal(id: string, params?: ChainSealParams) {
   return request<{ data: ChainSealResult }>({
     url: `/admin/user-seals/${id}/chain`,
     method: 'post',
-    data: params || { chainName: 'antchain' },
+    data: params,
   }).then((res: any) => res.data)
 }
 

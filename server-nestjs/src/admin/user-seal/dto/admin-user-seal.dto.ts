@@ -111,14 +111,12 @@ export class UserSealListVo {
 
 export class ChainSealDto {
   @ApiPropertyOptional({
-    description: '区块链名称',
-    enum: ['antchain', 'chainmaker', 'zhixin'],
-    default: 'antchain',
+    description: '区块链名称（从字典 xunyin_chain_name 获取）',
+    example: 'local',
   })
   @IsOptional()
   @IsString()
-  @IsIn(['antchain', 'chainmaker', 'zhixin'])
-  chainName?: string = 'antchain';
+  chainName?: string;
 }
 
 export class ChainSealVo {
