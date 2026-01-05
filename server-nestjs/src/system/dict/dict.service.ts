@@ -114,4 +114,15 @@ export class DictService {
       data: { status, updateTime: new Date() },
     });
   }
+
+  async batchChangeStatus(dictIds: string[], status: string) {
+    this.logger.log(
+      `批量修改字典类型状态: ${dictIds.length} 个 -> ${status}`,
+      'DictService',
+    );
+    return this.prisma.sysDictType.updateMany({
+      where: { dictId: { in: dictIds.map((id) => BigInt(id)) } },
+      data: { status, updateTime: new Date() },
+    });
+  }
 }

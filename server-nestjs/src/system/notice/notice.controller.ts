@@ -67,4 +67,11 @@ export class NoticeController {
   changeStatus(@Body() body: { noticeId: string; status: string }) {
     return this.service.changeStatus(body.noticeId, body.status);
   }
+
+  @Put('batchChangeStatus')
+  @RequirePermission('system:notice:edit')
+  @ApiOperation({ summary: '批量修改通知公告状态' })
+  batchChangeStatus(@Body() body: { noticeIds: string[]; status: string }) {
+    return this.service.batchChangeStatus(body.noticeIds, body.status);
+  }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMenuStore } from '@/stores/modules/menu'
 import { useThemeStore } from '@/stores/theme'
@@ -25,6 +25,54 @@ const menuList = computed(() => menuStore.menuList)
 
 const isActive = (path: string) => route.path === path
 
+// 当前展开的菜单项
+const expandedItem = ref<string>('')
+
+// 根据当前路由找到对应的父菜单索引
+function findActiveMenuIndex(): string {
+  const currentPath = route.path
+  for (let i = 0; i < menuList.value.length; i++) {
+    const menu = menuList.value[i]
+    // 检查是否匹配父路由
+    if (currentPath.startsWith(menu.path)) {
+      return `item-${i}`
+    }
+    // 检查子路由
+    if (menu.children) {
+      for (const child of menu.children) {
+        const childPath = child.path.startsWith('/') ? child.path : `${menu.path}/${child.path}`
+        if (currentPath === childPath || currentPath.startsWith(childPath + '/')) {
+          return `item-${i}`
+        }
+      }
+    }
+  }
+  return ''
+}
+
+// 监听路由变化，自动展开对应菜单
+watch(
+  () => route.path,
+  () => {
+    const activeIndex = findActiveMenuIndex()
+    if (activeIndex) {
+      expandedItem.value = activeIndex
+    }
+  },
+  { immediate: true }
+)
+
+// 监听菜单数据加载完成
+watch(
+  () => menuList.value,
+  () => {
+    if (menuList.value.length > 0 && !expandedItem.value) {
+      expandedItem.value = findActiveMenuIndex()
+    }
+  },
+  { immediate: true }
+)
+
 // 将 kebab-case 转换为 PascalCase
 function toPascalCase(str: string): string {
   if (!str) return ''
@@ -43,7 +91,7 @@ function getIcon(iconName: string) {
 </script>
 
 <template>
-  <Accordion type="single" collapsible class="w-full" default-value="item-0">
+  <Accordion type="single" collapsible class="w-full" v-model="expandedItem">
     <AccordionItem
       v-for="(item, index) in menuList"
       :key="item.path"

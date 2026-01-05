@@ -32,7 +32,7 @@ export class MenuService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) { }
+  ) {}
 
   /**
    * 查询菜单列表
@@ -281,10 +281,25 @@ export class MenuService {
    * 获取路由名称
    */
   private getRouteName(menu: SysMenu): string {
-    // 首字母大写
+    // 使用组件路径生成唯一名称，避免与系统路由冲突
+    // 如 app-config/login/index -> AppConfigLogin
+    if (menu.component && menu.component !== 'Layout') {
+      const parts = menu.component.split('/').filter((p) => p && p !== 'index');
+      return parts
+        .map((part) =>
+          part
+            .split('-')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(''),
+        )
+        .join('');
+    }
+    // 目录使用 path 首字母大写
     const path = menu.path || '';
-    // 简单处理，实际可能需要更复杂的逻辑
-    return path.charAt(0).toUpperCase() + path.slice(1);
+    return path
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('');
   }
 
   /**
@@ -292,8 +307,8 @@ export class MenuService {
    */
   private getRouterPath(menu: SysMenu): string {
     let routerPath = menu.path || '';
-    // 如果是内链，且不是 http 开头
-    if (menu.parentId === null && menu.menuType === 'M' && menu.isFrame === 1) {
+    // 顶级菜单（目录）路径需要以 / 开头
+    if (menu.parentId === null && menu.menuType === 'M') {
       if (!routerPath.startsWith('/')) {
         routerPath = '/' + routerPath;
       }

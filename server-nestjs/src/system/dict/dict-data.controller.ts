@@ -67,4 +67,11 @@ export class DictDataController {
   changeStatus(@Body() body: { dictCode: string; status: string }) {
     return this.service.changeStatus(body.dictCode, body.status);
   }
+
+  @Put('batchChangeStatus')
+  @RequirePermission('system:dict:edit')
+  @ApiOperation({ summary: '批量修改字典数据状态' })
+  batchChangeStatus(@Body() body: { dictCodes: string[]; status: string }) {
+    return this.service.batchChangeStatus(body.dictCodes, body.status);
+  }
 }

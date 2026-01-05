@@ -106,4 +106,15 @@ export class NoticeService {
       data: { status, updateTime: new Date() },
     });
   }
+
+  async batchChangeStatus(noticeIds: string[], status: string) {
+    this.logger.log(
+      `批量修改通知公告状态: ${noticeIds.length} 个 -> ${status}`,
+      'NoticeService',
+    );
+    return this.prisma.sysNotice.updateMany({
+      where: { noticeId: { in: noticeIds.map((id) => BigInt(id)) } },
+      data: { status, updateTime: new Date() },
+    });
+  }
 }

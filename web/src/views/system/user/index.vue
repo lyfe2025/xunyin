@@ -232,6 +232,8 @@ async function getList() {
     const res = await listUser(queryParams)
     userList.value = res.rows
     total.value = res.total
+    selectedRows.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -488,9 +490,6 @@ function toggleRowSelection(userId: string) {
   } else {
     selectedRows.value.push(userId)
   }
-  // 更新全选状态
-  selectAll.value =
-    selectedRows.value.length > 0 && selectedRows.value.length === userList.value.length
 }
 
 async function handleDelete(row: SysUser) {
@@ -533,9 +532,9 @@ async function confirmResetPwd() {
 }
 
 async function handleStatusChange(userId: string, status: string) {
-  await changeUserStatus(userId, status)
+  await changeUserStatus(userId, status as '0' | '1')
   const user = userList.value.find((u) => u.userId === userId)
-  if (user) user.status = status
+  if (user) user.status = status as '0' | '1'
 }
 
 function resetForm() {
@@ -600,10 +599,19 @@ function toTreeDept(list: any[]): any[] {
 watch(selectAll, (newVal) => {
   if (newVal) {
     selectedRows.value = userList.value.map((u) => u.userId)
-  } else {
+  } else if (selectedRows.value.length === userList.value.length) {
     selectedRows.value = []
   }
 })
+
+// 监听选中项变化，更新全选状态
+watch(
+  selectedRows,
+  (newVal) => {
+    selectAll.value = userList.value.length > 0 && newVal.length === userList.value.length
+  },
+  { deep: true }
+)
 
 const route = useRoute()
 
@@ -634,28 +642,6 @@ onMounted(async () => {
         <p class="text-sm text-muted-foreground">管理系统用户、分配角色和部门</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" :disabled="!hasSelectedRows" @click="handleBatchDelete">
-          <Trash2 class="h-4 w-4 sm:mr-2" />
-          <span class="hidden sm:inline">批量删除</span>
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!hasSelectedRows"
-          @click="handleBatchStatus('0')"
-        >
-          <CheckSquare class="h-4 w-4 sm:mr-2" />
-          <span class="hidden sm:inline">批量启用</span>
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!hasSelectedRows"
-          @click="handleBatchStatus('1')"
-        >
-          <XSquare class="h-4 w-4 sm:mr-2" />
-          <span class="hidden sm:inline">批量停用</span>
-        </Button>
         <Button variant="outline" size="sm" @click="handleImport">
           <FileUp class="h-4 w-4 sm:mr-2" />
           <span class="hidden sm:inline">导入</span>
@@ -776,6 +762,17 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 批量操作栏 -->
+    <div
+      v-if="selectedRows.length > 0"
+      class="flex items-center gap-3 p-3 bg-muted/50 border rounded-lg"
+    >
+      <span class="text-sm">已选择 {{ selectedRows.length }} 项</span>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('0')">批量启用</Button>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('1')">批量停用</Button>
+      <Button size="sm" variant="destructive" @click="handleBatchDelete">批量删除</Button>
     </div>
 
     <!-- Table -->

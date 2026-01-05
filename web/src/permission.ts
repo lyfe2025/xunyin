@@ -7,8 +7,8 @@ import 'nprogress/nprogress.css'
 
 NProgress.configure({ showSpinner: false })
 
-// 无需登录即可访问的页面（错误页面）
-const publicPages = ['/404', '/403']
+// 无需登录即可访问的页面（错误页面、公开页面）
+const publicPages = ['/404', '/403', '/download']
 
 router.beforeEach(async (to, _from, next) => {
   NProgress.start()

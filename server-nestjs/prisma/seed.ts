@@ -368,7 +368,7 @@ async function main() {
     menuName: '系统管理',
     path: 'system',
     component: 'Layout',
-    orderNum: 2,
+    orderNum: 3,
     menuType: 'M',
     visible: '0',
     status: '0',
@@ -513,7 +513,7 @@ async function main() {
     menuName: '系统监控',
     path: 'monitor',
     component: 'Layout',
-    orderNum: 3,
+    orderNum: 4,
     menuType: 'M',
     visible: '0',
     status: '0',
@@ -619,7 +619,7 @@ async function main() {
     menuName: '系统工具',
     path: 'tool',
     component: 'Layout',
-    orderNum: 4,
+    orderNum: 5,
     menuType: 'M',
     visible: '0',
     status: '0',
@@ -1409,6 +1409,238 @@ async function main() {
   }
 
   console.log('Initialized xunyin menus');
+
+  // ============ APP配置管理菜单 ============
+  const appConfigDir = await ensureMenu({
+    menuName: 'APP配置',
+    path: 'app-config',
+    component: 'Layout',
+    orderNum: 2,
+    menuType: 'M',
+    visible: '0',
+    status: '0',
+    icon: 'smartphone',
+    isFrame: 1,
+    parentId: null,
+  });
+
+  // APP配置子菜单
+  await ensureMenu({
+    menuName: '启动页配置',
+    parentId: appConfigDir.menuId,
+    path: 'splash',
+    component: 'app-config/splash/index',
+    orderNum: 1,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'app:splash:list',
+    icon: 'image',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '登录页配置',
+    parentId: appConfigDir.menuId,
+    path: 'login',
+    component: 'app-config/login/index',
+    orderNum: 2,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'app:login:list',
+    icon: 'log-in',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '协议管理',
+    parentId: appConfigDir.menuId,
+    path: 'agreement',
+    component: 'app-config/agreement/index',
+    orderNum: 3,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'app:agreement:list',
+    icon: 'file-text',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '下载页配置',
+    parentId: appConfigDir.menuId,
+    path: 'download',
+    component: 'app-config/download/index',
+    orderNum: 4,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'app:download:list',
+    icon: 'download',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '版本管理',
+    parentId: appConfigDir.menuId,
+    path: 'version',
+    component: 'app-config/version/index',
+    orderNum: 5,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'app:version:list',
+    icon: 'package',
+    isFrame: 1,
+  });
+  await ensureMenu({
+    menuName: '推广统计',
+    parentId: appConfigDir.menuId,
+    path: 'promotion',
+    component: 'app-config/promotion/index',
+    orderNum: 6,
+    menuType: 'C',
+    visible: '0',
+    status: '0',
+    perms: 'app:promotion:list',
+    icon: 'trending-up',
+    isFrame: 1,
+  });
+
+  // APP配置按钮权限
+  const splashMenu = await getMenuByPath(appConfigDir.menuId, 'splash');
+  if (splashMenu) {
+    await ensureButton({
+      menuName: '启动页查询',
+      parentId: splashMenu.menuId,
+      perms: 'app:splash:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '启动页新增',
+      parentId: splashMenu.menuId,
+      perms: 'app:splash:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '启动页修改',
+      parentId: splashMenu.menuId,
+      perms: 'app:splash:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '启动页删除',
+      parentId: splashMenu.menuId,
+      perms: 'app:splash:remove',
+      orderNum: 4,
+    });
+  }
+
+  const loginConfigMenu = await getMenuByPath(appConfigDir.menuId, 'login');
+  if (loginConfigMenu) {
+    await ensureButton({
+      menuName: '登录页查询',
+      parentId: loginConfigMenu.menuId,
+      perms: 'app:login:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '登录页修改',
+      parentId: loginConfigMenu.menuId,
+      perms: 'app:login:edit',
+      orderNum: 2,
+    });
+  }
+
+  const downloadConfigMenu = await getMenuByPath(
+    appConfigDir.menuId,
+    'download',
+  );
+  if (downloadConfigMenu) {
+    await ensureButton({
+      menuName: '下载页查询',
+      parentId: downloadConfigMenu.menuId,
+      perms: 'app:download:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '下载页修改',
+      parentId: downloadConfigMenu.menuId,
+      perms: 'app:download:edit',
+      orderNum: 2,
+    });
+  }
+
+  const promotionMenu = await getMenuByPath(appConfigDir.menuId, 'promotion');
+  if (promotionMenu) {
+    await ensureButton({
+      menuName: '推广渠道查询',
+      parentId: promotionMenu.menuId,
+      perms: 'app:promotion:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '推广渠道新增',
+      parentId: promotionMenu.menuId,
+      perms: 'app:promotion:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '推广渠道修改',
+      parentId: promotionMenu.menuId,
+      perms: 'app:promotion:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '推广渠道删除',
+      parentId: promotionMenu.menuId,
+      perms: 'app:promotion:remove',
+      orderNum: 4,
+    });
+  }
+
+  const versionMenu = await getMenuByPath(appConfigDir.menuId, 'version');
+  if (versionMenu) {
+    await ensureButton({
+      menuName: '版本查询',
+      parentId: versionMenu.menuId,
+      perms: 'app:version:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '版本新增',
+      parentId: versionMenu.menuId,
+      perms: 'app:version:add',
+      orderNum: 2,
+    });
+    await ensureButton({
+      menuName: '版本修改',
+      parentId: versionMenu.menuId,
+      perms: 'app:version:edit',
+      orderNum: 3,
+    });
+    await ensureButton({
+      menuName: '版本删除',
+      parentId: versionMenu.menuId,
+      perms: 'app:version:remove',
+      orderNum: 4,
+    });
+  }
+
+  const agreementMenu = await getMenuByPath(appConfigDir.menuId, 'agreement');
+  if (agreementMenu) {
+    await ensureButton({
+      menuName: '协议查询',
+      parentId: agreementMenu.menuId,
+      perms: 'app:agreement:query',
+      orderNum: 1,
+    });
+    await ensureButton({
+      menuName: '协议修改',
+      parentId: agreementMenu.menuId,
+      perms: 'app:agreement:edit',
+      orderNum: 2,
+    });
+  }
+
+  console.log('Initialized app-config menus');
 
   // 6. 为不同角色分配菜单权限
   const allMenus = await prisma.sysMenu.findMany({
@@ -2200,6 +2432,25 @@ async function main() {
       configName: 'OSS SecretKey',
       configKey: 'sys.storage.oss.secretKey',
       configValue: '',
+      configType: 'Y',
+    },
+    // 文件上传限制
+    {
+      configName: 'APK最大上传大小(MB)',
+      configKey: 'sys.upload.apk.maxSize',
+      configValue: '200',
+      configType: 'Y',
+    },
+    {
+      configName: '图片最大上传大小(MB)',
+      configKey: 'sys.upload.image.maxSize',
+      configValue: '5',
+      configType: 'Y',
+    },
+    {
+      configName: '音频最大上传大小(MB)',
+      configKey: 'sys.upload.audio.maxSize',
+      configValue: '20',
       configType: 'Y',
     },
     // 网站Logo和图标
@@ -4161,6 +4412,323 @@ async function main() {
     console.log(`Created verification for ${demoUser3.nickname}: rejected`);
 
     console.log('Xunyin business data seeding completed.');
+  }
+
+  // ==================== APP 协议初始数据 ====================
+  const existingAgreements = await prisma.appAgreement.count();
+  if (existingAgreements === 0) {
+    console.log('Seeding app agreements...');
+
+    // 用户协议
+    await prisma.appAgreement.create({
+      data: {
+        type: 'user_agreement',
+        title: '用户服务协议',
+        content: `<h1>寻印用户服务协议</h1>
+
+<p>更新日期：2026年1月1日</p>
+<p>生效日期：2026年1月1日</p>
+
+<p>欢迎您使用寻印！请您在使用本应用前，仔细阅读并充分理解本协议各条款。</p>
+
+<h2>一、服务说明</h2>
+<p>寻印是一款城市文化探索与数字印记收藏平台（以下简称"本应用"），由[公司名称]（以下简称"我们"）运营。本应用为用户提供以下服务：</p>
+<ul>
+  <li>城市文化之旅探索与导览</li>
+  <li>探索点打卡与互动任务</li>
+  <li>数字印记收集、展示与区块链存证</li>
+  <li>个人探索记录与成就管理</li>
+  <li>社区分享与互动功能</li>
+</ul>
+
+<h2>二、账号注册与管理</h2>
+<h3>2.1 账号注册</h3>
+<p>您可以通过以下方式注册本应用账号：</p>
+<ul>
+  <li>手机号码注册</li>
+  <li>微信授权登录</li>
+  <li>Apple ID 登录</li>
+  <li>Google 账号登录</li>
+</ul>
+
+<h3>2.2 账号安全</h3>
+<p>您应妥善保管账号信息，因账号泄露、被盗等造成的损失由您自行承担。如发现账号异常，请立即联系我们。</p>
+
+<h3>2.3 账号使用规范</h3>
+<ul>
+  <li>禁止将账号转让、出借、出租给他人使用</li>
+  <li>禁止使用他人账号进行任何操作</li>
+  <li>禁止注册多个账号进行违规操作</li>
+</ul>
+
+<h2>三、用户行为规范</h2>
+<p>使用本应用时，您承诺遵守以下规范：</p>
+
+<h3>3.1 合法合规</h3>
+<ul>
+  <li>遵守中华人民共和国法律法规</li>
+  <li>遵守公序良俗和社会公德</li>
+  <li>不从事任何违法违规活动</li>
+</ul>
+
+<h3>3.2 内容规范</h3>
+<p>您不得发布、传播以下内容：</p>
+<ul>
+  <li>违反国家法律法规的内容</li>
+  <li>涉及政治敏感、色情低俗、暴力恐怖的内容</li>
+  <li>侵犯他人知识产权、隐私权等合法权益的内容</li>
+  <li>虚假、欺诈、误导性信息</li>
+  <li>恶意攻击、诽谤他人的内容</li>
+</ul>
+
+<h3>3.3 探索安全</h3>
+<ul>
+  <li>在进行户外探索时，请注意人身安全</li>
+  <li>遵守景区、公共场所的管理规定</li>
+  <li>不得进入禁止进入的区域</li>
+  <li>恶劣天气条件下请谨慎出行</li>
+</ul>
+
+<h2>四、知识产权</h2>
+<h3>4.1 平台内容</h3>
+<p>本应用的所有内容（包括但不限于文字、图片、音频、视频、软件、界面设计、数据）的知识产权归我们或相关权利人所有，未经授权不得使用。</p>
+
+<h3>4.2 用户内容</h3>
+<p>您在本应用发布的原创内容（如照片、评论等），知识产权归您所有。但您授予我们非独占、免费、可转授权的使用许可，用于本应用的运营和推广。</p>
+
+<h3>4.3 数字印记</h3>
+<p>您获得的数字印记仅代表您的探索成就记录，不构成任何形式的财产权益或投资价值。</p>
+
+<h2>五、隐私保护</h2>
+<p>我们重视您的隐私保护，具体请参阅《隐私政策》。</p>
+
+<h2>六、服务变更与终止</h2>
+<h3>6.1 服务变更</h3>
+<p>我们有权根据业务发展需要，变更、中断或终止部分或全部服务，并在合理期限内提前通知用户。</p>
+
+<h3>6.2 账号注销</h3>
+<p>您可以申请注销账号。账号注销后，相关数据将按照法律法规和隐私政策的规定处理。</p>
+
+<h3>6.3 违规处理</h3>
+<p>如您违反本协议，我们有权采取警告、限制功能、封禁账号等措施，并保留追究法律责任的权利。</p>
+
+<h2>七、免责声明</h2>
+<ul>
+  <li>因不可抗力（如自然灾害、政策变化等）导致的服务中断，我们不承担责任</li>
+  <li>因第三方原因（如网络运营商、支付平台等）导致的服务异常，我们不承担责任</li>
+  <li>用户在探索过程中因自身原因造成的人身伤害或财产损失，由用户自行承担</li>
+  <li>用户因违反本协议或法律法规造成的损失，由用户自行承担</li>
+</ul>
+
+<h2>八、协议修改</h2>
+<p>我们保留随时修改本协议的权利。修改后的协议将在应用内公布，继续使用本应用即表示您接受修改后的协议。如您不同意修改后的协议，请停止使用本应用。</p>
+
+<h2>九、争议解决</h2>
+<p>本协议的订立、执行和解释均适用中华人民共和国法律。如发生争议，双方应友好协商解决；协商不成的，任何一方均可向我们所在地有管辖权的人民法院提起诉讼。</p>
+
+<h2>十、联系我们</h2>
+<p>如您对本协议有任何疑问，请通过以下方式联系我们：</p>
+<ul>
+  <li>客服邮箱：support@xunyin.app</li>
+  <li>客服电话：400-XXX-XXXX</li>
+  <li>工作时间：周一至周五 9:00-18:00</li>
+</ul>`,
+        version: '1.0',
+        status: '0',
+        createBy: 'system',
+      },
+    });
+    console.log('Created agreement: user_agreement');
+
+    // 隐私政策
+    await prisma.appAgreement.create({
+      data: {
+        type: 'privacy_policy',
+        title: '隐私政策',
+        content: `<h1>寻印隐私政策</h1>
+
+<p>更新日期：2026年1月1日</p>
+<p>生效日期：2026年1月1日</p>
+
+<p>寻印（以下简称"我们"）非常重视您的隐私保护。本隐私政策说明我们如何收集、使用、存储和保护您的个人信息。请您在使用本应用前，仔细阅读并理解本政策。</p>
+
+<h2>一、信息收集</h2>
+
+<h3>1.1 您主动提供的信息</h3>
+<table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+  <tr style="background-color: #f5f5f5;">
+    <th>信息类型</th>
+    <th>具体内容</th>
+    <th>收集目的</th>
+  </tr>
+  <tr>
+    <td>注册信息</td>
+    <td>手机号码、邮箱地址</td>
+    <td>创建账号、身份验证、找回密码</td>
+  </tr>
+  <tr>
+    <td>个人资料</td>
+    <td>昵称、头像、性别、生日、个性签名</td>
+    <td>展示个人主页、个性化服务</td>
+  </tr>
+  <tr>
+    <td>实名信息</td>
+    <td>真实姓名、身份证号（可选）</td>
+    <td>印记上链存证（需实名认证）</td>
+  </tr>
+  <tr>
+    <td>第三方账号</td>
+    <td>微信/Apple/Google 授权信息</td>
+    <td>快捷登录</td>
+  </tr>
+</table>
+
+<h3>1.2 自动收集的信息</h3>
+<table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+  <tr style="background-color: #f5f5f5;">
+    <th>信息类型</th>
+    <th>具体内容</th>
+    <th>收集目的</th>
+  </tr>
+  <tr>
+    <td>设备信息</td>
+    <td>设备型号、操作系统版本、设备标识符</td>
+    <td>保障服务安全、优化用户体验</td>
+  </tr>
+  <tr>
+    <td>位置信息</td>
+    <td>GPS 定位、基站定位（需授权）</td>
+    <td>探索点打卡、附近推荐</td>
+  </tr>
+  <tr>
+    <td>使用记录</td>
+    <td>探索记录、印记收集记录、浏览记录</td>
+    <td>提供服务、数据统计分析</td>
+  </tr>
+  <tr>
+    <td>日志信息</td>
+    <td>访问时间、操作记录、错误日志</td>
+    <td>问题排查、服务优化</td>
+  </tr>
+</table>
+
+<h2>二、信息使用</h2>
+<p>我们使用收集的信息用于以下目的：</p>
+
+<h3>2.1 提供核心服务</h3>
+<ul>
+  <li>账号注册与登录验证</li>
+  <li>探索点定位与打卡功能</li>
+  <li>印记收集与展示</li>
+  <li>区块链存证服务</li>
+</ul>
+
+<h3>2.2 改善用户体验</h3>
+<ul>
+  <li>个性化内容推荐</li>
+  <li>服务优化与新功能开发</li>
+  <li>用户反馈处理</li>
+</ul>
+
+<h3>2.3 安全保障</h3>
+<ul>
+  <li>身份验证与账号安全</li>
+  <li>风险识别与欺诈防范</li>
+  <li>违规行为检测与处理</li>
+</ul>
+
+<h2>三、信息共享</h2>
+<p>我们承诺不会向第三方出售您的个人信息。仅在以下情况下可能共享：</p>
+
+<h3>3.1 经您同意</h3>
+<p>在获得您明确同意后，我们可能与第三方共享您的信息。</p>
+
+<h3>3.2 法律要求</h3>
+<p>根据法律法规要求、司法程序、政府强制性要求，我们可能需要披露您的信息。</p>
+
+<h3>3.3 服务提供商</h3>
+<p>我们可能委托以下类型的服务提供商处理您的信息：</p>
+<ul>
+  <li>云服务提供商（数据存储）</li>
+  <li>短信/推送服务商（消息通知）</li>
+  <li>支付服务商（支付处理）</li>
+  <li>区块链服务商（印记存证）</li>
+</ul>
+<p>我们会与服务提供商签署数据保护协议，确保其按照本政策处理您的信息。</p>
+
+<h2>四、信息存储与安全</h2>
+
+<h3>4.1 存储地点</h3>
+<p>您的个人信息存储于中华人民共和国境内的服务器。如需跨境传输，我们将遵守相关法律法规并采取必要的安全措施。</p>
+
+<h3>4.2 存储期限</h3>
+<ul>
+  <li>账号信息：账号存续期间及注销后 30 天</li>
+  <li>探索记录：账号存续期间</li>
+  <li>区块链存证：永久存储（区块链特性）</li>
+  <li>日志信息：最长 180 天</li>
+</ul>
+
+<h3>4.3 安全措施</h3>
+<p>我们采取以下措施保护您的信息安全：</p>
+<ul>
+  <li>数据传输加密（HTTPS/TLS）</li>
+  <li>敏感数据加密存储</li>
+  <li>访问权限控制</li>
+  <li>安全审计与监控</li>
+  <li>定期安全评估</li>
+</ul>
+
+<h2>五、您的权利</h2>
+<p>根据相关法律法规，您享有以下权利：</p>
+
+<h3>5.1 访问权</h3>
+<p>您可以在"我的"-"个人资料"中查看和访问您的个人信息。</p>
+
+<h3>5.2 更正权</h3>
+<p>您可以修改您的个人资料信息。如发现信息错误，可联系我们更正。</p>
+
+<h3>5.3 删除权</h3>
+<p>您可以申请删除您的个人信息，但以下情况除外：</p>
+<ul>
+  <li>法律法规要求保留的信息</li>
+  <li>已上链存证的印记数据（区块链不可篡改特性）</li>
+</ul>
+
+<h3>5.4 撤回同意</h3>
+<p>您可以在设备设置中撤回位置、相机等权限授权。撤回后可能影响相关功能的使用。</p>
+
+<h3>5.5 注销账号</h3>
+<p>您可以在"我的"-"设置"-"账号注销"中申请注销账号。</p>
+
+<h2>六、未成年人保护</h2>
+<p>我们非常重视未成年人的隐私保护：</p>
+<ul>
+  <li>本应用主要面向成年用户</li>
+  <li>如果您是未满 14 周岁的未成年人，请在监护人指导下使用本应用，并由监护人阅读本政策</li>
+  <li>如果您是未成年人的监护人，发现未成年人未经同意使用本应用，请联系我们</li>
+</ul>
+
+<h2>七、政策更新</h2>
+<p>我们可能会更新本隐私政策。更新后的政策将在应用内公布，重大变更会通过弹窗等方式通知您。请定期查阅本政策。</p>
+
+<h2>八、联系我们</h2>
+<p>如您对本隐私政策有任何疑问、意见或建议，或需要行使您的权利，请通过以下方式联系我们：</p>
+<ul>
+  <li>隐私专员邮箱：privacy@xunyin.app</li>
+  <li>客服邮箱：support@xunyin.app</li>
+  <li>客服电话：400-XXX-XXXX</li>
+  <li>公司地址：[公司地址]</li>
+</ul>
+<p>我们将在 15 个工作日内回复您的请求。</p>`,
+        version: '1.0',
+        status: '0',
+        createBy: 'system',
+      },
+    });
+    console.log('Created agreement: privacy_policy');
+
+    console.log('App agreements seeding completed.');
   }
 
   // 清除 Redis 用户状态缓存，避免重新初始化数据后无法登录

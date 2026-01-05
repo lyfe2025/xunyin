@@ -57,3 +57,11 @@ export function changePostStatus(postId: string, status: string) {
     data: { postId, status },
   })
 }
+
+export function batchChangePostStatus(postIds: string[], status: string) {
+  return request<{ msg: string }>({
+    url: '/system/post/batchChangeStatus',
+    method: 'put',
+    data: { postIds, status },
+  })
+}

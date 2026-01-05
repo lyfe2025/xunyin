@@ -59,3 +59,11 @@ export function changeNoticeStatus(noticeId: string, status: string) {
     data: { noticeId, status },
   })
 }
+
+export function batchChangeNoticeStatus(noticeIds: string[], status: string) {
+  return request<{ msg: string }>({
+    url: '/system/notice/batchChangeStatus',
+    method: 'put',
+    data: { noticeIds, status },
+  })
+}

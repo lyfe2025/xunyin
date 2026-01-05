@@ -52,10 +52,19 @@ const selectAll = ref(false)
 watch(selectAll, (newVal) => {
   if (newVal) {
     selectedIds.value = onlineList.value.map((item) => item.tokenId)
-  } else {
+  } else if (selectedIds.value.length === onlineList.value.length) {
     selectedIds.value = []
   }
 })
+
+// 监听选中项变化，更新全选状态
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = onlineList.value.length > 0 && newVal.length === onlineList.value.length
+  },
+  { deep: true }
+)
 
 // 强退确认弹窗
 const showLogoutDialog = ref(false)
@@ -127,10 +136,8 @@ async function getList() {
     const res = await listOnline(queryParams)
     onlineList.value = res.rows
     total.value = res.total
-    // 清除已不存在的选中项
-    selectedIds.value = selectedIds.value.filter((id) =>
-      res.rows.some((r: SysUserOnline) => r.tokenId === id)
-    )
+    selectedIds.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -156,9 +163,6 @@ function toggleSelect(tokenId: string) {
   } else {
     selectedIds.value.push(tokenId)
   }
-  // 更新全选状态
-  selectAll.value =
-    selectedIds.value.length > 0 && selectedIds.value.length === onlineList.value.length
 }
 
 // 强退操作
@@ -272,15 +276,16 @@ onUnmounted(() => {
           <RefreshCw class="w-4 h-4 mr-2" />
           重置
         </Button>
-        <Button
-          variant="destructive"
-          :disabled="selectedIds.length === 0"
-          @click="openLogoutDialog()"
-        >
-          <LogOut class="w-4 h-4 mr-2" />
-          批量强退 ({{ selectedIds.length }})
-        </Button>
       </div>
+    </div>
+
+    <!-- 批量操作栏 -->
+    <div
+      v-if="selectedIds.length > 0"
+      class="flex items-center gap-3 p-3 bg-muted/50 border rounded-lg"
+    >
+      <span class="text-sm">已选择 {{ selectedIds.length }} 项</span>
+      <Button size="sm" variant="destructive" @click="openLogoutDialog()">批量强退</Button>
     </div>
 
     <!-- Table -->

@@ -120,4 +120,15 @@ export class PostService {
       data: { status, updateTime: new Date() },
     });
   }
+
+  async batchChangeStatus(postIds: string[], status: string) {
+    this.logger.log(
+      `批量修改岗位状态: ${postIds.length} 个 -> ${status}`,
+      'PostService',
+    );
+    return this.prisma.sysPost.updateMany({
+      where: { postId: { in: postIds.map((id) => BigInt(id)) } },
+      data: { status, updateTime: new Date() },
+    });
+  }
 }

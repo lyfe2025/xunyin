@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Plus, Edit, Trash2, RefreshCw, List } from 'lucide-vue-next'
 import TablePagination from '@/components/common/TablePagination.vue'
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -35,7 +36,7 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { listType, getType, delType, addType, updateType, changeDictTypeStatus, type DictType } from '@/api/system/dict'
+import { listType, getType, delType, addType, updateType, changeDictTypeStatus, batchChangeDictTypeStatus, type DictType } from '@/api/system/dict'
 
 const router = useRouter()
 const { toast } = useToast()
@@ -54,6 +55,7 @@ const total = ref(0)
 const typeList = ref<DictType[]>([])
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
+const showBatchDeleteDialog = ref(false)
 const dictToDelete = ref<DictType | null>(null)
 const dialogTitle = ref('')
 const form = reactive<Partial<DictType>>({
@@ -63,6 +65,10 @@ const form = reactive<Partial<DictType>>({
   status: '0',
   remark: '',
 })
+
+// 批量选择
+const selectedIds = ref<string[]>([])
+const selectAll = ref(false)
 
 // Fetch data
 async function getList() {
@@ -75,6 +81,8 @@ async function getList() {
     const response = await listType(params)
     typeList.value = response.rows
     total.value = response.total
+    selectedIds.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -184,6 +192,69 @@ async function handleStatusChange(dictId: string, status: string) {
   if (dict) dict.status = status
 }
 
+// 批量选择
+function handleSelectOne(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
+// 监听全选状态变化
+watch(selectAll, (newVal) => {
+  if (newVal) {
+    selectedIds.value = typeList.value.map((d) => d.dictId)
+  } else if (selectedIds.value.length === typeList.value.length) {
+    selectedIds.value = []
+  }
+})
+
+// 监听选中项变化，更新全选状态
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = typeList.value.length > 0 && newVal.length === typeList.value.length
+  },
+  { deep: true }
+)
+
+// 批量删除
+function handleBatchDelete() {
+  if (selectedIds.value.length === 0) {
+    toast({ title: '请选择要删除的数据', variant: 'destructive' })
+    return
+  }
+  showBatchDeleteDialog.value = true
+}
+
+async function confirmBatchDelete() {
+  try {
+    await delType(selectedIds.value)
+    toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
+    getList()
+    showBatchDeleteDialog.value = false
+  } catch {
+    // 忽略错误
+  }
+}
+
+// 批量状态操作
+async function handleBatchStatus(status: string) {
+  if (selectedIds.value.length === 0) {
+    toast({ title: '请选择要操作的数据', variant: 'destructive' })
+    return
+  }
+  try {
+    await batchChangeDictTypeStatus(selectedIds.value, status)
+    toast({ title: status === '0' ? '批量启用成功' : '批量停用成功' })
+    getList()
+  } catch (e: any) {
+    toast({ title: '操作失败', description: e.message, variant: 'destructive' })
+  }
+}
+
 onMounted(() => {
   getList()
 })
@@ -252,10 +323,21 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- 批量操作栏 -->
+    <div
+      v-if="selectedIds.length > 0"
+      class="flex items-center gap-3 p-3 bg-muted/50 border rounded-lg"
+    >
+      <span class="text-sm">已选择 {{ selectedIds.length }} 项</span>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('0')">批量启用</Button>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('1')">批量停用</Button>
+      <Button size="sm" variant="destructive" @click="handleBatchDelete">批量删除</Button>
+    </div>
+
     <!-- Table -->
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
-      <TableSkeleton v-if="loading" :columns="6" :rows="10" />
+      <TableSkeleton v-if="loading" :columns="8" :rows="10" />
 
       <!-- 空状态 -->
       <EmptyState
@@ -270,6 +352,9 @@ onMounted(() => {
       <Table v-else>
         <TableHeader>
           <TableRow>
+            <TableHead class="w-[50px]">
+              <Checkbox v-model="selectAll" />
+            </TableHead>
             <TableHead class="w-[100px]">字典编号</TableHead>
             <TableHead>字典名称</TableHead>
             <TableHead>字典类型</TableHead>
@@ -281,6 +366,12 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-for="item in typeList" :key="item.dictId">
+            <TableCell>
+              <Checkbox
+                :model-value="selectedIds.includes(item.dictId)"
+                @update:model-value="() => handleSelectOne(item.dictId)"
+              />
+            </TableCell>
             <TableCell>{{ item.dictId }}</TableCell>
             <TableCell>{{ item.dictName }}</TableCell>
             <TableCell>
@@ -373,6 +464,16 @@ onMounted(() => {
       confirm-text="删除"
       destructive
       @confirm="confirmDelete"
+    />
+
+    <!-- Batch Delete Confirmation Dialog -->
+    <ConfirmDialog
+      v-model:open="showBatchDeleteDialog"
+      title="确认批量删除"
+      :description="`确定要删除选中的 ${selectedIds.length} 个字典类型吗？`"
+      confirm-text="删除"
+      destructive
+      @confirm="confirmBatchDelete"
     />
   </div>
 </template>

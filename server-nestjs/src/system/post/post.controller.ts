@@ -67,4 +67,11 @@ export class PostController {
   changeStatus(@Body() body: { postId: string; status: string }) {
     return this.postService.changeStatus(body.postId, body.status);
   }
+
+  @Put('batchChangeStatus')
+  @RequirePermission('system:post:edit')
+  @ApiOperation({ summary: '批量修改岗位状态' })
+  batchChangeStatus(@Body() body: { postIds: string[]; status: string }) {
+    return this.postService.batchChangeStatus(body.postIds, body.status);
+  }
 }

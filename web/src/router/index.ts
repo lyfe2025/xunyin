@@ -128,6 +128,43 @@ const router = createRouter({
           component: () => import('@/views/monitor/druid/index.vue'),
           meta: { title: '数据库监控', icon: 'database', roles: ['admin'] },
         },
+        // APP Config Module
+        {
+          path: 'app-config/splash',
+          name: 'AppSplash',
+          component: () => import('@/views/app-config/splash/index.vue'),
+          meta: { title: '启动页配置', icon: 'image' },
+        },
+        {
+          path: 'app-config/login',
+          name: 'AppLogin',
+          component: () => import('@/views/app-config/login/index.vue'),
+          meta: { title: '登录页配置', icon: 'log-in' },
+        },
+        {
+          path: 'app-config/download',
+          name: 'AppDownload',
+          component: () => import('@/views/app-config/download/index.vue'),
+          meta: { title: '下载页配置', icon: 'download' },
+        },
+        {
+          path: 'app-config/promotion',
+          name: 'AppPromotion',
+          component: () => import('@/views/app-config/promotion/index.vue'),
+          meta: { title: '推广统计', icon: 'trending-up' },
+        },
+        {
+          path: 'app-config/version',
+          name: 'AppVersion',
+          component: () => import('@/views/app-config/version/index.vue'),
+          meta: { title: '版本管理', icon: 'package' },
+        },
+        {
+          path: 'app-config/agreement',
+          name: 'AppAgreement',
+          component: () => import('@/views/app-config/agreement/index.vue'),
+          meta: { title: '协议管理', icon: 'file-text' },
+        },
         // Tool Module
         {
           path: 'tool/build',
@@ -165,6 +202,12 @@ const router = createRouter({
       name: 'NotFound',
       component: () => import('@/views/error/404.vue'),
       meta: { title: '未找到' },
+    },
+    {
+      path: '/download',
+      name: 'PublicDownload',
+      component: () => import('@/views/public/download/index.vue'),
+      meta: { title: '下载 APP' },
     },
     {
       path: '/:pathMatch(.*)*',

@@ -10,6 +10,7 @@ import { AdminUserSealModule } from './user-seal/admin-user-seal.module';
 import { AdminBgmModule } from './bgm/admin-bgm.module';
 import { AdminPhotoModule } from './photo/admin-photo.module';
 import { AdminBlockchainModule } from './blockchain/admin-blockchain.module';
+import { AdminAppConfigModule } from './app-config/admin-app-config.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AdminBlockchainModule } from './blockchain/admin-blockchain.module';
     AdminBgmModule,
     AdminPhotoModule,
     AdminBlockchainModule,
+    AdminAppConfigModule,
   ],
 })
-export class AdminModule {}
+export class AdminModule { }

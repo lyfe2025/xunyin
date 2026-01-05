@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import {
   Table,
   TableBody,
@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Plus, Edit, Trash2, RefreshCw, Search, Loader2 } from 'lucide-vue-next'
 import TablePagination from '@/components/common/TablePagination.vue'
@@ -35,7 +36,7 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { formatDate } from '@/utils/format'
-import { listPost, getPost, delPost, addPost, updatePost, changePostStatus } from '@/api/system/post'
+import { listPost, getPost, delPost, addPost, updatePost, changePostStatus, batchChangePostStatus } from '@/api/system/post'
 import type { SysPost } from '@/api/system/types'
 
 const { toast } = useToast()
@@ -54,9 +55,14 @@ const queryParams = reactive({
 
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
+const showBatchDeleteDialog = ref(false)
 const postToDelete = ref<SysPost | null>(null)
 const isEdit = ref(false)
 const submitLoading = ref(false)
+
+// 批量选择
+const selectedIds = ref<string[]>([])
+const selectAll = ref(false)
 
 const form = reactive<Partial<SysPost>>({
   postId: undefined,
@@ -78,6 +84,8 @@ async function getList() {
     const res = await listPost(params)
     postList.value = res.rows
     total.value = res.total
+    selectedIds.value = []
+    selectAll.value = false
   } finally {
     loading.value = false
   }
@@ -167,6 +175,69 @@ async function handleStatusChange(postId: string, status: string) {
   if (post) post.status = status
 }
 
+// 批量选择
+function handleSelectOne(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
+// 监听全选状态变化
+watch(selectAll, (newVal) => {
+  if (newVal) {
+    selectedIds.value = postList.value.map((p) => p.postId)
+  } else if (selectedIds.value.length === postList.value.length) {
+    selectedIds.value = []
+  }
+})
+
+// 监听选中项变化，更新全选状态
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = postList.value.length > 0 && newVal.length === postList.value.length
+  },
+  { deep: true }
+)
+
+// 批量删除
+function handleBatchDelete() {
+  if (selectedIds.value.length === 0) {
+    toast({ title: '请选择要删除的数据', variant: 'destructive' })
+    return
+  }
+  showBatchDeleteDialog.value = true
+}
+
+async function confirmBatchDelete() {
+  try {
+    await delPost(selectedIds.value)
+    toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
+    getList()
+    showBatchDeleteDialog.value = false
+  } catch {
+    // 忽略错误
+  }
+}
+
+// 批量状态操作
+async function handleBatchStatus(status: string) {
+  if (selectedIds.value.length === 0) {
+    toast({ title: '请选择要操作的数据', variant: 'destructive' })
+    return
+  }
+  try {
+    await batchChangePostStatus(selectedIds.value, status)
+    toast({ title: status === '0' ? '批量启用成功' : '批量停用成功' })
+    getList()
+  } catch (e: any) {
+    toast({ title: '操作失败', description: e.message, variant: 'destructive' })
+  }
+}
+
 onMounted(() => {
   getList()
 })
@@ -235,10 +306,21 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- 批量操作栏 -->
+    <div
+      v-if="selectedIds.length > 0"
+      class="flex items-center gap-3 p-3 bg-muted/50 border rounded-lg"
+    >
+      <span class="text-sm">已选择 {{ selectedIds.length }} 项</span>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('0')">批量启用</Button>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('1')">批量停用</Button>
+      <Button size="sm" variant="destructive" @click="handleBatchDelete">批量删除</Button>
+    </div>
+
     <!-- Table -->
     <div class="border rounded-md bg-card overflow-x-auto">
       <!-- 骨架屏 -->
-      <TableSkeleton v-if="loading" :columns="6" :rows="10" />
+      <TableSkeleton v-if="loading" :columns="8" :rows="10" />
 
       <!-- 空状态 -->
       <EmptyState
@@ -253,6 +335,9 @@ onMounted(() => {
       <Table v-else>
         <TableHeader>
           <TableRow>
+            <TableHead class="w-[50px]">
+              <Checkbox v-model="selectAll" />
+            </TableHead>
             <TableHead>岗位编号</TableHead>
             <TableHead>岗位编码</TableHead>
             <TableHead>岗位名称</TableHead>
@@ -264,6 +349,12 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-for="item in postList" :key="item.postId">
+            <TableCell>
+              <Checkbox
+                :model-value="selectedIds.includes(item.postId)"
+                @update:model-value="() => handleSelectOne(item.postId)"
+              />
+            </TableCell>
             <TableCell>{{ item.postId }}</TableCell>
             <TableCell
               ><Badge variant="outline">{{ item.postCode }}</Badge></TableCell
@@ -368,6 +459,16 @@ onMounted(() => {
       confirm-text="删除"
       destructive
       @confirm="confirmDelete"
+    />
+
+    <!-- Batch Delete Confirmation Dialog -->
+    <ConfirmDialog
+      v-model:open="showBatchDeleteDialog"
+      title="确认批量删除"
+      :description="`确定要删除选中的 ${selectedIds.length} 个岗位吗？`"
+      confirm-text="删除"
+      destructive
+      @confirm="confirmBatchDelete"
     />
   </div>
 </template>

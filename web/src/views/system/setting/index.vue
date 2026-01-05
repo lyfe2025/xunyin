@@ -30,7 +30,6 @@ import {
   Save,
   RefreshCw,
   Shield,
-  KeyRound,
   Globe,
   Mail,
   HardDrive,
@@ -41,6 +40,7 @@ import {
   HelpCircle,
   ChevronDown,
   Link2,
+  KeyRound,
 } from 'lucide-vue-next'
 
 const { toast } = useToast()
@@ -138,16 +138,6 @@ const form = reactive({
   'map.google.enabled': 'false',
   'map.google.key': '',
 
-  // ========== App配置 ==========
-  'app.name': '寻印',
-  'app.version': '1.0.0',
-  'app.forceUpdateVersion': '',
-  'app.downloadUrl': '',
-  'app.userAgreementUrl': '',
-  'app.privacyPolicyUrl': '',
-  'app.userAgreementContent': '',
-  'app.privacyPolicyContent': '',
-
   // ========== 区块链存证配置 ==========
   'chain.provider': 'local',
   'chain.timestamp.apiKey': '',
@@ -199,7 +189,6 @@ async function getData() {
       'sys.storage.',
       'oauth.',
       'map.',
-      'app.',
       'chain.',
     ]
     const results = await Promise.all(
@@ -372,15 +361,6 @@ function getConfigName(key: string): string {
     'map.tencent.key': '腾讯地图Key',
     'map.google.enabled': 'Google地图开关',
     'map.google.key': 'Google地图Key',
-    // App配置
-    'app.name': 'App名称',
-    'app.version': 'App版本',
-    'app.forceUpdateVersion': '强制更新版本',
-    'app.downloadUrl': 'App下载地址',
-    'app.userAgreementUrl': '用户协议URL',
-    'app.privacyPolicyUrl': '隐私政策URL',
-    'app.userAgreementContent': '用户协议内容',
-    'app.privacyPolicyContent': '隐私政策内容',
     // 区块链存证
     'chain.provider': '链服务提供者',
     'chain.antchain.appId': '蚂蚁链AppID',
@@ -554,26 +534,6 @@ const mailEnabled = computed({
   },
 })
 
-// 三方登录开关
-const wechatEnabled = computed({
-  get: () => form['oauth.wechat.enabled'] === 'true',
-  set: (val: boolean) => {
-    form['oauth.wechat.enabled'] = val ? 'true' : 'false'
-  },
-})
-const googleEnabled = computed({
-  get: () => form['oauth.google.enabled'] === 'true',
-  set: (val: boolean) => {
-    form['oauth.google.enabled'] = val ? 'true' : 'false'
-  },
-})
-const appleEnabled = computed({
-  get: () => form['oauth.apple.enabled'] === 'true',
-  set: (val: boolean) => {
-    form['oauth.apple.enabled'] = val ? 'true' : 'false'
-  },
-})
-
 // 地图开关
 const amapEnabled = computed({
   get: () => form['map.amap.enabled'] === 'true',
@@ -649,11 +609,8 @@ onMounted(() => {
         <TabsTrigger value="security"><Shield class="h-4 w-4 mr-2" />安全设置</TabsTrigger>
         <TabsTrigger value="mail"><Mail class="h-4 w-4 mr-2" />邮件设置</TabsTrigger>
         <TabsTrigger value="storage"><HardDrive class="h-4 w-4 mr-2" />存储设置</TabsTrigger>
-        <TabsTrigger value="oauth"><KeyRound class="h-4 w-4 mr-2" />三方登录</TabsTrigger>
         <TabsTrigger value="map"><Globe class="h-4 w-4 mr-2" />地图配置</TabsTrigger>
-        <TabsTrigger value="app"><Globe class="h-4 w-4 mr-2" />App配置</TabsTrigger>
         <TabsTrigger value="chain"><Link2 class="h-4 w-4 mr-2" />区块链存证</TabsTrigger>
-        <TabsTrigger value="agreement"><Shield class="h-4 w-4 mr-2" />协议与政策</TabsTrigger>
       </TabsList>
 
       <!-- 网站设置 -->
@@ -1271,157 +1228,6 @@ onMounted(() => {
         </Card>
       </TabsContent>
 
-      <!-- 三方登录配置 -->
-      <TabsContent value="oauth" class="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>三方登录配置</CardTitle>
-            <CardDescription>配置 App 支持的第三方登录方式</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs default-value="wechat">
-              <TabsList class="mb-4">
-                <TabsTrigger value="wechat">微信登录</TabsTrigger>
-                <TabsTrigger value="google">Google 登录</TabsTrigger>
-                <TabsTrigger value="apple">Apple 登录</TabsTrigger>
-              </TabsList>
-
-              <!-- 微信登录 -->
-              <TabsContent value="wechat" class="space-y-4">
-                <div class="flex items-center justify-between pb-4 border-b">
-                  <div class="space-y-0.5">
-                    <Label class="text-base">启用微信登录</Label>
-                    <p class="text-sm text-muted-foreground">允许用户使用微信账号登录 App</p>
-                  </div>
-                  <Switch v-model:checked="wechatEnabled" />
-                </div>
-                <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
-                  <p>
-                    1. 登录
-                    <a
-                      href="https://open.weixin.qq.com"
-                      target="_blank"
-                      class="text-primary hover:underline"
-                      >微信开放平台</a
-                    >
-                    创建移动应用
-                  </p>
-                  <p>2. 获取 AppID 和 AppSecret</p>
-                  <p>3. 配置应用的 Bundle ID（iOS）和包名（Android）</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div class="grid gap-2">
-                    <Label>AppID</Label>
-                    <Input v-model="form['oauth.wechat.appId']" placeholder="wx..." />
-                  </div>
-                  <div class="grid gap-2">
-                    <Label>AppSecret</Label>
-                    <Input
-                      v-model="form['oauth.wechat.appSecret']"
-                      type="password"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-
-              <!-- Google 登录 -->
-              <TabsContent value="google" class="space-y-4">
-                <div class="flex items-center justify-between pb-4 border-b">
-                  <div class="space-y-0.5">
-                    <Label class="text-base">启用 Google 登录</Label>
-                    <p class="text-sm text-muted-foreground">
-                      允许用户使用 Google 账号登录 App（海外用户）
-                    </p>
-                  </div>
-                  <Switch v-model:checked="googleEnabled" />
-                </div>
-                <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
-                  <p>
-                    1. 登录
-                    <a
-                      href="https://console.cloud.google.com/apis/credentials"
-                      target="_blank"
-                      class="text-primary hover:underline"
-                      >Google Cloud Console</a
-                    >
-                  </p>
-                  <p>2. 创建 OAuth 2.0 客户端 ID（选择 iOS/Android 应用类型）</p>
-                  <p>3. 配置授权重定向 URI</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div class="grid gap-2">
-                    <Label>Client ID</Label>
-                    <Input
-                      v-model="form['oauth.google.clientId']"
-                      placeholder="xxx.apps.googleusercontent.com"
-                    />
-                  </div>
-                  <div class="grid gap-2">
-                    <Label>Client Secret</Label>
-                    <Input
-                      v-model="form['oauth.google.clientSecret']"
-                      type="password"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-
-              <!-- Apple 登录 -->
-              <TabsContent value="apple" class="space-y-4">
-                <div class="flex items-center justify-between pb-4 border-b">
-                  <div class="space-y-0.5">
-                    <Label class="text-base">启用 Apple 登录</Label>
-                    <p class="text-sm text-muted-foreground">
-                      允许用户使用 Apple ID 登录 App（iOS 用户）
-                    </p>
-                  </div>
-                  <Switch v-model:checked="appleEnabled" />
-                </div>
-                <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
-                  <p>
-                    1. 登录
-                    <a
-                      href="https://developer.apple.com/account"
-                      target="_blank"
-                      class="text-primary hover:underline"
-                      >Apple Developer</a
-                    >
-                    → Certificates, Identifiers & Profiles
-                  </p>
-                  <p>2. 创建 Services ID 并启用 Sign in with Apple</p>
-                  <p>3. 创建 Key 并下载 .p8 私钥文件，Team ID 在开发者账号右上角可见</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div class="grid gap-2">
-                    <Label>Team ID</Label>
-                    <Input v-model="form['oauth.apple.teamId']" placeholder="XXXXXXXXXX" />
-                  </div>
-                  <div class="grid gap-2">
-                    <Label>Client ID (Service ID)</Label>
-                    <Input v-model="form['oauth.apple.clientId']" placeholder="com.example.app" />
-                  </div>
-                  <div class="grid gap-2">
-                    <Label>Key ID</Label>
-                    <Input v-model="form['oauth.apple.keyId']" placeholder="XXXXXXXXXX" />
-                  </div>
-                </div>
-                <div class="grid gap-2">
-                  <Label>Private Key (.p8 内容)</Label>
-                  <Textarea
-                    v-model="form['oauth.apple.privateKey']"
-                    placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"
-                    rows="4"
-                    class="font-mono text-xs"
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
       <!-- 地图配置 -->
       <TabsContent value="map" class="space-y-4">
         <Card>
@@ -1535,42 +1341,6 @@ onMounted(() => {
                 </div>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <!-- App配置 -->
-      <TabsContent value="app" class="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>App 基本信息</CardTitle>
-            <CardDescription>配置寻印 App 的基本信息</CardDescription>
-          </CardHeader>
-          <CardContent class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="grid gap-2">
-                <Label>App 名称</Label>
-                <Input v-model="form['app.name']" placeholder="寻印" />
-              </div>
-              <div class="grid gap-2">
-                <Label>当前版本</Label>
-                <Input v-model="form['app.version']" placeholder="1.0.0" />
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="grid gap-2">
-                <Label>强制更新版本</Label>
-                <Input
-                  v-model="form['app.forceUpdateVersion']"
-                  placeholder="低于此版本强制更新，留空不强制"
-                />
-                <p class="text-xs text-muted-foreground">低于此版本的用户将被强制更新</p>
-              </div>
-              <div class="grid gap-2">
-                <Label>App 下载地址</Label>
-                <Input v-model="form['app.downloadUrl']" placeholder="https://..." />
-              </div>
-            </div>
           </CardContent>
         </Card>
       </TabsContent>
@@ -1805,38 +1575,6 @@ onMounted(() => {
                 <p class="text-xs text-destructive">私钥泄露将导致钱包资产被盗，请确保服务器安全</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <!-- 协议与政策 -->
-      <TabsContent value="agreement" class="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>协议与政策</CardTitle>
-            <CardDescription>在线编辑用户协议和隐私政策内容，支持富文本格式</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs default-value="userAgreement">
-              <TabsList class="mb-4">
-                <TabsTrigger value="userAgreement">用户协议</TabsTrigger>
-                <TabsTrigger value="privacyPolicy">隐私政策</TabsTrigger>
-              </TabsList>
-              <TabsContent value="userAgreement">
-                <RichTextEditor
-                  v-model="form['app.userAgreementContent']"
-                  placeholder="请输入用户协议内容..."
-                  min-height="500px"
-                />
-              </TabsContent>
-              <TabsContent value="privacyPolicy">
-                <RichTextEditor
-                  v-model="form['app.privacyPolicyContent']"
-                  placeholder="请输入隐私政策内容..."
-                  min-height="500px"
-                />
-              </TabsContent>
-            </Tabs>
           </CardContent>
         </Card>
       </TabsContent>

@@ -906,6 +906,7 @@ CREATE TABLE IF NOT EXISTS user_seal (
   tx_hash VARCHAR(100),
   block_height BIGINT,
   chain_time TIMESTAMP,
+  chain_certificate JSONB,
   create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   update_time TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES app_user(id),
@@ -924,6 +925,7 @@ COMMENT ON COLUMN user_seal.chain_name IS '链名称: LocalChain(本地哈希存
 COMMENT ON COLUMN user_seal.tx_hash IS '交易哈希';
 COMMENT ON COLUMN user_seal.block_height IS '区块高度';
 COMMENT ON COLUMN user_seal.chain_time IS '上链时间';
+COMMENT ON COLUMN user_seal.chain_certificate IS '存证原始数据，用于验证';
 
 CREATE INDEX IF NOT EXISTS idx_user_seal_user_id ON user_seal(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_seal_seal_id ON user_seal(seal_id);
@@ -1014,3 +1016,324 @@ COMMENT ON COLUMN background_music.status IS '状态（0正常 1停用）';
 
 CREATE INDEX IF NOT EXISTS idx_background_music_context ON background_music(context, context_id);
 CREATE INDEX IF NOT EXISTS idx_background_music_status ON background_music(status);
+
+
+-- =============================================
+-- APP 配置相关表
+-- 说明：APP 启动页、登录页、下载页、推广统计、版本管理
+-- =============================================
+
+-- ----------------------------
+-- APP启动页配置表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_splash_config (
+  id VARCHAR(30) PRIMARY KEY,
+  title VARCHAR(100),
+  type VARCHAR(20) NOT NULL DEFAULT 'image',
+  media_url VARCHAR(500) NOT NULL,
+  link_type VARCHAR(20),
+  link_url VARCHAR(500),
+  duration INT DEFAULT 3,
+  skip_delay INT DEFAULT 0,
+  platform VARCHAR(20) DEFAULT 'all',
+  start_time TIMESTAMP,
+  end_time TIMESTAMP,
+  order_num INT DEFAULT 0,
+  status CHAR(1) DEFAULT '0',
+  create_by VARCHAR(64) DEFAULT '',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_by VARCHAR(64) DEFAULT '',
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE app_splash_config IS 'APP启动页配置表';
+COMMENT ON COLUMN app_splash_config.id IS '配置ID';
+COMMENT ON COLUMN app_splash_config.title IS '标题';
+COMMENT ON COLUMN app_splash_config.type IS '类型：image-图片 video-视频';
+COMMENT ON COLUMN app_splash_config.media_url IS '媒体资源URL';
+COMMENT ON COLUMN app_splash_config.link_type IS '跳转类型：none-不跳转 internal-内部页面 external-外部链接';
+COMMENT ON COLUMN app_splash_config.link_url IS '跳转链接';
+COMMENT ON COLUMN app_splash_config.duration IS '展示时长（秒）';
+COMMENT ON COLUMN app_splash_config.skip_delay IS '跳过按钮延迟显示（秒）';
+COMMENT ON COLUMN app_splash_config.platform IS '平台：all-全部 ios-仅iOS android-仅Android';
+COMMENT ON COLUMN app_splash_config.start_time IS '生效开始时间';
+COMMENT ON COLUMN app_splash_config.end_time IS '生效结束时间';
+COMMENT ON COLUMN app_splash_config.order_num IS '显示顺序';
+COMMENT ON COLUMN app_splash_config.status IS '状态（0启用 1停用）';
+COMMENT ON COLUMN app_splash_config.create_by IS '创建者';
+COMMENT ON COLUMN app_splash_config.create_time IS '创建时间';
+COMMENT ON COLUMN app_splash_config.update_by IS '更新者';
+COMMENT ON COLUMN app_splash_config.update_time IS '更新时间';
+
+CREATE INDEX IF NOT EXISTS idx_app_splash_status ON app_splash_config(status);
+CREATE INDEX IF NOT EXISTS idx_app_splash_platform ON app_splash_config(platform);
+CREATE INDEX IF NOT EXISTS idx_app_splash_time ON app_splash_config(start_time, end_time);
+
+-- ----------------------------
+-- APP登录页配置表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_login_config (
+  id VARCHAR(30) PRIMARY KEY,
+  -- 背景配置
+  background_type VARCHAR(20) DEFAULT 'gradient',
+  background_image VARCHAR(500),
+  background_color VARCHAR(20),
+  gradient_start VARCHAR(20) DEFAULT '#8B4513',
+  gradient_end VARCHAR(20) DEFAULT '#2C2C2C',
+  gradient_direction VARCHAR(30) DEFAULT '135deg',
+  -- Logo配置
+  logo_image VARCHAR(500),
+  logo_size VARCHAR(20) DEFAULT 'normal',
+  -- 标语配置
+  slogan VARCHAR(200),
+  slogan_color VARCHAR(20) DEFAULT '#F5F5DC',
+  -- 按钮样式
+  button_style VARCHAR(20) DEFAULT 'filled',
+  button_primary_color VARCHAR(20) DEFAULT '#C53D43',
+  button_secondary_color VARCHAR(30) DEFAULT 'rgba(255,255,255,0.2)',
+  button_radius VARCHAR(20) DEFAULT 'full',
+  -- 登录方式开关
+  wechat_login_enabled BOOLEAN DEFAULT TRUE,
+  apple_login_enabled BOOLEAN DEFAULT TRUE,
+  google_login_enabled BOOLEAN DEFAULT FALSE,
+  phone_login_enabled BOOLEAN DEFAULT TRUE,
+  email_login_enabled BOOLEAN DEFAULT FALSE,
+  guest_mode_enabled BOOLEAN DEFAULT FALSE,
+  -- 协议配置
+  agreement_source VARCHAR(20) DEFAULT 'builtin',
+  user_agreement_url VARCHAR(500),
+  privacy_policy_url VARCHAR(500),
+  -- 系统字段
+  status CHAR(1) DEFAULT '0',
+  create_by VARCHAR(64) DEFAULT '',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_by VARCHAR(64) DEFAULT '',
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE app_login_config IS 'APP登录页配置表';
+COMMENT ON COLUMN app_login_config.id IS '配置ID';
+COMMENT ON COLUMN app_login_config.background_type IS '背景类型: image-图片, color-纯色, gradient-渐变';
+COMMENT ON COLUMN app_login_config.background_image IS '背景图（backgroundType=image时使用）';
+COMMENT ON COLUMN app_login_config.background_color IS '纯色背景（backgroundType=color时使用）';
+COMMENT ON COLUMN app_login_config.gradient_start IS '渐变起始色（默认赭石色）';
+COMMENT ON COLUMN app_login_config.gradient_end IS '渐变结束色（默认墨色）';
+COMMENT ON COLUMN app_login_config.gradient_direction IS '渐变方向: to bottom, to top, to right, to left, 45deg, 135deg';
+COMMENT ON COLUMN app_login_config.logo_image IS 'Logo图片';
+COMMENT ON COLUMN app_login_config.logo_size IS 'Logo尺寸: small-小, normal-正常, large-大';
+COMMENT ON COLUMN app_login_config.slogan IS '标语';
+COMMENT ON COLUMN app_login_config.slogan_color IS '标语颜色（默认米白色）';
+COMMENT ON COLUMN app_login_config.button_style IS '按钮风格: filled-填充, outlined-描边, rounded-圆角';
+COMMENT ON COLUMN app_login_config.button_primary_color IS '主按钮颜色（默认朱砂红）';
+COMMENT ON COLUMN app_login_config.button_secondary_color IS '次按钮颜色（默认半透明白色）';
+COMMENT ON COLUMN app_login_config.button_radius IS '按钮圆角: none-无, sm-小, md-中, lg-大, full-全圆角';
+COMMENT ON COLUMN app_login_config.wechat_login_enabled IS '微信登录是否启用';
+COMMENT ON COLUMN app_login_config.apple_login_enabled IS 'Apple登录是否启用';
+COMMENT ON COLUMN app_login_config.google_login_enabled IS 'Google登录是否启用';
+COMMENT ON COLUMN app_login_config.phone_login_enabled IS '手机号登录是否启用';
+COMMENT ON COLUMN app_login_config.email_login_enabled IS '邮箱登录是否启用';
+COMMENT ON COLUMN app_login_config.guest_mode_enabled IS '游客模式是否启用';
+COMMENT ON COLUMN app_login_config.agreement_source IS '协议来源: builtin-内置协议, external-外部链接';
+COMMENT ON COLUMN app_login_config.user_agreement_url IS '用户协议外部链接';
+COMMENT ON COLUMN app_login_config.privacy_policy_url IS '隐私政策外部链接';
+COMMENT ON COLUMN app_login_config.status IS '状态（0启用 1停用）';
+COMMENT ON COLUMN app_login_config.create_by IS '创建者';
+COMMENT ON COLUMN app_login_config.create_time IS '创建时间';
+COMMENT ON COLUMN app_login_config.update_by IS '更新者';
+COMMENT ON COLUMN app_login_config.update_time IS '更新时间';
+
+-- ----------------------------
+-- APP下载页配置表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_download_config (
+  id VARCHAR(30) PRIMARY KEY,
+  page_title VARCHAR(100),
+  page_description TEXT,
+  -- 背景配置
+  background_type VARCHAR(20) NOT NULL DEFAULT 'gradient',
+  background_image VARCHAR(500),
+  background_color VARCHAR(20),
+  gradient_start VARCHAR(20) DEFAULT '#8B4513',
+  gradient_end VARCHAR(20) DEFAULT '#2C2C2C',
+  gradient_direction VARCHAR(30) DEFAULT '135deg',
+  -- APP信息
+  app_icon VARCHAR(500),
+  app_name VARCHAR(100),
+  app_slogan VARCHAR(200),
+  slogan_color VARCHAR(20) DEFAULT '#F5F5DC',
+  -- 按钮样式
+  button_style VARCHAR(20) DEFAULT 'filled',
+  button_primary_color VARCHAR(20) DEFAULT '#C53D43',
+  button_secondary_color VARCHAR(30) DEFAULT 'rgba(255,255,255,0.2)',
+  button_radius VARCHAR(20) DEFAULT 'full',
+  feature_list JSONB,
+  ios_store_url VARCHAR(500),
+  android_store_url VARCHAR(500),
+  android_apk_url VARCHAR(500),
+  qrcode_image VARCHAR(500),
+  footer_text VARCHAR(500),
+  status CHAR(1) DEFAULT '0',
+  create_by VARCHAR(64) DEFAULT '',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_by VARCHAR(64) DEFAULT '',
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE app_download_config IS 'APP下载页配置表';
+COMMENT ON COLUMN app_download_config.id IS '配置ID';
+COMMENT ON COLUMN app_download_config.page_title IS '页面标题';
+COMMENT ON COLUMN app_download_config.page_description IS '页面描述';
+COMMENT ON COLUMN app_download_config.background_type IS '背景类型: image-图片, color-纯色, gradient-渐变';
+COMMENT ON COLUMN app_download_config.background_image IS '背景图（backgroundType=image时使用）';
+COMMENT ON COLUMN app_download_config.background_color IS '纯色背景（backgroundType=color时使用）';
+COMMENT ON COLUMN app_download_config.gradient_start IS '渐变起始色（默认赭石色）';
+COMMENT ON COLUMN app_download_config.gradient_end IS '渐变结束色（默认墨色）';
+COMMENT ON COLUMN app_download_config.gradient_direction IS '渐变方向';
+COMMENT ON COLUMN app_download_config.app_icon IS 'APP图标';
+COMMENT ON COLUMN app_download_config.app_name IS 'APP名称';
+COMMENT ON COLUMN app_download_config.app_slogan IS 'APP标语';
+COMMENT ON COLUMN app_download_config.slogan_color IS '标语颜色（默认米白色）';
+COMMENT ON COLUMN app_download_config.button_style IS '按钮风格: filled-填充, outlined-描边, rounded-圆角';
+COMMENT ON COLUMN app_download_config.button_primary_color IS '主按钮颜色（默认朱砂红）';
+COMMENT ON COLUMN app_download_config.button_secondary_color IS '次按钮颜色（默认半透明白色）';
+COMMENT ON COLUMN app_download_config.button_radius IS '按钮圆角: none-无, sm-小, md-中, lg-大, full-全圆角';
+COMMENT ON COLUMN app_download_config.feature_list IS '功能特点JSON数组';
+COMMENT ON COLUMN app_download_config.ios_store_url IS 'iOS商店链接';
+COMMENT ON COLUMN app_download_config.android_store_url IS 'Android商店链接';
+COMMENT ON COLUMN app_download_config.android_apk_url IS 'Android APK下载链接';
+COMMENT ON COLUMN app_download_config.qrcode_image IS '二维码图片';
+COMMENT ON COLUMN app_download_config.footer_text IS '页脚文字';
+COMMENT ON COLUMN app_download_config.status IS '状态（0启用 1停用）';
+COMMENT ON COLUMN app_download_config.create_by IS '创建者';
+COMMENT ON COLUMN app_download_config.create_time IS '创建时间';
+COMMENT ON COLUMN app_download_config.update_by IS '更新者';
+COMMENT ON COLUMN app_download_config.update_time IS '更新时间';
+
+-- ----------------------------
+-- APP推广渠道表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_promotion_channel (
+  id VARCHAR(30) PRIMARY KEY,
+  channel_code VARCHAR(50) NOT NULL UNIQUE,
+  channel_name VARCHAR(100) NOT NULL,
+  channel_type VARCHAR(20),
+  description VARCHAR(500),
+  download_url VARCHAR(500),
+  qrcode_image VARCHAR(500),
+  status CHAR(1) DEFAULT '0',
+  create_by VARCHAR(64) DEFAULT '',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_by VARCHAR(64) DEFAULT '',
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE app_promotion_channel IS 'APP推广渠道表';
+COMMENT ON COLUMN app_promotion_channel.id IS '渠道ID';
+COMMENT ON COLUMN app_promotion_channel.channel_code IS '渠道编码';
+COMMENT ON COLUMN app_promotion_channel.channel_name IS '渠道名称';
+COMMENT ON COLUMN app_promotion_channel.channel_type IS '渠道类型：social-社交媒体 ad-广告投放 offline-线下推广 other-其他';
+COMMENT ON COLUMN app_promotion_channel.description IS '描述';
+COMMENT ON COLUMN app_promotion_channel.download_url IS '下载链接';
+COMMENT ON COLUMN app_promotion_channel.qrcode_image IS '二维码图片';
+COMMENT ON COLUMN app_promotion_channel.status IS '状态（0启用 1停用）';
+COMMENT ON COLUMN app_promotion_channel.create_by IS '创建者';
+COMMENT ON COLUMN app_promotion_channel.create_time IS '创建时间';
+COMMENT ON COLUMN app_promotion_channel.update_by IS '更新者';
+COMMENT ON COLUMN app_promotion_channel.update_time IS '更新时间';
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_app_channel_code ON app_promotion_channel(channel_code);
+CREATE INDEX IF NOT EXISTS idx_app_channel_type ON app_promotion_channel(channel_type);
+
+-- ----------------------------
+-- APP推广统计表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_promotion_stats (
+  id VARCHAR(30) PRIMARY KEY,
+  channel_id VARCHAR(30) NOT NULL,
+  stat_date DATE NOT NULL,
+  page_views INT DEFAULT 0,
+  download_clicks INT DEFAULT 0,
+  install_count INT DEFAULT 0,
+  register_count INT DEFAULT 0,
+  active_count INT DEFAULT 0,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (channel_id) REFERENCES app_promotion_channel(id)
+);
+COMMENT ON TABLE app_promotion_stats IS 'APP推广统计表';
+COMMENT ON COLUMN app_promotion_stats.id IS '统计ID';
+COMMENT ON COLUMN app_promotion_stats.channel_id IS '渠道ID';
+COMMENT ON COLUMN app_promotion_stats.stat_date IS '统计日期';
+COMMENT ON COLUMN app_promotion_stats.page_views IS '页面浏览量';
+COMMENT ON COLUMN app_promotion_stats.download_clicks IS '下载点击数';
+COMMENT ON COLUMN app_promotion_stats.install_count IS '安装数';
+COMMENT ON COLUMN app_promotion_stats.register_count IS '注册数';
+COMMENT ON COLUMN app_promotion_stats.active_count IS '活跃数';
+COMMENT ON COLUMN app_promotion_stats.create_time IS '创建时间';
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_app_stats_channel_date ON app_promotion_stats(channel_id, stat_date);
+CREATE INDEX IF NOT EXISTS idx_app_stats_date ON app_promotion_stats(stat_date);
+
+-- ----------------------------
+-- APP版本管理表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_version (
+  id VARCHAR(30) PRIMARY KEY,
+  version_code VARCHAR(20) NOT NULL,
+  version_name VARCHAR(50) NOT NULL,
+  platform VARCHAR(20) NOT NULL,
+  download_url VARCHAR(500),
+  file_size VARCHAR(20),
+  update_content TEXT,
+  is_force_update BOOLEAN DEFAULT FALSE,
+  min_support_version VARCHAR(20),
+  publish_time TIMESTAMP,
+  status CHAR(1) DEFAULT '0',
+  create_by VARCHAR(64) DEFAULT '',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_by VARCHAR(64) DEFAULT '',
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE app_version IS 'APP版本管理表';
+COMMENT ON COLUMN app_version.id IS '版本ID';
+COMMENT ON COLUMN app_version.version_code IS '版本号';
+COMMENT ON COLUMN app_version.version_name IS '版本名称';
+COMMENT ON COLUMN app_version.platform IS '平台：ios/android';
+COMMENT ON COLUMN app_version.download_url IS '下载链接';
+COMMENT ON COLUMN app_version.file_size IS '文件大小';
+COMMENT ON COLUMN app_version.update_content IS '更新内容';
+COMMENT ON COLUMN app_version.is_force_update IS '是否强制更新';
+COMMENT ON COLUMN app_version.min_support_version IS '最低支持版本';
+COMMENT ON COLUMN app_version.publish_time IS '发布时间';
+COMMENT ON COLUMN app_version.status IS '状态（0启用 1停用）';
+COMMENT ON COLUMN app_version.create_by IS '创建者';
+COMMENT ON COLUMN app_version.create_time IS '创建时间';
+COMMENT ON COLUMN app_version.update_by IS '更新者';
+COMMENT ON COLUMN app_version.update_time IS '更新时间';
+
+CREATE INDEX IF NOT EXISTS idx_app_version_platform ON app_version(platform);
+CREATE INDEX IF NOT EXISTS idx_app_version_code ON app_version(version_code);
+
+-- ----------------------------
+-- APP协议内容表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS app_agreement (
+  id VARCHAR(30) PRIMARY KEY,
+  type VARCHAR(30) NOT NULL UNIQUE,
+  title VARCHAR(100) NOT NULL,
+  content TEXT NOT NULL,
+  version VARCHAR(20) DEFAULT '1.0',
+  status CHAR(1) DEFAULT '0',
+  create_by VARCHAR(64) DEFAULT '',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_by VARCHAR(64) DEFAULT '',
+  update_time TIMESTAMP
+);
+COMMENT ON TABLE app_agreement IS 'APP协议内容表';
+COMMENT ON COLUMN app_agreement.id IS '协议ID';
+COMMENT ON COLUMN app_agreement.type IS '协议类型：user_agreement-用户协议 privacy_policy-隐私政策';
+COMMENT ON COLUMN app_agreement.title IS '协议标题';
+COMMENT ON COLUMN app_agreement.content IS '协议内容';
+COMMENT ON COLUMN app_agreement.version IS '版本号';
+COMMENT ON COLUMN app_agreement.status IS '状态（0启用 1停用）';
+COMMENT ON COLUMN app_agreement.create_by IS '创建者';
+COMMENT ON COLUMN app_agreement.create_time IS '创建时间';
+COMMENT ON COLUMN app_agreement.update_by IS '更新者';
+COMMENT ON COLUMN app_agreement.update_time IS '更新时间';
+
+CREATE INDEX IF NOT EXISTS idx_app_agreement_type ON app_agreement(type);

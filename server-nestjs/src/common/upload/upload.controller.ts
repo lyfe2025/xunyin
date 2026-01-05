@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { StorageService } from './storage.service';
+import { UploadConfigService } from './upload-config.service';
 
 // 文件魔数签名（用于校验真实文件类型）
 const FILE_SIGNATURES: Record<string, number[][]> = {
@@ -45,6 +46,8 @@ const FILE_SIGNATURES: Record<string, number[][]> = {
     [0xff, 0xf1],
     [0xff, 0xf9],
   ], // AAC
+  // APK 文件 (ZIP 格式，以 PK 开头)
+  'application/vnd.android.package-archive': [[0x50, 0x4b, 0x03, 0x04]],
 };
 
 /**
@@ -109,6 +112,7 @@ function sanitizeFilename(filename: string): string {
     '.flac',
     '.aac',
     '.m4a',
+    '.apk',
   ];
   if (!allowedExts.includes(ext)) {
     return '.png';
@@ -130,7 +134,10 @@ function generateFilename(prefix: string, originalname: string): string {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class UploadController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(
+    private readonly storageService: StorageService,
+    private readonly uploadConfigService: UploadConfigService,
+  ) { }
 
   /**
    * 上传头像
@@ -425,6 +432,77 @@ export class UploadController {
       filename: result.filename,
       size: result.size,
       mimetype: file.mimetype,
+    };
+  }
+
+  /**
+   * 上传 APK 文件
+   */
+  @Post('apk')
+  @ApiOperation({ summary: '上传 APK 安装包' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (_req, file, cb) => {
+        const allowedMimes = [
+          'application/vnd.android.package-archive',
+          'application/octet-stream',
+        ];
+        const hasValidExt = file.originalname.toLowerCase().endsWith('.apk');
+        if (!allowedMimes.includes(file.mimetype) && !hasValidExt) {
+          cb(new BadRequestException('只支持 APK 格式文件'), false);
+        } else {
+          cb(null, true);
+        }
+      },
+      limits: { fileSize: 500 * 1024 * 1024 }, // 硬上限 500MB，实际限制由数据库配置控制
+    }),
+  )
+  async uploadApk(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('请选择要上传的文件');
+    }
+
+    // 从数据库获取配置的最大大小
+    const maxSize = await this.uploadConfigService.getApkMaxSize();
+    if (file.buffer.length > maxSize) {
+      const maxSizeMB = Math.round(maxSize / (1024 * 1024));
+      throw new BadRequestException(`APK 文件不能超过 ${maxSizeMB}MB`);
+    }
+
+    // APK 文件是 ZIP 格式，校验魔数
+    const allowedTypes = ['application/vnd.android.package-archive'];
+    const isValidMagic = validateFileMagic(file.buffer, allowedTypes);
+    const hasValidExt = file.originalname.toLowerCase().endsWith('.apk');
+
+    if (!isValidMagic && !hasValidExt) {
+      throw new BadRequestException('文件类型不合法，请上传真实的 APK 文件');
+    }
+
+    const filename = generateFilename('app', file.originalname);
+    const result = await this.storageService.upload(
+      file.buffer,
+      filename,
+      'application/vnd.android.package-archive',
+      'apk',
+    );
+
+    // 格式化文件大小
+    const fileSizeMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
+
+    return {
+      url: result.url,
+      filename: result.filename,
+      size: result.size,
+      fileSize: `${fileSizeMB} MB`,
+      mimetype: 'application/vnd.android.package-archive',
     };
   }
 }

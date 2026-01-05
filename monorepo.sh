@@ -365,14 +365,14 @@ attach_logs() {
 
 type_check() { (cd "$WEB_DIR" && npm run type-check); }
 validate_server() { (cd "$SERVER_DIR" && npm run validate); }
-migrate_dev() { (cd "$SERVER_DIR" && npx prisma migrate dev); }
+migrate_dev() { (cd "$SERVER_DIR" && npx prisma migrate dev && npx prisma generate); }
 studio() { (cd "$SERVER_DIR" && npx prisma studio); }
 reset_db() {
   printf "${FG_YELLOW}⚠️  警告: 此操作将删除所有数据并重置数据库到初始状态!${RESET}\n"
   read -rp "确认重置数据库? (y/N): " confirm
   if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
     printf "${FG_BLUE}正在重置数据库...${RESET}\n"
-    (cd "$SERVER_DIR" && npx prisma migrate reset --force && npx prisma db seed)
+    (cd "$SERVER_DIR" && npx prisma migrate reset --force && npx prisma generate && npx prisma db seed)
     printf "${FG_GREEN}数据库已重置并重新初始化${RESET}\n"
   else
     printf "${FG_BLUE}已取消重置操作${RESET}\n"

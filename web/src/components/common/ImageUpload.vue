@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { X, Loader2, Image as ImageIcon } from 'lucide-vue-next'
+import { X, Loader2, Image as ImageIcon, Video } from 'lucide-vue-next'
 import { uploadImage } from '@/api/upload'
 import { getResourceUrl } from '@/utils/url'
 
@@ -24,7 +24,15 @@ const fileInput = ref<HTMLInputElement>()
 // 显示用的完整 URL
 const displayUrl = computed(() => getResourceUrl(props.modelValue))
 // 原始值（用于判断是否有值）
-const hasImage = computed(() => !!props.modelValue)
+const hasMedia = computed(() => !!props.modelValue)
+// 判断是否为视频类型
+const isVideo = computed(() => {
+  if (!props.modelValue) return false
+  const url = props.modelValue.toLowerCase()
+  return url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.endsWith('.avi')
+})
+// 判断 accept 是否为视频类型
+const isVideoAccept = computed(() => props.accept?.includes('video'))
 const acceptTypes = computed(
   () => props.accept || 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml'
 )
@@ -84,9 +92,19 @@ function handleRemove() {
       @change="handleFileChange"
     />
 
-    <!-- 已上传图片预览 -->
-    <div v-if="hasImage" class="relative inline-block">
-      <img :src="displayUrl" alt="preview" class="h-24 w-24 rounded-lg border object-cover" />
+    <!-- 已上传媒体预览 -->
+    <div v-if="hasMedia" class="relative inline-block">
+      <!-- 视频预览 -->
+      <video
+        v-if="isVideo"
+        :src="displayUrl"
+        class="h-24 w-24 rounded-lg border object-cover"
+        muted
+        loop
+        autoplay
+      />
+      <!-- 图片预览 -->
+      <img v-else :src="displayUrl" alt="preview" class="h-24 w-24 rounded-lg border object-cover" />
       <Button
         variant="destructive"
         size="icon"
@@ -108,7 +126,8 @@ function handleRemove() {
       >
         <Loader2 v-if="uploading" class="h-6 w-6 animate-spin" />
         <template v-else>
-          <ImageIcon class="h-6 w-6 text-muted-foreground" />
+          <Video v-if="isVideoAccept" class="h-6 w-6 text-muted-foreground" />
+          <ImageIcon v-else class="h-6 w-6 text-muted-foreground" />
           <span class="text-xs text-muted-foreground">{{ placeholder || '上传图片' }}</span>
         </template>
       </Button>

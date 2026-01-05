@@ -819,3 +819,200 @@ model BackgroundMusic {
   @@index([status])
   @@map("background_music")
 }
+
+
+// ============ APP 配置相关模型 ============
+
+/// APP启动页配置表
+model AppSplashConfig {
+  id          String    @id @default(cuid())
+  title       String?   @db.VarChar(100)                           // 标题
+  type        String    @default("image") @db.VarChar(20)          // 类型：image/video
+  mediaUrl    String    @map("media_url") @db.VarChar(500)         // 媒体资源URL
+  linkType    String?   @map("link_type") @db.VarChar(20)          // 跳转类型：none/internal/external
+  linkUrl     String?   @map("link_url") @db.VarChar(500)          // 跳转链接
+  duration    Int       @default(3)                                 // 展示时长（秒）
+  skipDelay   Int       @default(0) @map("skip_delay")             // 跳过按钮延迟显示（秒）
+  platform    String    @default("all") @db.VarChar(20)            // 平台：all/ios/android
+  startTime   DateTime? @map("start_time")                         // 生效开始时间
+  endTime     DateTime? @map("end_time")                           // 生效结束时间
+  orderNum    Int       @default(0) @map("order_num")
+  status      String    @default("0") @db.Char(1)                  // 0启用 1停用
+  createBy    String?   @default("") @map("create_by") @db.VarChar(64)
+  createTime  DateTime  @default(now()) @map("create_time")
+  updateBy    String?   @default("") @map("update_by") @db.VarChar(64)
+  updateTime  DateTime  @updatedAt @map("update_time")
+
+  @@index([status])
+  @@index([platform])
+  @@index([startTime, endTime])
+  @@map("app_splash_config")
+}
+
+/// APP登录页配置表
+model AppLoginConfig {
+  id                  String   @id @default(cuid())
+  // 背景配置
+  backgroundType      String   @default("gradient") @map("background_type") @db.VarChar(20) // image/color/gradient
+  backgroundImage     String?  @map("background_image") @db.VarChar(500)  // 背景图（backgroundType=image时使用）
+  backgroundColor     String?  @map("background_color") @db.VarChar(20)   // 纯色背景（backgroundType=color时使用）
+  gradientStart       String?  @default("#8B4513") @map("gradient_start") @db.VarChar(20) // 渐变起始色（赭石色）
+  gradientEnd         String?  @default("#2C2C2C") @map("gradient_end") @db.VarChar(20)   // 渐变结束色（墨色）
+  gradientDirection   String?  @default("135deg") @map("gradient_direction") @db.VarChar(30) // 渐变方向
+  // Logo配置
+  logoImage           String?  @map("logo_image") @db.VarChar(500)        // Logo图片
+  logoSize            String?  @default("normal") @map("logo_size") @db.VarChar(20) // small/normal/large
+  // 标语配置
+  slogan              String?  @db.VarChar(200)                           // 标语
+  sloganColor         String?  @default("#F5F5DC") @map("slogan_color") @db.VarChar(20) // 标语颜色（米白色）
+  // 按钮样式
+  buttonStyle         String?  @default("filled") @map("button_style") @db.VarChar(20) // filled/outlined/rounded
+  buttonPrimaryColor  String?  @default("#C53D43") @map("button_primary_color") @db.VarChar(20) // 主按钮颜色（朱砂红）
+  buttonSecondaryColor String? @default("rgba(255,255,255,0.2)") @map("button_secondary_color") @db.VarChar(30) // 次要按钮颜色
+  buttonRadius        String?  @default("full") @map("button_radius") @db.VarChar(20) // none/sm/md/lg/full
+  // 按钮文本配置
+  wechatButtonText    String?  @map("wechat_button_text") @db.VarChar(50)   // 微信登录按钮文本
+  phoneButtonText     String?  @map("phone_button_text") @db.VarChar(50)    // 手机号登录按钮文本
+  emailButtonText     String?  @map("email_button_text") @db.VarChar(50)    // 邮箱登录按钮文本
+  guestButtonText     String?  @map("guest_button_text") @db.VarChar(50)    // 游客模式按钮文本
+  // 登录方式开关
+  wechatLoginEnabled  Boolean  @default(true) @map("wechat_login_enabled")
+  appleLoginEnabled   Boolean  @default(true) @map("apple_login_enabled")
+  googleLoginEnabled  Boolean  @default(false) @map("google_login_enabled")
+  phoneLoginEnabled   Boolean  @default(true) @map("phone_login_enabled")
+  emailLoginEnabled   Boolean  @default(false) @map("email_login_enabled")
+  guestModeEnabled    Boolean  @default(false) @map("guest_mode_enabled")
+  // 协议配置
+  agreementSource     String   @default("builtin") @map("agreement_source") @db.VarChar(20) // builtin: 内置协议, external: 外部链接
+  userAgreementUrl    String?  @map("user_agreement_url") @db.VarChar(500)  // 外部链接时使用
+  privacyPolicyUrl    String?  @map("privacy_policy_url") @db.VarChar(500)  // 外部链接时使用
+  // 系统字段
+  status              String   @default("0") @db.Char(1)
+  createBy            String?  @default("") @map("create_by") @db.VarChar(64)
+  createTime          DateTime @default(now()) @map("create_time")
+  updateBy            String?  @default("") @map("update_by") @db.VarChar(64)
+  updateTime          DateTime @updatedAt @map("update_time")
+
+  @@map("app_login_config")
+}
+
+/// APP下载页配置表
+model AppDownloadConfig {
+  id              String   @id @default(cuid())
+  pageTitle       String?  @map("page_title") @db.VarChar(100)
+  pageDescription String?  @map("page_description") @db.Text
+  favicon         String?  @db.VarChar(500)                           // 页面favicon
+  // 背景配置
+  backgroundType      String   @default("gradient") @map("background_type") @db.VarChar(20) // image/color/gradient
+  backgroundImage     String?  @map("background_image") @db.VarChar(500)
+  backgroundColor     String?  @map("background_color") @db.VarChar(20)
+  gradientStart       String?  @default("#8B4513") @map("gradient_start") @db.VarChar(20) // 赭石色
+  gradientEnd         String?  @default("#2C2C2C") @map("gradient_end") @db.VarChar(20)   // 墨色
+  gradientDirection   String?  @default("135deg") @map("gradient_direction") @db.VarChar(30)
+  // APP信息
+  appIcon         String?  @map("app_icon") @db.VarChar(500)
+  appName         String?  @map("app_name") @db.VarChar(100)
+  appSlogan       String?  @map("app_slogan") @db.VarChar(200)
+  sloganColor     String?  @default("#F5F5DC") @map("slogan_color") @db.VarChar(20) // 米白色
+  // 按钮样式
+  buttonStyle         String?  @default("filled") @map("button_style") @db.VarChar(20) // filled/outlined/rounded
+  buttonPrimaryColor  String?  @default("#C53D43") @map("button_primary_color") @db.VarChar(20) // 朱砂红
+  buttonSecondaryColor String? @default("rgba(255,255,255,0.2)") @map("button_secondary_color") @db.VarChar(30) // 次要按钮颜色
+  buttonRadius        String?  @default("full") @map("button_radius") @db.VarChar(20) // none/sm/md/lg/full
+  // 按钮文本配置
+  iosButtonText       String?  @map("ios_button_text") @db.VarChar(50)     // iOS下载按钮文本
+  androidButtonText   String?  @map("android_button_text") @db.VarChar(50) // Android下载按钮文本
+  featureList     Json?    @map("feature_list")                           // 功能特点列表
+  iosStoreUrl     String?  @map("ios_store_url") @db.VarChar(500)
+  androidStoreUrl String?  @map("android_store_url") @db.VarChar(500)
+  androidApkUrl   String?  @map("android_apk_url") @db.VarChar(500)
+  qrcodeImage     String?  @map("qrcode_image") @db.VarChar(500)
+  footerText      String?  @map("footer_text") @db.VarChar(500)
+  status          String   @default("0") @db.Char(1)
+  createBy        String?  @default("") @map("create_by") @db.VarChar(64)
+  createTime      DateTime @default(now()) @map("create_time")
+  updateBy        String?  @default("") @map("update_by") @db.VarChar(64)
+  updateTime      DateTime @updatedAt @map("update_time")
+
+  @@map("app_download_config")
+}
+
+/// APP推广渠道表
+model AppPromotionChannel {
+  id           String    @id @default(cuid())
+  channelCode  String    @unique @map("channel_code") @db.VarChar(50)
+  channelName  String    @map("channel_name") @db.VarChar(100)
+  channelType  String?   @map("channel_type") @db.VarChar(20)       // social/ad/offline/other
+  description  String?   @db.VarChar(500)
+  downloadUrl  String?   @map("download_url") @db.VarChar(500)
+  qrcodeImage  String?   @map("qrcode_image") @db.VarChar(500)
+  status       String    @default("0") @db.Char(1)
+  createBy     String?   @default("") @map("create_by") @db.VarChar(64)
+  createTime   DateTime  @default(now()) @map("create_time")
+  updateBy     String?   @default("") @map("update_by") @db.VarChar(64)
+  updateTime   DateTime  @updatedAt @map("update_time")
+
+  stats        AppPromotionStats[]
+
+  @@index([channelType])
+  @@map("app_promotion_channel")
+}
+
+/// APP推广统计表
+model AppPromotionStats {
+  id             String   @id @default(cuid())
+  channelId      String   @map("channel_id")
+  statDate       DateTime @map("stat_date") @db.Date
+  pageViews      Int      @default(0) @map("page_views")
+  downloadClicks Int      @default(0) @map("download_clicks")
+  installCount   Int      @default(0) @map("install_count")
+  registerCount  Int      @default(0) @map("register_count")
+  activeCount    Int      @default(0) @map("active_count")
+  createTime     DateTime @default(now()) @map("create_time")
+
+  channel        AppPromotionChannel @relation(fields: [channelId], references: [id])
+
+  @@unique([channelId, statDate])
+  @@index([statDate])
+  @@map("app_promotion_stats")
+}
+
+/// APP版本管理表
+model AppVersion {
+  id                String    @id @default(cuid())
+  versionCode       String    @map("version_code") @db.VarChar(20)
+  versionName       String    @map("version_name") @db.VarChar(50)
+  platform          String    @db.VarChar(20)                          // ios/android
+  downloadUrl       String?   @map("download_url") @db.VarChar(500)
+  fileSize          String?   @map("file_size") @db.VarChar(20)
+  updateContent     String?   @map("update_content") @db.Text
+  isForceUpdate     Boolean   @default(false) @map("is_force_update")
+  minSupportVersion String?   @map("min_support_version") @db.VarChar(20)
+  publishTime       DateTime? @map("publish_time")
+  status            String    @default("0") @db.Char(1)
+  createBy          String?   @default("") @map("create_by") @db.VarChar(64)
+  createTime        DateTime  @default(now()) @map("create_time")
+  updateBy          String?   @default("") @map("update_by") @db.VarChar(64)
+  updateTime        DateTime  @updatedAt @map("update_time")
+
+  @@index([platform])
+  @@index([versionCode])
+  @@map("app_version")
+}
+
+/// APP协议内容表
+model AppAgreement {
+  id          String   @id @default(cuid())
+  type        String   @unique @db.VarChar(30)                      // user_agreement/privacy_policy
+  title       String   @db.VarChar(100)
+  content     String   @db.Text
+  version     String   @default("1.0") @db.VarChar(20)
+  status      String   @default("0") @db.Char(1)
+  createBy    String?  @default("") @map("create_by") @db.VarChar(64)
+  createTime  DateTime @default(now()) @map("create_time")
+  updateBy    String?  @default("") @map("update_by") @db.VarChar(64)
+  updateTime  DateTime @updatedAt @map("update_time")
+
+  @@index([type])
+  @@map("app_agreement")
+}

@@ -131,10 +131,26 @@ export function changeDictTypeStatus(dictId: string, status: string) {
   })
 }
 
+export function batchChangeDictTypeStatus(dictIds: string[], status: string) {
+  return request<{ msg: string }>({
+    url: '/system/dict/type/batchChangeStatus',
+    method: 'put',
+    data: { dictIds, status },
+  })
+}
+
 export function changeDictDataStatus(dictCode: string, status: string) {
   return request<{ msg: string }>({
     url: '/system/dict/data/changeStatus',
     method: 'put',
     data: { dictCode, status },
+  })
+}
+
+export function batchChangeDictDataStatus(dictCodes: string[], status: string) {
+  return request<{ msg: string }>({
+    url: '/system/dict/data/batchChangeStatus',
+    method: 'put',
+    data: { dictCodes, status },
   })
 }
