@@ -30,7 +30,7 @@ import { RequirePermission } from '../../common/decorators/permission.decorator'
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('system/menu')
 export class SystemMenuController {
-  constructor(private readonly menuService: MenuService) {}
+  constructor(private readonly menuService: MenuService) { }
 
   @Post()
   @RequirePermission('system:menu:add')
@@ -97,5 +97,22 @@ export class SystemMenuController {
   @ApiResponse({ status: 200, description: '删除成功' })
   remove(@Param('menuId') menuId: string) {
     return this.menuService.remove(menuId);
+  }
+
+  @Put('changeStatus')
+  @RequirePermission('system:menu:edit')
+  @ApiOperation({ summary: '修改菜单状态' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        menuId: { type: 'string', description: '菜单ID' },
+        status: { type: 'string', description: '状态 0正常 1停用' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: '修改成功' })
+  changeStatus(@Body() body: { menuId: string; status: string }) {
+    return this.menuService.changeStatus(body.menuId, body.status);
   }
 }

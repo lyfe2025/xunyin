@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Switch } from '@/components/ui/switch'
 import { Loader2 } from 'lucide-vue-next'
 import { useToast } from '@/components/ui/toast/use-toast'
@@ -7,6 +7,8 @@ import { useToast } from '@/components/ui/toast/use-toast'
 interface Props {
   modelValue: string
   id: string
+  /** 显示名称，用于提示信息，如"城市「杭州」已启用" */
+  name?: string
   activeValue?: string
   inactiveValue?: string
   activeText?: string
@@ -20,9 +22,10 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  name: '',
   activeValue: '0',
   inactiveValue: '1',
-  activeText: '正常',
+  activeText: '启用',
   inactiveText: '停用',
   showText: false,
 })
@@ -32,7 +35,16 @@ const { toast } = useToast()
 
 const loading = ref(false)
 
-const isActive = () => props.modelValue === props.activeValue
+const isActive = computed(() => props.modelValue === props.activeValue)
+
+// 生成提示信息
+function getToastMessage(checked: boolean): string {
+  const action = checked ? props.activeText : props.inactiveText
+  if (props.name) {
+    return `「${props.name}」已${action}`
+  }
+  return `已${action}`
+}
 
 async function handleChange(checked: boolean) {
   const newValue = checked ? props.activeValue : props.inactiveValue
@@ -40,7 +52,7 @@ async function handleChange(checked: boolean) {
   try {
     await emit('change', props.id, newValue)
     emit('update:modelValue', newValue)
-    toast({ title: checked ? '已启用' : '已停用' })
+    toast({ title: getToastMessage(checked) })
   } catch (error: any) {
     toast({
       title: '操作失败',
@@ -60,13 +72,13 @@ async function handleChange(checked: boolean) {
       <span class="text-xs text-muted-foreground">更新中...</span>
     </div>
     <template v-else>
-      <Switch :checked="isActive()" @update:checked="handleChange" />
+      <Switch :checked="isActive" @update:checked="handleChange" />
       <span
         v-if="showText"
         class="text-xs"
-        :class="isActive() ? 'text-green-600' : 'text-muted-foreground'"
+        :class="isActive ? 'text-green-600' : 'text-muted-foreground'"
       >
-        {{ isActive() ? activeText : inactiveText }}
+        {{ isActive ? activeText : inactiveText }}
       </span>
     </template>
   </div>

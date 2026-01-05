@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   Table,
@@ -55,6 +55,7 @@ import {
   addPoint,
   updatePoint,
   updatePointStatus,
+  batchUpdatePointStatus,
   type ExplorationPoint,
   type PointForm,
 } from '@/api/xunyin/point'
@@ -90,8 +91,40 @@ const submitLoading = ref(false)
 
 // 批量选择
 const selectedIds = ref<string[]>([])
+const selectAll = ref(false)
 const showBatchDeleteDialog = ref(false)
 const showMapPicker = ref(false)
+
+const isIndeterminate = computed(
+  () => selectedIds.value.length > 0 && selectedIds.value.length < pointList.value.length
+)
+
+// 监听全选状态变化
+watch(selectAll, (newVal) => {
+  if (newVal) {
+    selectedIds.value = pointList.value.map((p) => p.id)
+  } else if (selectedIds.value.length === pointList.value.length) {
+    selectedIds.value = []
+  }
+})
+
+// 监听选中项变化，更新全选状态
+watch(
+  selectedIds,
+  (newVal) => {
+    selectAll.value = pointList.value.length > 0 && newVal.length === pointList.value.length
+  },
+  { deep: true }
+)
+
+function toggleSelect(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
 
 const taskTypeOptions = [
   { value: 'gesture', label: '手势识别' },
@@ -262,15 +295,17 @@ async function confirmBatchDelete() {
   }
 }
 
-function handleSelectAll(checked: boolean) {
-  selectedIds.value = checked ? pointList.value.map((p) => p.id) : []
-}
-
-function handleSelectOne(id: string, checked: boolean) {
-  if (checked) {
-    selectedIds.value.push(id)
-  } else {
-    selectedIds.value = selectedIds.value.filter((i) => i !== id)
+async function handleBatchStatus(status: string) {
+  if (selectedIds.value.length === 0) {
+    toast({ title: '请选择要操作的记录', variant: 'destructive' })
+    return
+  }
+  try {
+    await batchUpdatePointStatus(selectedIds.value, status)
+    toast({ title: status === '0' ? '批量启用成功' : '批量停用成功' })
+    getList()
+  } catch (e: any) {
+    toast({ title: '操作失败', description: e.message, variant: 'destructive' })
   }
 }
 
@@ -344,14 +379,6 @@ onMounted(() => {
           :formats="['xlsx', 'csv', 'json']"
           @export="handleExport"
         />
-        <Button
-          v-if="selectedIds.length > 0"
-          variant="destructive"
-          size="sm"
-          @click="handleBatchDelete"
-        >
-          <Trash2 class="h-4 w-4 mr-2" />批量删除 ({{ selectedIds.length }})
-        </Button>
         <Button size="sm" @click="handleAdd"> <Plus class="h-4 w-4 mr-2" />新增探索点 </Button>
       </div>
     </div>
@@ -400,6 +427,17 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- 批量操作栏 -->
+    <div
+      v-if="selectedIds.length > 0"
+      class="flex items-center gap-3 p-3 bg-muted/50 border rounded-lg"
+    >
+      <span class="text-sm">已选择 {{ selectedIds.length }} 项</span>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('0')">批量启用</Button>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('1')">批量停用</Button>
+      <Button size="sm" variant="destructive" @click="handleBatchDelete">批量删除</Button>
+    </div>
+
     <div class="border rounded-md bg-card overflow-x-auto">
       <TableSkeleton v-if="loading" :columns="9" :rows="10" />
       <EmptyState
@@ -412,10 +450,7 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">
-              <Checkbox
-                :checked="selectedIds.length === pointList.length && pointList.length > 0"
-                @update:checked="handleSelectAll"
-              />
+              <Checkbox v-model="selectAll" :indeterminate="isIndeterminate" />
             </TableHead>
             <TableHead>名称</TableHead>
             <TableHead>所属文化之旅</TableHead>
@@ -431,8 +466,8 @@ onMounted(() => {
           <TableRow v-for="point in pointList" :key="point.id">
             <TableCell>
               <Checkbox
-                :checked="selectedIds.includes(point.id)"
-                @update:checked="(checked: boolean) => handleSelectOne(point.id, checked)"
+                :model-value="selectedIds.includes(point.id)"
+                @update:model-value="() => toggleSelect(point.id)"
               />
             </TableCell>
             <TableCell>
@@ -477,6 +512,7 @@ onMounted(() => {
               <StatusSwitch
                 :model-value="point.status"
                 :id="point.id"
+                :name="point.name"
                 @change="handleStatusChange"
               />
             </TableCell>

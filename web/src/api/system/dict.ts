@@ -122,3 +122,19 @@ export function getDictDataByType(dictType: string) {
     params: { dictType, pageSize: 100 },
   }).then((res: any) => res.data?.rows || [])
 }
+
+export function changeDictTypeStatus(dictId: string, status: string) {
+  return request<{ msg: string }>({
+    url: '/system/dict/type/changeStatus',
+    method: 'put',
+    data: { dictId, status },
+  })
+}
+
+export function changeDictDataStatus(dictCode: string, status: string) {
+  return request<{ msg: string }>({
+    url: '/system/dict/data/changeStatus',
+    method: 'put',
+    data: { dictCode, status },
+  })
+}

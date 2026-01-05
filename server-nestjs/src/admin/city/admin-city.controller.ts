@@ -19,6 +19,8 @@ import {
   CreateCityDto,
   UpdateCityDto,
   UpdateStatusDto,
+  BatchDeleteDto,
+  BatchUpdateStatusDto,
 } from './dto/admin-city.dto';
 
 @ApiTags('管理端-城市管理')
@@ -26,7 +28,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/cities')
 export class AdminCityController {
-  constructor(private readonly adminCityService: AdminCityService) {}
+  constructor(private readonly adminCityService: AdminCityService) { }
 
   @Get()
   @ApiOperation({ summary: '城市列表（分页）' })
@@ -68,5 +70,19 @@ export class AdminCityController {
   @RequirePermission('xunyin:city:remove')
   async remove(@Param('id') id: string) {
     await this.adminCityService.remove(id);
+  }
+
+  @Post('batch-delete')
+  @ApiOperation({ summary: '批量删除城市' })
+  @RequirePermission('xunyin:city:remove')
+  async batchDelete(@Body() dto: BatchDeleteDto) {
+    return this.adminCityService.batchDelete(dto.ids);
+  }
+
+  @Post('batch-status')
+  @ApiOperation({ summary: '批量修改城市状态' })
+  @RequirePermission('xunyin:city:edit')
+  async batchUpdateStatus(@Body() dto: BatchUpdateStatusDto) {
+    return this.adminCityService.batchUpdateStatus(dto.ids, dto.status);
   }
 }

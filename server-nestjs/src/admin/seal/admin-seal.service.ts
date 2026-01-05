@@ -10,7 +10,7 @@ import type {
 
 @Injectable()
 export class AdminSealService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(query: QueryAdminSealDto) {
     const { type, name, status, pageNum = 1, pageSize = 20 } = query;
@@ -136,5 +136,30 @@ export class AdminSealService {
       where: { id },
       data: { status },
     });
+  }
+
+  async batchDelete(ids: string[]) {
+    // 检查是否有用户已获得这些印记
+    const userSealCount = await this.prisma.userSeal.count({
+      where: { sealId: { in: ids } },
+    });
+    if (userSealCount > 0) {
+      throw new BusinessException(
+        ErrorCode.OPERATION_DENIED,
+        '选中的印记已有用户获得，无法删除',
+      );
+    }
+    const result = await this.prisma.seal.deleteMany({
+      where: { id: { in: ids } },
+    });
+    return { deleted: result.count };
+  }
+
+  async batchUpdateStatus(ids: string[], status: string) {
+    const result = await this.prisma.seal.updateMany({
+      where: { id: { in: ids } },
+      data: { status },
+    });
+    return { updated: result.count };
   }
 }

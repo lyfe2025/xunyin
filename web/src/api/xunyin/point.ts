@@ -101,6 +101,14 @@ export function updatePointStatus(id: string, status: string) {
   })
 }
 
+export function batchUpdatePointStatus(ids: string[], status: string) {
+  return request({
+    url: '/admin/points/batch-status',
+    method: 'patch',
+    data: { ids, status },
+  })
+}
+
 export function exportPoints(query: PointQuery) {
   return request<Blob>({
     url: '/admin/points/export',

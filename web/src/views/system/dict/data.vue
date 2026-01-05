@@ -6,6 +6,7 @@ import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import {
   Table,
   TableBody,
@@ -39,6 +40,7 @@ import {
   delData,
   addData,
   updateData,
+  changeDictDataStatus,
   type DictData,
   type DictDataForm,
 } from '@/api/system/dict'
@@ -178,6 +180,13 @@ function resetForm() {
   form.remark = ''
 }
 
+// 状态切换
+async function handleStatusChange(dictCode: string, status: string) {
+  await changeDictDataStatus(dictCode, status)
+  const data = dataList.value.find((d) => d.dictCode === dictCode)
+  if (data) data.status = status
+}
+
 function goBack() {
   router.push('/system/dict')
 }
@@ -283,9 +292,12 @@ onMounted(() => {
             <TableCell>{{ item.dictValue }}</TableCell>
             <TableCell>{{ item.dictSort }}</TableCell>
             <TableCell>
-              <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
-                {{ item.status === '0' ? '正常' : '停用' }}
-              </Badge>
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.dictCode"
+                :name="item.dictLabel"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell class="text-muted-foreground">{{ item.remark }}</TableCell>
             <TableCell class="text-right space-x-2">

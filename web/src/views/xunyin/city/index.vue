@@ -50,6 +50,8 @@ import {
   addCity,
   updateCity,
   updateCityStatus,
+  batchDeleteCity,
+  batchUpdateCityStatus,
   type City,
   type CityForm,
 } from '@/api/xunyin/city'
@@ -263,12 +265,27 @@ function handleBatchDelete() {
 
 async function confirmBatchDelete() {
   try {
-    await Promise.all(selectedIds.value.map((id) => delCity(id)))
+    await batchDeleteCity(selectedIds.value)
     toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
     getList()
     showBatchDeleteDialog.value = false
   } catch {
     // 忽略错误
+  }
+}
+
+// 批量状态操作
+async function handleBatchStatus(status: string) {
+  if (selectedIds.value.length === 0) {
+    toast({ title: '请选择要操作的数据', variant: 'destructive' })
+    return
+  }
+  try {
+    await batchUpdateCityStatus(selectedIds.value, status)
+    toast({ title: status === '0' ? '批量启用成功' : '批量停用成功' })
+    getList()
+  } catch (e: any) {
+    toast({ title: '操作失败', description: e.message, variant: 'destructive' })
   }
 }
 
@@ -369,14 +386,6 @@ onMounted(() => {
           :formats="['xlsx', 'csv', 'json']"
           @export="handleExport"
         />
-        <Button
-          v-if="selectedIds.length > 0"
-          variant="destructive"
-          size="sm"
-          @click="handleBatchDelete"
-        >
-          <Trash2 class="h-4 w-4 mr-2" />批量删除 ({{ selectedIds.length }})
-        </Button>
         <Button size="sm" @click="handleAdd"> <Plus class="h-4 w-4 mr-2" />新增城市 </Button>
       </div>
     </div>
@@ -419,6 +428,17 @@ onMounted(() => {
           ><RefreshCw class="w-4 h-4 mr-2" />重置</Button
         >
       </div>
+    </div>
+
+    <!-- 批量操作栏 -->
+    <div
+      v-if="selectedIds.length > 0"
+      class="flex items-center gap-3 p-3 bg-muted/50 border rounded-lg"
+    >
+      <span class="text-sm">已选择 {{ selectedIds.length }} 项</span>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('0')">批量启用</Button>
+      <Button size="sm" variant="outline" @click="handleBatchStatus('1')">批量停用</Button>
+      <Button size="sm" variant="destructive" @click="handleBatchDelete">批量删除</Button>
     </div>
 
     <div class="border rounded-md bg-card overflow-x-auto">
@@ -502,7 +522,7 @@ onMounted(() => {
             <TableCell>{{ city.explorerCount }}</TableCell>
             <TableCell>{{ city.orderNum }}</TableCell>
             <TableCell>
-              <StatusSwitch :model-value="city.status" :id="city.id" @change="handleStatusChange" />
+              <StatusSwitch :model-value="city.status" :id="city.id" :name="city.name" @change="handleStatusChange" />
             </TableCell>
             <TableCell class="text-right space-x-1">
               <TooltipProvider>

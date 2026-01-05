@@ -23,7 +23,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('system/post')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(private readonly postService: PostService) { }
 
   @Get()
   @RequirePermission('system:post:list')
@@ -59,5 +59,12 @@ export class PostController {
   remove(@Query('ids') ids: string) {
     const postIds = ids ? ids.split(',') : [];
     return this.postService.remove(postIds);
+  }
+
+  @Put('changeStatus')
+  @RequirePermission('system:post:edit')
+  @ApiOperation({ summary: '修改岗位状态' })
+  changeStatus(@Body() body: { postId: string; status: string }) {
+    return this.postService.changeStatus(body.postId, body.status);
   }
 }

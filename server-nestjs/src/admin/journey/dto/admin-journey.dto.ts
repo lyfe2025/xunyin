@@ -192,3 +192,19 @@ export class UpdateStatusDto {
   @IsString()
   status: string;
 }
+
+export class BatchDeleteDto {
+  @ApiProperty({ description: 'ID列表', type: [String] })
+  @IsString({ each: true })
+  ids: string[];
+}
+
+export class BatchUpdateStatusDto {
+  @ApiProperty({ description: 'ID列表', type: [String] })
+  @IsString({ each: true })
+  ids: string[];
+
+  @ApiProperty({ description: '状态 0正常 1停用' })
+  @IsString()
+  status: string;
+}

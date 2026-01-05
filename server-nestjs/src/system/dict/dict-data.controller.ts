@@ -23,7 +23,7 @@ import { UpdateDictDataDto } from './dto/update-dict-data.dto';
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('system/dict/data')
 export class DictDataController {
-  constructor(private readonly service: DictDataService) {}
+  constructor(private readonly service: DictDataService) { }
 
   @Get()
   @RequirePermission('system:dict:list')
@@ -59,5 +59,12 @@ export class DictDataController {
   remove(@Query('ids') ids: string) {
     const dictCodes = ids ? ids.split(',') : [];
     return this.service.remove(dictCodes);
+  }
+
+  @Put('changeStatus')
+  @RequirePermission('system:dict:edit')
+  @ApiOperation({ summary: '修改字典数据状态' })
+  changeStatus(@Body() body: { dictCode: string; status: string }) {
+    return this.service.changeStatus(body.dictCode, body.status);
   }
 }

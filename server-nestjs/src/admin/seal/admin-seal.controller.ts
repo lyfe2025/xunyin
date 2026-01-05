@@ -19,6 +19,8 @@ import {
   CreateSealDto,
   UpdateSealDto,
   UpdateStatusDto,
+  BatchDeleteDto,
+  BatchUpdateStatusDto,
 } from './dto/admin-seal.dto';
 
 @ApiTags('管理端-印记管理')
@@ -26,7 +28,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/seals')
 export class AdminSealController {
-  constructor(private readonly adminSealService: AdminSealService) {}
+  constructor(private readonly adminSealService: AdminSealService) { }
 
   @Get()
   @ApiOperation({ summary: '印记列表（分页）' })
@@ -68,5 +70,19 @@ export class AdminSealController {
   @RequirePermission('xunyin:seal:remove')
   async remove(@Param('id') id: string) {
     await this.adminSealService.remove(id);
+  }
+
+  @Post('batch-delete')
+  @ApiOperation({ summary: '批量删除印记' })
+  @RequirePermission('xunyin:seal:remove')
+  async batchDelete(@Body() dto: BatchDeleteDto) {
+    return this.adminSealService.batchDelete(dto.ids);
+  }
+
+  @Post('batch-status')
+  @ApiOperation({ summary: '批量修改印记状态' })
+  @RequirePermission('xunyin:seal:edit')
+  async batchUpdateStatus(@Body() dto: BatchUpdateStatusDto) {
+    return this.adminSealService.batchUpdateStatus(dto.ids, dto.status);
   }
 }

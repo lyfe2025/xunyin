@@ -33,8 +33,9 @@ import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { formatDate } from '@/utils/format'
-import { listPost, getPost, delPost, addPost, updatePost } from '@/api/system/post'
+import { listPost, getPost, delPost, addPost, updatePost, changePostStatus } from '@/api/system/post'
 import type { SysPost } from '@/api/system/types'
 
 const { toast } = useToast()
@@ -159,6 +160,13 @@ function resetForm() {
   form.remark = ''
 }
 
+// 状态切换
+async function handleStatusChange(postId: string, status: string) {
+  await changePostStatus(postId, status)
+  const post = postList.value.find((p) => p.postId === postId)
+  if (post) post.status = status
+}
+
 onMounted(() => {
   getList()
 })
@@ -263,9 +271,12 @@ onMounted(() => {
             <TableCell>{{ item.postName }}</TableCell>
             <TableCell>{{ item.postSort }}</TableCell>
             <TableCell>
-              <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
-                {{ item.status === '0' ? '正常' : '停用' }}
-              </Badge>
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.postId"
+                :name="item.postName"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell>{{ formatDate(item.createTime) }}</TableCell>
             <TableCell class="text-right space-x-2">

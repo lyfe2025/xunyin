@@ -12,7 +12,7 @@ export class NoticeService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   async findAll(query: QueryNoticeDto) {
     const where: Prisma.SysNoticeWhereInput = {};
@@ -94,5 +94,16 @@ export class NoticeService {
       'NoticeService',
     );
     return {};
+  }
+
+  async changeStatus(noticeId: string, status: string) {
+    this.logger.log(
+      `修改通知公告状态: ${noticeId} -> ${status}`,
+      'NoticeService',
+    );
+    return this.prisma.sysNotice.update({
+      where: { noticeId: BigInt(noticeId) },
+      data: { status, updateTime: new Date() },
+    });
   }
 }

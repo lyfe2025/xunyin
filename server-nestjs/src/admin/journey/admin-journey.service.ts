@@ -10,7 +10,7 @@ import type {
 
 @Injectable()
 export class AdminJourneyService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(query: QueryAdminJourneyDto) {
     const { cityId, name, status, pageNum = 1, pageSize = 20 } = query;
@@ -118,5 +118,30 @@ export class AdminJourneyService {
       where: { id },
       data: { status },
     });
+  }
+
+  async batchDelete(ids: string[]) {
+    // 检查是否有关联的探索点
+    const pointCount = await this.prisma.explorationPoint.count({
+      where: { journeyId: { in: ids } },
+    });
+    if (pointCount > 0) {
+      throw new BusinessException(
+        ErrorCode.OPERATION_DENIED,
+        '选中的文化之旅下存在探索点，无法删除',
+      );
+    }
+    const result = await this.prisma.journey.deleteMany({
+      where: { id: { in: ids } },
+    });
+    return { deleted: result.count };
+  }
+
+  async batchUpdateStatus(ids: string[], status: string) {
+    const result = await this.prisma.journey.updateMany({
+      where: { id: { in: ids } },
+      data: { status },
+    });
+    return { updated: result.count };
   }
 }

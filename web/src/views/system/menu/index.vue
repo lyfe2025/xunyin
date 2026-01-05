@@ -56,7 +56,8 @@ function getIconComponent(name: string) {
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { listMenu, delMenu, addMenu, updateMenu } from '@/api/system/menu'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
+import { listMenu, delMenu, addMenu, updateMenu, changeMenuStatus } from '@/api/system/menu'
 import type { SysMenu } from '@/api/system/types'
 
 const { toast } = useToast()
@@ -269,6 +270,23 @@ function resetForm() {
   form.icon = ''
 }
 
+// 状态切换
+async function handleStatusChange(menuId: string, status: string) {
+  await changeMenuStatus(menuId, status)
+  // 递归更新本地数据
+  const updateStatus = (list: SysMenu[]) => {
+    for (const item of list) {
+      if (item.menuId === menuId) {
+        item.status = status
+        return true
+      }
+      if (item.children && updateStatus(item.children)) return true
+    }
+    return false
+  }
+  updateStatus(menuList.value)
+}
+
 // 将扁平菜单列表转换为树形结构
 function toTreeMenu(list: SysMenu[]): SysMenu[] {
   const map = new Map<string, SysMenu & { children: SysMenu[] }>()
@@ -428,9 +446,12 @@ onMounted(() => {
             >
             <TableCell class="max-w-[200px] truncate">{{ item.component }}</TableCell>
             <TableCell>
-              <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
-                {{ item.status === '0' ? '正常' : '停用' }}
-              </Badge>
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.menuId"
+                :name="item.menuName"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell class="text-right space-x-2">
               <Button variant="ghost" size="icon" @click="handleUpdate(item)">

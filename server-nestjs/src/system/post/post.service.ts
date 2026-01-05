@@ -11,7 +11,7 @@ export class PostService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   async findAll(query: QueryPostDto) {
     const where: Prisma.SysPostWhereInput = {};
@@ -111,5 +111,13 @@ export class PostService {
 
     this.logger.log(`岗位删除成功: ${postIds.length} 个`, 'PostService');
     return {};
+  }
+
+  async changeStatus(postId: string, status: string) {
+    this.logger.log(`修改岗位状态: ${postId} -> ${status}`, 'PostService');
+    return this.prisma.sysPost.update({
+      where: { postId: BigInt(postId) },
+      data: { status, updateTime: new Date() },
+    });
   }
 }

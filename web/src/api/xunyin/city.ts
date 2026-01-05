@@ -86,6 +86,22 @@ export function updateCityStatus(id: string, status: string) {
   })
 }
 
+export function batchDeleteCity(ids: string[]) {
+  return request({
+    url: '/admin/cities/batch-delete',
+    method: 'post',
+    data: { ids },
+  })
+}
+
+export function batchUpdateCityStatus(ids: string[], status: string) {
+  return request({
+    url: '/admin/cities/batch-status',
+    method: 'post',
+    data: { ids, status },
+  })
+}
+
 export function exportCities(query: CityQuery) {
   return request<Blob>({
     url: '/admin/cities/export',

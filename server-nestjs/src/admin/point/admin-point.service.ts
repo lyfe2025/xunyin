@@ -145,4 +145,11 @@ export class AdminPointService {
       data: { status },
     });
   }
+
+  async batchUpdateStatus(ids: string[], status: string) {
+    return this.prisma.explorationPoint.updateMany({
+      where: { id: { in: ids } },
+      data: { status },
+    });
+  }
 }

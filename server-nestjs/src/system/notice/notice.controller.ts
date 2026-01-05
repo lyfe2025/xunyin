@@ -23,7 +23,7 @@ import { UpdateNoticeDto } from './dto/update-notice.dto';
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('system/notice')
 export class NoticeController {
-  constructor(private readonly service: NoticeService) {}
+  constructor(private readonly service: NoticeService) { }
 
   @Get()
   @RequirePermission('system:notice:list')
@@ -59,5 +59,12 @@ export class NoticeController {
   remove(@Query('ids') ids: string) {
     const noticeIds = ids ? ids.split(',') : [];
     return this.service.remove(noticeIds);
+  }
+
+  @Put('changeStatus')
+  @RequirePermission('system:notice:edit')
+  @ApiOperation({ summary: '修改通知公告状态' })
+  changeStatus(@Body() body: { noticeId: string; status: string }) {
+    return this.service.changeStatus(body.noticeId, body.status);
   }
 }

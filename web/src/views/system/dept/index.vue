@@ -44,7 +44,8 @@ import { formatDate } from '@/utils/format'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { listDept, getDept, delDept, addDept, updateDept, listDeptTree } from '@/api/system/dept'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
+import { listDept, getDept, delDept, addDept, updateDept, listDeptTree, changeDeptStatus } from '@/api/system/dept'
 import type { SysDept } from '@/api/system/types'
 
 const { toast } = useToast()
@@ -246,6 +247,23 @@ function resetForm() {
   form.status = '0'
 }
 
+// 状态切换
+async function handleStatusChange(deptId: string, status: string) {
+  await changeDeptStatus(deptId, status)
+  // 递归更新本地数据
+  const updateStatus = (list: SysDept[]) => {
+    for (const item of list) {
+      if (item.deptId === deptId) {
+        item.status = status
+        return true
+      }
+      if (item.children && updateStatus(item.children)) return true
+    }
+    return false
+  }
+  updateStatus(deptList.value)
+}
+
 // 将扁平部门列表转换为树形结构
 function toTreeDept(list: SysDept[]): SysDept[] {
   const map = new Map<string, SysDept & { children: SysDept[] }>()
@@ -378,9 +396,12 @@ onMounted(() => {
             </TableCell>
             <TableCell>{{ item.orderNum }}</TableCell>
             <TableCell>
-              <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
-                {{ item.status === '0' ? '正常' : '停用' }}
-              </Badge>
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.deptId"
+                :name="item.deptName"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell>{{ formatDate(item.createTime) }}</TableCell>
             <TableCell class="text-right space-x-2">

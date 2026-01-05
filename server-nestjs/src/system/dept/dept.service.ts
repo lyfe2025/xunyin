@@ -13,7 +13,7 @@ export class DeptService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   /**
    * 查询部门列表
@@ -250,5 +250,16 @@ export class DeptService {
       );
       throw error;
     }
+  }
+
+  /**
+   * 修改部门状态
+   */
+  async changeStatus(deptId: string, status: string) {
+    this.logger.log(`修改部门状态: ${deptId} -> ${status}`, 'DeptService');
+    return this.prisma.sysDept.update({
+      where: { deptId: BigInt(deptId) },
+      data: { status, updateTime: new Date() },
+    });
   }
 }

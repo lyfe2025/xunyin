@@ -19,6 +19,8 @@ import {
   CreateJourneyDto,
   UpdateJourneyDto,
   UpdateStatusDto,
+  BatchDeleteDto,
+  BatchUpdateStatusDto,
 } from './dto/admin-journey.dto';
 
 @ApiTags('管理端-文化之旅管理')
@@ -26,7 +28,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/journeys')
 export class AdminJourneyController {
-  constructor(private readonly adminJourneyService: AdminJourneyService) {}
+  constructor(private readonly adminJourneyService: AdminJourneyService) { }
 
   @Get()
   @ApiOperation({ summary: '文化之旅列表（分页）' })
@@ -68,5 +70,19 @@ export class AdminJourneyController {
   @RequirePermission('xunyin:journey:remove')
   async remove(@Param('id') id: string) {
     await this.adminJourneyService.remove(id);
+  }
+
+  @Post('batch-delete')
+  @ApiOperation({ summary: '批量删除文化之旅' })
+  @RequirePermission('xunyin:journey:remove')
+  async batchDelete(@Body() dto: BatchDeleteDto) {
+    return this.adminJourneyService.batchDelete(dto.ids);
+  }
+
+  @Post('batch-status')
+  @ApiOperation({ summary: '批量修改文化之旅状态' })
+  @RequirePermission('xunyin:journey:edit')
+  async batchUpdateStatus(@Body() dto: BatchUpdateStatusDto) {
+    return this.adminJourneyService.batchUpdateStatus(dto.ids, dto.status);
   }
 }

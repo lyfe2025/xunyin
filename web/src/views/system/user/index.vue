@@ -89,6 +89,7 @@ import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import ExportButton from '@/components/common/ExportButton.vue'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { formatDate } from '@/utils/format'
 
 // State
@@ -531,14 +532,10 @@ async function confirmResetPwd() {
   }
 }
 
-async function _handleStatusChange(row: SysUser) {
-  try {
-    await changeUserStatus(row.userId, row.status === '0' ? '1' : '0')
-    row.status = row.status === '0' ? '1' : '0'
-    toast({ title: '操作成功', description: '用户状态已变更' })
-  } catch {
-    // revert on error
-  }
+async function handleStatusChange(userId: string, status: string) {
+  await changeUserStatus(userId, status)
+  const user = userList.value.find((u) => u.userId === userId)
+  if (user) user.status = status
 }
 
 function resetForm() {
@@ -836,9 +833,12 @@ onMounted(async () => {
             <TableCell v-if="isColumnVisible('phonenumber')">{{ user.phonenumber }}</TableCell>
             <TableCell v-if="isColumnVisible('email')">{{ user.email }}</TableCell>
             <TableCell v-if="isColumnVisible('status')">
-              <Badge :variant="user.status === '0' ? 'default' : 'destructive'">
-                {{ user.status === '0' ? '正常' : '停用' }}
-              </Badge>
+              <StatusSwitch
+                :model-value="user.status"
+                :id="user.userId"
+                :name="user.nickName || user.userName"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell v-if="isColumnVisible('createTime')">{{
               formatDate(user.createTime)

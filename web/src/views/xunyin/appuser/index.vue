@@ -683,6 +683,7 @@ onMounted(() => {
                   <StatusSwitch
                     :model-value="user.status"
                     :id="user.id"
+                    :name="user.nickname || user.phone"
                     active-text="正常"
                     inactive-text="禁用"
                     @change="handleStatusChange"

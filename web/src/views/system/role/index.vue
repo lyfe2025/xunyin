@@ -47,6 +47,7 @@ import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { formatDate } from '@/utils/format'
 import {
   listRole,
@@ -256,24 +257,10 @@ async function confirmDelete() {
   }
 }
 
-async function _handleStatusChange(row: SysRole) {
-  const newStatus = row.status === '0' ? '1' : '0'
-  const oldStatus = row.status
-
-  // 乐观更新
-  row.status = newStatus
-
-  try {
-    await changeRoleStatus(row.roleId, newStatus)
-    toast({
-      title: '操作成功',
-      description: `角色已${newStatus === '0' ? '启用' : '停用'}`,
-    })
-  } catch (error) {
-    // 失败时回滚
-    row.status = oldStatus
-    console.error('状态切换失败:', error)
-  }
+async function handleStatusChange(roleId: string, status: string) {
+  await changeRoleStatus(roleId, status)
+  const role = roleList.value.find((r) => r.roleId === roleId)
+  if (role) role.status = status
 }
 
 // 查看角色权限预览
@@ -637,11 +624,12 @@ onMounted(() => {
             </TableCell>
             <TableCell>{{ item.roleSort }}</TableCell>
             <TableCell>
-              <div class="flex items-center space-x-2">
-                <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
-                  {{ item.status === '0' ? '正常' : '停用' }}
-                </Badge>
-              </div>
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.roleId"
+                :name="item.roleName"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell>{{ formatDate(item.createTime) }}</TableCell>
             <TableCell class="text-right space-x-2">

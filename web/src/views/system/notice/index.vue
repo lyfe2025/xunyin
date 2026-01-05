@@ -35,6 +35,7 @@ import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import LeaveConfirmDialog from '@/components/common/LeaveConfirmDialog.vue'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { formatDate } from '@/utils/format'
 import { sanitizeHtml } from '@/utils/sanitize'
 import {
@@ -43,6 +44,7 @@ import {
   delNotice,
   addNotice,
   updateNotice,
+  changeNoticeStatus,
   type SysNotice,
 } from '@/api/system/notice'
 import { useUnsavedChanges } from '@/composables'
@@ -207,6 +209,13 @@ function getNoticeTypeLabel(type: string) {
   return map[type] || '未知'
 }
 
+// 状态切换
+async function handleStatusChange(noticeId: string, status: string) {
+  await changeNoticeStatus(noticeId, status)
+  const notice = noticeList.value.find((n) => n.noticeId === noticeId)
+  if (notice) notice.status = status
+}
+
 // 清洗后的预览内容，防止 XSS 攻击
 const sanitizedPreviewContent = computed(() => {
   return sanitizeHtml(previewNotice.value?.noticeContent)
@@ -315,9 +324,14 @@ onMounted(() => {
               <Badge variant="outline">{{ getNoticeTypeLabel(item.noticeType) }}</Badge>
             </TableCell>
             <TableCell>
-              <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
-                {{ item.status === '0' ? '正常' : '关闭' }}
-              </Badge>
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.noticeId"
+                :name="item.noticeTitle"
+                active-text="正常"
+                inactive-text="关闭"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell>{{ item.createBy }}</TableCell>
             <TableCell>{{ formatDate(item.createTime) }}</TableCell>

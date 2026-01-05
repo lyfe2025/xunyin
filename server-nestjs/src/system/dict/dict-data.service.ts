@@ -11,7 +11,7 @@ export class DictDataService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   async list(query: QueryDictDataDto) {
     const where: Prisma.SysDictDataWhereInput = {};
@@ -109,5 +109,16 @@ export class DictDataService {
       'DictDataService',
     );
     return {};
+  }
+
+  async changeStatus(dictCode: string, status: string) {
+    this.logger.debug(
+      `修改字典数据状态: ${dictCode} -> ${status}`,
+      'DictDataService',
+    );
+    return this.prisma.sysDictData.update({
+      where: { dictCode: BigInt(dictCode) },
+      data: { status },
+    });
   }
 }

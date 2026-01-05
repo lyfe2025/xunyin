@@ -6,6 +6,7 @@ import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { formatDate } from '@/utils/format'
 import {
   Table,
@@ -34,7 +35,7 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { listType, getType, delType, addType, updateType, type DictType } from '@/api/system/dict'
+import { listType, getType, delType, addType, updateType, changeDictTypeStatus, type DictType } from '@/api/system/dict'
 
 const router = useRouter()
 const { toast } = useToast()
@@ -176,6 +177,13 @@ function resetForm() {
   form.remark = ''
 }
 
+// 状态切换
+async function handleStatusChange(dictId: string, status: string) {
+  await changeDictTypeStatus(dictId, status)
+  const dict = typeList.value.find((d) => d.dictId === dictId)
+  if (dict) dict.status = status
+}
+
 onMounted(() => {
   getList()
 })
@@ -279,9 +287,12 @@ onMounted(() => {
               <Badge variant="outline">{{ item.dictType }}</Badge>
             </TableCell>
             <TableCell>
-              <Badge :variant="item.status === '0' ? 'default' : 'destructive'">
-                {{ item.status === '0' ? '正常' : '停用' }}
-              </Badge>
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.dictId"
+                :name="item.dictName"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell class="text-muted-foreground">{{ item.remark }}</TableCell>
             <TableCell>{{ formatDate(item.createTime) }}</TableCell>

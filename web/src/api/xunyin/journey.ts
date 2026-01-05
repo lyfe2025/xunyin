@@ -93,6 +93,22 @@ export function updateJourneyStatus(id: string, status: string) {
   })
 }
 
+export function batchDeleteJourney(ids: string[]) {
+  return request({
+    url: '/admin/journeys/batch-delete',
+    method: 'post',
+    data: { ids },
+  })
+}
+
+export function batchUpdateJourneyStatus(ids: string[], status: string) {
+  return request({
+    url: '/admin/journeys/batch-status',
+    method: 'post',
+    data: { ids, status },
+  })
+}
+
 export function exportJourneys(query: JourneyQuery) {
   return request<Blob>({
     url: '/admin/journeys/export',

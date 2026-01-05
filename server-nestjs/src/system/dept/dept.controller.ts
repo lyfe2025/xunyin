@@ -30,7 +30,7 @@ import { RequirePermission } from '../../common/decorators/permission.decorator'
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('system/dept')
 export class DeptController {
-  constructor(private readonly deptService: DeptService) {}
+  constructor(private readonly deptService: DeptService) { }
 
   @Post()
   @RequirePermission('system:dept:add')
@@ -87,5 +87,22 @@ export class DeptController {
   @ApiResponse({ status: 200, description: '删除成功' })
   remove(@Param('deptId') deptId: string) {
     return this.deptService.remove(deptId);
+  }
+
+  @Put('changeStatus')
+  @RequirePermission('system:dept:edit')
+  @ApiOperation({ summary: '修改部门状态' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        deptId: { type: 'string', description: '部门ID' },
+        status: { type: 'string', description: '状态 0正常 1停用' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: '修改成功' })
+  changeStatus(@Body() body: { deptId: string; status: string }) {
+    return this.deptService.changeStatus(body.deptId, body.status);
   }
 }

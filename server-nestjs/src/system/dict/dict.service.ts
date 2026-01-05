@@ -11,7 +11,7 @@ export class DictService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   async listTypes(query: QueryDictTypeDto) {
     const { dictName, dictType, status } = query;
@@ -105,5 +105,13 @@ export class DictService {
 
     this.logger.log(`字典类型删除成功: ${dictIds.length} 个`, 'DictService');
     return {};
+  }
+
+  async changeStatus(dictId: string, status: string) {
+    this.logger.log(`修改字典类型状态: ${dictId} -> ${status}`, 'DictService');
+    return this.prisma.sysDictType.update({
+      where: { dictId: BigInt(dictId) },
+      data: { status, updateTime: new Date() },
+    });
   }
 }

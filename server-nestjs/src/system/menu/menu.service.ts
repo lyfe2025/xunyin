@@ -32,7 +32,7 @@ export class MenuService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
-  ) {}
+  ) { }
 
   /**
    * 查询菜单列表
@@ -319,5 +319,16 @@ export class MenuService {
       component = 'ParentView';
     }
     return component;
+  }
+
+  /**
+   * 修改菜单状态
+   */
+  async changeStatus(menuId: string, status: string) {
+    this.logger.log(`修改菜单状态: ${menuId} -> ${status}`, 'MenuService');
+    return this.prisma.sysMenu.update({
+      where: { menuId: BigInt(menuId) },
+      data: { status, updateTime: new Date() },
+    });
   }
 }

@@ -723,7 +723,7 @@ onUnmounted(() => {
             <TableCell>{{ formatDuration(item.duration) }}</TableCell>
             <TableCell>{{ item.orderNum }}</TableCell>
             <TableCell>
-              <StatusSwitch :model-value="item.status" :id="item.id" @change="handleStatusChange" />
+              <StatusSwitch :model-value="item.status" :id="item.id" :name="item.name" @change="handleStatusChange" />
             </TableCell>
             <TableCell class="text-right">
               <div class="flex items-center justify-end gap-1">

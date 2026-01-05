@@ -19,6 +19,7 @@ import {
   CreatePointDto,
   UpdatePointDto,
   UpdateStatusDto,
+  BatchUpdateStatusDto,
 } from './dto/admin-point.dto';
 
 @ApiTags('管理端-探索点管理')
@@ -26,7 +27,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('admin/points')
 export class AdminPointController {
-  constructor(private readonly adminPointService: AdminPointService) {}
+  constructor(private readonly adminPointService: AdminPointService) { }
 
   @Get()
   @ApiOperation({ summary: '探索点列表（分页）' })
@@ -61,6 +62,13 @@ export class AdminPointController {
   @RequirePermission('xunyin:point:edit')
   async updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
     return this.adminPointService.updateStatus(id, dto.status);
+  }
+
+  @Patch('batch-status')
+  @ApiOperation({ summary: '批量更新探索点状态' })
+  @RequirePermission('xunyin:point:edit')
+  async batchUpdateStatus(@Body() dto: BatchUpdateStatusDto) {
+    return this.adminPointService.batchUpdateStatus(dto.ids, dto.status);
   }
 
   @Delete(':id')

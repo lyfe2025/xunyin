@@ -86,6 +86,22 @@ export function updateSealStatus(id: string, status: string) {
   })
 }
 
+export function batchDeleteSeal(ids: string[]) {
+  return request({
+    url: '/admin/seals/batch-delete',
+    method: 'post',
+    data: { ids },
+  })
+}
+
+export function batchUpdateSealStatus(ids: string[], status: string) {
+  return request({
+    url: '/admin/seals/batch-status',
+    method: 'post',
+    data: { ids, status },
+  })
+}
+
 export function exportSeals(query: SealQuery) {
   return request<Blob>({
     url: '/admin/seals/export',

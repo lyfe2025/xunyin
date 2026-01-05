@@ -37,12 +37,12 @@ export class QueryAdminPointDto {
   @Min(1)
   pageNum?: number = 1;
 
-  @ApiPropertyOptional({ description: '每页数量', default: 10 })
+  @ApiPropertyOptional({ description: '每页数量', default: 20 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  @Max(100)
+  @Max(500)
   pageSize?: number = 20;
 }
 
@@ -210,6 +210,16 @@ export class UpdatePointDto {
 }
 
 export class UpdateStatusDto {
+  @ApiProperty({ description: '状态 0正常 1停用' })
+  @IsString()
+  status: string;
+}
+
+export class BatchUpdateStatusDto {
+  @ApiProperty({ description: 'ID列表', type: [String] })
+  @IsString({ each: true })
+  ids: string[];
+
   @ApiProperty({ description: '状态 0正常 1停用' })
   @IsString()
   status: string;

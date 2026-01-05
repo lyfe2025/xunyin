@@ -23,7 +23,7 @@ import { UpdateDictTypeDto } from './dto/update-dict-type.dto';
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('system/dict/type')
 export class DictController {
-  constructor(private readonly dictService: DictService) {}
+  constructor(private readonly dictService: DictService) { }
 
   @Get()
   @RequirePermission('system:dict:list')
@@ -59,5 +59,12 @@ export class DictController {
   remove(@Query('ids') ids: string) {
     const dictIds = ids ? ids.split(',') : [];
     return this.dictService.removeTypes(dictIds);
+  }
+
+  @Put('changeStatus')
+  @RequirePermission('system:dict:edit')
+  @ApiOperation({ summary: '修改字典类型状态' })
+  changeStatus(@Body() body: { dictId: string; status: string }) {
+    return this.dictService.changeStatus(body.dictId, body.status);
   }
 }

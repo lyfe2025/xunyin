@@ -70,3 +70,11 @@ export function listDeptTree(): Promise<SysDept[]> {
     method: 'get',
   }).then((res: unknown) => (res as { data: SysDept[] }).data)
 }
+
+export function changeDeptStatus(deptId: string, status: string) {
+  return request<{ msg: string }>({
+    url: '/system/dept/changeStatus',
+    method: 'put',
+    data: { deptId, status },
+  })
+}
