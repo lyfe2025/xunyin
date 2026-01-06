@@ -1,6 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common'
-import { APP_INTERCEPTOR } from '@nestjs/core'
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { PrismaModule } from './prisma/prisma.module'
@@ -38,6 +39,24 @@ import { AdminModule } from './admin/admin.module'
     ConfigModule.forRoot({
       isGlobal: true, // 全局可用
     }),
+    // 全局限流配置：每分钟最多 100 次请求
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 1000, // 1 秒
+        limit: 10, // 每秒最多 10 次
+      },
+      {
+        name: 'medium',
+        ttl: 10000, // 10 秒
+        limit: 50, // 每 10 秒最多 50 次
+      },
+      {
+        name: 'long',
+        ttl: 60000, // 1 分钟
+        limit: 100, // 每分钟最多 100 次
+      },
+    ]),
     LoggerModule,
     PrismaModule,
     UserModule,
@@ -74,6 +93,11 @@ import { AdminModule } from './admin/admin.module'
     {
       provide: APP_INTERCEPTOR,
       useClass: OperationLogInterceptor,
+    },
+    // 全局限流守卫
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

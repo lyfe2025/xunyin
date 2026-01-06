@@ -9,6 +9,7 @@ import { NestExpressApplication } from '@nestjs/platform-express'
 import { join } from 'path'
 import { json, urlencoded } from 'express'
 import redoc from 'redoc-express'
+import helmet from 'helmet'
 
 // 全局 BigInt 序列化支持
 // 解决 "TypeError: Do not know how to serialize a BigInt" 错误
@@ -28,6 +29,30 @@ async function bootstrap() {
   // 使用自定义日志服务
   const logger = app.get(LoggerService)
   app.useLogger(logger)
+
+  // 配置 Helmet 安全头
+  // 生产环境使用严格配置，开发环境放宽限制以便调试
+  const isProduction = process.env.NODE_ENV === 'production'
+  app.use(
+    helmet({
+      contentSecurityPolicy: isProduction
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              scriptSrc: ["'self'"],
+              imgSrc: ["'self'", 'data:', 'blob:'],
+              connectSrc: ["'self'"],
+              fontSrc: ["'self'"],
+              objectSrc: ["'none'"],
+              frameAncestors: ["'self'"],
+            },
+          }
+        : false, // 开发环境禁用 CSP 以便 Swagger UI 正常工作
+      crossOriginEmbedderPolicy: false, // 允许加载跨域资源
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // 允许跨域访问静态资源
+    }),
+  )
 
   // 配置静态文件服务 (用于访问上传的文件)
   // 设置 CORS 头允许跨域访问
@@ -61,7 +86,6 @@ async function bootstrap() {
   // 启用 CORS (跨域资源共享)
   // 生产环境必须配置白名单，未配置则拒绝所有跨域请求
   // 开发环境允许所有来源
-  const isProduction = process.env.NODE_ENV === 'production'
   const corsOrigins = process.env.CORS_ORIGINS?.split(',')
     .map((o) => o.trim())
     .filter(Boolean)

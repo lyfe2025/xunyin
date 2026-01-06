@@ -80,13 +80,13 @@ export class AdminBgmService {
 
     return {
       list: list.map((b) => {
-        const journeyInfo = journeyMap.get(b.contextId!)
-        const pointInfo = pointMap.get(b.contextId!)
+        const journeyInfo = journeyMap.get(b.contextId)
+        const pointInfo = pointMap.get(b.contextId)
         return {
           ...b,
           contextName:
             b.context === 'city'
-              ? cityMap.get(b.contextId!) || null
+              ? cityMap.get(b.contextId) || null
               : b.context === 'journey'
                 ? journeyInfo?.name || null
                 : b.context === 'point'
