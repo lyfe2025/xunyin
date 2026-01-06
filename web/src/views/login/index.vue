@@ -45,8 +45,8 @@ const siteLogo = computed(() => {
   return logo
 })
 
-const username = ref('admin')
-const password = ref('admin123')
+const username = ref('')
+const password = ref('')
 const showPassword = ref(false)
 const code = ref('')
 const uuid = ref('')
@@ -77,9 +77,19 @@ const loadCaptcha = async () => {
     if (res.captchaEnabled && res.uuid && res.img) {
       uuid.value = res.uuid
       captchaImg.value = res.img
+      // 验证码启用时清空默认账号密码
+      username.value = ''
+      password.value = ''
+    } else {
+      // 验证码未启用时显示默认账号密码
+      username.value = 'admin'
+      password.value = 'admin123'
     }
   } catch {
     captchaEnabled.value = false
+    // 获取失败时也显示默认账号密码
+    username.value = 'admin'
+    password.value = 'admin123'
   } finally {
     captchaLoading.value = false
   }
@@ -361,7 +371,9 @@ const backToLogin = () => {
             </Button>
           </div>
 
-          <p class="text-center text-sm text-muted-foreground">默认账号：admin / admin123</p>
+          <p v-if="!captchaEnabled" class="text-center text-sm text-muted-foreground">
+            默认账号：admin / admin123
+          </p>
         </template>
       </div>
     </div>
