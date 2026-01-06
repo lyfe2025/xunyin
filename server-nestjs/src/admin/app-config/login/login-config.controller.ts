@@ -1,7 +1,8 @@
-import { Controller, Get, Put, Body, UseGuards, Request } from '@nestjs/common'
+import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../../../auth/jwt-auth.guard'
 import { RequirePermission } from '../../../common/decorators/permission.decorator'
+import { CurrentUser, JwtUser } from '../../../common/decorators/user.decorator'
 import { LoginConfigService } from './login-config.service'
 import { UpdateLoginConfigDto } from './dto/login-config.dto'
 
@@ -22,7 +23,7 @@ export class LoginConfigController {
   @Put()
   @ApiOperation({ summary: '更新登录页配置' })
   @RequirePermission('app:login:edit')
-  async update(@Body() dto: UpdateLoginConfigDto, @Request() req: any) {
-    return this.loginConfigService.update(dto, req.user?.userName)
+  async update(@Body() dto: UpdateLoginConfigDto, @CurrentUser() user: JwtUser) {
+    return this.loginConfigService.update(dto, user?.userName)
   }
 }

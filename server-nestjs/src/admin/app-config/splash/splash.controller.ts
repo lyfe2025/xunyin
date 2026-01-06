@@ -9,11 +9,11 @@ import {
   Param,
   Query,
   UseGuards,
-  Request,
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../../../auth/jwt-auth.guard'
 import { RequirePermission } from '../../../common/decorators/permission.decorator'
+import { CurrentUser, JwtUser } from '../../../common/decorators/user.decorator'
 import { SplashService } from './splash.service'
 import {
   QuerySplashDto,
@@ -47,22 +47,30 @@ export class SplashController {
   @Post()
   @ApiOperation({ summary: '创建启动页配置' })
   @RequirePermission('app:splash:add')
-  async create(@Body() dto: CreateSplashDto, @Request() req: any) {
-    return this.splashService.create(dto, req.user?.userName)
+  async create(@Body() dto: CreateSplashDto, @CurrentUser() user: JwtUser) {
+    return this.splashService.create(dto, user?.userName)
   }
 
   @Put(':id')
   @ApiOperation({ summary: '更新启动页配置' })
   @RequirePermission('app:splash:edit')
-  async update(@Param('id') id: string, @Body() dto: UpdateSplashDto, @Request() req: any) {
-    return this.splashService.update(id, dto, req.user?.userName)
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateSplashDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.splashService.update(id, dto, user?.userName)
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: '更新启动页状态' })
   @RequirePermission('app:splash:edit')
-  async updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto, @Request() req: any) {
-    return this.splashService.updateStatus(id, dto.status, req.user?.userName)
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateStatusDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.splashService.updateStatus(id, dto.status, user?.userName)
   }
 
   @Delete(':id')

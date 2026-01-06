@@ -9,11 +9,11 @@ import {
   Param,
   Query,
   UseGuards,
-  Request,
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../../../auth/jwt-auth.guard'
 import { RequirePermission } from '../../../common/decorators/permission.decorator'
+import { CurrentUser, JwtUser } from '../../../common/decorators/user.decorator'
 import { VersionService } from './version.service'
 import {
   QueryVersionDto,
@@ -53,22 +53,30 @@ export class VersionController {
   @Post()
   @ApiOperation({ summary: '创建版本' })
   @RequirePermission('app:version:add')
-  async create(@Body() dto: CreateVersionDto, @Request() req: any) {
-    return this.versionService.create(dto, req.user?.userName)
+  async create(@Body() dto: CreateVersionDto, @CurrentUser() user: JwtUser) {
+    return this.versionService.create(dto, user?.userName)
   }
 
   @Put(':id')
   @ApiOperation({ summary: '更新版本' })
   @RequirePermission('app:version:edit')
-  async update(@Param('id') id: string, @Body() dto: UpdateVersionDto, @Request() req: any) {
-    return this.versionService.update(id, dto, req.user?.userName)
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateVersionDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.versionService.update(id, dto, user?.userName)
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: '更新版本状态' })
   @RequirePermission('app:version:edit')
-  async updateStatus(@Param('id') id: string, @Body('status') status: string, @Request() req: any) {
-    return this.versionService.updateStatus(id, status, req.user?.userName)
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.versionService.updateStatus(id, status, user?.userName)
   }
 
   @Delete(':id')

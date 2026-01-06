@@ -1,18 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Request,
-} from '@nestjs/common'
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../../../auth/jwt-auth.guard'
 import { RequirePermission } from '../../../common/decorators/permission.decorator'
+import { CurrentUser, JwtUser } from '../../../common/decorators/user.decorator'
 import { PromotionService } from './promotion.service'
 import {
   QueryChannelDto,
@@ -48,15 +38,19 @@ export class PromotionController {
   @Post('channels')
   @ApiOperation({ summary: '创建推广渠道' })
   @RequirePermission('app:promotion:add')
-  async createChannel(@Body() dto: CreateChannelDto, @Request() req: any) {
-    return this.promotionService.createChannel(dto, req.user?.userName)
+  async createChannel(@Body() dto: CreateChannelDto, @CurrentUser() user: JwtUser) {
+    return this.promotionService.createChannel(dto, user?.userName)
   }
 
   @Put('channels/:id')
   @ApiOperation({ summary: '更新推广渠道' })
   @RequirePermission('app:promotion:edit')
-  async updateChannel(@Param('id') id: string, @Body() dto: UpdateChannelDto, @Request() req: any) {
-    return this.promotionService.updateChannel(id, dto, req.user?.userName)
+  async updateChannel(
+    @Param('id') id: string,
+    @Body() dto: UpdateChannelDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.promotionService.updateChannel(id, dto, user?.userName)
   }
 
   @Delete('channels/:id')

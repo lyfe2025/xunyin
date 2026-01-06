@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { PrismaService } from '../../../prisma/prisma.service'
 import { BusinessException } from '../../../common/exceptions'
 import { ErrorCode } from '../../../common/enums'
@@ -98,7 +99,7 @@ export class PromotionService {
   async findStats(query: QueryStatsDto) {
     const { channelId, startDate, endDate, pageNum = 1, pageSize = 10 } = query
 
-    const where: any = {}
+    const where: Prisma.AppPromotionStatsWhereInput = {}
     if (channelId) where.channelId = channelId
     if (startDate || endDate) {
       where.statDate = {}
@@ -127,7 +128,7 @@ export class PromotionService {
   async getStatsSummary(query: QueryStatsDto) {
     const { channelId, startDate, endDate } = query
 
-    const where: any = {}
+    const where: Prisma.AppPromotionStatsWhereInput = {}
     if (channelId) where.channelId = channelId
     if (startDate || endDate) {
       where.statDate = {}
@@ -158,7 +159,7 @@ export class PromotionService {
   async getChannelRanking(query: QueryStatsDto) {
     const { startDate, endDate } = query
 
-    const where: any = {}
+    const where: Prisma.AppPromotionStatsWhereInput = {}
     if (startDate || endDate) {
       where.statDate = {}
       if (startDate) where.statDate.gte = new Date(startDate)

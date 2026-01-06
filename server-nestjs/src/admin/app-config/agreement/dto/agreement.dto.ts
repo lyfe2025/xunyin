@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiPropertyOptional } from '@nestjs/swagger'
 import { IsString, IsOptional, MaxLength, IsIn } from 'class-validator'
 
 export class UpdateAgreementDto {

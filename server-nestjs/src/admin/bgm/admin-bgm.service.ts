@@ -80,12 +80,12 @@ export class AdminBgmService {
 
     return {
       list: list.map((b) => {
-        const journeyInfo = journeyMap.get(b.contextId)
-        const pointInfo = pointMap.get(b.contextId)
+        const journeyInfo = b.contextId ? journeyMap.get(b.contextId) : undefined
+        const pointInfo = b.contextId ? pointMap.get(b.contextId) : undefined
         return {
           ...b,
           contextName:
-            b.context === 'city'
+            b.context === 'city' && b.contextId
               ? cityMap.get(b.contextId) || null
               : b.context === 'journey'
                 ? journeyInfo?.name || null

@@ -18,6 +18,95 @@ pnpm --filter server-nestjs lint
 pnpm --filter web lint
 ```
 
+## TypeScript 类型安全
+
+### 禁止使用 `any` 类型
+
+项目启用了严格的 TypeScript 检查，避免使用 `any` 类型：
+
+```typescript
+// ❌ 错误：使用 any
+const where: any = {}
+async update(@Request() req: any) {}
+
+// ✅ 正确：使用具体类型
+const where: Prisma.UserWhereInput = {}
+async update(@CurrentUser() user: JwtUser) {}
+```
+
+### Prisma 查询类型
+
+使用 Prisma 生成的类型定义：
+
+```typescript
+import { Prisma } from '@prisma/client'
+
+// 查询条件
+const where: Prisma.UserWhereInput = {}
+const where: Prisma.CityWhereInput = {}
+
+// 创建数据
+const data: Prisma.UserCreateInput = {}
+
+// 更新数据
+const data: Prisma.UserUpdateInput = {}
+```
+
+### 获取当前用户
+
+#### Admin 端（管理后台）
+
+使用 `@CurrentUser()` 装饰器获取 JWT 用户信息：
+
+```typescript
+import { CurrentUser, JwtUser } from '../common/decorators/user.decorator'
+
+@Put(':id')
+@UseGuards(JwtAuthGuard)
+async update(@Param('id') id: string, @Body() dto: UpdateDto, @CurrentUser() user: JwtUser) {
+  return this.service.update(id, dto, user?.userName)
+}
+```
+
+#### App 端（移动端）
+
+使用 App 端专用的 `@CurrentUser()` 装饰器：
+
+```typescript
+import { CurrentUser } from '../app-auth/decorators/current-user.decorator'
+import type { CurrentAppUser } from '../app-auth/decorators/current-user.decorator'
+
+@Get('profile')
+@UseGuards(AppAuthGuard)
+async getProfile(@CurrentUser() user: CurrentAppUser) {
+  return this.service.getProfile(user.userId)
+}
+```
+
+### Map 类型安全
+
+当 Map 的 key 可能为 null 时，需要先检查：
+
+```typescript
+// ❌ 错误：contextId 可能为 null
+const name = cityMap.get(item.contextId)
+
+// ✅ 正确：先检查 contextId 是否存在
+const name = item.contextId ? cityMap.get(item.contextId) : undefined
+```
+
+### 移除未使用的导入
+
+确保没有未使用的导入：
+
+```typescript
+// ❌ 错误：ApiProperty 未使用
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+
+// ✅ 正确：只导入需要的
+import { ApiPropertyOptional } from '@nestjs/swagger'
+```
+
 ## Prettier 配置
 
 项目使用统一的 Prettier 配置，配置文件位于：
