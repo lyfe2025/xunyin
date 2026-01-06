@@ -144,12 +144,7 @@ export default [
       prettier: pluginPrettier,
     },
     rules: {
-      'prettier/prettier': [
-        'error',
-        {
-          endOfLine: 'auto',
-        },
-      ],
+      'prettier/prettier': ['error', {}],
     },
   },
 ]

@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class UserStatsService {
@@ -9,49 +9,40 @@ export class UserStatsService {
    * 获取用户统计概览
    */
   async getOverview(userId: string) {
-    const [
-      user,
-      completedJourneys,
-      inProgressJourneys,
-      totalSeals,
-      chainedSeals,
-      totalPhotos,
-    ] = await Promise.all([
-      this.prisma.appUser.findUnique({ where: { id: userId } }),
-      this.prisma.journeyProgress.count({
-        where: { userId, status: 'completed' },
-      }),
-      this.prisma.journeyProgress.count({
-        where: { userId, status: 'in_progress' },
-      }),
-      this.prisma.userSeal.count({ where: { userId } }),
-      this.prisma.userSeal.count({ where: { userId, isChained: true } }),
-      this.prisma.explorationPhoto.count({ where: { userId } }),
-    ]);
+    const [user, completedJourneys, inProgressJourneys, totalSeals, chainedSeals, totalPhotos] =
+      await Promise.all([
+        this.prisma.appUser.findUnique({ where: { id: userId } }),
+        this.prisma.journeyProgress.count({
+          where: { userId, status: 'completed' },
+        }),
+        this.prisma.journeyProgress.count({
+          where: { userId, status: 'in_progress' },
+        }),
+        this.prisma.userSeal.count({ where: { userId } }),
+        this.prisma.userSeal.count({ where: { userId, isChained: true } }),
+        this.prisma.explorationPhoto.count({ where: { userId } }),
+      ])
 
     // 计算总行程距离
     const completedJourneyIds = await this.prisma.journeyProgress.findMany({
       where: { userId, status: 'completed' },
       select: { journeyId: true },
-    });
+    })
 
-    let totalDistance = 0;
+    let totalDistance = 0
     if (completedJourneyIds.length > 0) {
       const journeys = await this.prisma.journey.findMany({
         where: { id: { in: completedJourneyIds.map((j) => j.journeyId) } },
         select: { totalDistance: true },
-      });
-      totalDistance = journeys.reduce(
-        (sum, j) => sum + Number(j.totalDistance),
-        0,
-      );
+      })
+      totalDistance = journeys.reduce((sum, j) => sum + Number(j.totalDistance), 0)
     }
 
     // 计算总花费时间
     const totalTimeSpent = await this.prisma.journeyProgress.aggregate({
       where: { userId, status: 'completed' },
       _sum: { timeSpentMinutes: true },
-    });
+    })
 
     return {
       totalPoints: user?.totalPoints || 0,
@@ -63,7 +54,7 @@ export class UserStatsService {
       totalPhotos,
       totalDistance: Math.round(totalDistance),
       totalTimeSpentMinutes: totalTimeSpent._sum.timeSpentMinutes || 0,
-    };
+    }
   }
 
   /**
@@ -74,7 +65,7 @@ export class UserStatsService {
       where: { userId },
       orderBy: { createTime: 'desc' },
       take: limit,
-    });
+    })
 
     return activities.map((activity) => ({
       id: activity.id,
@@ -82,7 +73,7 @@ export class UserStatsService {
       title: activity.title,
       relatedId: activity.relatedId,
       createTime: activity.createTime,
-    }));
+    }))
   }
 
   /**
@@ -97,42 +88,42 @@ export class UserStatsService {
           include: { city: true },
         },
       },
-    });
+    })
 
     const cityStats = new Map<
       string,
       {
-        cityId: string;
-        cityName: string;
-        journeyCount: number;
-        totalTime: number;
+        cityId: string
+        cityName: string
+        journeyCount: number
+        totalTime: number
       }
-    >();
+    >()
 
     for (const progress of journeyProgresses) {
-      const cityId = progress.journey.cityId;
-      const cityName = progress.journey.city.name;
-      const existing = cityStats.get(cityId);
+      const cityId = progress.journey.cityId
+      const cityName = progress.journey.city.name
+      const existing = cityStats.get(cityId)
 
       if (existing) {
-        existing.journeyCount += 1;
-        existing.totalTime += progress.timeSpentMinutes || 0;
+        existing.journeyCount += 1
+        existing.totalTime += progress.timeSpentMinutes || 0
       } else {
         cityStats.set(cityId, {
           cityId,
           cityName,
           journeyCount: 1,
           totalTime: progress.timeSpentMinutes || 0,
-        });
+        })
       }
     }
 
     // 按月统计
-    const monthlyStats = new Map<string, number>();
+    const monthlyStats = new Map<string, number>()
     for (const progress of journeyProgresses) {
       if (progress.completeTime) {
-        const month = progress.completeTime.toISOString().slice(0, 7);
-        monthlyStats.set(month, (monthlyStats.get(month) || 0) + 1);
+        const month = progress.completeTime.toISOString().slice(0, 7)
+        monthlyStats.set(month, (monthlyStats.get(month) || 0) + 1)
       }
     }
 
@@ -142,6 +133,6 @@ export class UserStatsService {
         month,
         count,
       })),
-    };
+    }
   }
 }

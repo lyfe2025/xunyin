@@ -21,7 +21,7 @@ export function exportToExcel<T extends Record<string, any>>(
   data: T[],
   columns: { key: keyof T; label: string }[],
   filename: string,
-  sheetName = 'Sheet1'
+  sheetName = 'Sheet1',
 ) {
   // 构建表头和数据
   const headers = columns.map((c) => c.label)
@@ -29,7 +29,7 @@ export function exportToExcel<T extends Record<string, any>>(
     columns.map((c) => {
       const value = row[c.key]
       return value ?? ''
-    })
+    }),
   )
 
   // 创建工作表
@@ -39,7 +39,7 @@ export function exportToExcel<T extends Record<string, any>>(
   const colWidths = columns.map((col, index) => {
     const maxLength = Math.max(
       col.label.length * 2, // 中文字符宽度
-      ...rows.map((row) => String(row[index] ?? '').length)
+      ...rows.map((row) => String(row[index] ?? '').length),
     )
     return { wch: Math.min(maxLength + 2, 50) }
   })
@@ -59,7 +59,7 @@ export function exportToExcel<T extends Record<string, any>>(
 export function exportToCsv<T extends Record<string, any>>(
   data: T[],
   columns: { key: keyof T; label: string }[],
-  filename: string
+  filename: string,
 ) {
   const headers = columns.map((c) => c.label).join(',')
   const rows = data.map((row) =>
@@ -72,7 +72,7 @@ export function exportToCsv<T extends Record<string, any>>(
         }
         return value ?? ''
       })
-      .join(',')
+      .join(','),
   )
   const csv = [headers, ...rows].join('\n')
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })

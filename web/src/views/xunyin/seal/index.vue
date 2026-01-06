@@ -269,7 +269,7 @@ watch(
   (newVal) => {
     selectAll.value = sealList.value.length > 0 && newVal.length === sealList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 function getSealTypeLabel(type: string) {
@@ -484,7 +484,12 @@ onMounted(() => {
             <TableCell>{{ seal.badgeTitle || '-' }}</TableCell>
             <TableCell>{{ seal.orderNum }}</TableCell>
             <TableCell>
-              <StatusSwitch :model-value="seal.status" :id="seal.id" :name="seal.name" @change="handleStatusChange" />
+              <StatusSwitch
+                :model-value="seal.status"
+                :id="seal.id"
+                :name="seal.name"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell class="text-right space-x-1">
               <TooltipProvider>

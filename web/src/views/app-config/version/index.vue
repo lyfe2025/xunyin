@@ -299,7 +299,7 @@ function handleSelectAll(checked: boolean) {
 }
 
 const isAllSelected = computed(
-  () => list.value.length > 0 && selectedIds.value.length === list.value.length
+  () => list.value.length > 0 && selectedIds.value.length === list.value.length,
 )
 
 onMounted(() => {
@@ -500,10 +500,7 @@ onMounted(() => {
                 <p class="text-xs text-muted-foreground">最大 200MB</p>
               </div>
             </div>
-            <div
-              v-else
-              class="flex items-center justify-between p-3 border rounded-lg bg-muted/50"
-            >
+            <div v-else class="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
               <div class="flex items-center gap-2">
                 <FileArchive class="h-5 w-5 text-green-600" />
                 <span class="text-sm truncate max-w-[280px]">{{ form.downloadUrl }}</span>

@@ -29,12 +29,14 @@ const hasMedia = computed(() => !!props.modelValue)
 const isVideo = computed(() => {
   if (!props.modelValue) return false
   const url = props.modelValue.toLowerCase()
-  return url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.endsWith('.avi')
+  return (
+    url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.endsWith('.avi')
+  )
 })
 // 判断 accept 是否为视频类型
 const isVideoAccept = computed(() => props.accept?.includes('video'))
 const acceptTypes = computed(
-  () => props.accept || 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml'
+  () => props.accept || 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml',
 )
 const maxSizeMB = computed(() => props.maxSize || 5)
 
@@ -104,7 +106,12 @@ function handleRemove() {
         autoplay
       />
       <!-- 图片预览 -->
-      <img v-else :src="displayUrl" alt="preview" class="h-24 w-24 rounded-lg border object-cover" />
+      <img
+        v-else
+        :src="displayUrl"
+        alt="preview"
+        class="h-24 w-24 rounded-lg border object-cover"
+      />
       <Button
         variant="destructive"
         size="icon"

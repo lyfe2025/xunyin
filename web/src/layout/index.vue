@@ -97,15 +97,15 @@ watch(
         (m) =>
           path.startsWith(m.path) ||
           m.children?.some(
-            (c) => path === (c.path.startsWith('/') ? c.path : `${m.path}/${c.path}`)
-          )
+            (c) => path === (c.path.startsWith('/') ? c.path : `${m.path}/${c.path}`),
+          ),
       )
       if (topMenu) {
         activeTopMenu.value = topMenu.path
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 图标工具函数
@@ -134,7 +134,7 @@ const sidebarStyle = computed(() => ({
 const sidebarWidthClass = computed(() =>
   isCollapsed.value
     ? `w-[${themeStore.sidebarCollapsedWidth}px]`
-    : `w-[${themeStore.sidebarExpandedWidth}px]`
+    : `w-[${themeStore.sidebarExpandedWidth}px]`,
 )
 
 // 页面切换动画类名
@@ -224,7 +224,7 @@ const handleOpenEditDialog = (userId: string) => {
       v-if="isNormalMode || isMixedMode"
       :class="
         cn(
-          'fixed inset-y-0 left-0 z-10 hidden flex-col border-r bg-background sm:flex transition-all duration-300'
+          'fixed inset-y-0 left-0 z-10 hidden flex-col border-r bg-background sm:flex transition-all duration-300',
         )
       "
       :style="sidebarStyle"
@@ -255,7 +255,7 @@ const handleOpenEditDialog = (userId: string) => {
                 :class="
                   cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:text-primary',
-                    isActive('/dashboard') ? 'bg-muted text-primary' : 'text-muted-foreground'
+                    isActive('/dashboard') ? 'bg-muted text-primary' : 'text-muted-foreground',
                   )
                 "
               >
@@ -276,7 +276,7 @@ const handleOpenEditDialog = (userId: string) => {
                         'h-9 w-9 flex items-center justify-center rounded-lg transition-colors',
                         isActive('/dashboard')
                           ? 'bg-muted text-primary'
-                          : 'text-muted-foreground hover:text-primary hover:bg-muted/50'
+                          : 'text-muted-foreground hover:text-primary hover:bg-muted/50',
                       )
                     "
                   >
@@ -299,7 +299,7 @@ const handleOpenEditDialog = (userId: string) => {
                         'h-9 w-9 flex items-center justify-center rounded-lg cursor-pointer transition-colors',
                         route.path.startsWith(menu.path)
                           ? 'bg-muted text-primary'
-                          : 'text-muted-foreground hover:text-primary hover:bg-muted/50'
+                          : 'text-muted-foreground hover:text-primary hover:bg-muted/50',
                       )
                     "
                   >
@@ -317,10 +317,10 @@ const handleOpenEditDialog = (userId: string) => {
                         cn(
                           'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted',
                           isActive(
-                            child.path.startsWith('/') ? child.path : `${menu.path}/${child.path}`
+                            child.path.startsWith('/') ? child.path : `${menu.path}/${child.path}`,
                           )
                             ? 'bg-muted text-primary'
-                            : 'text-muted-foreground'
+                            : 'text-muted-foreground',
                         )
                       "
                     >
@@ -344,10 +344,10 @@ const handleOpenEditDialog = (userId: string) => {
                   cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:text-primary',
                     isActive(
-                      child.path.startsWith('/') ? child.path : `${activeTopMenu}/${child.path}`
+                      child.path.startsWith('/') ? child.path : `${activeTopMenu}/${child.path}`,
                     )
                       ? 'bg-muted text-primary'
-                      : 'text-muted-foreground'
+                      : 'text-muted-foreground',
                   )
                 "
               >
@@ -364,10 +364,12 @@ const handleOpenEditDialog = (userId: string) => {
                       cn(
                         'h-9 w-9 flex items-center justify-center rounded-lg transition-colors',
                         isActive(
-                          child.path.startsWith('/') ? child.path : `${activeTopMenu}/${child.path}`
+                          child.path.startsWith('/')
+                            ? child.path
+                            : `${activeTopMenu}/${child.path}`,
                         )
                           ? 'bg-muted text-primary'
-                          : 'text-muted-foreground hover:text-primary'
+                          : 'text-muted-foreground hover:text-primary',
                       )
                     "
                   >
@@ -390,7 +392,7 @@ const handleOpenEditDialog = (userId: string) => {
               :class="
                 cn(
                   'flex items-center gap-2 w-full h-auto py-2',
-                  isCollapsed ? 'justify-center px-0' : 'justify-between px-2'
+                  isCollapsed ? 'justify-center px-0' : 'justify-between px-2',
                 )
               "
             >
@@ -505,7 +507,7 @@ const handleOpenEditDialog = (userId: string) => {
                   :class="
                     cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:text-primary',
-                      isActive('/dashboard') ? 'bg-muted text-primary' : 'text-muted-foreground'
+                      isActive('/dashboard') ? 'bg-muted text-primary' : 'text-muted-foreground',
                     )
                   "
                 >
@@ -538,10 +540,12 @@ const handleOpenEditDialog = (userId: string) => {
                           cn(
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:text-primary',
                             isActive(
-                              child.path.startsWith('/') ? child.path : `${item.path}/${child.path}`
+                              child.path.startsWith('/')
+                                ? child.path
+                                : `${item.path}/${child.path}`,
                             )
                               ? 'bg-muted text-primary'
-                              : 'text-muted-foreground'
+                              : 'text-muted-foreground',
                           )
                         "
                       >
@@ -647,7 +651,7 @@ const handleOpenEditDialog = (userId: string) => {
                   :class="
                     cn(
                       'group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50',
-                      isActive('/dashboard') && 'bg-accent text-accent-foreground'
+                      isActive('/dashboard') && 'bg-accent text-accent-foreground',
                     )
                   "
                 >
@@ -677,8 +681,8 @@ const handleOpenEditDialog = (userId: string) => {
                               isActive(
                                 child.path.startsWith('/')
                                   ? child.path
-                                  : `${menu.path}/${child.path}`
-                              ) && 'bg-accent'
+                                  : `${menu.path}/${child.path}`,
+                              ) && 'bg-accent',
                             )
                           "
                         >
@@ -701,7 +705,7 @@ const handleOpenEditDialog = (userId: string) => {
                   :class="
                     cn(
                       'group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer',
-                      activeTopMenu === menu.path && 'bg-accent text-accent-foreground'
+                      activeTopMenu === menu.path && 'bg-accent text-accent-foreground',
                     )
                   "
                   @click="activeTopMenu = menu.path"

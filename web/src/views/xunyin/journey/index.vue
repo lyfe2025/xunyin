@@ -297,7 +297,7 @@ watch(
   (newVal) => {
     selectAll.value = journeyList.value.length > 0 && newVal.length === journeyList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 function goToPoints(journeyId: string) {

@@ -365,7 +365,7 @@ async function saveOauthConfig() {
           configKey: key,
           configValue: value,
           configType: 'Y',
-        })
+        }),
       )
     }
   }

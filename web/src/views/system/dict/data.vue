@@ -221,7 +221,7 @@ watch(
   (newVal) => {
     selectAll.value = dataList.value.length > 0 && newVal.length === dataList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 // 批量删除

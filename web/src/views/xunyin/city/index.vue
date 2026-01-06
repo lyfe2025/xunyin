@@ -313,7 +313,7 @@ watch(
   (newVal) => {
     selectAll.value = cityList.value.length > 0 && newVal.length === cityList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 // 跳转到文化之旅页面并筛选
@@ -522,7 +522,12 @@ onMounted(() => {
             <TableCell>{{ city.explorerCount }}</TableCell>
             <TableCell>{{ city.orderNum }}</TableCell>
             <TableCell>
-              <StatusSwitch :model-value="city.status" :id="city.id" :name="city.name" @change="handleStatusChange" />
+              <StatusSwitch
+                :model-value="city.status"
+                :id="city.id"
+                :name="city.name"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell class="text-right space-x-1">
               <TooltipProvider>

@@ -1,13 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsString,
-  IsOptional,
-  Min,
-  Max,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsNumber, IsString, IsOptional, Min, Max, ValidateNested } from 'class-validator'
+import { Type } from 'class-transformer'
 
 class LatLngDto {
   @ApiProperty({ description: '纬度' })
@@ -15,102 +8,102 @@ class LatLngDto {
   @IsNumber()
   @Min(-90)
   @Max(90)
-  lat: number;
+  lat: number
 
   @ApiProperty({ description: '经度' })
   @Type(() => Number)
   @IsNumber()
   @Min(-180)
   @Max(180)
-  lng: number;
+  lng: number
 }
 
 export class WalkingRouteDto {
   @ApiProperty({ description: '起点' })
   @ValidateNested()
   @Type(() => LatLngDto)
-  origin: LatLngDto;
+  origin: LatLngDto
 
   @ApiProperty({ description: '终点' })
   @ValidateNested()
   @Type(() => LatLngDto)
-  destination: LatLngDto;
+  destination: LatLngDto
 }
 
 export class SearchPoiDto {
   @ApiProperty({ description: '关键词' })
   @IsString()
-  keyword: string;
+  keyword: string
 
   @ApiPropertyOptional({ description: '城市' })
   @IsOptional()
   @IsString()
-  city?: string;
+  city?: string
 }
 
 export class WalkingRouteVo {
   @ApiProperty({ description: '距离(米)' })
-  distance: number;
+  distance: number
 
   @ApiProperty({ description: '时长(分钟)' })
-  duration: number;
+  duration: number
 
   @ApiPropertyOptional({ description: '编码后的路径' })
-  polyline?: string;
+  polyline?: string
 
   @ApiProperty({ description: '导航步骤' })
-  steps: RouteStepVo[];
+  steps: RouteStepVo[]
 }
 
 export class RouteStepVo {
   @ApiProperty({ description: '步骤说明' })
-  instruction: string;
+  instruction: string
 
   @ApiProperty({ description: '距离(米)' })
-  distance: number;
+  distance: number
 }
 
 export class PoiVo {
   @ApiProperty({ description: '名称' })
-  name: string;
+  name: string
 
   @ApiProperty({ description: '地址' })
-  address: string;
+  address: string
 
   @ApiProperty({ description: '纬度' })
-  lat: number;
+  lat: number
 
   @ApiProperty({ description: '经度' })
-  lng: number;
+  lng: number
 }
 
 export class MapConfigVo {
   @ApiProperty({ description: '地图方案' })
-  provider: string;
+  provider: string
 
   @ApiProperty({ description: '高德配置' })
   amap: {
-    key: string;
-    securityCode: string;
-  };
+    key: string
+    securityCode: string
+  }
 
   @ApiPropertyOptional({ description: 'MapTiler配置' })
   maptiler?: {
-    key: string;
-    styleUrl: string;
-  };
+    key: string
+    styleUrl: string
+  }
 
   @ApiProperty({ description: '城市标记' })
-  cityMarkers: CityMarkerVo[];
+  cityMarkers: CityMarkerVo[]
 }
 
 export class CityMarkerVo {
   @ApiProperty({ description: '城市ID' })
-  cityId: string;
+  cityId: string
 
   @ApiProperty({ description: '图标资源' })
-  iconAsset: string;
+  iconAsset: string
 
   @ApiProperty({ description: '位置' })
-  position: { lat: number; lng: number };
+  position: { lat: number; lng: number }
 }

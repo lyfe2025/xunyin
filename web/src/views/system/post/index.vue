@@ -36,7 +36,15 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
 import { formatDate } from '@/utils/format'
-import { listPost, getPost, delPost, addPost, updatePost, changePostStatus, batchChangePostStatus } from '@/api/system/post'
+import {
+  listPost,
+  getPost,
+  delPost,
+  addPost,
+  updatePost,
+  changePostStatus,
+  batchChangePostStatus,
+} from '@/api/system/post'
 import type { SysPost } from '@/api/system/types'
 
 const { toast } = useToast()
@@ -200,7 +208,7 @@ watch(
   (newVal) => {
     selectAll.value = postList.value.length > 0 && newVal.length === postList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 // 批量删除

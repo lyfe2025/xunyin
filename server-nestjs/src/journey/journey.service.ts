@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { BusinessException } from '../common/exceptions';
-import { ErrorCode } from '../common/enums';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../prisma/prisma.service'
+import { BusinessException } from '../common/exceptions'
+import { ErrorCode } from '../common/enums'
 
 @Injectable()
 export class JourneyService {
@@ -18,10 +18,10 @@ export class JourneyService {
           select: { points: { where: { status: '0' } } },
         },
       },
-    });
+    })
 
     if (!journey || journey.status !== '0') {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在')
     }
 
     return {
@@ -39,7 +39,7 @@ export class JourneyService {
       unlockCondition: journey.unlockCondition,
       bgmUrl: journey.bgmUrl,
       pointCount: journey._count.points,
-    };
+    }
   }
 
   /**
@@ -48,10 +48,10 @@ export class JourneyService {
   async findPoints(journeyId: string) {
     const journey = await this.prisma.journey.findUnique({
       where: { id: journeyId },
-    });
+    })
 
     if (!journey || journey.status !== '0') {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在')
     }
 
     const points = await this.prisma.explorationPoint.findMany({
@@ -60,7 +60,7 @@ export class JourneyService {
         status: '0',
       },
       orderBy: { orderNum: 'asc' },
-    });
+    })
 
     return points.map((point) => ({
       id: point.id,
@@ -73,12 +73,10 @@ export class JourneyService {
       arAssetUrl: point.arAssetUrl,
       culturalBackground: point.culturalBackground,
       culturalKnowledge: point.culturalKnowledge,
-      distanceFromPrev: point.distanceFromPrev
-        ? Number(point.distanceFromPrev)
-        : null,
+      distanceFromPrev: point.distanceFromPrev ? Number(point.distanceFromPrev) : null,
       pointsReward: point.pointsReward,
       orderNum: point.orderNum,
-    }));
+    }))
   }
 
   /**
@@ -88,18 +86,15 @@ export class JourneyService {
     // 验证文化之旅存在
     const journey = await this.prisma.journey.findUnique({
       where: { id: journeyId },
-    });
+    })
 
     if (!journey || journey.status !== '0') {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在')
     }
 
     // 检查是否已锁定
     if (journey.isLocked) {
-      throw new BusinessException(
-        ErrorCode.OPERATION_DENIED,
-        '文化之旅尚未解锁',
-      );
+      throw new BusinessException(ErrorCode.OPERATION_DENIED, '文化之旅尚未解锁')
     }
 
     // 检查是否已有进行中的进度
@@ -107,7 +102,7 @@ export class JourneyService {
       where: {
         userId_journeyId: { userId, journeyId },
       },
-    });
+    })
 
     if (existingProgress) {
       if (existingProgress.status === 'in_progress') {
@@ -116,7 +111,7 @@ export class JourneyService {
           progressId: existingProgress.id,
           journeyId: existingProgress.journeyId,
           startTime: existingProgress.startTime,
-        };
+        }
       }
       // 如果之前放弃或完成，重新开始
       const updated = await this.prisma.journeyProgress.update({
@@ -127,13 +122,13 @@ export class JourneyService {
           completeTime: null,
           timeSpentMinutes: null,
         },
-      });
+      })
 
       return {
         progressId: updated.id,
         journeyId: updated.journeyId,
         startTime: updated.startTime,
-      };
+      }
     }
 
     // 创建新进度
@@ -144,7 +139,7 @@ export class JourneyService {
         status: 'in_progress',
         startTime: new Date(),
       },
-    });
+    })
 
     // 记录用户动态
     await this.prisma.userActivity.create({
@@ -154,13 +149,13 @@ export class JourneyService {
         title: `开始了「${journey.name}」文化之旅`,
         relatedId: journeyId,
       },
-    });
+    })
 
     return {
       progressId: progress.id,
       journeyId: progress.journeyId,
       startTime: progress.startTime,
-    };
+    }
   }
 
   /**
@@ -177,10 +172,10 @@ export class JourneyService {
         pointCompletions: true,
       },
       orderBy: { startTime: 'desc' },
-    });
+    })
 
     // 获取每个文化之旅的总探索点数
-    const journeyIds = progresses.map((p) => p.journeyId);
+    const journeyIds = progresses.map((p) => p.journeyId)
     const pointCounts = await this.prisma.explorationPoint.groupBy({
       by: ['journeyId'],
       where: {
@@ -188,11 +183,9 @@ export class JourneyService {
         status: '0',
       },
       _count: { id: true },
-    });
+    })
 
-    const pointCountMap = new Map(
-      pointCounts.map((pc) => [pc.journeyId, pc._count.id]),
-    );
+    const pointCountMap = new Map(pointCounts.map((pc) => [pc.journeyId, pc._count.id]))
 
     return progresses.map((progress) => ({
       id: progress.id,
@@ -204,7 +197,7 @@ export class JourneyService {
       timeSpentMinutes: progress.timeSpentMinutes,
       completedPoints: progress.pointCompletions.length,
       totalPoints: pointCountMap.get(progress.journeyId) || 0,
-    }));
+    }))
   }
 
   /**
@@ -215,25 +208,17 @@ export class JourneyService {
       where: {
         userId_journeyId: { userId, journeyId },
       },
-    });
+    })
 
     if (!progress) {
-      throw new BusinessException(
-        ErrorCode.DATA_NOT_FOUND,
-        '未找到文化之旅进度',
-      );
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到文化之旅进度')
     }
 
     if (progress.status !== 'in_progress') {
-      throw new BusinessException(
-        ErrorCode.OPERATION_DENIED,
-        '只能放弃进行中的文化之旅',
-      );
+      throw new BusinessException(ErrorCode.OPERATION_DENIED, '只能放弃进行中的文化之旅')
     }
 
-    const timeSpent = Math.round(
-      (Date.now() - progress.startTime.getTime()) / 60000,
-    );
+    const timeSpent = Math.round((Date.now() - progress.startTime.getTime()) / 60000)
 
     await this.prisma.journeyProgress.update({
       where: { id: progress.id },
@@ -241,8 +226,8 @@ export class JourneyService {
         status: 'abandoned',
         timeSpentMinutes: timeSpent,
       },
-    });
+    })
 
-    return { message: '已放弃文化之旅' };
+    return { message: '已放弃文化之旅' }
   }
 }

@@ -45,7 +45,15 @@ import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
-import { listDept, getDept, delDept, addDept, updateDept, listDeptTree, changeDeptStatus } from '@/api/system/dept'
+import {
+  listDept,
+  getDept,
+  delDept,
+  addDept,
+  updateDept,
+  listDeptTree,
+  changeDeptStatus,
+} from '@/api/system/dept'
 import type { SysDept } from '@/api/system/types'
 
 const { toast } = useToast()
@@ -150,7 +158,7 @@ const flattenedOptions = computed(() => {
   const result: Array<{ id: string; label: string }> = []
   const traverse = (
     nodes: Array<{ deptId: string; deptName: string; children?: any[] }>,
-    prefix = ''
+    prefix = '',
   ) => {
     for (const node of nodes || []) {
       result.push({ id: node.deptId, label: prefix + node.deptName })

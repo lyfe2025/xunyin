@@ -97,7 +97,7 @@ function getContextLabel(context: string) {
 const cityOptions = ref<{ id: string; name: string }[]>([])
 const journeyOptions = ref<{ id: string; name: string; cityName?: string }[]>([])
 const pointOptions = ref<{ id: string; name: string; journeyName?: string; cityName?: string }[]>(
-  []
+  [],
 )
 
 const showFormDialog = ref(false)
@@ -136,7 +136,7 @@ const { toast } = useToast()
 const selectAll = ref(false)
 
 const isIndeterminate = computed(
-  () => selectedIds.value.length > 0 && selectedIds.value.length < bgmList.value.length
+  () => selectedIds.value.length > 0 && selectedIds.value.length < bgmList.value.length,
 )
 
 // 监听全选状态变化
@@ -155,7 +155,7 @@ watch(
   (newVal) => {
     selectAll.value = bgmList.value.length > 0 && newVal.length === bgmList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 function toggleSelect(id: string) {
@@ -500,7 +500,7 @@ watch(
     if (!isEdit.value && oldVal !== undefined) {
       form.contextId = undefined
     }
-  }
+  },
 )
 
 onMounted(() => {
@@ -723,7 +723,12 @@ onUnmounted(() => {
             <TableCell>{{ formatDuration(item.duration) }}</TableCell>
             <TableCell>{{ item.orderNum }}</TableCell>
             <TableCell>
-              <StatusSwitch :model-value="item.status" :id="item.id" :name="item.name" @change="handleStatusChange" />
+              <StatusSwitch
+                :model-value="item.status"
+                :id="item.id"
+                :name="item.name"
+                @change="handleStatusChange"
+              />
             </TableCell>
             <TableCell class="text-right">
               <div class="flex items-center justify-end gap-1">

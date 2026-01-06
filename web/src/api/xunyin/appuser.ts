@@ -117,7 +117,7 @@ export function getVerification(id: string) {
 
 export function auditVerification(
   id: string,
-  data: { status: 'approved' | 'rejected'; rejectReason?: string }
+  data: { status: 'approved' | 'rejected'; rejectReason?: string },
 ) {
   return request({
     url: `/admin/appusers/verifications/${id}/audit`,

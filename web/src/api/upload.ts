@@ -77,7 +77,7 @@ export function uploadAudio(file: File): Promise<UploadResult> {
  */
 export function uploadApk(
   file: File,
-  onProgress?: (percent: number) => void
+  onProgress?: (percent: number) => void,
 ): Promise<UploadResult> {
   const formData = new FormData()
   formData.append('file', file)

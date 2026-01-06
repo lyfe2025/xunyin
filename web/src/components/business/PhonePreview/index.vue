@@ -13,7 +13,7 @@ withDefaults(
     showDeviceSwitch: true,
     scale: 0.65,
     hint: '',
-  }
+  },
 )
 
 const currentDevice = ref<DeviceType>('iphone')

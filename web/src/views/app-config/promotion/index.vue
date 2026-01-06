@@ -251,7 +251,7 @@ function handleSelectAll(checked: boolean) {
 }
 
 const isAllSelected = computed(
-  () => list.value.length > 0 && selectedIds.value.length === list.value.length
+  () => list.value.length > 0 && selectedIds.value.length === list.value.length,
 )
 
 // 获取渠道类型标签

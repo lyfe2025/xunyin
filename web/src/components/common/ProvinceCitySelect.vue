@@ -88,7 +88,7 @@ watch(
     if (val !== selectedProvince.value) {
       selectedProvince.value = val || ''
     }
-  }
+  },
 )
 
 watch(
@@ -97,7 +97,7 @@ watch(
     if (val !== selectedCity.value) {
       selectedCity.value = val || ''
     }
-  }
+  },
 )
 
 // 省份变化时清空城市

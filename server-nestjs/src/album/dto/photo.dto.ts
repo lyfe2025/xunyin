@@ -1,53 +1,46 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  IsDateString,
-  Min,
-  Max,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsString, IsOptional, IsNumber, IsDateString, Min, Max } from 'class-validator'
+import { Type } from 'class-transformer'
 
 export class QueryPhotoDto {
   @ApiPropertyOptional({ description: '文化之旅ID' })
   @IsOptional()
   @IsString()
-  journeyId?: string;
+  journeyId?: string
 
   @ApiPropertyOptional({ description: '开始日期' })
   @IsOptional()
   @IsDateString()
-  startDate?: string;
+  startDate?: string
 
   @ApiPropertyOptional({ description: '结束日期' })
   @IsOptional()
   @IsDateString()
-  endDate?: string;
+  endDate?: string
 }
 
 export class CreatePhotoDto {
   @ApiProperty({ description: '文化之旅ID' })
   @IsString()
-  journeyId: string;
+  journeyId: string
 
   @ApiProperty({ description: '探索点ID' })
   @IsString()
-  pointId: string;
+  pointId: string
 
   @ApiProperty({ description: '照片URL' })
   @IsString()
-  photoUrl: string;
+  photoUrl: string
 
   @ApiPropertyOptional({ description: '缩略图URL' })
   @IsOptional()
   @IsString()
-  thumbnailUrl?: string;
+  thumbnailUrl?: string
 
   @ApiPropertyOptional({ description: '滤镜' })
   @IsOptional()
   @IsString()
-  filter?: string;
+  filter?: string
 
   @ApiPropertyOptional({ description: '纬度' })
   @IsOptional()
@@ -55,7 +48,7 @@ export class CreatePhotoDto {
   @IsNumber()
   @Min(-90)
   @Max(90)
-  latitude?: number;
+  latitude?: number
 
   @ApiPropertyOptional({ description: '经度' })
   @IsOptional()
@@ -63,60 +56,60 @@ export class CreatePhotoDto {
   @IsNumber()
   @Min(-180)
   @Max(180)
-  longitude?: number;
+  longitude?: number
 
   @ApiProperty({ description: '拍摄时间' })
   @IsDateString()
-  takenTime: string;
+  takenTime: string
 }
 
 // ==================== Response VOs ====================
 
 export class PhotoVo {
   @ApiProperty({ description: '照片ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '文化之旅ID' })
-  journeyId: string;
+  journeyId: string
 
   @ApiProperty({ description: '文化之旅名称' })
-  journeyName: string;
+  journeyName: string
 
   @ApiProperty({ description: '探索点ID' })
-  pointId: string;
+  pointId: string
 
   @ApiProperty({ description: '探索点名称' })
-  pointName: string;
+  pointName: string
 
   @ApiProperty({ description: '照片URL' })
-  photoUrl: string;
+  photoUrl: string
 
   @ApiPropertyOptional({ description: '缩略图URL' })
-  thumbnailUrl?: string;
+  thumbnailUrl?: string
 
   @ApiPropertyOptional({ description: '滤镜' })
-  filter?: string;
+  filter?: string
 
   @ApiPropertyOptional({ description: '纬度' })
-  latitude?: number;
+  latitude?: number
 
   @ApiPropertyOptional({ description: '经度' })
-  longitude?: number;
+  longitude?: number
 
   @ApiProperty({ description: '拍摄时间' })
-  takenTime: Date;
+  takenTime: Date
 
   @ApiProperty({ description: '创建时间' })
-  createTime: Date;
+  createTime: Date
 }
 
 export class PhotoStatsVo {
   @ApiProperty({ description: '总照片数' })
-  totalPhotos: number;
+  totalPhotos: number
 
   @ApiProperty({ description: '文化之旅数' })
-  journeyCount: number;
+  journeyCount: number
 
   @ApiProperty({ description: '探索点数' })
-  pointCount: number;
+  pointCount: number
 }

@@ -1,12 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { createHash } from 'crypto';
+import { Injectable, Logger } from '@nestjs/common'
+import { createHash } from 'crypto'
 import {
   ChainProvider,
   ChainData,
   ChainResult,
   VerifyResult,
-} from '../interfaces/chain-provider.interface';
-import { BlockchainConfigService } from '../blockchain-config.service';
+} from '../interfaces/chain-provider.interface'
+import { BlockchainConfigService } from '../blockchain-config.service'
 
 /**
  * Polygon 公链实现
@@ -14,17 +14,17 @@ import { BlockchainConfigService } from '../blockchain-config.service';
  */
 @Injectable()
 export class PolygonProvider implements ChainProvider {
-  private readonly logger = new Logger(PolygonProvider.name);
+  private readonly logger = new Logger(PolygonProvider.name)
 
   constructor(private configService: BlockchainConfigService) {}
 
   getChainName(): string {
-    return 'Polygon';
+    return 'Polygon'
   }
 
   async chain(data: ChainData): Promise<ChainResult> {
-    const config = await this.configService.getChainConfig();
-    const { rpcUrl, privateKey } = config.polygon;
+    const config = await this.configService.getChainConfig()
+    const { rpcUrl, privateKey } = config.polygon
 
     // 构造存证内容
     const content = {
@@ -35,19 +35,15 @@ export class PolygonProvider implements ChainProvider {
       location: data.location,
       journeyId: data.journeyId,
       timestamp: Date.now(),
-    };
+    }
 
-    const contentHash = createHash('sha256')
-      .update(JSON.stringify(content))
-      .digest('hex');
+    const contentHash = createHash('sha256').update(JSON.stringify(content)).digest('hex')
 
     // 检查配置是否完整
     if (!rpcUrl || !privateKey) {
-      this.logger.warn('Polygon 配置不完整，使用模拟数据');
-      const txHash = `0x${contentHash}`;
-      const blockHeight = Math.floor(
-        Math.random() * 1000000 + 50000000,
-      ).toString();
+      this.logger.warn('Polygon 配置不完整，使用模拟数据')
+      const txHash = `0x${contentHash}`
+      const blockHeight = Math.floor(Math.random() * 1000000 + 50000000).toString()
 
       return {
         txHash,
@@ -55,7 +51,7 @@ export class PolygonProvider implements ChainProvider {
         chainTime: new Date(),
         chainName: this.getChainName(),
         certificate: content,
-      };
+      }
     }
 
     // TODO: 使用 ethers.js 调用合约
@@ -80,11 +76,9 @@ export class PolygonProvider implements ChainProvider {
     //   certificate: content,
     // };
 
-    this.logger.log(`Polygon 存证: rpcUrl=${rpcUrl}`);
-    const txHash = `0x${contentHash}`;
-    const blockHeight = Math.floor(
-      Math.random() * 1000000 + 50000000,
-    ).toString();
+    this.logger.log(`Polygon 存证: rpcUrl=${rpcUrl}`)
+    const txHash = `0x${contentHash}`
+    const blockHeight = Math.floor(Math.random() * 1000000 + 50000000).toString()
 
     return {
       txHash,
@@ -92,7 +86,7 @@ export class PolygonProvider implements ChainProvider {
       chainTime: new Date(),
       chainName: this.getChainName(),
       certificate: content,
-    };
+    }
   }
 
   verify(txHash: string): Promise<VerifyResult> {
@@ -114,6 +108,6 @@ export class PolygonProvider implements ChainProvider {
       blockHeight: '0',
       chainTime: new Date(),
       chainName: this.getChainName(),
-    });
+    })
   }
 }

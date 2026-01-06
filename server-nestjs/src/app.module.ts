@@ -1,37 +1,37 @@
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
-import { UserModule } from './system/user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { MenuModule } from './system/menu/menu.module';
-import { DeptModule } from './system/dept/dept.module';
-import { RoleModule } from './system/role/role.module';
-import { DictModule } from './system/dict/dict.module';
-import { SysConfigModule } from './system/config/config.module';
-import { NoticeModule } from './system/notice/notice.module';
-import { OperationLogInterceptor } from './common/interceptors/operation-log.interceptor';
-import { PermissionGuard } from './common/guards/permission.guard';
-import { PostModule } from './system/post/post.module';
-import { MonitorModule } from './monitor/monitor.module';
-import { LoggerModule } from './common/logger/logger.module';
-import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
-import { UploadModule } from './common/upload/upload.module';
-import { MailModule } from './common/mail/mail.module';
-import { ExcelModule } from './common/excel/excel.module';
-import { AppAuthModule } from './app-auth/app-auth.module';
-import { CityModule } from './city/city.module';
-import { JourneyModule } from './journey/journey.module';
-import { ExplorationPointModule } from './exploration-point/exploration-point.module';
-import { SealModule } from './seal/seal.module';
-import { BlockchainModule } from './blockchain/blockchain.module';
-import { AlbumModule } from './album/album.module';
-import { UserStatsModule } from './user-stats/user-stats.module';
-import { AudioModule } from './audio/audio.module';
-import { MapModule } from './map/map.module';
-import { AdminModule } from './admin/admin.module';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common'
+import { APP_INTERCEPTOR } from '@nestjs/core'
+import { ConfigModule } from '@nestjs/config'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { PrismaModule } from './prisma/prisma.module'
+import { UserModule } from './system/user/user.module'
+import { AuthModule } from './auth/auth.module'
+import { MenuModule } from './system/menu/menu.module'
+import { DeptModule } from './system/dept/dept.module'
+import { RoleModule } from './system/role/role.module'
+import { DictModule } from './system/dict/dict.module'
+import { SysConfigModule } from './system/config/config.module'
+import { NoticeModule } from './system/notice/notice.module'
+import { OperationLogInterceptor } from './common/interceptors/operation-log.interceptor'
+import { PermissionGuard } from './common/guards/permission.guard'
+import { PostModule } from './system/post/post.module'
+import { MonitorModule } from './monitor/monitor.module'
+import { LoggerModule } from './common/logger/logger.module'
+import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware'
+import { UploadModule } from './common/upload/upload.module'
+import { MailModule } from './common/mail/mail.module'
+import { ExcelModule } from './common/excel/excel.module'
+import { AppAuthModule } from './app-auth/app-auth.module'
+import { CityModule } from './city/city.module'
+import { JourneyModule } from './journey/journey.module'
+import { ExplorationPointModule } from './exploration-point/exploration-point.module'
+import { SealModule } from './seal/seal.module'
+import { BlockchainModule } from './blockchain/blockchain.module'
+import { AlbumModule } from './album/album.module'
+import { UserStatsModule } from './user-stats/user-stats.module'
+import { AudioModule } from './audio/audio.module'
+import { MapModule } from './map/map.module'
+import { AdminModule } from './admin/admin.module'
 
 @Module({
   imports: [
@@ -79,6 +79,6 @@ import { AdminModule } from './admin/admin.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*')
   }
 }

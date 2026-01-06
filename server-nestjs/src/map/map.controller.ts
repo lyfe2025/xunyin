@@ -1,13 +1,8 @@
-import { Controller, Get, Post, Query, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { MapService } from './map.service';
-import { ValidateLocationDto, ValidateLocationVo } from './dto/location.dto';
-import {
-  WalkingRouteDto,
-  SearchPoiDto,
-  WalkingRouteVo,
-  MapConfigVo,
-} from './dto/route.dto';
+import { Controller, Get, Post, Query, Body } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
+import { MapService } from './map.service'
+import { ValidateLocationDto, ValidateLocationVo } from './dto/location.dto'
+import { WalkingRouteDto, SearchPoiDto, WalkingRouteVo, MapConfigVo } from './dto/route.dto'
 
 @ApiTags('地图服务')
 @Controller('app/map')
@@ -18,7 +13,7 @@ export class MapController {
   @ApiOperation({ summary: '获取地图配置' })
   @ApiResponse({ status: 200, description: '成功', type: MapConfigVo })
   async getConfig() {
-    return this.mapService.getConfig();
+    return this.mapService.getConfig()
   }
 
   @Post('validate-location')
@@ -26,7 +21,7 @@ export class MapController {
   @ApiBody({ type: ValidateLocationDto })
   @ApiResponse({ status: 200, description: '成功', type: ValidateLocationVo })
   async validateLocation(@Body() dto: ValidateLocationDto) {
-    return this.mapService.validateLocation(dto);
+    return this.mapService.validateLocation(dto)
   }
 
   @Post('route/walking')
@@ -34,13 +29,13 @@ export class MapController {
   @ApiBody({ type: WalkingRouteDto })
   @ApiResponse({ status: 200, description: '成功', type: WalkingRouteVo })
   async walkingRoute(@Body() dto: WalkingRouteDto) {
-    return this.mapService.walkingRoute(dto);
+    return this.mapService.walkingRoute(dto)
   }
 
   @Get('search')
   @ApiOperation({ summary: 'POI搜索' })
   @ApiResponse({ status: 200, description: '成功' })
   async searchPoi(@Query() dto: SearchPoiDto) {
-    return this.mapService.searchPoi(dto);
+    return this.mapService.searchPoi(dto)
   }
 }

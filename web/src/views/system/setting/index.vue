@@ -60,7 +60,7 @@ watch(
     if (newTab && typeof newTab === 'string') {
       activeTab.value = newTab
     }
-  }
+  },
 )
 
 // 未保存更改提示（页面级表单，启用路由守卫）
@@ -168,7 +168,7 @@ watch(
       isDirty.value = true
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 async function getData() {
@@ -192,7 +192,7 @@ async function getData() {
       'chain.',
     ]
     const results = await Promise.all(
-      prefixes.map((p) => listConfig({ configKey: p, pageSize: 50 }))
+      prefixes.map((p) => listConfig({ configKey: p, pageSize: 50 })),
     )
     configList.value = results.flatMap((r) => r.rows ?? [])
     // 重置 configMap
@@ -250,7 +250,7 @@ async function handleSubmit() {
             configValue: value,
             configType: 'Y',
             remark: getConfigRemark(key),
-          })
+          }),
         )
       }
     }
@@ -481,7 +481,7 @@ watch(
       loginPathInput.value = path || ''
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 监听其他字段校验
@@ -489,31 +489,31 @@ watch(
   () => form['sys.app.email'],
   (val) => {
     formErrors.email = validators.email(val)
-  }
+  },
 )
 watch(
   () => form['sys.login.maxRetry'],
   (val) => {
     formErrors.maxRetry = validators.positiveInt(val, 1, 10, '失败锁定次数')
-  }
+  },
 )
 watch(
   () => form['sys.login.lockTime'],
   (val) => {
     formErrors.lockTime = validators.positiveInt(val, 1, 1440, '锁定时长')
-  }
+  },
 )
 watch(
   () => form['sys.session.timeout'],
   (val) => {
     formErrors.sessionTimeout = validators.positiveInt(val, 5, 10080, '会话超时')
-  }
+  },
 )
 watch(
   () => form['sys.mail.port'],
   (val) => {
     formErrors.mailPort = validators.port(val)
-  }
+  },
 )
 watch(
   () => form['sys.mail.from'],
@@ -524,7 +524,7 @@ watch(
     } else {
       formErrors.mailFrom = ''
     }
-  }
+  },
 )
 
 const mailEnabled = computed({

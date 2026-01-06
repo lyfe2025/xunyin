@@ -96,7 +96,7 @@ const showBatchDeleteDialog = ref(false)
 const showMapPicker = ref(false)
 
 const isIndeterminate = computed(
-  () => selectedIds.value.length > 0 && selectedIds.value.length < pointList.value.length
+  () => selectedIds.value.length > 0 && selectedIds.value.length < pointList.value.length,
 )
 
 // 监听全选状态变化
@@ -114,7 +114,7 @@ watch(
   (newVal) => {
     selectAll.value = pointList.value.length > 0 && newVal.length === pointList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 function toggleSelect(id: string) {

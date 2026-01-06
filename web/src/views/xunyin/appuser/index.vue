@@ -224,7 +224,7 @@ watch(
   (newVal) => {
     selectAll.value = userList.value.length > 0 && newVal.length === userList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 // 导出
@@ -355,7 +355,7 @@ function handleSelectVerification(id: string) {
 
 // 只选择待审核的记录
 const pendingVerifications = computed(() =>
-  verificationList.value.filter((v) => v.status === 'pending')
+  verificationList.value.filter((v) => v.status === 'pending'),
 )
 
 watch(selectAllVerifications, (newVal) => {
@@ -372,7 +372,7 @@ watch(
     selectAllVerifications.value =
       pendingVerifications.value.length > 0 && newVal.length === pendingVerifications.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 function openAuditDialog(row: UserVerification) {
@@ -1085,7 +1085,7 @@ onMounted(() => {
               @click="
                 openImagePreview(
                   [currentVerification.idCardFront, currentVerification.idCardBack],
-                  0
+                  0,
                 )
               "
             />
@@ -1096,7 +1096,7 @@ onMounted(() => {
               @click="
                 openImagePreview(
                   [currentVerification.idCardFront, currentVerification.idCardBack],
-                  1
+                  1,
                 )
               "
             />

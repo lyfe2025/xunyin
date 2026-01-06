@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { BusinessException } from '../../common/exceptions';
-import { ErrorCode } from '../../common/enums';
-import type { QueryProgressDto } from './dto/admin-progress.dto';
-import { Prisma } from '@prisma/client';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../../prisma/prisma.service'
+import { BusinessException } from '../../common/exceptions'
+import { ErrorCode } from '../../common/enums'
+import type { QueryProgressDto } from './dto/admin-progress.dto'
+import { Prisma } from '@prisma/client'
 
 @Injectable()
 export class AdminProgressService {
@@ -19,20 +19,20 @@ export class AdminProgressService {
       status,
       pageNum = 1,
       pageSize = 20,
-    } = query;
+    } = query
 
-    const where: Prisma.JourneyProgressWhereInput = {};
-    if (userId) where.userId = userId;
-    if (journeyId) where.journeyId = journeyId;
-    if (status) where.status = status;
+    const where: Prisma.JourneyProgressWhereInput = {}
+    if (userId) where.userId = userId
+    if (journeyId) where.journeyId = journeyId
+    if (status) where.status = status
     if (nickname) {
-      where.user = { nickname: { contains: nickname } };
+      where.user = { nickname: { contains: nickname } }
     }
     if (journeyName) {
-      where.journey = { name: { contains: journeyName } };
+      where.journey = { name: { contains: journeyName } }
     }
     if (cityId) {
-      where.journey = { ...(where.journey as object), cityId };
+      where.journey = { ...(where.journey as object), cityId }
     }
 
     const [list, total] = await Promise.all([
@@ -55,7 +55,7 @@ export class AdminProgressService {
         },
       }),
       this.prisma.journeyProgress.count({ where }),
-    ]);
+    ])
 
     return {
       list: list.map((p) => ({
@@ -78,7 +78,7 @@ export class AdminProgressService {
       total,
       pageNum,
       pageSize,
-    };
+    }
   }
 
   async findOne(id: string) {
@@ -99,10 +99,10 @@ export class AdminProgressService {
           orderBy: { completeTime: 'asc' },
         },
       },
-    });
+    })
 
     if (!progress) {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '进度记录不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '进度记录不存在')
     }
 
     return {
@@ -113,7 +113,7 @@ export class AdminProgressService {
       cityName: progress.journey.city?.name,
       completedPoints: progress.pointCompletions.length,
       totalPoints: progress.journey.points.length,
-    };
+    }
   }
 
   async getStats() {
@@ -122,8 +122,8 @@ export class AdminProgressService {
       this.prisma.journeyProgress.count({ where: { status: 'in_progress' } }),
       this.prisma.journeyProgress.count({ where: { status: 'completed' } }),
       this.prisma.journeyProgress.count({ where: { status: 'abandoned' } }),
-    ]);
+    ])
 
-    return { total, inProgress, completed, abandoned };
+    return { total, inProgress, completed, abandoned }
   }
 }

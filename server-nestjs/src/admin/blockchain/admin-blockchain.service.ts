@@ -1,14 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { BlockchainConfigService } from '../../blockchain/blockchain-config.service';
-import type {
-  ChainProviderInfoVo,
-  ChainProviderOption,
-} from './dto/blockchain-config.dto';
+import { Injectable } from '@nestjs/common'
+import { BlockchainConfigService } from '../../blockchain/blockchain-config.service'
+import type { ChainProviderInfoVo, ChainProviderOption } from './dto/blockchain-config.dto'
 
-const PROVIDER_OPTIONS: Omit<
-  ChainProviderOption,
-  'isConfigured' | 'isCurrent'
->[] = [
+const PROVIDER_OPTIONS: Omit<ChainProviderOption, 'isConfigured' | 'isCurrent'>[] = [
   {
     value: 'local',
     label: '本地哈希存证',
@@ -39,7 +33,7 @@ const PROVIDER_OPTIONS: Omit<
     label: 'Polygon 公链',
     description: '以太坊 Layer2 公链',
   },
-];
+]
 
 @Injectable()
 export class AdminBlockchainService {
@@ -49,8 +43,8 @@ export class AdminBlockchainService {
    * 获取当前链服务配置信息
    */
   async getChainProviderInfo(): Promise<ChainProviderInfoVo> {
-    const config = await this.configService.getChainConfig();
-    const currentProvider = config.provider;
+    const config = await this.configService.getChainConfig()
+    const currentProvider = config.provider
 
     // 检查各链服务的配置状态
     const configuredMap: Record<string, boolean> = {
@@ -60,21 +54,21 @@ export class AdminBlockchainService {
       zhixin: !!(config.zhixin.secretId && config.zhixin.secretKey),
       bsn: !!(config.bsn.apiKey && config.bsn.projectId),
       polygon: !!(config.polygon.privateKey && config.polygon.contractAddress),
-    };
+    }
 
     const options: ChainProviderOption[] = PROVIDER_OPTIONS.map((opt) => ({
       ...opt,
       isConfigured: configuredMap[opt.value] ?? false,
       isCurrent: opt.value === currentProvider,
-    }));
+    }))
 
-    const currentOption = options.find((o) => o.isCurrent);
+    const currentOption = options.find((o) => o.isCurrent)
 
     return {
       currentProvider,
       currentProviderName: currentOption?.label || currentProvider,
       isConfigured: configuredMap[currentProvider] ?? false,
       options,
-    };
+    }
   }
 }

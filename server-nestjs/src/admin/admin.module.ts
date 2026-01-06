@@ -1,16 +1,16 @@
-import { Module } from '@nestjs/common';
-import { AdminCityModule } from './city/admin-city.module';
-import { AdminJourneyModule } from './journey/admin-journey.module';
-import { AdminPointModule } from './point/admin-point.module';
-import { AdminSealModule } from './seal/admin-seal.module';
-import { AdminDashboardModule } from './dashboard/admin-dashboard.module';
-import { AdminAppUserModule } from './appuser/admin-appuser.module';
-import { AdminProgressModule } from './progress/admin-progress.module';
-import { AdminUserSealModule } from './user-seal/admin-user-seal.module';
-import { AdminBgmModule } from './bgm/admin-bgm.module';
-import { AdminPhotoModule } from './photo/admin-photo.module';
-import { AdminBlockchainModule } from './blockchain/admin-blockchain.module';
-import { AdminAppConfigModule } from './app-config/admin-app-config.module';
+import { Module } from '@nestjs/common'
+import { AdminCityModule } from './city/admin-city.module'
+import { AdminJourneyModule } from './journey/admin-journey.module'
+import { AdminPointModule } from './point/admin-point.module'
+import { AdminSealModule } from './seal/admin-seal.module'
+import { AdminDashboardModule } from './dashboard/admin-dashboard.module'
+import { AdminAppUserModule } from './appuser/admin-appuser.module'
+import { AdminProgressModule } from './progress/admin-progress.module'
+import { AdminUserSealModule } from './user-seal/admin-user-seal.module'
+import { AdminBgmModule } from './bgm/admin-bgm.module'
+import { AdminPhotoModule } from './photo/admin-photo.module'
+import { AdminBlockchainModule } from './blockchain/admin-blockchain.module'
+import { AdminAppConfigModule } from './app-config/admin-app-config.module'
 
 @Module({
   imports: [
@@ -28,4 +28,4 @@ import { AdminAppConfigModule } from './app-config/admin-app-config.module';
     AdminAppConfigModule,
   ],
 })
-export class AdminModule { }
+export class AdminModule {}

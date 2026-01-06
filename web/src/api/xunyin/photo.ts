@@ -53,7 +53,7 @@ export interface PhotoStats {
 export function listPhoto(query: PhotoQuery) {
   // 过滤掉空字符串参数
   const params = Object.fromEntries(
-    Object.entries(query).filter(([, v]) => v !== '' && v !== undefined && v !== null)
+    Object.entries(query).filter(([, v]) => v !== '' && v !== undefined && v !== null),
   )
   return request<{ data: { list: Photo[]; total: number } }>({
     url: '/admin/photos',

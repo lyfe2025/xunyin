@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, MaxLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsString, IsOptional, MaxLength } from 'class-validator'
 
 /**
  * 更新用户资料 DTO
@@ -9,13 +9,13 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(50, { message: '昵称最长50个字符' })
-  nickname?: string;
+  nickname?: string
 
   @ApiPropertyOptional({ description: '头像URL', maxLength: 255 })
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  avatar?: string;
+  avatar?: string
 }
 
 /**
@@ -23,25 +23,25 @@ export class UpdateProfileDto {
  */
 export class AppUserVo {
   @ApiProperty({ description: '用户ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '手机号' })
-  phone: string | null;
+  phone: string | null
 
   @ApiProperty({ description: '昵称' })
-  nickname: string;
+  nickname: string
 
   @ApiProperty({ description: '头像' })
-  avatar: string | null;
+  avatar: string | null
 
   @ApiProperty({ description: '当前称号' })
-  badgeTitle: string | null;
+  badgeTitle: string | null
 
   @ApiProperty({ description: '总积分' })
-  totalPoints: number;
+  totalPoints: number
 
   @ApiProperty({ description: '创建时间' })
-  createTime: Date;
+  createTime: Date
 }
 
 /**
@@ -49,11 +49,11 @@ export class AppUserVo {
  */
 export class LoginResponseVo {
   @ApiProperty({ description: '访问令牌' })
-  token: string;
+  token: string
 
   @ApiProperty({ description: '刷新令牌' })
-  refreshToken: string;
+  refreshToken: string
 
   @ApiProperty({ description: '过期时间（秒）' })
-  expiresIn: number;
+  expiresIn: number
 }

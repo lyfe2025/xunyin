@@ -1,22 +1,16 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
-import { SealService } from './seal.service';
-import { AppAuthGuard } from '../app-auth/guards/app-auth.guard';
-import { CurrentUser } from '../app-auth/decorators/current-user.decorator';
-import type { CurrentAppUser } from '../app-auth/decorators/current-user.decorator';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
+import { SealService } from './seal.service'
+import { AppAuthGuard } from '../app-auth/guards/app-auth.guard'
+import { CurrentUser } from '../app-auth/decorators/current-user.decorator'
+import type { CurrentAppUser } from '../app-auth/decorators/current-user.decorator'
 import {
   QuerySealDto,
   UserSealVo,
   SealDetailVo,
   SealProgressVo,
   AvailableSealVo,
-} from './dto/seal.dto';
+} from './dto/seal.dto'
 
 @ApiTags('印记')
 @Controller('app/seals')
@@ -33,11 +27,8 @@ export class SealController {
     enum: ['route', 'city', 'special'],
   })
   @ApiResponse({ status: 200, description: '成功', type: [UserSealVo] })
-  async findUserSeals(
-    @CurrentUser() user: CurrentAppUser,
-    @Query() query: QuerySealDto,
-  ) {
-    return this.sealService.findUserSeals(user.userId, query);
+  async findUserSeals(@CurrentUser() user: CurrentAppUser, @Query() query: QuerySealDto) {
+    return this.sealService.findUserSeals(user.userId, query)
   }
 
   @Get('progress')
@@ -46,7 +37,7 @@ export class SealController {
   @ApiOperation({ summary: '获取印记收集进度' })
   @ApiResponse({ status: 200, description: '成功', type: SealProgressVo })
   async getProgress(@CurrentUser() user: CurrentAppUser) {
-    return this.sealService.getProgress(user.userId);
+    return this.sealService.getProgress(user.userId)
   }
 
   @Get('available')
@@ -59,11 +50,8 @@ export class SealController {
     enum: ['route', 'city', 'special'],
   })
   @ApiResponse({ status: 200, description: '成功', type: [AvailableSealVo] })
-  async findAvailable(
-    @CurrentUser() user: CurrentAppUser,
-    @Query() query: QuerySealDto,
-  ) {
-    return this.sealService.findAvailable(user.userId, query);
+  async findAvailable(@CurrentUser() user: CurrentAppUser, @Query() query: QuerySealDto) {
+    return this.sealService.findAvailable(user.userId, query)
   }
 
   @Get(':id')
@@ -72,6 +60,6 @@ export class SealController {
   @ApiOperation({ summary: '获取印记详情' })
   @ApiResponse({ status: 200, description: '成功', type: SealDetailVo })
   async findOne(@CurrentUser() user: CurrentAppUser, @Param('id') id: string) {
-    return this.sealService.findOne(user.userId, id);
+    return this.sealService.findOne(user.userId, id)
   }
 }

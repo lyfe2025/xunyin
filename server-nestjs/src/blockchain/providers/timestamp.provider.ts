@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { createHash, randomBytes } from 'crypto';
+import { Injectable, Logger } from '@nestjs/common'
+import { createHash, randomBytes } from 'crypto'
 import {
   ChainProvider,
   ChainData,
   ChainResult,
   VerifyResult,
-} from '../interfaces/chain-provider.interface';
+} from '../interfaces/chain-provider.interface'
 
 /**
  * 可信时间戳存证实现
@@ -31,10 +31,10 @@ import {
  */
 @Injectable()
 export class TimestampProvider implements ChainProvider {
-  private readonly logger = new Logger(TimestampProvider.name);
+  private readonly logger = new Logger(TimestampProvider.name)
 
   getChainName(): string {
-    return 'Timestamp';
+    return 'Timestamp'
   }
 
   chain(data: ChainData): Promise<ChainResult> {
@@ -53,15 +53,13 @@ export class TimestampProvider implements ChainProvider {
       earnedTime: data.earnedTime.toISOString(),
       location: data.location,
       journeyId: data.journeyId,
-    };
+    }
 
     // 计算数据哈希
-    const dataHash = createHash('sha256')
-      .update(JSON.stringify(originalData))
-      .digest('hex');
+    const dataHash = createHash('sha256').update(JSON.stringify(originalData)).digest('hex')
 
     // 模拟时间戳令牌
-    const timestamp = Date.now();
+    const timestamp = Date.now()
     const certificate = {
       version: '1.0',
       type: 'TIMESTAMP_TOKEN',
@@ -75,14 +73,12 @@ export class TimestampProvider implements ChainProvider {
         accuracy: '1s',
       },
       nonce: randomBytes(16).toString('hex'),
-    };
+    }
 
     // 生成时间戳凭证哈希作为 txHash
-    const txHash = `ts_${createHash('sha256').update(JSON.stringify(certificate)).digest('hex')}`;
+    const txHash = `ts_${createHash('sha256').update(JSON.stringify(certificate)).digest('hex')}`
 
-    this.logger.log(
-      `时间戳存证成功: sealId=${data.sealId}, txHash=${txHash.slice(0, 20)}...`,
-    );
+    this.logger.log(`时间戳存证成功: sealId=${data.sealId}, txHash=${txHash.slice(0, 20)}...`)
 
     return Promise.resolve({
       txHash,
@@ -90,13 +86,10 @@ export class TimestampProvider implements ChainProvider {
       chainTime: new Date(timestamp),
       chainName: this.getChainName(),
       certificate,
-    });
+    })
   }
 
-  verify(
-    txHash: string,
-    certificate?: Record<string, unknown>,
-  ): Promise<VerifyResult> {
+  verify(txHash: string, certificate?: Record<string, unknown>): Promise<VerifyResult> {
     if (!certificate) {
       return Promise.resolve({
         valid: false,
@@ -104,15 +97,13 @@ export class TimestampProvider implements ChainProvider {
         blockHeight: '0',
         chainTime: new Date(),
         chainName: this.getChainName(),
-      });
+      })
     }
 
-    const expectedHash = createHash('sha256')
-      .update(JSON.stringify(certificate))
-      .digest('hex');
+    const expectedHash = createHash('sha256').update(JSON.stringify(certificate)).digest('hex')
 
-    const valid = txHash === `ts_${expectedHash}`;
-    const timestamp = certificate.timestamp as number | undefined;
+    const valid = txHash === `ts_${expectedHash}`
+    const timestamp = certificate.timestamp as number | undefined
 
     return Promise.resolve({
       valid,
@@ -121,6 +112,6 @@ export class TimestampProvider implements ChainProvider {
       chainTime: timestamp ? new Date(timestamp) : new Date(),
       chainName: this.getChainName(),
       certificate,
-    });
+    })
   }
 }

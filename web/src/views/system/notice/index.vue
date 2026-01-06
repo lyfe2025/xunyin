@@ -98,7 +98,7 @@ watch(
       isDirty.value = true
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 // Fetch Data
@@ -250,7 +250,7 @@ watch(
   (newVal) => {
     selectAll.value = noticeList.value.length > 0 && newVal.length === noticeList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 // 批量删除

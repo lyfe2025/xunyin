@@ -1,14 +1,14 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { BusinessException } from '../common/exceptions';
-import { ErrorCode } from '../common/enums';
-import type { ChainProvider } from './interfaces/chain-provider.interface';
-import { CHAIN_PROVIDER } from './interfaces/chain-provider.interface';
-import type { Prisma } from '@prisma/client';
+import { Injectable, Inject, Logger } from '@nestjs/common'
+import { PrismaService } from '../prisma/prisma.service'
+import { BusinessException } from '../common/exceptions'
+import { ErrorCode } from '../common/enums'
+import type { ChainProvider } from './interfaces/chain-provider.interface'
+import { CHAIN_PROVIDER } from './interfaces/chain-provider.interface'
+import type { Prisma } from '@prisma/client'
 
 @Injectable()
 export class BlockchainService {
-  private readonly logger = new Logger(BlockchainService.name);
+  private readonly logger = new Logger(BlockchainService.name)
 
   constructor(
     private prisma: PrismaService,
@@ -22,14 +22,14 @@ export class BlockchainService {
     const userSeal = await this.prisma.userSeal.findUnique({
       where: { userId_sealId: { userId, sealId } },
       include: { seal: true },
-    });
+    })
 
     if (!userSeal) {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到该印记');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到该印记')
     }
 
     if (userSeal.isChained) {
-      throw new BusinessException(ErrorCode.DATA_ALREADY_EXISTS, '印记已上链');
+      throw new BusinessException(ErrorCode.DATA_ALREADY_EXISTS, '印记已上链')
     }
 
     // 调用链服务上链
@@ -38,7 +38,7 @@ export class BlockchainService {
       userId: userSeal.userId,
       sealName: userSeal.seal.name,
       earnedTime: userSeal.earnedTime,
-    });
+    })
 
     // 更新数据库
     const updated = await this.prisma.userSeal.update({
@@ -51,11 +51,11 @@ export class BlockchainService {
         chainTime: chainResult.chainTime,
         chainCertificate: chainResult.certificate as Prisma.InputJsonValue,
       },
-    });
+    })
 
     this.logger.log(
       `印记上链成功: sealId=${sealId}, chain=${chainResult.chainName}, txHash=${chainResult.txHash.slice(0, 20)}...`,
-    );
+    )
 
     return {
       sealId: updated.sealId,
@@ -63,7 +63,7 @@ export class BlockchainService {
       blockHeight: updated.blockHeight?.toString(),
       chainTime: updated.chainTime,
       chainName: updated.chainName,
-    };
+    }
   }
 
   /**
@@ -73,17 +73,17 @@ export class BlockchainService {
     const userSeal = await this.prisma.userSeal.findFirst({
       where: { txHash },
       include: { seal: true, user: true },
-    });
+    })
 
     if (!userSeal) {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到链上记录');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到链上记录')
     }
 
     // 调用链服务验证
     const verifyResult = await this.chainProvider.verify(
       txHash,
       userSeal.chainCertificate as Record<string, unknown> | undefined,
-    );
+    )
 
     return {
       valid: verifyResult.valid,
@@ -94,7 +94,7 @@ export class BlockchainService {
       sealName: userSeal.seal.name,
       ownerNickname: userSeal.user.nickname,
       earnedTime: userSeal.earnedTime,
-    };
+    }
   }
 
   /**
@@ -103,10 +103,10 @@ export class BlockchainService {
   async getChainStatus(userId: string, sealId: string) {
     const userSeal = await this.prisma.userSeal.findUnique({
       where: { userId_sealId: { userId, sealId } },
-    });
+    })
 
     if (!userSeal) {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到该印记');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到该印记')
     }
 
     return {
@@ -116,6 +116,6 @@ export class BlockchainService {
       txHash: userSeal.txHash,
       blockHeight: userSeal.blockHeight?.toString(),
       chainTime: userSeal.chainTime,
-    };
+    }
   }
 }

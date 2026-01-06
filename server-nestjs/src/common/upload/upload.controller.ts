@@ -5,20 +5,14 @@ import {
   UseInterceptors,
   BadRequestException,
   UseGuards,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
-import { extname } from 'path';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiConsumes,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { StorageService } from './storage.service';
-import { UploadConfigService } from './upload-config.service';
+} from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { memoryStorage } from 'multer'
+import { extname } from 'path'
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
+import { StorageService } from './storage.service'
+import { UploadConfigService } from './upload-config.service'
 
 // 文件魔数签名（用于校验真实文件类型）
 const FILE_SIGNATURES: Record<string, number[][]> = {
@@ -48,56 +42,52 @@ const FILE_SIGNATURES: Record<string, number[][]> = {
   ], // AAC
   // APK 文件 (ZIP 格式，以 PK 开头)
   'application/vnd.android.package-archive': [[0x50, 0x4b, 0x03, 0x04]],
-};
+}
 
 /**
  * 校验文件魔数
  */
 function validateFileMagic(buffer: Buffer, allowedTypes: string[]): boolean {
-  const header = Array.from(buffer.subarray(0, 16));
+  const header = Array.from(buffer.subarray(0, 16))
 
   for (const type of allowedTypes) {
-    const signatures = FILE_SIGNATURES[type];
-    if (!signatures) continue;
+    const signatures = FILE_SIGNATURES[type]
+    if (!signatures) continue
 
     for (const sig of signatures) {
-      const match = sig.every((byte, i) => header[i] === byte);
-      if (match) return true;
+      const match = sig.every((byte, i) => header[i] === byte)
+      if (match) return true
     }
   }
 
   // SVG 检查
   if (allowedTypes.includes('image/svg+xml')) {
-    const content = buffer.toString('utf8', 0, 1000).trim();
-    if (
-      content.startsWith('<?xml') ||
-      content.startsWith('<svg') ||
-      content.includes('<svg')
-    ) {
-      return true;
+    const content = buffer.toString('utf8', 0, 1000).trim()
+    if (content.startsWith('<?xml') || content.startsWith('<svg') || content.includes('<svg')) {
+      return true
     }
   }
 
-  return false;
+  return false
 }
 
 /**
  * 清理 SVG 文件中的潜在恶意内容
  */
 function sanitizeSvgBuffer(buffer: Buffer): Buffer {
-  let content = buffer.toString('utf8');
-  content = content.replace(/<script[\s\S]*?<\/script>/gi, '');
-  content = content.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
-  content = content.replace(/javascript:/gi, '');
-  content = content.replace(/data:[^"'\s]*/gi, '');
-  return Buffer.from(content, 'utf8');
+  let content = buffer.toString('utf8')
+  content = content.replace(/<script[\s\S]*?<\/script>/gi, '')
+  content = content.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '')
+  content = content.replace(/javascript:/gi, '')
+  content = content.replace(/data:[^"'\s]*/gi, '')
+  return Buffer.from(content, 'utf8')
 }
 
 /**
  * 清理文件名，防止路径遍历攻击
  */
 function sanitizeFilename(filename: string): string {
-  const ext = extname(filename).toLowerCase();
+  const ext = extname(filename).toLowerCase()
   const allowedExts = [
     '.jpg',
     '.jpeg',
@@ -113,20 +103,20 @@ function sanitizeFilename(filename: string): string {
     '.aac',
     '.m4a',
     '.apk',
-  ];
+  ]
   if (!allowedExts.includes(ext)) {
-    return '.png';
+    return '.png'
   }
-  return ext;
+  return ext
 }
 
 /**
  * 生成唯一文件名
  */
 function generateFilename(prefix: string, originalname: string): string {
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  const ext = sanitizeFilename(originalname);
-  return `${prefix}-${uniqueSuffix}${ext}`;
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
+  const ext = sanitizeFilename(originalname)
+  return `${prefix}-${uniqueSuffix}${ext}`
 }
 
 @ApiTags('文件上传')
@@ -137,7 +127,7 @@ export class UploadController {
   constructor(
     private readonly storageService: StorageService,
     private readonly uploadConfigService: UploadConfigService,
-  ) { }
+  ) {}
 
   /**
    * 上传头像
@@ -155,19 +145,11 @@ export class UploadController {
     FileInterceptor('file', {
       storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
-        const allowedMimes = [
-          'image/jpeg',
-          'image/png',
-          'image/gif',
-          'image/webp',
-        ];
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
         if (!allowedMimes.includes(file.mimetype)) {
-          cb(
-            new BadRequestException('只支持图片格式 (jpg, png, gif, webp)'),
-            false,
-          );
+          cb(new BadRequestException('只支持图片格式 (jpg, png, gif, webp)'), false)
         } else {
-          cb(null, true);
+          cb(null, true)
         }
       },
       limits: { fileSize: 2 * 1024 * 1024 },
@@ -175,28 +157,23 @@ export class UploadController {
   )
   async uploadAvatar(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('请选择要上传的文件');
+      throw new BadRequestException('请选择要上传的文件')
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
     if (!validateFileMagic(file.buffer, allowedTypes)) {
-      throw new BadRequestException('文件类型不合法，请上传真实的图片文件');
+      throw new BadRequestException('文件类型不合法，请上传真实的图片文件')
     }
 
-    const filename = generateFilename('avatar', file.originalname);
-    const result = await this.storageService.upload(
-      file.buffer,
-      filename,
-      file.mimetype,
-      'avatars',
-    );
+    const filename = generateFilename('avatar', file.originalname)
+    const result = await this.storageService.upload(file.buffer, filename, file.mimetype, 'avatars')
 
     return {
       url: result.url,
       filename: result.filename,
       size: result.size,
       mimetype: file.mimetype,
-    };
+    }
   }
 
   /**
@@ -223,16 +200,11 @@ export class UploadController {
           'image/svg+xml',
           'image/x-icon',
           'image/vnd.microsoft.icon',
-        ];
+        ]
         if (!allowedMimes.includes(file.mimetype)) {
-          cb(
-            new BadRequestException(
-              '只支持图片格式 (jpg, png, gif, webp, svg, ico)',
-            ),
-            false,
-          );
+          cb(new BadRequestException('只支持图片格式 (jpg, png, gif, webp, svg, ico)'), false)
         } else {
-          cb(null, true);
+          cb(null, true)
         }
       },
       limits: { fileSize: 2 * 1024 * 1024 },
@@ -240,7 +212,7 @@ export class UploadController {
   )
   async uploadSystem(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('请选择要上传的文件');
+      throw new BadRequestException('请选择要上传的文件')
     }
 
     const allowedTypes = [
@@ -250,34 +222,26 @@ export class UploadController {
       'image/webp',
       'image/svg+xml',
       'image/x-icon',
-    ];
+    ]
     if (!validateFileMagic(file.buffer, allowedTypes)) {
-      throw new BadRequestException('文件类型不合法，请上传真实的图片文件');
+      throw new BadRequestException('文件类型不合法，请上传真实的图片文件')
     }
 
-    let buffer = file.buffer;
+    let buffer = file.buffer
     // SVG 安全处理
-    if (
-      file.mimetype === 'image/svg+xml' ||
-      file.originalname.toLowerCase().endsWith('.svg')
-    ) {
-      buffer = sanitizeSvgBuffer(buffer);
+    if (file.mimetype === 'image/svg+xml' || file.originalname.toLowerCase().endsWith('.svg')) {
+      buffer = sanitizeSvgBuffer(buffer)
     }
 
-    const filename = generateFilename('sys', file.originalname);
-    const result = await this.storageService.upload(
-      buffer,
-      filename,
-      file.mimetype,
-      'system',
-    );
+    const filename = generateFilename('sys', file.originalname)
+    const result = await this.storageService.upload(buffer, filename, file.mimetype, 'system')
 
     return {
       url: result.url,
       filename: result.filename,
       size: result.size,
       mimetype: file.mimetype,
-    };
+    }
   }
 
   /**
@@ -296,22 +260,11 @@ export class UploadController {
     FileInterceptor('file', {
       storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
-        const allowedMimes = [
-          'image/jpeg',
-          'image/png',
-          'image/gif',
-          'image/webp',
-          'image/svg+xml',
-        ];
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
         if (!allowedMimes.includes(file.mimetype)) {
-          cb(
-            new BadRequestException(
-              '只支持图片格式 (jpg, png, gif, webp, svg)',
-            ),
-            false,
-          );
+          cb(new BadRequestException('只支持图片格式 (jpg, png, gif, webp, svg)'), false)
         } else {
-          cb(null, true);
+          cb(null, true)
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
@@ -319,42 +272,28 @@ export class UploadController {
   )
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('请选择要上传的文件');
+      throw new BadRequestException('请选择要上传的文件')
     }
 
-    const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/svg+xml',
-    ];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
     if (!validateFileMagic(file.buffer, allowedTypes)) {
-      throw new BadRequestException('文件类型不合法，请上传真实的图片文件');
+      throw new BadRequestException('文件类型不合法，请上传真实的图片文件')
     }
 
-    let buffer = file.buffer;
-    if (
-      file.mimetype === 'image/svg+xml' ||
-      file.originalname.toLowerCase().endsWith('.svg')
-    ) {
-      buffer = sanitizeSvgBuffer(buffer);
+    let buffer = file.buffer
+    if (file.mimetype === 'image/svg+xml' || file.originalname.toLowerCase().endsWith('.svg')) {
+      buffer = sanitizeSvgBuffer(buffer)
     }
 
-    const filename = generateFilename('img', file.originalname);
-    const result = await this.storageService.upload(
-      buffer,
-      filename,
-      file.mimetype,
-      'images',
-    );
+    const filename = generateFilename('img', file.originalname)
+    const result = await this.storageService.upload(buffer, filename, file.mimetype, 'images')
 
     return {
       url: result.url,
       filename: result.filename,
       size: result.size,
       mimetype: file.mimetype,
-    };
+    }
   }
 
   /**
@@ -382,16 +321,11 @@ export class UploadController {
           'audio/aac',
           'audio/x-m4a',
           'audio/mp4',
-        ];
+        ]
         if (!allowedMimes.includes(file.mimetype)) {
-          cb(
-            new BadRequestException(
-              '只支持音频格式 (mp3, wav, ogg, flac, aac, m4a)',
-            ),
-            false,
-          );
+          cb(new BadRequestException('只支持音频格式 (mp3, wav, ogg, flac, aac, m4a)'), false)
         } else {
-          cb(null, true);
+          cb(null, true)
         }
       },
       limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
@@ -399,40 +333,29 @@ export class UploadController {
   )
   async uploadAudio(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('请选择要上传的文件');
+      throw new BadRequestException('请选择要上传的文件')
     }
 
-    const allowedTypes = [
-      'audio/mpeg',
-      'audio/wav',
-      'audio/ogg',
-      'audio/flac',
-      'audio/aac',
-    ];
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac']
     // 音频文件魔数校验可能不完全准确，这里放宽限制
-    const isValidMagic = validateFileMagic(file.buffer, allowedTypes);
-    const hasValidExt = ['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a'].some(
-      (ext) => file.originalname.toLowerCase().endsWith(ext),
-    );
+    const isValidMagic = validateFileMagic(file.buffer, allowedTypes)
+    const hasValidExt = ['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a'].some((ext) =>
+      file.originalname.toLowerCase().endsWith(ext),
+    )
 
     if (!isValidMagic && !hasValidExt) {
-      throw new BadRequestException('文件类型不合法，请上传真实的音频文件');
+      throw new BadRequestException('文件类型不合法，请上传真实的音频文件')
     }
 
-    const filename = generateFilename('audio', file.originalname);
-    const result = await this.storageService.upload(
-      file.buffer,
-      filename,
-      file.mimetype,
-      'audio',
-    );
+    const filename = generateFilename('audio', file.originalname)
+    const result = await this.storageService.upload(file.buffer, filename, file.mimetype, 'audio')
 
     return {
       url: result.url,
       filename: result.filename,
       size: result.size,
       mimetype: file.mimetype,
-    };
+    }
   }
 
   /**
@@ -451,15 +374,12 @@ export class UploadController {
     FileInterceptor('file', {
       storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
-        const allowedMimes = [
-          'application/vnd.android.package-archive',
-          'application/octet-stream',
-        ];
-        const hasValidExt = file.originalname.toLowerCase().endsWith('.apk');
+        const allowedMimes = ['application/vnd.android.package-archive', 'application/octet-stream']
+        const hasValidExt = file.originalname.toLowerCase().endsWith('.apk')
         if (!allowedMimes.includes(file.mimetype) && !hasValidExt) {
-          cb(new BadRequestException('只支持 APK 格式文件'), false);
+          cb(new BadRequestException('只支持 APK 格式文件'), false)
         } else {
-          cb(null, true);
+          cb(null, true)
         }
       },
       limits: { fileSize: 500 * 1024 * 1024 }, // 硬上限 500MB，实际限制由数据库配置控制
@@ -467,35 +387,35 @@ export class UploadController {
   )
   async uploadApk(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('请选择要上传的文件');
+      throw new BadRequestException('请选择要上传的文件')
     }
 
     // 从数据库获取配置的最大大小
-    const maxSize = await this.uploadConfigService.getApkMaxSize();
+    const maxSize = await this.uploadConfigService.getApkMaxSize()
     if (file.buffer.length > maxSize) {
-      const maxSizeMB = Math.round(maxSize / (1024 * 1024));
-      throw new BadRequestException(`APK 文件不能超过 ${maxSizeMB}MB`);
+      const maxSizeMB = Math.round(maxSize / (1024 * 1024))
+      throw new BadRequestException(`APK 文件不能超过 ${maxSizeMB}MB`)
     }
 
     // APK 文件是 ZIP 格式，校验魔数
-    const allowedTypes = ['application/vnd.android.package-archive'];
-    const isValidMagic = validateFileMagic(file.buffer, allowedTypes);
-    const hasValidExt = file.originalname.toLowerCase().endsWith('.apk');
+    const allowedTypes = ['application/vnd.android.package-archive']
+    const isValidMagic = validateFileMagic(file.buffer, allowedTypes)
+    const hasValidExt = file.originalname.toLowerCase().endsWith('.apk')
 
     if (!isValidMagic && !hasValidExt) {
-      throw new BadRequestException('文件类型不合法，请上传真实的 APK 文件');
+      throw new BadRequestException('文件类型不合法，请上传真实的 APK 文件')
     }
 
-    const filename = generateFilename('app', file.originalname);
+    const filename = generateFilename('app', file.originalname)
     const result = await this.storageService.upload(
       file.buffer,
       filename,
       'application/vnd.android.package-archive',
       'apk',
-    );
+    )
 
     // 格式化文件大小
-    const fileSizeMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
+    const fileSizeMB = (file.buffer.length / (1024 * 1024)).toFixed(2)
 
     return {
       url: result.url,
@@ -503,6 +423,6 @@ export class UploadController {
       size: result.size,
       fileSize: `${fileSizeMB} MB`,
       mimetype: 'application/vnd.android.package-archive',
-    };
+    }
   }
 }

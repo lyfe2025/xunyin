@@ -321,7 +321,7 @@ function searchGoogle() {
       } else {
         toast({ title: '未找到相关地点', variant: 'destructive' })
       }
-    }
+    },
   )
 }
 
@@ -412,7 +412,7 @@ watch(
       selectedAddress.value = ''
       setTimeout(initMap, 100)
     }
-  }
+  },
 )
 
 // 监听地图服务切换

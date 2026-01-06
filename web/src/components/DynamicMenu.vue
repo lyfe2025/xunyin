@@ -59,7 +59,7 @@ watch(
       expandedItem.value = activeIndex
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 监听菜单数据加载完成
@@ -70,7 +70,7 @@ watch(
       expandedItem.value = findActiveMenuIndex()
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 将 kebab-case 转换为 PascalCase
@@ -117,7 +117,7 @@ function getIcon(iconName: string) {
               'flex items-center gap-3 rounded-lg px-3 text-sm transition-all hover:text-primary',
               isActive(child.path.startsWith('/') ? child.path : `${item.path}/${child.path}`)
                 ? 'bg-muted text-primary'
-                : 'text-muted-foreground'
+                : 'text-muted-foreground',
             )
           "
           :style="menuItemStyle"

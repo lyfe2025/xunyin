@@ -63,7 +63,7 @@ watch(
   (newVal) => {
     selectAll.value = onlineList.value.length > 0 && newVal.length === onlineList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 // 强退确认弹窗

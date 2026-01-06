@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator'
+import { Type } from 'class-transformer'
 
 // ==================== Query DTOs ====================
 
@@ -8,7 +8,7 @@ export class QueryCityDto {
   @ApiPropertyOptional({ description: '省份名称' })
   @IsOptional()
   @IsString()
-  province?: string;
+  province?: string
 }
 
 export class NearbyCityDto {
@@ -17,14 +17,14 @@ export class NearbyCityDto {
   @IsNumber()
   @Min(-90)
   @Max(90)
-  latitude: number;
+  latitude: number
 
   @ApiProperty({ description: '经度', example: 120.1551 })
   @Type(() => Number)
   @IsNumber()
   @Min(-180)
   @Max(180)
-  longitude: number;
+  longitude: number
 
   @ApiPropertyOptional({ description: '搜索半径(公里)', default: 200 })
   @Type(() => Number)
@@ -32,7 +32,7 @@ export class NearbyCityDto {
   @IsNumber()
   @Min(1)
   @Max(1000)
-  radius?: number;
+  radius?: number
 
   @ApiPropertyOptional({ description: '返回数量限制', default: 10 })
   @Type(() => Number)
@@ -40,81 +40,81 @@ export class NearbyCityDto {
   @IsNumber()
   @Min(1)
   @Max(50)
-  limit?: number;
+  limit?: number
 }
 
 // ==================== Response VOs ====================
 
 export class CityVo {
   @ApiProperty({ description: '城市ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '城市名称' })
-  name: string;
+  name: string
 
   @ApiProperty({ description: '省份' })
-  province: string;
+  province: string
 
   @ApiProperty({ description: '纬度' })
-  latitude: number;
+  latitude: number
 
   @ApiProperty({ description: '经度' })
-  longitude: number;
+  longitude: number
 
   @ApiPropertyOptional({ description: '城市图标' })
-  iconAsset?: string;
+  iconAsset?: string
 
   @ApiPropertyOptional({ description: '封面图片' })
-  coverImage?: string;
+  coverImage?: string
 
   @ApiPropertyOptional({ description: '城市描述' })
-  description?: string;
+  description?: string
 
   @ApiProperty({ description: '探索人数' })
-  explorerCount: number;
+  explorerCount: number
 
   @ApiPropertyOptional({ description: '背景音乐URL' })
-  bgmUrl?: string;
+  bgmUrl?: string
 }
 
 export class CityDetailVo extends CityVo {
   @ApiProperty({ description: '文化之旅数量' })
-  journeyCount: number;
+  journeyCount: number
 }
 
 export class JourneyBriefVo {
   @ApiProperty({ description: '文化之旅ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '文化之旅名称' })
-  name: string;
+  name: string
 
   @ApiProperty({ description: '主题' })
-  theme: string;
+  theme: string
 
   @ApiPropertyOptional({ description: '封面图片' })
-  coverImage?: string;
+  coverImage?: string
 
   @ApiProperty({ description: '星级评分 1-5' })
-  rating: number;
+  rating: number
 
   @ApiProperty({ description: '预计时长(分钟)' })
-  estimatedMinutes: number;
+  estimatedMinutes: number
 
   @ApiProperty({ description: '总距离(米)' })
-  totalDistance: number;
+  totalDistance: number
 
   @ApiProperty({ description: '完成人数' })
-  completedCount: number;
+  completedCount: number
 
   @ApiProperty({ description: '是否锁定' })
-  isLocked: boolean;
+  isLocked: boolean
 
   @ApiPropertyOptional({ description: '解锁条件' })
-  unlockCondition?: string;
+  unlockCondition?: string
 }
 
 export class NearbyCityVo extends CityVo {
   @ApiProperty({ description: '距离(公里)' })
-  distance: number;
+  distance: number
 }

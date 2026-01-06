@@ -77,7 +77,7 @@ watch(
   (val) => {
     if (val) parseCron(val)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 应用表达式
@@ -173,7 +173,7 @@ const _nextExecutions = computed(() => {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-      })
+      }),
     )
   }
   return results

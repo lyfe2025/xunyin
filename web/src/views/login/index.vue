@@ -29,10 +29,10 @@ const appStore = useAppStore()
 // 网站配置
 const siteName = computed(() => appStore.siteConfig.name || '寻印管理后台')
 const siteDescription = computed(
-  () => appStore.siteConfig.description || '城市文化探索与数字印记收藏平台'
+  () => appStore.siteConfig.description || '城市文化探索与数字印记收藏平台',
 )
 const siteCopyright = computed(
-  () => appStore.siteConfig.copyright || '© 2025 Xunyin. All rights reserved.'
+  () => appStore.siteConfig.copyright || '© 2025 Xunyin. All rights reserved.',
 )
 const siteIcp = computed(() => appStore.siteConfig.icp || '')
 const siteLogo = computed(() => {

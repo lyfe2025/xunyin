@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { createHash, randomBytes } from 'crypto';
+import { Injectable, Logger } from '@nestjs/common'
+import { createHash, randomBytes } from 'crypto'
 import {
   ChainProvider,
   ChainData,
   ChainResult,
   VerifyResult,
-} from '../interfaces/chain-provider.interface';
+} from '../interfaces/chain-provider.interface'
 
 /**
  * 腾讯至信链存证实现
@@ -24,10 +24,10 @@ import {
  */
 @Injectable()
 export class ZhixinChainProvider implements ChainProvider {
-  private readonly logger = new Logger(ZhixinChainProvider.name);
+  private readonly logger = new Logger(ZhixinChainProvider.name)
 
   getChainName(): string {
-    return 'ZhixinChain';
+    return 'ZhixinChain'
   }
 
   chain(data: ChainData): Promise<ChainResult> {
@@ -53,18 +53,14 @@ export class ZhixinChainProvider implements ChainProvider {
       },
       timestamp: Date.now(),
       nonce: randomBytes(16).toString('hex'),
-    };
+    }
 
-    const contentHash = createHash('sha256')
-      .update(JSON.stringify(certificate))
-      .digest('hex');
+    const contentHash = createHash('sha256').update(JSON.stringify(certificate)).digest('hex')
 
-    const txHash = `zx_${contentHash}`;
-    const blockHeight = (Math.floor(Date.now() / 1000) - 1700000000).toString();
+    const txHash = `zx_${contentHash}`
+    const blockHeight = (Math.floor(Date.now() / 1000) - 1700000000).toString()
 
-    this.logger.log(
-      `至信链存证成功: sealId=${data.sealId}, txHash=${txHash.slice(0, 20)}...`,
-    );
+    this.logger.log(`至信链存证成功: sealId=${data.sealId}, txHash=${txHash.slice(0, 20)}...`)
 
     return Promise.resolve({
       txHash,
@@ -72,13 +68,10 @@ export class ZhixinChainProvider implements ChainProvider {
       chainTime: new Date(),
       chainName: this.getChainName(),
       certificate,
-    });
+    })
   }
 
-  verify(
-    txHash: string,
-    certificate?: Record<string, unknown>,
-  ): Promise<VerifyResult> {
+  verify(txHash: string, certificate?: Record<string, unknown>): Promise<VerifyResult> {
     if (!certificate) {
       return Promise.resolve({
         valid: false,
@@ -86,15 +79,13 @@ export class ZhixinChainProvider implements ChainProvider {
         blockHeight: '0',
         chainTime: new Date(),
         chainName: this.getChainName(),
-      });
+      })
     }
 
-    const expectedHash = createHash('sha256')
-      .update(JSON.stringify(certificate))
-      .digest('hex');
+    const expectedHash = createHash('sha256').update(JSON.stringify(certificate)).digest('hex')
 
-    const valid = txHash === `zx_${expectedHash}`;
-    const timestamp = certificate.timestamp as number | undefined;
+    const valid = txHash === `zx_${expectedHash}`
+    const timestamp = certificate.timestamp as number | undefined
 
     return Promise.resolve({
       valid,
@@ -103,6 +94,6 @@ export class ZhixinChainProvider implements ChainProvider {
       chainTime: timestamp ? new Date(timestamp) : new Date(),
       chainName: this.getChainName(),
       certificate,
-    });
+    })
   }
 }

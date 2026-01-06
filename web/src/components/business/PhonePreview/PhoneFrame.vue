@@ -14,7 +14,7 @@ const props = withDefaults(
     scale: 0.65,
     showStatusBar: true,
     statusBarColor: 'white',
-  }
+  },
 )
 
 // iPhone 尺寸

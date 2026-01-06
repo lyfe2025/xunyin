@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { BusinessException } from '../common/exceptions';
-import { ErrorCode } from '../common/enums';
-import type { QueryPhotoDto, CreatePhotoDto } from './dto/photo.dto';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../prisma/prisma.service'
+import { BusinessException } from '../common/exceptions'
+import { ErrorCode } from '../common/enums'
+import type { QueryPhotoDto, CreatePhotoDto } from './dto/photo.dto'
 
 @Injectable()
 export class AlbumService {
@@ -12,7 +12,7 @@ export class AlbumService {
    * 获取照片列表
    */
   async findAll(userId: string, query: QueryPhotoDto) {
-    const { journeyId, startDate, endDate } = query;
+    const { journeyId, startDate, endDate } = query
 
     const photos = await this.prisma.explorationPhoto.findMany({
       where: {
@@ -31,7 +31,7 @@ export class AlbumService {
         point: true,
       },
       orderBy: { takenTime: 'desc' },
-    });
+    })
 
     return photos.map((photo) => ({
       id: photo.id,
@@ -46,7 +46,7 @@ export class AlbumService {
       longitude: photo.longitude ? Number(photo.longitude) : null,
       takenTime: photo.takenTime,
       createTime: photo.createTime,
-    }));
+    }))
   }
 
   /**
@@ -63,13 +63,13 @@ export class AlbumService {
         by: ['pointId'],
         where: { userId },
       }),
-    ]);
+    ])
 
     return {
       totalPhotos,
       journeyCount: journeyCount.length,
       pointCount: pointCount.length,
-    };
+    }
   }
 
   /**
@@ -83,7 +83,7 @@ export class AlbumService {
         point: true,
       },
       orderBy: { takenTime: 'desc' },
-    });
+    })
 
     return photos.map((photo) => ({
       id: photo.id,
@@ -98,7 +98,7 @@ export class AlbumService {
       longitude: photo.longitude ? Number(photo.longitude) : null,
       takenTime: photo.takenTime,
       createTime: photo.createTime,
-    }));
+    }))
   }
 
   /**
@@ -109,14 +109,14 @@ export class AlbumService {
     const [journey, point] = await Promise.all([
       this.prisma.journey.findUnique({ where: { id: dto.journeyId } }),
       this.prisma.explorationPoint.findUnique({ where: { id: dto.pointId } }),
-    ]);
+    ])
 
     if (!journey || journey.status !== '0') {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '文化之旅不存在')
     }
 
     if (!point || point.status !== '0') {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '探索点不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '探索点不存在')
     }
 
     const photo = await this.prisma.explorationPhoto.create({
@@ -135,7 +135,7 @@ export class AlbumService {
         journey: true,
         point: true,
       },
-    });
+    })
 
     return {
       id: photo.id,
@@ -150,7 +150,7 @@ export class AlbumService {
       longitude: photo.longitude ? Number(photo.longitude) : null,
       takenTime: photo.takenTime,
       createTime: photo.createTime,
-    };
+    }
   }
 
   /**
@@ -159,18 +159,18 @@ export class AlbumService {
   async remove(userId: string, id: string) {
     const photo = await this.prisma.explorationPhoto.findUnique({
       where: { id },
-    });
+    })
 
     if (!photo) {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '照片不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '照片不存在')
     }
 
     if (photo.userId !== userId) {
-      throw new BusinessException(ErrorCode.FORBIDDEN, '无权删除该照片');
+      throw new BusinessException(ErrorCode.FORBIDDEN, '无权删除该照片')
     }
 
-    await this.prisma.explorationPhoto.delete({ where: { id } });
+    await this.prisma.explorationPhoto.delete({ where: { id } })
 
-    return { message: '删除成功' };
+    return { message: '删除成功' }
   }
 }

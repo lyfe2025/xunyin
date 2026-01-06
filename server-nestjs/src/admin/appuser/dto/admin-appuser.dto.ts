@@ -1,30 +1,22 @@
-import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  Min,
-  Max,
-  IsIn,
-  IsBoolean,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger'
+import { IsString, IsOptional, IsNumber, Min, Max, IsIn, IsBoolean } from 'class-validator'
+import { Type } from 'class-transformer'
 
 export class QueryAppUserDto {
   @ApiPropertyOptional({ description: '手机号' })
   @IsOptional()
   @IsString()
-  phone?: string;
+  phone?: string
 
   @ApiPropertyOptional({ description: '邮箱' })
   @IsOptional()
   @IsString()
-  email?: string;
+  email?: string
 
   @ApiPropertyOptional({ description: '昵称' })
   @IsOptional()
   @IsString()
-  nickname?: string;
+  nickname?: string
 
   @ApiPropertyOptional({
     description: '登录方式',
@@ -33,25 +25,25 @@ export class QueryAppUserDto {
   @IsOptional()
   @IsString()
   @IsIn(['wechat', 'email', 'google', 'apple'])
-  loginType?: string;
+  loginType?: string
 
   @ApiPropertyOptional({ description: '是否已实名认证' })
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
-  isVerified?: boolean;
+  isVerified?: boolean
 
   @ApiPropertyOptional({ description: '状态 0正常 1禁用' })
   @IsOptional()
   @IsString()
-  status?: string;
+  status?: string
 
   @ApiPropertyOptional({ description: '页码', default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  pageNum?: number = 1;
+  pageNum?: number = 1
 
   @ApiPropertyOptional({ description: '每页数量', default: 10 })
   @IsOptional()
@@ -59,13 +51,13 @@ export class QueryAppUserDto {
   @IsNumber()
   @Min(1)
   @Max(100)
-  pageSize?: number = 20;
+  pageSize?: number = 20
 }
 
 export class ChangeStatusDto {
   @ApiProperty({ description: '状态 0正常 1禁用' })
   @IsString()
-  status: string;
+  status: string
 }
 
 // 实名认证查询
@@ -73,12 +65,12 @@ export class QueryVerificationDto {
   @ApiPropertyOptional({ description: '用户ID' })
   @IsOptional()
   @IsString()
-  userId?: string;
+  userId?: string
 
   @ApiPropertyOptional({ description: '真实姓名' })
   @IsOptional()
   @IsString()
-  realName?: string;
+  realName?: string
 
   @ApiPropertyOptional({
     description: '认证状态',
@@ -87,14 +79,14 @@ export class QueryVerificationDto {
   @IsOptional()
   @IsString()
   @IsIn(['pending', 'approved', 'rejected'])
-  status?: string;
+  status?: string
 
   @ApiPropertyOptional({ description: '页码', default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  pageNum?: number = 1;
+  pageNum?: number = 1
 
   @ApiPropertyOptional({ description: '每页数量', default: 10 })
   @IsOptional()
@@ -102,7 +94,7 @@ export class QueryVerificationDto {
   @IsNumber()
   @Min(1)
   @Max(100)
-  pageSize?: number = 20;
+  pageSize?: number = 20
 }
 
 // 审核实名认证
@@ -110,27 +102,27 @@ export class AuditVerificationDto {
   @ApiProperty({ description: '审核结果', enum: ['approved', 'rejected'] })
   @IsString()
   @IsIn(['approved', 'rejected'])
-  status: string;
+  status: string
 
   @ApiPropertyOptional({ description: '拒绝原因（拒绝时必填）' })
   @IsOptional()
   @IsString()
-  rejectReason?: string;
+  rejectReason?: string
 }
 
 // 批量审核实名认证
 export class BatchAuditVerificationDto {
   @ApiProperty({ description: '认证记录ID列表', type: [String] })
   @IsString({ each: true })
-  ids: string[];
+  ids: string[]
 
   @ApiProperty({ description: '审核结果', enum: ['approved', 'rejected'] })
   @IsString()
   @IsIn(['approved', 'rejected'])
-  status: 'approved' | 'rejected';
+  status: 'approved' | 'rejected'
 
   @ApiPropertyOptional({ description: '拒绝原因（拒绝时必填）' })
   @IsOptional()
   @IsString()
-  rejectReason?: string;
+  rejectReason?: string
 }

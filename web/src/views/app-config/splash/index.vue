@@ -118,7 +118,7 @@ async function getList() {
       platform: queryParams.platform === '__all__' ? '' : queryParams.platform,
       status: queryParams.status === '__all__' ? '' : queryParams.status,
     }
-    const res = await listSplash(params) as any
+    const res = (await listSplash(params)) as any
     // 兼容 res.data.list 或 res.list 两种格式
     const data = res.data || res
     list.value = data.list || []
@@ -274,7 +274,7 @@ function handleSelectAll(checked: boolean) {
 }
 
 const isAllSelected = computed(
-  () => list.value.length > 0 && selectedIds.value.length === list.value.length
+  () => list.value.length > 0 && selectedIds.value.length === list.value.length,
 )
 
 onMounted(() => {
@@ -346,7 +346,11 @@ onMounted(() => {
             v-for="(item, index) in list"
             :key="item.id"
             class="w-3 h-3 rounded-full transition-all border-2"
-            :class="previewItem?.id === item.id ? 'bg-primary border-primary scale-110' : 'bg-transparent border-muted-foreground hover:border-primary hover:bg-primary/20'"
+            :class="
+              previewItem?.id === item.id
+                ? 'bg-primary border-primary scale-110'
+                : 'bg-transparent border-muted-foreground hover:border-primary hover:bg-primary/20'
+            "
             :title="item.title || `启动页 ${index + 1}`"
             @click.stop="handlePreview(item)"
           />
@@ -563,10 +567,16 @@ onMounted(() => {
             </Label>
             <Input
               v-model="form.linkUrl"
-              :placeholder="form.linkType === 'external' ? 'https://example.com' : '/pages/home/index'"
+              :placeholder="
+                form.linkType === 'external' ? 'https://example.com' : '/pages/home/index'
+              "
             />
             <p class="text-xs text-muted-foreground">
-              {{ form.linkType === 'external' ? '点击启动页后跳转的外部网址' : '点击启动页后跳转的 APP 内部页面路径' }}
+              {{
+                form.linkType === 'external'
+                  ? '点击启动页后跳转的外部网址'
+                  : '点击启动页后跳转的 APP 内部页面路径'
+              }}
             </p>
           </div>
         </div>

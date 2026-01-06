@@ -36,7 +36,16 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { listType, getType, delType, addType, updateType, changeDictTypeStatus, batchChangeDictTypeStatus, type DictType } from '@/api/system/dict'
+import {
+  listType,
+  getType,
+  delType,
+  addType,
+  updateType,
+  changeDictTypeStatus,
+  batchChangeDictTypeStatus,
+  type DictType,
+} from '@/api/system/dict'
 
 const router = useRouter()
 const { toast } = useToast()
@@ -217,7 +226,7 @@ watch(
   (newVal) => {
     selectAll.value = typeList.value.length > 0 && newVal.length === typeList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 // 批量删除

@@ -1,41 +1,34 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  MaxLength,
-  Min,
-  Max,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsString, IsOptional, IsNumber, MaxLength, Min, Max } from 'class-validator'
+import { Type } from 'class-transformer'
 
 export class QueryAdminPointDto {
   @ApiPropertyOptional({ description: '文化之旅ID' })
   @IsOptional()
   @IsString()
-  journeyId?: string;
+  journeyId?: string
 
   @ApiPropertyOptional({ description: '探索点名称' })
   @IsOptional()
   @IsString()
-  name?: string;
+  name?: string
 
   @ApiPropertyOptional({ description: '任务类型 gesture/photo/treasure' })
   @IsOptional()
   @IsString()
-  taskType?: string;
+  taskType?: string
 
   @ApiPropertyOptional({ description: '状态 0正常 1停用' })
   @IsOptional()
   @IsString()
-  status?: string;
+  status?: string
 
   @ApiPropertyOptional({ description: '页码', default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  pageNum?: number = 1;
+  pageNum?: number = 1
 
   @ApiPropertyOptional({ description: '每页数量', default: 20 })
   @IsOptional()
@@ -43,184 +36,184 @@ export class QueryAdminPointDto {
   @IsNumber()
   @Min(1)
   @Max(500)
-  pageSize?: number = 20;
+  pageSize?: number = 20
 }
 
 export class CreatePointDto {
   @ApiProperty({ description: '文化之旅ID' })
   @IsString()
-  journeyId: string;
+  journeyId: string
 
   @ApiProperty({ description: '探索点名称' })
   @IsString()
   @MaxLength(100)
-  name: string;
+  name: string
 
   @ApiProperty({ description: '纬度' })
   @Type(() => Number)
   @IsNumber()
-  latitude: number;
+  latitude: number
 
   @ApiProperty({ description: '经度' })
   @Type(() => Number)
   @IsNumber()
-  longitude: number;
+  longitude: number
 
   @ApiProperty({ description: '任务类型 gesture/photo/treasure' })
   @IsString()
   @MaxLength(20)
-  taskType: string;
+  taskType: string
 
   @ApiProperty({ description: '任务描述' })
   @IsString()
   @MaxLength(255)
-  taskDescription: string;
+  taskDescription: string
 
   @ApiPropertyOptional({ description: '目标手势' })
   @IsOptional()
   @IsString()
-  targetGesture?: string;
+  targetGesture?: string
 
   @ApiPropertyOptional({ description: 'AR资源URL' })
   @IsOptional()
   @IsString()
-  arAssetUrl?: string;
+  arAssetUrl?: string
 
   @ApiPropertyOptional({ description: '文化背景' })
   @IsOptional()
   @IsString()
-  culturalBackground?: string;
+  culturalBackground?: string
 
   @ApiPropertyOptional({ description: '文化小知识' })
   @IsOptional()
   @IsString()
-  culturalKnowledge?: string;
+  culturalKnowledge?: string
 
   @ApiPropertyOptional({ description: '距上一点距离(米)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  distanceFromPrev?: number;
+  distanceFromPrev?: number
 
   @ApiPropertyOptional({ description: '积分奖励', default: 50 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  pointsReward?: number = 50;
+  pointsReward?: number = 50
 
   @ApiPropertyOptional({ description: '背景音乐ID' })
   @IsOptional()
   @IsString()
-  bgmId?: string;
+  bgmId?: string
 
   @ApiProperty({ description: '排序号' })
   @Type(() => Number)
   @IsNumber()
-  orderNum: number;
+  orderNum: number
 
   @ApiPropertyOptional({ description: '状态 0正常 1停用', default: '0' })
   @IsOptional()
   @IsString()
-  status?: string = '0';
+  status?: string = '0'
 }
 
 export class UpdatePointDto {
   @ApiPropertyOptional({ description: '文化之旅ID' })
   @IsOptional()
   @IsString()
-  journeyId?: string;
+  journeyId?: string
 
   @ApiPropertyOptional({ description: '探索点名称' })
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  name?: string;
+  name?: string
 
   @ApiPropertyOptional({ description: '纬度' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  latitude?: number;
+  latitude?: number
 
   @ApiPropertyOptional({ description: '经度' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  longitude?: number;
+  longitude?: number
 
   @ApiPropertyOptional({ description: '任务类型 gesture/photo/treasure' })
   @IsOptional()
   @IsString()
   @MaxLength(20)
-  taskType?: string;
+  taskType?: string
 
   @ApiPropertyOptional({ description: '任务描述' })
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  taskDescription?: string;
+  taskDescription?: string
 
   @ApiPropertyOptional({ description: '目标手势' })
   @IsOptional()
   @IsString()
-  targetGesture?: string;
+  targetGesture?: string
 
   @ApiPropertyOptional({ description: 'AR资源URL' })
   @IsOptional()
   @IsString()
-  arAssetUrl?: string;
+  arAssetUrl?: string
 
   @ApiPropertyOptional({ description: '文化背景' })
   @IsOptional()
   @IsString()
-  culturalBackground?: string;
+  culturalBackground?: string
 
   @ApiPropertyOptional({ description: '文化小知识' })
   @IsOptional()
   @IsString()
-  culturalKnowledge?: string;
+  culturalKnowledge?: string
 
   @ApiPropertyOptional({ description: '距上一点距离(米)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  distanceFromPrev?: number;
+  distanceFromPrev?: number
 
   @ApiPropertyOptional({ description: '积分奖励' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  pointsReward?: number;
+  pointsReward?: number
 
   @ApiPropertyOptional({ description: '背景音乐ID' })
   @IsOptional()
   @IsString()
-  bgmId?: string;
+  bgmId?: string
 
   @ApiPropertyOptional({ description: '排序号' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  orderNum?: number;
+  orderNum?: number
 
   @ApiPropertyOptional({ description: '状态 0正常 1停用' })
   @IsOptional()
   @IsString()
-  status?: string;
+  status?: string
 }
 
 export class UpdateStatusDto {
   @ApiProperty({ description: '状态 0正常 1停用' })
   @IsString()
-  status: string;
+  status: string
 }
 
 export class BatchUpdateStatusDto {
   @ApiProperty({ description: 'ID列表', type: [String] })
   @IsString({ each: true })
-  ids: string[];
+  ids: string[]
 
   @ApiProperty({ description: '状态 0正常 1停用' })
   @IsString()
-  status: string;
+  status: string
 }

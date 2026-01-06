@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { createHash, randomBytes } from 'crypto';
+import { Injectable, Logger } from '@nestjs/common'
+import { createHash, randomBytes } from 'crypto'
 import {
   ChainProvider,
   ChainData,
   ChainResult,
   VerifyResult,
-} from '../interfaces/chain-provider.interface';
+} from '../interfaces/chain-provider.interface'
 
 /**
  * 本地哈希存证实现
@@ -13,10 +13,10 @@ import {
  */
 @Injectable()
 export class LocalChainProvider implements ChainProvider {
-  private readonly logger = new Logger(LocalChainProvider.name);
+  private readonly logger = new Logger(LocalChainProvider.name)
 
   getChainName(): string {
-    return 'LocalChain';
+    return 'LocalChain'
   }
 
   chain(data: ChainData): Promise<ChainResult> {
@@ -34,22 +34,18 @@ export class LocalChainProvider implements ChainProvider {
       },
       timestamp: Date.now(),
       nonce: randomBytes(16).toString('hex'),
-    };
+    }
 
     // 生成存证哈希
-    const contentHash = createHash('sha256')
-      .update(JSON.stringify(certificate))
-      .digest('hex');
+    const contentHash = createHash('sha256').update(JSON.stringify(certificate)).digest('hex')
 
     // 生成伪交易哈希
-    const txHash = `0x${contentHash}`;
+    const txHash = `0x${contentHash}`
 
     // 生成伪区块高度（基于时间戳，保证递增）
-    const blockHeight = (Math.floor(Date.now() / 1000) - 1700000000).toString();
+    const blockHeight = (Math.floor(Date.now() / 1000) - 1700000000).toString()
 
-    this.logger.log(
-      `本地存证成功: sealId=${data.sealId}, txHash=${txHash.slice(0, 20)}...`,
-    );
+    this.logger.log(`本地存证成功: sealId=${data.sealId}, txHash=${txHash.slice(0, 20)}...`)
 
     return Promise.resolve({
       txHash,
@@ -57,13 +53,10 @@ export class LocalChainProvider implements ChainProvider {
       chainTime: new Date(),
       chainName: this.getChainName(),
       certificate,
-    });
+    })
   }
 
-  verify(
-    txHash: string,
-    certificate?: Record<string, unknown>,
-  ): Promise<VerifyResult> {
+  verify(txHash: string, certificate?: Record<string, unknown>): Promise<VerifyResult> {
     if (!certificate) {
       return Promise.resolve({
         valid: false,
@@ -71,17 +64,15 @@ export class LocalChainProvider implements ChainProvider {
         blockHeight: '0',
         chainTime: new Date(),
         chainName: this.getChainName(),
-      });
+      })
     }
 
     // 重新计算哈希验证
-    const expectedHash = createHash('sha256')
-      .update(JSON.stringify(certificate))
-      .digest('hex');
+    const expectedHash = createHash('sha256').update(JSON.stringify(certificate)).digest('hex')
 
-    const valid = txHash === `0x${expectedHash}`;
-    const timestamp = certificate.timestamp as number | undefined;
-    const blockHeight = certificate.blockHeight as string | undefined;
+    const valid = txHash === `0x${expectedHash}`
+    const timestamp = certificate.timestamp as number | undefined
+    const blockHeight = certificate.blockHeight as string | undefined
 
     return Promise.resolve({
       valid,
@@ -90,6 +81,6 @@ export class LocalChainProvider implements ChainProvider {
       chainTime: timestamp ? new Date(timestamp) : new Date(),
       chainName: this.getChainName(),
       certificate,
-    });
+    })
   }
 }

@@ -371,7 +371,7 @@ const PreviewMenuTreeItem: any = {
                       toggleExpand()
                     },
                   },
-                  [h(isExpanded.value ? ChevronDown : ChevronRight, { class: 'w-3 h-3' })]
+                  [h(isExpanded.value ? ChevronDown : ChevronRight, { class: 'w-3 h-3' })],
                 )
               : h('span', { class: 'w-4' }),
             // 禁用的 Checkbox
@@ -380,7 +380,7 @@ const PreviewMenuTreeItem: any = {
               disabled: true,
             }),
             h('span', { class: 'text-sm' }, props.menu.menuName),
-          ]
+          ],
         ),
         // 子节点(仅在展开时显示)
         hasChildren.value && shouldExpand.value
@@ -394,8 +394,8 @@ const PreviewMenuTreeItem: any = {
                   level: currentLevel + 1,
                   selectedIds: props.selectedIds,
                   expandAll: props.expandAll,
-                })
-              )
+                }),
+              ),
             )
           : null,
       ])
@@ -474,7 +474,7 @@ const MenuTreeItem: any = {
                       toggleExpand()
                     },
                   },
-                  [h(isExpanded.value ? ChevronDown : ChevronRight, { class: 'w-3 h-3' })]
+                  [h(isExpanded.value ? ChevronDown : ChevronRight, { class: 'w-3 h-3' })],
                 )
               : h('span', { class: 'w-4' }), // 占位符保持对齐
             h(Checkbox, {
@@ -482,7 +482,7 @@ const MenuTreeItem: any = {
               'onUpdate:modelValue': toggle,
             }),
             h('span', { class: 'text-sm' }, props.menu.menuName),
-          ]
+          ],
         ),
         // 子节点(仅在展开时显示)
         hasChildren.value && shouldExpand.value
@@ -498,8 +498,8 @@ const MenuTreeItem: any = {
                   level: currentLevel + 1,
                   expandAll: props.expandAll,
                   'onUpdate:modelValue': (val: any) => emit('update:modelValue', val),
-                })
-              )
+                }),
+              ),
             )
           : null,
       ])

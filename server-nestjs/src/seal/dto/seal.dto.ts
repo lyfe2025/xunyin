@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsIn } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsString, IsOptional, IsIn } from 'class-validator'
 
 export class QuerySealDto {
   @ApiPropertyOptional({
@@ -9,164 +9,164 @@ export class QuerySealDto {
   @IsOptional()
   @IsString()
   @IsIn(['route', 'city', 'special'])
-  type?: string;
+  type?: string
 }
 
 // ==================== Response VOs ====================
 
 export class UserSealVo {
   @ApiProperty({ description: '用户印记ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '印记ID' })
-  sealId: string;
+  sealId: string
 
   @ApiProperty({ description: '印记类型', enum: ['route', 'city', 'special'] })
-  type: string;
+  type: string
 
   @ApiProperty({ description: '印记名称' })
-  name: string;
+  name: string
 
   @ApiProperty({ description: '印记图片' })
-  imageAsset: string;
+  imageAsset: string
 
   @ApiPropertyOptional({ description: '印记描述' })
-  description?: string;
+  description?: string
 
   @ApiPropertyOptional({ description: '解锁的称号' })
-  badgeTitle?: string;
+  badgeTitle?: string
 
   @ApiProperty({ description: '获得时间' })
-  earnedTime: Date;
+  earnedTime: Date
 
   @ApiPropertyOptional({ description: '花费时间(分钟)' })
-  timeSpentMinutes?: number;
+  timeSpentMinutes?: number
 
   @ApiProperty({ description: '获得积分' })
-  pointsEarned: number;
+  pointsEarned: number
 
   @ApiProperty({ description: '是否已上链' })
-  isChained: boolean;
+  isChained: boolean
 
   @ApiPropertyOptional({ description: '交易哈希' })
-  txHash?: string;
+  txHash?: string
 }
 
 export class SealDetailVo {
   @ApiProperty({ description: '印记ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '印记类型', enum: ['route', 'city', 'special'] })
-  type: string;
+  type: string
 
   @ApiProperty({ description: '印记名称' })
-  name: string;
+  name: string
 
   @ApiProperty({ description: '印记图片' })
-  imageAsset: string;
+  imageAsset: string
 
   @ApiPropertyOptional({ description: '印记描述' })
-  description?: string;
+  description?: string
 
   @ApiPropertyOptional({ description: '解锁条件' })
-  unlockCondition?: string;
+  unlockCondition?: string
 
   @ApiPropertyOptional({ description: '解锁的称号' })
-  badgeTitle?: string;
+  badgeTitle?: string
 
   @ApiPropertyOptional({ description: '关联文化之旅ID' })
-  journeyId?: string;
+  journeyId?: string
 
   @ApiPropertyOptional({ description: '关联文化之旅名称' })
-  journeyName?: string;
+  journeyName?: string
 
   @ApiPropertyOptional({ description: '关联城市ID' })
-  cityId?: string;
+  cityId?: string
 
   @ApiPropertyOptional({ description: '关联城市名称' })
-  cityName?: string;
+  cityName?: string
 
   @ApiProperty({ description: '是否已拥有' })
-  owned: boolean;
+  owned: boolean
 
   @ApiPropertyOptional({ description: '获得时间' })
-  earnedTime?: Date;
+  earnedTime?: Date
 
   @ApiPropertyOptional({ description: '花费时间(分钟)' })
-  timeSpentMinutes?: number;
+  timeSpentMinutes?: number
 
   @ApiPropertyOptional({ description: '获得积分' })
-  pointsEarned?: number;
+  pointsEarned?: number
 
   @ApiPropertyOptional({ description: '是否已上链' })
-  isChained?: boolean;
+  isChained?: boolean
 
   @ApiPropertyOptional({ description: '交易哈希' })
-  txHash?: string;
+  txHash?: string
 
   @ApiPropertyOptional({ description: '上链时间' })
-  chainTime?: Date;
+  chainTime?: Date
 }
 
 export class SealProgressVo {
   @ApiProperty({ description: '总印记数' })
-  total: number;
+  total: number
 
   @ApiProperty({ description: '已收集数' })
-  collected: number;
+  collected: number
 
   @ApiProperty({ description: '收集百分比' })
-  percentage: number;
+  percentage: number
 
   @ApiProperty({ description: '按类型统计' })
-  byType: SealTypeProgressVo[];
+  byType: SealTypeProgressVo[]
 }
 
 export class SealTypeProgressVo {
   @ApiProperty({ description: '印记类型' })
-  type: string;
+  type: string
 
   @ApiProperty({ description: '总数' })
-  total: number;
+  total: number
 
   @ApiProperty({ description: '已收集数' })
-  collected: number;
+  collected: number
 }
 
 export class AvailableSealVo {
   @ApiProperty({ description: '印记ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '印记类型', enum: ['route', 'city', 'special'] })
-  type: string;
+  type: string
 
   @ApiProperty({ description: '印记名称' })
-  name: string;
+  name: string
 
   @ApiProperty({ description: '印记图片' })
-  imageAsset: string;
+  imageAsset: string
 
   @ApiPropertyOptional({ description: '印记描述' })
-  description?: string;
+  description?: string
 
   @ApiPropertyOptional({ description: '解锁条件' })
-  unlockCondition?: string;
+  unlockCondition?: string
 
   @ApiPropertyOptional({ description: '解锁的称号' })
-  badgeTitle?: string;
+  badgeTitle?: string
 
   @ApiPropertyOptional({ description: '关联文化之旅ID' })
-  journeyId?: string;
+  journeyId?: string
 
   @ApiPropertyOptional({ description: '关联文化之旅名称' })
-  journeyName?: string;
+  journeyName?: string
 
   @ApiPropertyOptional({ description: '关联城市ID' })
-  cityId?: string;
+  cityId?: string
 
   @ApiPropertyOptional({ description: '关联城市名称' })
-  cityName?: string;
+  cityName?: string
 
   @ApiProperty({ description: '是否已拥有' })
-  owned: boolean;
+  owned: boolean
 }

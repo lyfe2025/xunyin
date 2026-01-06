@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
-import { BusinessException } from '../common/exceptions';
-import { ErrorCode } from '../common/enums';
-import { AmapProvider } from './providers/amap.provider';
-import type { ValidateLocationDto } from './dto/location.dto';
-import type { WalkingRouteDto, SearchPoiDto } from './dto/route.dto';
+import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { PrismaService } from '../prisma/prisma.service'
+import { BusinessException } from '../common/exceptions'
+import { ErrorCode } from '../common/enums'
+import { AmapProvider } from './providers/amap.provider'
+import type { ValidateLocationDto } from './dto/location.dto'
+import type { WalkingRouteDto, SearchPoiDto } from './dto/route.dto'
 
-const LOCATION_THRESHOLD = 50; // 米
+const LOCATION_THRESHOLD = 50 // 米
 
 @Injectable()
 export class MapService {
@@ -24,14 +24,13 @@ export class MapService {
     const cities = await this.prisma.city.findMany({
       where: { status: '0' },
       orderBy: { orderNum: 'asc' },
-    });
+    })
 
     return {
       provider: 'amap',
       amap: {
         key: this.configService.get<string>('AMAP_WEB_KEY') || '',
-        securityCode:
-          this.configService.get<string>('AMAP_SECURITY_CODE') || '',
+        securityCode: this.configService.get<string>('AMAP_SECURITY_CODE') || '',
       },
       maptiler: {
         key: this.configService.get<string>('MAPTILER_KEY') || '',
@@ -45,7 +44,7 @@ export class MapService {
           lng: Number(city.longitude),
         },
       })),
-    };
+    }
   }
 
   /**
@@ -54,10 +53,10 @@ export class MapService {
   async validateLocation(dto: ValidateLocationDto) {
     const point = await this.prisma.explorationPoint.findUnique({
       where: { id: dto.pointId },
-    });
+    })
 
     if (!point || point.status !== '0') {
-      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '探索点不存在');
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '探索点不存在')
     }
 
     const distance = this.calculateDistance(
@@ -65,15 +64,15 @@ export class MapService {
       dto.userLng,
       Number(point.latitude),
       Number(point.longitude),
-    );
+    )
 
-    const distanceInMeters = distance * 1000;
+    const distanceInMeters = distance * 1000
 
     return {
       isInRange: distanceInMeters <= LOCATION_THRESHOLD,
       distance: Math.round(distanceInMeters * 100) / 100,
       threshold: LOCATION_THRESHOLD,
-    };
+    }
   }
 
   /**
@@ -85,39 +84,34 @@ export class MapService {
       dto.origin.lng,
       dto.destination.lat,
       dto.destination.lng,
-    );
+    )
   }
 
   /**
    * POI 搜索
    */
   async searchPoi(dto: SearchPoiDto) {
-    return this.amapProvider.searchPoi(dto.keyword, dto.city);
+    return this.amapProvider.searchPoi(dto.keyword, dto.city)
   }
 
   /**
    * 计算两点间距离（Haversine 公式）
    */
-  private calculateDistance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number,
-  ): number {
-    const R = 6371;
-    const dLat = this.toRad(lat2 - lat1);
-    const dLon = this.toRad(lon2 - lon1);
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371
+    const dLat = this.toRad(lat2 - lat1)
+    const dLon = this.toRad(lon2 - lon1)
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) *
         Math.cos(this.toRad(lat2)) *
         Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+        Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
   }
 
   private toRad(deg: number): number {
-    return deg * (Math.PI / 180);
+    return deg * (Math.PI / 180)
   }
 }

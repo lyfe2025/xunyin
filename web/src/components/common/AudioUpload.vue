@@ -22,7 +22,7 @@ const fileInput = ref<HTMLInputElement>()
 
 const audioUrl = computed(() => props.modelValue || '')
 const acceptTypes = computed(
-  () => props.accept || 'audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/flac,audio/aac'
+  () => props.accept || 'audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/flac,audio/aac',
 )
 const maxSizeMB = computed(() => props.maxSize || 20)
 

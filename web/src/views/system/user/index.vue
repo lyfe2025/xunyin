@@ -558,7 +558,7 @@ const _flattenedDepts = computed(() => {
   const result: Array<{ id: string; label: string }> = []
   const traverse = (
     nodes: Array<{ deptId: string; deptName: string; children?: any[] }>,
-    prefix = ''
+    prefix = '',
   ) => {
     for (const node of nodes || []) {
       result.push({ id: node.deptId, label: prefix + node.deptName })
@@ -610,7 +610,7 @@ watch(
   (newVal) => {
     selectAll.value = userList.value.length > 0 && newVal.length === userList.value.length
   },
-  { deep: true }
+  { deep: true },
 )
 
 const route = useRoute()

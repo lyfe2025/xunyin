@@ -1,19 +1,12 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsOptional,
-  IsString,
-  IsInt,
-  Min,
-  IsIn,
-  MaxLength,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsOptional, IsString, IsInt, Min, IsIn, MaxLength } from 'class-validator'
+import { Type } from 'class-transformer'
 
 export class QueryBgmDto {
   @ApiPropertyOptional({ description: '名称' })
   @IsOptional()
   @IsString()
-  name?: string;
+  name?: string
 
   @ApiPropertyOptional({
     description: '上下文类型',
@@ -22,38 +15,38 @@ export class QueryBgmDto {
   @IsOptional()
   @IsString()
   @IsIn(['home', 'city', 'journey'])
-  context?: string;
+  context?: string
 
   @ApiPropertyOptional({ description: '状态', enum: ['0', '1'] })
   @IsOptional()
   @IsString()
-  status?: string;
+  status?: string
 
   @ApiPropertyOptional({ description: '页码', default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  pageNum?: number;
+  pageNum?: number
 
   @ApiPropertyOptional({ description: '每页数量', default: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  pageSize?: number;
+  pageSize?: number
 }
 
 export class CreateBgmDto {
   @ApiProperty({ description: '名称' })
   @IsString()
   @MaxLength(100)
-  name: string;
+  name: string
 
   @ApiProperty({ description: '音频URL' })
   @IsString()
   @MaxLength(255)
-  url: string;
+  url: string
 
   @ApiProperty({
     description: '上下文类型',
@@ -61,31 +54,31 @@ export class CreateBgmDto {
   })
   @IsString()
   @IsIn(['home', 'city', 'journey', 'point'])
-  context: string;
+  context: string
 
   @ApiPropertyOptional({ description: '关联ID（城市ID或文化之旅ID）' })
   @IsOptional()
   @IsString()
-  contextId?: string;
+  contextId?: string
 
   @ApiPropertyOptional({ description: '时长（秒）' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  duration?: number;
+  duration?: number
 
   @ApiPropertyOptional({ description: '排序', default: 0 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  orderNum?: number;
+  orderNum?: number
 
   @ApiPropertyOptional({ description: '状态', enum: ['0', '1'], default: '0' })
   @IsOptional()
   @IsString()
   @IsIn(['0', '1'])
-  status?: string;
+  status?: string
 }
 
 export class UpdateBgmDto {
@@ -93,13 +86,13 @@ export class UpdateBgmDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  name?: string;
+  name?: string
 
   @ApiPropertyOptional({ description: '音频URL' })
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  url?: string;
+  url?: string
 
   @ApiPropertyOptional({
     description: '上下文类型',
@@ -108,91 +101,91 @@ export class UpdateBgmDto {
   @IsOptional()
   @IsString()
   @IsIn(['home', 'city', 'journey', 'point'])
-  context?: string;
+  context?: string
 
   @ApiPropertyOptional({ description: '关联ID' })
   @IsOptional()
   @IsString()
-  contextId?: string;
+  contextId?: string
 
   @ApiPropertyOptional({ description: '时长（秒）' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  duration?: number;
+  duration?: number
 
   @ApiPropertyOptional({ description: '排序' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  orderNum?: number;
+  orderNum?: number
 
   @ApiPropertyOptional({ description: '状态', enum: ['0', '1'] })
   @IsOptional()
   @IsString()
   @IsIn(['0', '1'])
-  status?: string;
+  status?: string
 }
 
 export class UpdateBgmStatusDto {
   @ApiProperty({ description: '状态', enum: ['0', '1'] })
   @IsString()
   @IsIn(['0', '1'])
-  status: string;
+  status: string
 }
 
 export class BatchDeleteBgmDto {
   @ApiProperty({ description: 'ID列表', type: [String] })
   @IsString({ each: true })
-  ids: string[];
+  ids: string[]
 }
 
 export class BatchUpdateStatusDto {
   @ApiProperty({ description: 'ID列表', type: [String] })
   @IsString({ each: true })
-  ids: string[];
+  ids: string[]
 
   @ApiProperty({ description: '状态', enum: ['0', '1'] })
   @IsString()
   @IsIn(['0', '1'])
-  status: string;
+  status: string
 }
 
 export class BgmListVo {
   @ApiProperty({ description: 'ID' })
-  id: string;
+  id: string
 
   @ApiProperty({ description: '名称' })
-  name: string;
+  name: string
 
   @ApiProperty({ description: '音频URL' })
-  url: string;
+  url: string
 
   @ApiProperty({ description: '上下文类型' })
-  context: string;
+  context: string
 
   @ApiProperty({ description: '关联ID' })
-  contextId: string | null;
+  contextId: string | null
 
   @ApiProperty({ description: '关联名称（城市名、文化之旅名或探索点名）' })
-  contextName: string | null;
+  contextName: string | null
 
   @ApiProperty({ description: '关联城市名（文化之旅或探索点类型）' })
-  contextCityName: string | null;
+  contextCityName: string | null
 
   @ApiProperty({ description: '关联文化之旅名（仅探索点类型）' })
-  contextJourneyName: string | null;
+  contextJourneyName: string | null
 
   @ApiProperty({ description: '时长（秒）' })
-  duration: number | null;
+  duration: number | null
 
   @ApiProperty({ description: '排序' })
-  orderNum: number;
+  orderNum: number
 
   @ApiProperty({ description: '状态' })
-  status: string;
+  status: string
 
   @ApiProperty({ description: '创建时间' })
-  createTime: Date;
+  createTime: Date
 }

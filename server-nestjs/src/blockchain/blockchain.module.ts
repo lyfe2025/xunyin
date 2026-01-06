@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { BlockchainController } from './blockchain.controller';
-import { BlockchainService } from './blockchain.service';
-import { BlockchainConfigService } from './blockchain-config.service';
-import { CHAIN_PROVIDER } from './interfaces/chain-provider.interface';
+import { Module } from '@nestjs/common'
+import { BlockchainController } from './blockchain.controller'
+import { BlockchainService } from './blockchain.service'
+import { BlockchainConfigService } from './blockchain-config.service'
+import { CHAIN_PROVIDER } from './interfaces/chain-provider.interface'
 import {
   LocalChainProvider,
   AntChainProvider,
@@ -10,7 +10,7 @@ import {
   PolygonProvider,
   TimestampProvider,
   ZhixinChainProvider,
-} from './providers';
+} from './providers'
 
 @Module({
   controllers: [BlockchainController],
@@ -34,20 +34,20 @@ import {
         timestampChain: TimestampProvider,
         zhixinChain: ZhixinChainProvider,
       ) => {
-        const provider = await configService.getProvider();
+        const provider = await configService.getProvider()
         switch (provider) {
           case 'antchain':
-            return antChain;
+            return antChain
           case 'bsn':
-            return bsnChain;
+            return bsnChain
           case 'polygon':
-            return polygonChain;
+            return polygonChain
           case 'timestamp':
-            return timestampChain;
+            return timestampChain
           case 'zhixin':
-            return zhixinChain;
+            return zhixinChain
           default:
-            return localChain;
+            return localChain
         }
       },
       inject: [

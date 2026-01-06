@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { CityService } from './city.service';
+import { Controller, Get, Param, Query } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger'
+import { CityService } from './city.service'
 import {
   QueryCityDto,
   NearbyCityDto,
@@ -8,7 +8,7 @@ import {
   CityDetailVo,
   JourneyBriefVo,
   NearbyCityVo,
-} from './dto/city.dto';
+} from './dto/city.dto'
 
 @ApiTags('城市')
 @Controller('app/cities')
@@ -20,7 +20,7 @@ export class CityController {
   @ApiQuery({ name: 'province', required: false, description: '省份名称' })
   @ApiResponse({ status: 200, description: '成功', type: [CityVo] })
   async findAll(@Query() query: QueryCityDto) {
-    return this.cityService.findAll(query);
+    return this.cityService.findAll(query)
   }
 
   @Get('nearby')
@@ -30,20 +30,20 @@ export class CityController {
   })
   @ApiResponse({ status: 200, description: '成功', type: [NearbyCityVo] })
   async findNearby(@Query() query: NearbyCityDto) {
-    return this.cityService.findNearby(query);
+    return this.cityService.findNearby(query)
   }
 
   @Get(':id')
   @ApiOperation({ summary: '获取城市详情' })
   @ApiResponse({ status: 200, description: '成功', type: CityDetailVo })
   async findOne(@Param('id') id: string) {
-    return this.cityService.findOne(id);
+    return this.cityService.findOne(id)
   }
 
   @Get(':id/journeys')
   @ApiOperation({ summary: '获取城市文化之旅列表' })
   @ApiResponse({ status: 200, description: '成功', type: [JourneyBriefVo] })
   async findJourneys(@Param('id') id: string) {
-    return this.cityService.findJourneys(id);
+    return this.cityService.findJourneys(id)
   }
 }

@@ -1,20 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { PassportStrategy } from '@nestjs/passport'
+import { ExtractJwt, Strategy } from 'passport-jwt'
 
 /**
  * App JWT Payload 接口
  */
 export interface AppJwtPayload {
   /** 用户ID */
-  sub: string;
+  sub: string
   /** 手机号 */
-  phone?: string;
+  phone?: string
   /** 昵称 */
-  nickname: string;
+  nickname: string
   /** Token 类型: access | refresh */
-  type?: 'access' | 'refresh';
+  type?: 'access' | 'refresh'
 }
 
 /**
@@ -27,9 +27,8 @@ export class AppJwtStrategy extends PassportStrategy(Strategy, 'app-jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey:
-        configService.get<string>('JWT_SECRET') || 'super-secret-key',
-    });
+      secretOrKey: configService.get<string>('JWT_SECRET') || 'super-secret-key',
+    })
   }
 
   /**
@@ -41,6 +40,6 @@ export class AppJwtStrategy extends PassportStrategy(Strategy, 'app-jwt') {
       userId: payload.sub,
       phone: payload.phone,
       nickname: payload.nickname,
-    };
+    }
   }
 }
