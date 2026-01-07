@@ -308,6 +308,7 @@ VALUES
   -- 高德地图
   ('高德地图开关', 'map.amap.enabled', 'true', 'Y', NOW()),
   ('高德Web服务Key', 'map.amap.webKey', '', 'Y', NOW()),
+  ('高德Web安全密钥', 'map.amap.webSecurityKey', '', 'Y', NOW()),
   ('高德Android Key', 'map.amap.androidKey', '', 'Y', NOW()),
   ('高德iOS Key', 'map.amap.iosKey', '', 'Y', NOW()),
   -- 腾讯地图

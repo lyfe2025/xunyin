@@ -56,21 +56,42 @@ let AMap: any = null
 let TMap: any = null
 
 // 加载高德地图 SDK
-async function loadAmapSDK(key: string): Promise<void> {
+async function loadAmapSDK(key: string, securityKey?: string): Promise<void> {
   return new Promise((resolve, reject) => {
+    // 配置安全密钥（必须在加载 SDK 之前设置）
+    if (securityKey) {
+      ;(window as any)._AMapSecurityConfig = {
+        securityJsCode: securityKey,
+      }
+    }
+
     if ((window as any).AMap) {
       AMap = (window as any).AMap
-      resolve()
+      // 确保插件已加载
+      AMap.plugin(['AMap.Geocoder', 'AMap.PlaceSearch'], () => {
+        resolve()
+      })
       return
     }
-    const script = document.createElement('script')
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}&plugin=AMap.Geocoder,AMap.PlaceSearch`
-    script.onload = () => {
-      AMap = (window as any).AMap
-      resolve()
+    // 使用 JSAPI Loader 方式加载（更可靠）
+    const loaderScript = document.createElement('script')
+    loaderScript.src = 'https://webapi.amap.com/loader.js'
+    loaderScript.onload = () => {
+      const AMapLoader = (window as any).AMapLoader
+      AMapLoader.load({
+        key,
+        version: '2.0',
+        plugins: ['AMap.Geocoder', 'AMap.PlaceSearch'],
+      })
+        .then((amap: any) => {
+          AMap = amap
+          ;(window as any).AMap = amap
+          resolve()
+        })
+        .catch((e: Error) => reject(e))
     }
-    script.onerror = () => reject(new Error('高德地图 SDK 加载失败'))
-    document.head.appendChild(script)
+    loaderScript.onerror = () => reject(new Error('高德地图 SDK 加载失败'))
+    document.head.appendChild(loaderScript)
   })
 }
 
@@ -123,8 +144,8 @@ function destroyMap() {
 }
 
 // 初始化高德地图
-async function initAmapMap(key: string) {
-  await loadAmapSDK(key)
+async function initAmapMap(key: string, securityKey?: string) {
+  await loadAmapSDK(key, securityKey)
   if (!mapContainer.value) return
 
   map = new AMap.Map(mapContainer.value, {
@@ -171,15 +192,26 @@ function getAddressAmap(lng: number, lat: number) {
 
 function searchAmap() {
   if (!searchInput.value.trim()) return
-  const placeSearch = new AMap.PlaceSearch({ map, pageSize: 5 })
+
+  const placeSearch = new AMap.PlaceSearch({
+    pageSize: 10,
+    pageIndex: 1,
+    city: '', // 全国搜索
+    citylimit: false,
+    extensions: 'all',
+  })
+
   placeSearch.search(searchInput.value, (status: string, result: any) => {
     if (status === 'complete' && result.poiList?.pois?.length > 0) {
       const poi = result.poiList.pois[0]
       const { lng, lat } = poi.location
       map.setCenter([lng, lat])
+      map.setZoom(15)
       updateMarkerAmap(lng, lat)
+    } else if (status === 'no_data') {
+      toast({ title: '未找到相关地点，请尝试更详细的地址', variant: 'destructive' })
     } else {
-      toast({ title: '未找到相关地点', variant: 'destructive' })
+      toast({ title: '搜索失败，请稍后重试', variant: 'destructive' })
     }
   })
 }
@@ -362,7 +394,7 @@ async function switchProvider(name: string) {
 
   try {
     if (name === 'amap') {
-      await initAmapMap(provider.key)
+      await initAmapMap(provider.key, provider.securityKey)
     } else if (name === 'tencent') {
       await initTencentMap(provider.key)
     } else if (name === 'google') {

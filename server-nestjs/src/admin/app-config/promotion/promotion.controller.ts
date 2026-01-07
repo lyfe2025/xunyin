@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } fro
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../../../auth/jwt-auth.guard'
 import { RequirePermission } from '../../../common/decorators/permission.decorator'
-import { CurrentUser, JwtUser } from '../../../common/decorators/user.decorator'
+import { CurrentUser, type JwtUser } from '../../../common/decorators/user.decorator'
 import { PromotionService } from './promotion.service'
 import {
   QueryChannelDto,

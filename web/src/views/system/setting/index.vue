@@ -129,6 +129,7 @@ const form = reactive({
   // 高德地图
   'map.amap.enabled': 'true',
   'map.amap.webKey': '',
+  'map.amap.webSecurityKey': '',
   'map.amap.androidKey': '',
   'map.amap.iosKey': '',
   // 腾讯地图
@@ -355,6 +356,7 @@ function getConfigName(key: string): string {
     // 地图配置
     'map.amap.enabled': '高德地图开关',
     'map.amap.webKey': '高德Web服务Key',
+    'map.amap.webSecurityKey': '高德Web安全密钥',
     'map.amap.androidKey': '高德Android Key',
     'map.amap.iosKey': '高德iOS Key',
     'map.tencent.enabled': '腾讯地图开关',
@@ -1266,13 +1268,23 @@ onMounted(() => {
                     创建应用
                   </p>
                   <p>2. Web 服务 Key 用于后端逆地理编码、路径规划等服务</p>
-                  <p>3. Android/iOS Key 需分别创建，配置包名和 SHA1/Bundle ID</p>
+                  <p>3. Web 安全密钥用于前端 JS API 调用（高德 2.0 必需）</p>
+                  <p>4. Android/iOS Key 需分别创建，配置包名和 SHA1/Bundle ID</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="grid gap-2">
                     <Label>Web 服务 Key</Label>
-                    <Input v-model="form['map.amap.webKey']" placeholder="用于后端服务调用" />
+                    <Input v-model="form['map.amap.webKey']" placeholder="用于前端地图和后端服务" />
                   </div>
+                  <div class="grid gap-2">
+                    <Label>Web 安全密钥</Label>
+                    <Input
+                      v-model="form['map.amap.webSecurityKey']"
+                      placeholder="高德控制台获取的安全密钥"
+                    />
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="grid gap-2">
                     <Label>Android Key</Label>
                     <Input v-model="form['map.amap.androidKey']" placeholder="Android 应用使用" />

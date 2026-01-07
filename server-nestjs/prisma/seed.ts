@@ -2588,6 +2588,12 @@ async function main() {
       configType: 'Y',
     },
     {
+      configName: '高德Web安全密钥',
+      configKey: 'map.amap.webSecurityKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
       configName: '高德Android Key',
       configKey: 'map.amap.androidKey',
       configValue: '',

@@ -7,7 +7,7 @@ import type { CurrentAppUser } from '../app-auth/decorators/current-user.decorat
 import { ChainSealVo, VerifyChainVo, ChainStatusVo } from './dto/chain-seal.dto'
 
 @ApiTags('区块链存证')
-@Controller('api/app/blockchain')
+@Controller('app/blockchain')
 export class BlockchainController {
   constructor(private readonly blockchainService: BlockchainService) {}
 

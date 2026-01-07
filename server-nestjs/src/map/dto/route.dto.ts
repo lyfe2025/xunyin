@@ -83,7 +83,9 @@ export class MapConfigVo {
 
   @ApiProperty({ description: '高德配置' })
   amap: {
-    key: string
+    webKey: string
+    androidKey: string
+    iosKey: string
     securityCode: string
   }
 

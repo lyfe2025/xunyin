@@ -2,7 +2,7 @@ import { Controller, Get, Put, Body, Param, UseGuards } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../../../auth/jwt-auth.guard'
 import { RequirePermission } from '../../../common/decorators/permission.decorator'
-import { CurrentUser, JwtUser } from '../../../common/decorators/user.decorator'
+import { CurrentUser, type JwtUser } from '../../../common/decorators/user.decorator'
 import { AgreementService } from './agreement.service'
 import { UpdateAgreementDto } from './dto/agreement.dto'
 

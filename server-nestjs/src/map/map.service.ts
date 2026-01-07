@@ -21,6 +21,22 @@ export class MapService {
    * 获取地图配置
    */
   async getConfig() {
+    // 从数据库获取高德地图配置
+    const configs = await this.prisma.sysConfig.findMany({
+      where: {
+        configKey: {
+          in: ['map.amap.webKey', 'map.amap.androidKey', 'map.amap.iosKey'],
+        },
+      },
+    })
+
+    const configMap: Record<string, string> = {}
+    configs.forEach((c) => {
+      if (c.configKey) {
+        configMap[c.configKey] = c.configValue ?? ''
+      }
+    })
+
     const cities = await this.prisma.city.findMany({
       where: { status: '0' },
       orderBy: { orderNum: 'asc' },
@@ -29,7 +45,9 @@ export class MapService {
     return {
       provider: 'amap',
       amap: {
-        key: this.configService.get<string>('AMAP_WEB_KEY') || '',
+        webKey: configMap['map.amap.webKey'] || '',
+        androidKey: configMap['map.amap.androidKey'] || '',
+        iosKey: configMap['map.amap.iosKey'] || '',
         securityCode: this.configService.get<string>('AMAP_SECURITY_CODE') || '',
       },
       maptiler: {

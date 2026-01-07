@@ -6,7 +6,7 @@ import { createReadStream, existsSync, statSync } from 'fs'
 import { join } from 'path'
 
 @ApiTags('文件下载')
-@Controller('api/app/download')
+@Controller('app/download')
 export class DownloadController {
   constructor(private prisma: PrismaService) {}
 

@@ -56,4 +56,7 @@ export class LoginResponseVo {
 
   @ApiProperty({ description: '过期时间（秒）' })
   expiresIn: number
+
+  @ApiProperty({ description: '用户信息', type: AppUserVo })
+  user: AppUserVo
 }

@@ -72,6 +72,7 @@ export interface MapProvider {
   name: string
   label: string
   key: string
+  securityKey?: string
 }
 
 /** 获取启用的地图服务列表 */

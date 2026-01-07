@@ -10,7 +10,7 @@ import {
   NearbyCityVo,
 } from './dto/city.dto'
 
-@ApiTags('城市')
+@ApiTags('App-城市')
 @Controller('app/cities')
 export class CityController {
   constructor(private readonly cityService: CityService) {}

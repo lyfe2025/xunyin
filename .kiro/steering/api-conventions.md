@@ -4,22 +4,53 @@ inclusion: always
 
 # API 设计规范
 
+## 全局路由前缀
+
+项目在 `main.ts` 中配置了全局前缀 `api`：
+```typescript
+app.setGlobalPrefix('api')
+```
+
+**重要**：Controller 中的路由路径**不要**包含 `api` 前缀，NestJS 会自动添加。
+
 ## 路由命名
 
 ### App 端 API（移动端）
-- 前缀：`/api/app/`
+- 最终 URL 前缀：`/api/app/`
+- Controller 路径：`app/xxx`（不含 `api`）
 - 示例：
   - `GET /api/app/cities` - 获取城市列表
   - `GET /api/app/cities/:id` - 获取城市详情
   - `POST /api/app/journeys/:id/start` - 开始文化之旅
 
 ### Admin 端 API（管理后台）
-- 前缀：`/api/admin/`
+- 最终 URL 前缀：`/api/admin/`
+- Controller 路径：`admin/xxx`（不含 `api`）
 - 示例：
   - `GET /api/admin/cities` - 城市列表（分页）
   - `POST /api/admin/cities` - 创建城市
   - `PUT /api/admin/cities/:id` - 更新城市
   - `DELETE /api/admin/cities/:id` - 删除城市
+
+### 系统管理 API
+- 最终 URL 前缀：`/api/system/`
+- Controller 路径：`system/xxx`（不含 `api`）
+
+### 监控 API
+- 最终 URL 前缀：`/api/monitor/`
+- Controller 路径：`monitor/xxx`（不含 `api`）
+
+## Controller 路由示例
+
+```typescript
+// ✅ 正确：不包含 api 前缀
+@Controller('app/cities')
+export class CityController {}
+
+// ❌ 错误：包含 api 前缀会导致路由变成 /api/api/app/cities
+@Controller('api/app/cities')
+export class CityController {}
+```
 
 ## RESTful 规范
 
@@ -108,7 +139,7 @@ GET /api/app/journeys?orderBy=createTime&order=desc
 ### 示例
 ```typescript
 @ApiTags('城市管理')
-@Controller('api/app/cities')
+@Controller('app/cities')  // 注意：不含 api 前缀
 export class CityController {
   @Get()
   @ApiOperation({ summary: '获取城市列表', description: '支持按省份筛选' })

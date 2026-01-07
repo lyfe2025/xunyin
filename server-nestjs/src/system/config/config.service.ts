@@ -125,6 +125,7 @@ export class ConfigService {
       name: string
       label: string
       key: string
+      securityKey?: string
     }>
   }> {
     const configs = await this.prisma.sysConfig.findMany({
@@ -133,6 +134,7 @@ export class ConfigService {
           in: [
             'map.amap.enabled',
             'map.amap.webKey',
+            'map.amap.webSecurityKey',
             'map.tencent.enabled',
             'map.tencent.key',
             'map.google.enabled',
@@ -149,7 +151,7 @@ export class ConfigService {
       }
     })
 
-    const providers: Array<{ name: string; label: string; key: string }> = []
+    const providers: Array<{ name: string; label: string; key: string; securityKey?: string }> = []
 
     // 高德地图
     if (configMap['map.amap.enabled'] === 'true' && configMap['map.amap.webKey']) {
@@ -157,6 +159,7 @@ export class ConfigService {
         name: 'amap',
         label: '高德地图',
         key: configMap['map.amap.webKey'],
+        securityKey: configMap['map.amap.webSecurityKey'] || undefined,
       })
     }
 

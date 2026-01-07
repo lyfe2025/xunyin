@@ -65,6 +65,10 @@ export class AppAuthService {
       id: user.id,
       phone: user.phone,
       nickname: user.nickname,
+      avatar: user.avatar,
+      badgeTitle: user.badgeTitle,
+      totalPoints: user.totalPoints,
+      createTime: user.createTime,
     })
   }
 
@@ -109,6 +113,10 @@ export class AppAuthService {
       id: user.id,
       phone: user.phone,
       nickname: user.nickname,
+      avatar: user.avatar,
+      badgeTitle: user.badgeTitle,
+      totalPoints: user.totalPoints,
+      createTime: user.createTime,
     })
   }
 
@@ -144,6 +152,10 @@ export class AppAuthService {
         id: user.id,
         phone: user.phone,
         nickname: user.nickname,
+        avatar: user.avatar,
+        badgeTitle: user.badgeTitle,
+        totalPoints: user.totalPoints,
+        createTime: user.createTime,
       })
     } catch (error) {
       if (error instanceof BusinessException) {
@@ -236,7 +248,15 @@ export class AppAuthService {
   /**
    * 生成访问令牌和刷新令牌
    */
-  private generateTokens(user: { id: string; phone: string | null; nickname: string }) {
+  private generateTokens(user: {
+    id: string
+    phone: string | null
+    nickname: string
+    avatar?: string | null
+    badgeTitle?: string | null
+    totalPoints?: number
+    createTime?: Date
+  }) {
     const accessPayload: AppJwtPayload = {
       sub: user.id,
       phone: user.phone || undefined,
@@ -263,6 +283,15 @@ export class AppAuthService {
       token,
       refreshToken,
       expiresIn: 7 * 24 * 60 * 60, // 7天（秒）
+      user: {
+        id: user.id,
+        phone: user.phone,
+        nickname: user.nickname,
+        avatar: user.avatar || null,
+        badgeTitle: user.badgeTitle || null,
+        totalPoints: user.totalPoints || 0,
+        createTime: user.createTime || new Date(),
+      },
     }
   }
 
