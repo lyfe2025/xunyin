@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/url_utils.dart';
 import '../../../models/journey.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../providers/service_providers.dart';
@@ -55,14 +56,27 @@ class _JourneyContent extends StatelessWidget {
           ),
           flexibleSpace: FlexibleSpaceBar(
             title: Text(journey.name, style: const TextStyle(fontSize: 16)),
-            background: Container(
-              color: AppColors.primary,
-              child: const Icon(
-                Icons.landscape,
-                size: 64,
-                color: Colors.white54,
-              ),
-            ),
+            background: journey.coverImage != null
+                ? Image.network(
+                    UrlUtils.getFullImageUrl(journey.coverImage),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: AppColors.primary,
+                      child: const Icon(
+                        Icons.landscape,
+                        size: 64,
+                        color: Colors.white54,
+                      ),
+                    ),
+                  )
+                : Container(
+                    color: AppColors.primary,
+                    child: const Icon(
+                      Icons.landscape,
+                      size: 64,
+                      color: Colors.white54,
+                    ),
+                  ),
           ),
         ),
         SliverToBoxAdapter(child: _buildInfoSection()),

@@ -1,3 +1,5 @@
+import '../core/utils/url_utils.dart';
+
 /// 照片
 class Photo {
   final String id;
@@ -32,9 +34,11 @@ class Photo {
       pointId: json['pointId'] as String?,
       pointName: json['pointName'] as String?,
       imageUrl: imageUrl.isNotEmpty
-          ? imageUrl
+          ? UrlUtils.getFullImageUrl(imageUrl)
           : 'https://placeholder.com/photo.jpg',
-      thumbnailUrl: thumbnailUrl?.isNotEmpty == true ? thumbnailUrl : null,
+      thumbnailUrl: thumbnailUrl?.isNotEmpty == true
+          ? UrlUtils.getFullImageUrl(thumbnailUrl)
+          : null,
       filter: json['filter'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
     );

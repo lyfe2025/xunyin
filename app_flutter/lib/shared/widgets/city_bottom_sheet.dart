@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/url_utils.dart';
 import '../../models/city.dart';
 import '../../models/journey.dart';
 import '../../providers/city_providers.dart';
@@ -187,7 +188,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                widget.city.coverImage!,
+                UrlUtils.getFullImageUrl(widget.city.coverImage),
                 height: 120,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -287,7 +288,7 @@ class _JourneyCard extends StatelessWidget {
                 color: AppColors.surfaceVariant,
                 child: journey.coverImage != null
                     ? Image.network(
-                        journey.coverImage!,
+                        UrlUtils.getFullImageUrl(journey.coverImage),
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) =>
                             const Icon(Icons.landscape, size: 32),
