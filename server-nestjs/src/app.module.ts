@@ -33,6 +33,7 @@ import { UserStatsModule } from './user-stats/user-stats.module'
 import { AudioModule } from './audio/audio.module'
 import { MapModule } from './map/map.module'
 import { AdminModule } from './admin/admin.module'
+import { HealthModule } from './health/health.module'
 
 @Module({
   imports: [
@@ -85,6 +86,8 @@ import { AdminModule } from './admin/admin.module'
     MapModule,
     // 寻印 Admin 模块
     AdminModule,
+    // 健康检查模块
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

@@ -30,6 +30,13 @@ export class AlbumController {
     return this.albumService.getStats(user.userId)
   }
 
+  @Get('by-journey')
+  @ApiOperation({ summary: '按文化之旅分组获取照片' })
+  @ApiResponse({ status: 200, description: '成功' })
+  async findByJourneyGrouped(@CurrentUser() user: CurrentAppUser) {
+    return this.albumService.findByJourneyGrouped(user.userId)
+  }
+
   @Get('journey/:journeyId')
   @ApiOperation({ summary: '获取文化之旅照片' })
   @ApiResponse({ status: 200, description: '成功', type: [PhotoVo] })

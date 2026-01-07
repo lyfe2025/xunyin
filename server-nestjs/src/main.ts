@@ -10,6 +10,7 @@ import { join } from 'path'
 import { json, urlencoded } from 'express'
 import redoc from 'redoc-express'
 import helmet from 'helmet'
+import compression from 'compression'
 
 // 全局 BigInt 序列化支持
 // 解决 "TypeError: Do not know how to serialize a BigInt" 错误
@@ -53,6 +54,9 @@ async function bootstrap() {
       crossOriginResourcePolicy: { policy: 'cross-origin' }, // 允许跨域访问静态资源
     }),
   )
+
+  // 启用响应压缩 - 减少传输体积，提升加载速度
+  app.use(compression())
 
   // 配置静态文件服务 (用于访问上传的文件)
   // 设置 CORS 头允许跨域访问
@@ -142,6 +146,7 @@ async function bootstrap() {
     .addTag('文件上传', '文件上传服务')
     .addTag('邮件服务', '邮件发送服务')
     .addTag('路由菜单', '前端路由获取')
+    .addTag('健康检查', '服务健康状态检查')
     // 寻印 App API
     .addTag('App认证', 'App用户认证')
     .addTag('城市', '城市信息')
@@ -165,14 +170,13 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true, // 持久化认证信息
-      docExpansion: 'list', // 默认展开所有接口列表（list=展开接口 full=展开全部 none=全部折叠）
+      docExpansion: 'list', // 默认展开所有接口列表
       defaultModelsExpandDepth: 2, // Schema 模型默认展开深度
       defaultModelExpandDepth: 2, // 单个模型默认展开深度
     },
   })
 
   // 配置 Redoc 文档（带左侧目录导航）
-  // 注意：必须在 app.listen 之前配置
   const expressApp = app.getHttpAdapter().getInstance()
   expressApp.use(
     '/redoc',
@@ -193,10 +197,14 @@ async function bootstrap() {
     }),
   )
 
+  // 启用优雅关闭
+  app.enableShutdownHooks()
+
   const port = process.env.PORT ?? 3000
   await app.listen(port, '0.0.0.0')
   logger.log(`Application is running on: http://0.0.0.0:${port}`, 'Bootstrap')
   logger.log(`Swagger API Docs: http://0.0.0.0:${port}/api-docs`, 'Bootstrap')
   logger.log(`Redoc API Docs: http://0.0.0.0:${port}/redoc`, 'Bootstrap')
+  logger.log(`Health Check: http://0.0.0.0:${port}/api/health`, 'Bootstrap')
 }
 void bootstrap()

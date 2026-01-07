@@ -244,6 +244,14 @@ export class RedisService implements OnModuleDestroy {
     return this.isRealRedis
   }
 
+  /** 健康检查 ping */
+  async ping(): Promise<string> {
+    if (this.isRealRedis && this.client instanceof Redis) {
+      return this.client.ping()
+    }
+    return 'PONG'
+  }
+
   onModuleDestroy() {
     if (this.isRealRedis && this.client instanceof Redis) {
       this.client.disconnect()

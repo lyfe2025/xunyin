@@ -73,6 +73,63 @@ export class AlbumService {
   }
 
   /**
+   * 按文化之旅分组获取照片
+   */
+  async findByJourneyGrouped(userId: string) {
+    // 获取用户所有照片
+    const photos = await this.prisma.explorationPhoto.findMany({
+      where: { userId },
+      include: {
+        journey: true,
+        point: true,
+      },
+      orderBy: { takenTime: 'desc' },
+    })
+
+    // 按 journeyId 分组
+    const groupedMap = new Map<
+      string,
+      {
+        journeyId: string
+        journeyName: string
+        photos: typeof photos
+      }
+    >()
+
+    for (const photo of photos) {
+      const key = photo.journeyId
+      if (!groupedMap.has(key)) {
+        groupedMap.set(key, {
+          journeyId: photo.journeyId,
+          journeyName: photo.journey.name,
+          photos: [],
+        })
+      }
+      groupedMap.get(key)!.photos.push(photo)
+    }
+
+    // 转换为数组格式
+    return Array.from(groupedMap.values()).map((group) => ({
+      journeyId: group.journeyId,
+      journeyName: group.journeyName,
+      photoCount: group.photos.length,
+      photos: group.photos.map((photo) => ({
+        id: photo.id,
+        journeyId: photo.journeyId,
+        journeyName: photo.journey.name,
+        pointId: photo.pointId,
+        pointName: photo.point.name,
+        imageUrl: photo.photoUrl,
+        thumbnailUrl: photo.thumbnailUrl,
+        filter: photo.filter,
+        latitude: photo.latitude ? Number(photo.latitude) : null,
+        longitude: photo.longitude ? Number(photo.longitude) : null,
+        createdAt: photo.createTime,
+      })),
+    }))
+  }
+
+  /**
    * 获取文化之旅照片
    */
   async findByJourney(userId: string, journeyId: string) {
