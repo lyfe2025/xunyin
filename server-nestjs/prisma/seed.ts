@@ -2397,6 +2397,75 @@ async function main() {
       configValue: '',
       configType: 'Y',
     },
+    // ========== 短信配置 ==========
+    {
+      configName: '短信服务开关',
+      configKey: 'sms.enabled',
+      configValue: 'false',
+      configType: 'Y',
+    },
+    {
+      configName: '短信服务提供商',
+      configKey: 'sms.provider',
+      configValue: 'aliyun',
+      configType: 'Y',
+    },
+    // 阿里云短信
+    {
+      configName: '阿里云AccessKey ID',
+      configKey: 'sms.aliyun.accessKeyId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '阿里云AccessKey Secret',
+      configKey: 'sms.aliyun.accessKeySecret',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '阿里云短信签名',
+      configKey: 'sms.aliyun.signName',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '阿里云验证码模板ID',
+      configKey: 'sms.aliyun.templateCode',
+      configValue: '',
+      configType: 'Y',
+    },
+    // 腾讯云短信
+    {
+      configName: '腾讯云SecretId',
+      configKey: 'sms.tencent.secretId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '腾讯云SecretKey',
+      configKey: 'sms.tencent.secretKey',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '腾讯云短信AppId',
+      configKey: 'sms.tencent.appId',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '腾讯云短信签名',
+      configKey: 'sms.tencent.signName',
+      configValue: '',
+      configType: 'Y',
+    },
+    {
+      configName: '腾讯云验证码模板ID',
+      configKey: 'sms.tencent.templateId',
+      configValue: '',
+      configType: 'Y',
+    },
     // 存储设置
     {
       configName: '存储类型',

@@ -267,6 +267,18 @@ VALUES
   ('邮箱账号', 'sys.mail.username', '', 'Y', NOW()),
   ('邮箱密码', 'sys.mail.password', '', 'Y', NOW()),
   ('发件人地址', 'sys.mail.from', '', 'Y', NOW()),
+  -- 短信设置
+  ('短信服务开关', 'sms.enabled', 'false', 'Y', NOW()),
+  ('短信服务提供商', 'sms.provider', 'aliyun', 'Y', NOW()),
+  ('阿里云AccessKey ID', 'sms.aliyun.accessKeyId', '', 'Y', NOW()),
+  ('阿里云AccessKey Secret', 'sms.aliyun.accessKeySecret', '', 'Y', NOW()),
+  ('阿里云短信签名', 'sms.aliyun.signName', '', 'Y', NOW()),
+  ('阿里云验证码模板ID', 'sms.aliyun.templateCode', '', 'Y', NOW()),
+  ('腾讯云SecretId', 'sms.tencent.secretId', '', 'Y', NOW()),
+  ('腾讯云SecretKey', 'sms.tencent.secretKey', '', 'Y', NOW()),
+  ('腾讯云短信AppId', 'sms.tencent.appId', '', 'Y', NOW()),
+  ('腾讯云短信签名', 'sms.tencent.signName', '', 'Y', NOW()),
+  ('腾讯云验证码模板ID', 'sms.tencent.templateId', '', 'Y', NOW()),
   -- 存储设置
   ('存储类型', 'sys.storage.type', 'local', 'Y', NOW()),
   ('本地存储路径', 'sys.storage.local.path', './uploads', 'Y', NOW()),

@@ -96,9 +96,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             _MenuTile(
               title: '绑定手机',
-              onTap: () => ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('功能开发中'))),
+              onTap: () => context.push('/settings/phone'),
             ),
           ]),
           _buildSection('其他', [

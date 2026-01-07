@@ -1,5 +1,64 @@
 # 代码质量规范
 
+## 代码格式规范（重要）
+
+**写代码时必须严格遵循以下格式规范，避免产生 lint 错误：**
+
+### TypeScript / JavaScript 格式
+
+```typescript
+// ✅ 正确格式示例
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../prisma/prisma.service'
+
+@Injectable()
+export class UserService {
+  constructor(private prisma: PrismaService) {}
+
+  async findAll() {
+    const users = await this.prisma.user.findMany({
+      where: { status: '0' },
+      orderBy: { createTime: 'desc' },
+    })
+    return users
+  }
+}
+```
+
+### 格式要点
+
+| 规则 | 说明 | 示例 |
+|------|------|------|
+| **不使用分号** | 语句末尾不加分号 | `const a = 1` ✅ `const a = 1;` ❌ |
+| **使用单引号** | 字符串使用单引号 | `'hello'` ✅ `"hello"` ❌ |
+| **尾随逗号** | 多行对象/数组最后一项加逗号 | `{ a: 1, b: 2, }` ✅ |
+| **2 空格缩进** | 使用空格而非 Tab | 缩进 2 个空格 |
+| **行宽 100** | 单行不超过 100 字符 | 超过则换行 |
+| **箭头函数括号** | 参数始终加括号 | `(x) => x + 1` ✅ `x => x + 1` ❌ |
+| **对象括号空格** | 花括号内侧加空格 | `{ a: 1 }` ✅ `{a: 1}` ❌ |
+
+### Vue 组件格式
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Button } from '@/components/ui/button'
+
+const count = ref(0)
+const handleClick = () => {
+  count.value++
+}
+</script>
+
+<template>
+  <div class="container">
+    <Button @click="handleClick">
+      Count: {{ count }}
+    </Button>
+  </div>
+</template>
+```
+
 ## Lint 检查要求
 
 每次修改代码后，必须执行 lint 检查确保代码质量：

@@ -18,7 +18,6 @@ import {
 import { useToast } from '@/components/ui/toast/use-toast'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import LeaveConfirmDialog from '@/components/common/LeaveConfirmDialog.vue'
-import RichTextEditor from '@/components/common/RichTextEditor.vue'
 import { listConfig, updateConfig, addConfig, type SysConfig } from '@/api/system/config'
 import { getDictDataByType, type DictData } from '@/api/system/dict'
 import { testMail } from '@/api/system/mail'
@@ -41,6 +40,7 @@ import {
   ChevronDown,
   Link2,
   KeyRound,
+  MessageSquare,
 } from 'lucide-vue-next'
 
 const { toast } = useToast()
@@ -101,6 +101,18 @@ const form = reactive({
   'sys.mail.password': '',
   'sys.mail.from': '',
   'sys.mail.ssl': 'true',
+  // 短信设置
+  'sms.enabled': 'false',
+  'sms.provider': 'aliyun',
+  'sms.aliyun.accessKeyId': '',
+  'sms.aliyun.accessKeySecret': '',
+  'sms.aliyun.signName': '',
+  'sms.aliyun.templateCode': '',
+  'sms.tencent.secretId': '',
+  'sms.tencent.secretKey': '',
+  'sms.tencent.appId': '',
+  'sms.tencent.signName': '',
+  'sms.tencent.templateId': '',
   // 存储设置
   'sys.storage.type': 'local',
   'sys.storage.local.path': './uploads',
@@ -187,6 +199,7 @@ async function getData() {
       'sys.login.',
       'sys.session.',
       'sys.mail.',
+      'sms.',
       'sys.storage.',
       'oauth.',
       'map.',
@@ -610,6 +623,7 @@ onMounted(() => {
         <TabsTrigger value="site"><Globe class="h-4 w-4 mr-2" />网站设置</TabsTrigger>
         <TabsTrigger value="security"><Shield class="h-4 w-4 mr-2" />安全设置</TabsTrigger>
         <TabsTrigger value="mail"><Mail class="h-4 w-4 mr-2" />邮件设置</TabsTrigger>
+        <TabsTrigger value="sms"><MessageSquare class="h-4 w-4 mr-2" />短信设置</TabsTrigger>
         <TabsTrigger value="storage"><HardDrive class="h-4 w-4 mr-2" />存储设置</TabsTrigger>
         <TabsTrigger value="map"><Globe class="h-4 w-4 mr-2" />地图配置</TabsTrigger>
         <TabsTrigger value="chain"><Link2 class="h-4 w-4 mr-2" />区块链存证</TabsTrigger>
@@ -995,6 +1009,131 @@ onMounted(() => {
               <p class="text-xs text-muted-foreground mt-2">
                 发送测试邮件到发件人地址，验证配置是否正确
               </p>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <!-- 短信设置 -->
+      <TabsContent value="sms" class="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>短信服务配置</CardTitle>
+            <CardDescription>配置短信验证码服务，用于 App 用户绑定手机号</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex items-center justify-between pb-4 border-b">
+              <div class="space-y-0.5">
+                <Label class="text-base">启用短信服务</Label>
+                <p class="text-sm text-muted-foreground">开启后可使用短信验证码功能</p>
+              </div>
+              <Switch
+                :checked="form['sms.enabled'] === 'true'"
+                @update:checked="(v: boolean) => (form['sms.enabled'] = v ? 'true' : 'false')"
+              />
+            </div>
+
+            <div class="grid gap-2">
+              <Label>短信服务提供商</Label>
+              <Select v-model="form['sms.provider']">
+                <SelectTrigger><SelectValue placeholder="选择服务商" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="aliyun">阿里云短信</SelectItem>
+                  <SelectItem value="tencent">腾讯云短信</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <!-- 阿里云短信配置 -->
+            <div v-if="form['sms.provider'] === 'aliyun'" class="space-y-4">
+              <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+                <p>
+                  1. 登录
+                  <a
+                    href="https://dysms.console.aliyun.com"
+                    target="_blank"
+                    class="text-primary hover:underline"
+                    >阿里云短信控制台</a
+                  >
+                  开通服务
+                </p>
+                <p>2. 创建签名和模板，等待审核通过</p>
+                <p>3. 在 RAM 控制台创建 AccessKey</p>
+                <p>4. 费用：约 0.045 元/条（国内）</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>AccessKey ID</Label>
+                  <Input v-model="form['sms.aliyun.accessKeyId']" placeholder="LTAI5t..." />
+                </div>
+                <div class="grid gap-2">
+                  <Label>AccessKey Secret</Label>
+                  <Input
+                    v-model="form['sms.aliyun.accessKeySecret']"
+                    type="password"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>短信签名</Label>
+                  <Input v-model="form['sms.aliyun.signName']" placeholder="寻印" />
+                  <p class="text-xs text-muted-foreground">短信内容前的签名，如【寻印】</p>
+                </div>
+                <div class="grid gap-2">
+                  <Label>验证码模板 ID</Label>
+                  <Input v-model="form['sms.aliyun.templateCode']" placeholder="SMS_123456789" />
+                  <p class="text-xs text-muted-foreground">验证码短信模板，需包含 ${code} 变量</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 腾讯云短信配置 -->
+            <div v-if="form['sms.provider'] === 'tencent'" class="space-y-4">
+              <div class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+                <p>
+                  1. 登录
+                  <a
+                    href="https://console.cloud.tencent.com/smsv2"
+                    target="_blank"
+                    class="text-primary hover:underline"
+                    >腾讯云短信控制台</a
+                  >
+                  开通服务
+                </p>
+                <p>2. 创建应用，获取 SDK AppID</p>
+                <p>3. 创建签名和模板，等待审核通过</p>
+                <p>4. 费用：约 0.05 元/条（国内）</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                  <Label>SecretId</Label>
+                  <Input v-model="form['sms.tencent.secretId']" placeholder="AKIDz8krbsJ5..." />
+                </div>
+                <div class="grid gap-2">
+                  <Label>SecretKey</Label>
+                  <Input
+                    v-model="form['sms.tencent.secretKey']"
+                    type="password"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid gap-2">
+                  <Label>SDK AppID</Label>
+                  <Input v-model="form['sms.tencent.appId']" placeholder="1400000000" />
+                </div>
+                <div class="grid gap-2">
+                  <Label>短信签名</Label>
+                  <Input v-model="form['sms.tencent.signName']" placeholder="寻印" />
+                </div>
+                <div class="grid gap-2">
+                  <Label>验证码模板 ID</Label>
+                  <Input v-model="form['sms.tencent.templateId']" placeholder="123456" />
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -88,4 +88,25 @@ export class AppProfileService {
       select: { id: true, avatar: true },
     })
   }
+
+  /**
+   * 根据手机号查找用户
+   */
+  async findByPhone(phone: string) {
+    return this.prisma.appUser.findFirst({
+      where: { phone },
+      select: { id: true, phone: true },
+    })
+  }
+
+  /**
+   * 更新手机号
+   */
+  async updatePhone(userId: string, phone: string) {
+    return this.prisma.appUser.update({
+      where: { id: userId },
+      data: { phone },
+      select: { id: true, phone: true },
+    })
+  }
 }
