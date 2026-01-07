@@ -148,3 +148,26 @@ export class CityController {
   async findAll(@Query() query: QueryCityDto) {}
 }
 ```
+
+## Flutter API 路径规范
+
+Flutter 的 `ApiClient` 配置了 `baseUrl` 为 `http://localhost:3000/api/app`（开发环境），已包含 `/api/app` 前缀。
+
+**重要**：在 Flutter 服务中调用 API 时，路径**不要**再包含 `/app` 前缀，否则会导致路径重复。
+
+```dart
+// ✅ 正确：不包含 /app 前缀
+final response = await _api.get('/agreements/$type');
+// 最终 URL: http://localhost:3000/api/app/agreements/user_agreement
+
+// ❌ 错误：包含 /app 前缀会导致路径重复
+final response = await _api.get('/app/agreements/$type');
+// 最终 URL: http://localhost:3000/api/app/app/agreements/user_agreement (404)
+```
+
+### Flutter API 路径示例
+| 资源 | Flutter 路径 | 最终 URL |
+|------|-------------|----------|
+| 城市列表 | `/cities` | `/api/app/cities` |
+| 协议内容 | `/agreements/:type` | `/api/app/agreements/:type` |
+| 文化之旅 | `/journeys/:id` | `/api/app/journeys/:id` |

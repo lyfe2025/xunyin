@@ -10,7 +10,7 @@ importers:
     devDependencies:
       shadcn-vue:
         specifier: ^2.4.1
-        version: 2.4.1(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)(vue@3.5.25(typescript@5.9.3))
+        version: 2.4.1(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)(vue@3.5.25(typescript@5.9.3))
 
   server-nestjs:
     dependencies:
@@ -261,6 +261,9 @@ importers:
       '@tiptap/extension-placeholder':
         specifier: ^3.13.0
         version: 3.13.0(@tiptap/extensions@3.13.0(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0))
+      '@tiptap/extension-table':
+        specifier: ^3.15.3
+        version: 3.15.3(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)
       '@tiptap/extension-text-align':
         specifier: ^3.13.0
         version: 3.13.0(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))
@@ -2169,6 +2172,12 @@ packages:
     resolution: {integrity: sha512-VHhWNqTAMOfrC48m2FcPIZB0nhl6XHQviAV16SBc+EFznKNv9tQUsqQrnuQ2y6ZVfqq5UxvZ3hKF/JlN/Ff7xw==}
     peerDependencies:
       '@tiptap/core': ^3.13.0
+
+  '@tiptap/extension-table@3.15.3':
+    resolution: {integrity: sha512-dJk0u2JX1J/3x/ps641qdxQPOiie5txQhs2M1srgDeeFu//ORCePAxryJCw1bgf0TEVwFWwFTCtcOFR5SSgMZQ==}
+    peerDependencies:
+      '@tiptap/core': ^3.15.3
+      '@tiptap/pm': ^3.15.3
 
   '@tiptap/extension-text-align@3.13.0':
     resolution: {integrity: sha512-hebIus9tdXWb+AmhO+LTeUxZLdb0tqwdeaL/0wYxJQR5DeCTlJe6huXacMD/BkmnlEpRhxzQH0FrmXAd0d4Wgg==}
@@ -8839,6 +8848,11 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.13.0(@tiptap/pm@3.13.0)
 
+  '@tiptap/extension-table@3.15.3(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)':
+    dependencies:
+      '@tiptap/core': 3.13.0(@tiptap/pm@3.13.0)
+      '@tiptap/pm': 3.13.0
+
   '@tiptap/extension-text-align@3.13.0(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))':
     dependencies:
       '@tiptap/core': 3.13.0(@tiptap/pm@3.13.0)
@@ -12999,49 +13013,6 @@ snapshots:
       - typescript
       - vue
 
-  shadcn-vue@2.4.1(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)(vue@3.5.25(typescript@5.9.3)):
-    dependencies:
-      '@dotenvx/dotenvx': 1.51.1
-      '@modelcontextprotocol/sdk': 1.24.3(zod@3.25.76)
-      '@unovue/detypes': 0.8.5
-      '@vue/compiler-sfc': 3.5.25
-      c12: 3.3.2
-      commander: 14.0.2
-      consola: 3.4.2
-      dedent: 1.7.0
-      deepmerge: 4.3.1
-      diff: 8.0.2
-      fs-extra: 11.3.2
-      fuzzysort: 3.1.0
-      get-tsconfig: 4.13.0
-      magic-string: 0.30.21
-      nypm: 0.6.2
-      ofetch: 1.5.1
-      ora: 9.0.0
-      pathe: 2.0.3
-      postcss: 8.5.6
-      prompts: 2.4.2
-      reka-ui: 2.6.1(typescript@5.9.3)(vue@3.5.25(typescript@5.9.3))
-      semver: 7.7.3
-      stringify-object: 6.0.0
-      tailwindcss: 4.1.17
-      tinyexec: 1.0.2
-      tinyglobby: 0.2.15
-      ts-morph: 27.0.2
-      undici: 7.16.0
-      vue-metamorph: 3.3.3(eslint@9.39.1(jiti@2.6.1))
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.0(zod@3.25.76)
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - '@vue/composition-api'
-      - babel-plugin-macros
-      - eslint
-      - magicast
-      - supports-color
-      - typescript
-      - vue
-
   shebang-command@2.0.0:
     dependencies:
       shebang-regex: 3.0.0
@@ -13664,18 +13635,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vue-eslint-parser@10.2.0(eslint@9.39.1(jiti@2.6.1)):
-    dependencies:
-      debug: 4.4.3
-      eslint: 9.39.1(jiti@2.6.1)
-      eslint-scope: 8.4.0
-      eslint-visitor-keys: 4.2.1
-      espree: 10.4.0
-      esquery: 1.6.0
-      semver: 7.7.3
-    transitivePeerDependencies:
-      - supports-color
-
   vue-metamorph@3.3.3(eslint@9.39.1(jiti@1.21.7)):
     dependencies:
       '@babel/parser': 8.0.0-alpha.12
@@ -13698,32 +13657,6 @@ snapshots:
       recast-x: 1.0.5
       table: 6.9.0
       vue-eslint-parser: 10.2.0(eslint@9.39.1(jiti@1.21.7))
-    transitivePeerDependencies:
-      - eslint
-      - supports-color
-
-  vue-metamorph@3.3.3(eslint@9.39.1(jiti@2.6.1)):
-    dependencies:
-      '@babel/parser': 8.0.0-alpha.12
-      ast-types-x: 1.18.0
-      chalk: 5.6.2
-      cli-progress: 3.12.0
-      commander: 13.1.0
-      deep-diff: 1.0.2
-      fs-extra: 11.3.2
-      glob: 11.1.0
-      lodash-es: 4.17.21
-      magic-string: 0.30.21
-      micromatch: 4.0.8
-      node-html-parser: 7.0.1
-      postcss: 8.5.6
-      postcss-less: 6.0.0(postcss@8.5.6)
-      postcss-sass: 0.5.0
-      postcss-scss: 4.0.9(postcss@8.5.6)
-      postcss-styl: 0.12.3
-      recast-x: 1.0.5
-      table: 6.9.0
-      vue-eslint-parser: 10.2.0(eslint@9.39.1(jiti@2.6.1))
     transitivePeerDependencies:
       - eslint
       - supports-color

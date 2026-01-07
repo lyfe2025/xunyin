@@ -2255,7 +2255,7 @@ FROM sys_menu WHERE path = 'app-config' AND parent_id IS NULL
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-SELECT '协议管理', 'agreement', 'app-config/agreement/index', 3, 'C', '0', '0', 'file-text', 1, menu_id, 'app:agreement:list'
+SELECT '内容管理', 'agreement', 'app-config/agreement/index', 3, 'C', '0', '0', 'file-text', 1, menu_id, 'app:agreement:list'
 FROM sys_menu WHERE path = 'app-config' AND parent_id IS NULL
 ON CONFLICT DO NOTHING;
 
@@ -2359,14 +2359,14 @@ SELECT '版本删除', '', '', 4, 'F', '1', '0', '#', 1, menu_id, 'app:version:r
 FROM sys_menu WHERE path = 'version' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'app-config' AND parent_id IS NULL)
 ON CONFLICT DO NOTHING;
 
--- 19.8 协议管理按钮
+-- 19.8 内容管理按钮
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-SELECT '协议查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'app:agreement:query'
+SELECT '内容查询', '', '', 1, 'F', '1', '0', '#', 1, menu_id, 'app:agreement:query'
 FROM sys_menu WHERE path = 'agreement' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'app-config' AND parent_id IS NULL)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sys_menu (menu_name, path, component, order_num, menu_type, visible, status, icon, is_frame, parent_id, perms)
-SELECT '协议修改', '', '', 2, 'F', '1', '0', '#', 1, menu_id, 'app:agreement:edit'
+SELECT '内容修改', '', '', 2, 'F', '1', '0', '#', 1, menu_id, 'app:agreement:edit'
 FROM sys_menu WHERE path = 'agreement' AND parent_id = (SELECT menu_id FROM sys_menu WHERE path = 'app-config' AND parent_id IS NULL)
 ON CONFLICT DO NOTHING;
 
@@ -2695,6 +2695,69 @@ VALUES (
   <li>公司地址：[公司地址]</li>
 </ul>
 <p>我们将在 15 个工作日内回复您的请求。</p>',
+  '1.0',
+  '0',
+  'system',
+  NOW(),
+  NOW()
+) ON CONFLICT (type) DO NOTHING;
+
+-- 20.3 关于我们
+INSERT INTO app_agreement (id, type, title, content, version, status, create_by, create_time, update_time)
+VALUES (
+  'agreement_about_001',
+  'about_us',
+  '关于我们',
+  '<h1>关于寻印</h1>
+
+<p style="font-size: 16px; color: #666; margin-bottom: 24px;">探索城市文化，收集专属印记</p>
+
+<h2>产品介绍</h2>
+<p>寻印是一款创新的城市文化探索应用，致力于让每一次出行都成为一段难忘的文化之旅。我们将城市中的历史遗迹、文化地标、特色街区串联成独特的探索路线，让您在行走中感受城市的文化底蕴。</p>
+
+<h2>核心功能</h2>
+
+<h3>🗺️ 文化之旅</h3>
+<p>精心策划的城市文化探索路线，涵盖历史古迹、艺术场馆、特色街区等多种主题。每条路线都配有详细的导览讲解，让您深入了解每个地点背后的故事。</p>
+
+<h3>📍 探索打卡</h3>
+<p>到达探索点后，通过 AR 互动、手势识别、拍照等多种有趣的方式完成打卡任务。每一次打卡都是一次与城市文化的深度互动。</p>
+
+<h3>🏆 数字印记</h3>
+<p>完成探索后获得精美的数字印记，记录您的探索足迹。印记支持区块链存证，永久保存您的探索成就，成为独一无二的数字收藏。</p>
+
+<h3>📸 探索相册</h3>
+<p>自动保存探索过程中的精彩瞬间，形成专属的探索相册。记录每一次旅程的美好回忆。</p>
+
+<h2>我们的愿景</h2>
+<p>让更多人发现城市之美，感受文化之韵。我们相信，每座城市都有独特的文化魅力等待被发现，每个人都可以成为城市文化的探索者和传承者。</p>
+
+<h2>联系我们</h2>
+<table border="0" cellpadding="8" cellspacing="0" style="width: 100%;">
+  <tr>
+    <td style="width: 100px; color: #666;">客服邮箱</td>
+    <td>support@xunyin.app</td>
+  </tr>
+  <tr>
+    <td style="color: #666;">商务合作</td>
+    <td>business@xunyin.app</td>
+  </tr>
+  <tr>
+    <td style="color: #666;">客服电话</td>
+    <td>400-XXX-XXXX</td>
+  </tr>
+  <tr>
+    <td style="color: #666;">工作时间</td>
+    <td>周一至周五 9:00-18:00</td>
+  </tr>
+</table>
+
+<h2>关注我们</h2>
+<p>关注寻印官方公众号，获取最新活动资讯和探索攻略。</p>
+
+<p style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; color: #999; font-size: 12px;">
+© 2026 寻印 All Rights Reserved
+</p>',
   '1.0',
   '0',
   'system',

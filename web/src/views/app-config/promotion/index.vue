@@ -30,6 +30,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/toast/use-toast'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import {
   Plus,
   Search,
@@ -67,6 +68,11 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('新增渠道')
 const submitLoading = ref(false)
 const activeTab = ref('channels')
+
+// 删除确认对话框
+const showDeleteDialog = ref(false)
+const deleteTarget = ref<PromotionChannel | null>(null)
+const showBatchDeleteDialog = ref(false)
 
 // 统计数据
 const summary = ref<StatsSummary>({
@@ -212,23 +218,33 @@ async function handleSubmit() {
 }
 
 // 删除
-async function handleDelete(row: PromotionChannel) {
-  if (!confirm('确定要删除该渠道吗？关联的统计数据也会被删除。')) return
-  await deleteChannel(row.id)
+function handleDelete(row: PromotionChannel) {
+  deleteTarget.value = row
+  showDeleteDialog.value = true
+}
+
+async function confirmDelete() {
+  if (!deleteTarget.value) return
+  await deleteChannel(deleteTarget.value.id)
   toast({ title: '删除成功' })
+  showDeleteDialog.value = false
   getList()
 }
 
 // 批量删除
-async function handleBatchDelete() {
+function handleBatchDelete() {
   if (selectedIds.value.length === 0) {
     toast({ title: '请选择要删除的数据', variant: 'destructive' })
     return
   }
-  if (!confirm(`确定要删除选中的 ${selectedIds.value.length} 条数据吗？`)) return
+  showBatchDeleteDialog.value = true
+}
+
+async function confirmBatchDelete() {
   await batchDeleteChannels(selectedIds.value)
   toast({ title: '删除成功' })
   selectedIds.value = []
+  showBatchDeleteDialog.value = false
   getList()
 }
 
@@ -571,5 +587,23 @@ onMounted(() => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ConfirmDialog
+      v-model:open="showDeleteDialog"
+      title="确认删除"
+      :description="`确定要删除渠道「${deleteTarget?.channelName}」吗？关联的统计数据也会被删除。`"
+      confirm-text="删除"
+      destructive
+      @confirm="confirmDelete"
+    />
+
+    <ConfirmDialog
+      v-model:open="showBatchDeleteDialog"
+      title="确认批量删除"
+      :description="`确定要删除选中的 ${selectedIds.length} 个渠道吗？关联的统计数据也会被删除。`"
+      confirm-text="删除"
+      destructive
+      @confirm="confirmBatchDelete"
+    />
   </div>
 </template>

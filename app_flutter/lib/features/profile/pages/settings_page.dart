@@ -42,9 +42,18 @@ class SettingsPage extends ConsumerWidget {
             _MenuTile(title: '绑定手机', onTap: () {}),
           ]),
           _buildSection('其他', [
-            _MenuTile(title: '关于我们', onTap: () {}),
-            _MenuTile(title: '用户协议', onTap: () {}),
-            _MenuTile(title: '隐私政策', onTap: () {}),
+            _MenuTile(
+              title: '关于我们',
+              onTap: () => context.push('/agreement/about_us'),
+            ),
+            _MenuTile(
+              title: '用户协议',
+              onTap: () => context.push('/agreement/user_agreement'),
+            ),
+            _MenuTile(
+              title: '隐私政策',
+              onTap: () => context.push('/agreement/privacy_policy'),
+            ),
             _MenuTile(
               title: '清除缓存',
               onTap: () => ScaffoldMessenger.of(

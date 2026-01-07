@@ -54,22 +54,29 @@ export class AgreementService {
   }
 
   private getDefaultAgreement(type: string) {
-    if (type === 'user_agreement') {
-      return {
-        type: 'user_agreement',
+    const defaults: Record<string, { title: string; content: string }> = {
+      user_agreement: {
         title: '用户协议',
         content: '<p>请在此处编辑用户协议内容...</p>',
-        version: '1.0',
-      }
-    }
-    if (type === 'privacy_policy') {
-      return {
-        type: 'privacy_policy',
+      },
+      privacy_policy: {
         title: '隐私政策',
         content: '<p>请在此处编辑隐私政策内容...</p>',
-        version: '1.0',
-      }
+      },
+      about_us: {
+        title: '关于我们',
+        content: '<p>请在此处编辑关于我们内容...</p>',
+      },
     }
-    throw new BusinessException(ErrorCode.INVALID_PARAMS, '无效的协议类型')
+
+    if (!defaults[type]) {
+      throw new BusinessException(ErrorCode.INVALID_PARAMS, '无效的协议类型')
+    }
+
+    return {
+      type,
+      ...defaults[type],
+      version: '1.0',
+    }
   }
 }

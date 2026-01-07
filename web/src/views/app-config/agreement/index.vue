@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/components/ui/toast/use-toast'
 import RichTextEditor from '@/components/common/RichTextEditor.vue'
-import { Save, RefreshCw, FileText, Shield } from 'lucide-vue-next'
-import { getAgreement, updateAgreement, type Agreement } from '@/api/app-config/agreement'
+import { Save, RefreshCw, FileText, Shield, Info } from 'lucide-vue-next'
+import { getAgreement, updateAgreement } from '@/api/app-config/agreement'
 
 const { toast } = useToast()
 
@@ -30,13 +30,21 @@ const privacyPolicy = reactive({
   version: '',
 })
 
+// 关于我们
+const aboutUs = reactive({
+  title: '',
+  content: '',
+  version: '',
+})
+
 // 获取协议内容
 async function getData() {
   loading.value = true
   try {
-    const [userRes, privacyRes] = await Promise.all([
+    const [userRes, privacyRes, aboutRes] = await Promise.all([
       getAgreement('user_agreement'),
       getAgreement('privacy_policy'),
+      getAgreement('about_us'),
     ])
 
     Object.assign(userAgreement, {
@@ -49,6 +57,12 @@ async function getData() {
       title: privacyRes.data.title || '隐私政策',
       content: privacyRes.data.content || '',
       version: privacyRes.data.version || '1.0',
+    })
+
+    Object.assign(aboutUs, {
+      title: aboutRes.data.title || '关于我们',
+      content: aboutRes.data.content || '',
+      version: aboutRes.data.version || '1.0',
     })
   } finally {
     loading.value = false
@@ -77,6 +91,17 @@ async function handleSavePrivacyPolicy() {
   }
 }
 
+// 保存关于我们
+async function handleSaveAboutUs() {
+  submitLoading.value = true
+  try {
+    await updateAgreement('about_us', aboutUs)
+    toast({ title: '关于我们保存成功' })
+  } finally {
+    submitLoading.value = false
+  }
+}
+
 // 重置
 function handleReset() {
   getData()
@@ -93,8 +118,8 @@ onMounted(() => {
     <!-- 页面标题 -->
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-xl sm:text-2xl font-bold tracking-tight">协议管理</h2>
-        <p class="text-muted-foreground">编辑用户协议和隐私政策内容</p>
+        <h2 class="text-xl sm:text-2xl font-bold tracking-tight">内容管理</h2>
+        <p class="text-muted-foreground">管理 APP 展示的用户协议、隐私政策和关于我们等页面内容</p>
       </div>
       <Button variant="outline" @click="handleReset" :disabled="loading">
         <RefreshCw class="h-4 w-4 mr-2" />重置
@@ -107,6 +132,7 @@ onMounted(() => {
           <FileText class="h-4 w-4 mr-2" />用户协议
         </TabsTrigger>
         <TabsTrigger value="privacy_policy"> <Shield class="h-4 w-4 mr-2" />隐私政策 </TabsTrigger>
+        <TabsTrigger value="about_us"> <Info class="h-4 w-4 mr-2" />关于我们 </TabsTrigger>
       </TabsList>
 
       <!-- 用户协议 -->
@@ -173,6 +199,41 @@ onMounted(() => {
             <div class="flex justify-end">
               <Button @click="handleSavePrivacyPolicy" :disabled="submitLoading">
                 <Save class="h-4 w-4 mr-2" />{{ submitLoading ? '保存中...' : '保存隐私政策' }}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <!-- 关于我们 -->
+      <TabsContent value="about_us">
+        <Card>
+          <CardHeader>
+            <CardTitle>关于我们</CardTitle>
+            <CardDescription>编辑 APP 关于我们页面内容，支持富文本格式</CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid gap-2">
+                <Label>页面标题</Label>
+                <Input v-model="aboutUs.title" placeholder="关于我们" />
+              </div>
+              <div class="grid gap-2">
+                <Label>版本号</Label>
+                <Input v-model="aboutUs.version" placeholder="1.0" />
+              </div>
+            </div>
+            <div class="grid gap-2">
+              <Label>页面内容</Label>
+              <RichTextEditor
+                v-model="aboutUs.content"
+                placeholder="请输入关于我们内容..."
+                min-height="500px"
+              />
+            </div>
+            <div class="flex justify-end">
+              <Button @click="handleSaveAboutUs" :disabled="submitLoading">
+                <Save class="h-4 w-4 mr-2" />{{ submitLoading ? '保存中...' : '保存关于我们' }}
               </Button>
             </div>
           </CardContent>

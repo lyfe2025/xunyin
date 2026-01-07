@@ -34,6 +34,7 @@ import { AudioModule } from './audio/audio.module'
 import { MapModule } from './map/map.module'
 import { AdminModule } from './admin/admin.module'
 import { HealthModule } from './health/health.module'
+import { AppConfigModule } from './app-config/app-config.module'
 
 @Module({
   imports: [
@@ -86,6 +87,8 @@ import { HealthModule } from './health/health.module'
     MapModule,
     // 寻印 Admin 模块
     AdminModule,
+    // App 端配置模块（公开 API）
+    AppConfigModule,
     // 健康检查模块
     HealthModule,
   ],

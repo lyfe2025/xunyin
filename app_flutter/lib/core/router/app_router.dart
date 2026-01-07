@@ -14,6 +14,7 @@ import '../../features/album/pages/album_page.dart';
 import '../../features/album/pages/photo_detail_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../../features/profile/pages/settings_page.dart';
+import '../../features/profile/pages/agreement_page.dart';
 
 /// 路由配置
 class AppRouter {
@@ -82,6 +83,17 @@ class AppRouter {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/agreement/:type',
+        builder: (context, state) {
+          final typeStr = state.pathParameters['type']!;
+          final type = AgreementType.values.firstWhere(
+            (e) => e.value == typeStr,
+            orElse: () => AgreementType.userAgreement,
+          );
+          return AgreementPage(type: type);
+        },
       ),
     ],
   );

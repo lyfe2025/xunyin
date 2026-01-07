@@ -10,6 +10,7 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Placeholder from '@tiptap/extension-placeholder'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { Separator } from '@/components/ui/separator'
@@ -40,6 +41,11 @@ import {
   Heading3,
   Minus,
   RemoveFormatting,
+  Table as TableIcon,
+  Plus,
+  Trash2,
+  TableCellsMerge,
+  TableCellsSplit,
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -59,6 +65,11 @@ const showLinkPopover = ref(false)
 // 图片弹窗
 const imageUrl = ref('')
 const showImagePopover = ref(false)
+
+// 表格弹窗
+const showTablePopover = ref(false)
+const tableRows = ref(3)
+const tableCols = ref(3)
 
 // 颜色选项
 const textColors = [
@@ -107,6 +118,13 @@ const editor = useEditor({
     Placeholder.configure({
       placeholder: props.placeholder || '请输入内容...',
     }),
+    Table.configure({
+      resizable: true,
+      HTMLAttributes: { class: 'border-collapse' },
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
   ],
   editorProps: {
     attributes: {
@@ -166,6 +184,18 @@ function setColor(color: string) {
 // 设置高亮颜色
 function setHighlight(color: string) {
   editor.value?.chain().focus().toggleHighlight({ color }).run()
+}
+
+// 插入表格
+function insertTable() {
+  editor.value
+    ?.chain()
+    .focus()
+    .insertTable({ rows: tableRows.value, cols: tableCols.value, withHeaderRow: true })
+    .run()
+  showTablePopover.value = false
+  tableRows.value = 3
+  tableCols.value = 3
 }
 </script>
 
@@ -399,6 +429,96 @@ function setHighlight(color: string) {
           </div>
         </PopoverContent>
       </Popover>
+
+      <Separator orientation="vertical" class="mx-1 h-6" />
+
+      <!-- 表格 -->
+      <Popover v-model:open="showTablePopover">
+        <PopoverTrigger as-child>
+          <Button variant="ghost" size="sm" class="h-8 w-8 p-0">
+            <TableIcon class="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent class="w-64" @pointerDownOutside.stop>
+          <div class="grid gap-4">
+            <div class="text-sm font-medium">插入表格</div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="space-y-1">
+                <Label class="text-xs">行数</Label>
+                <Input v-model.number="tableRows" type="number" min="1" max="20" />
+              </div>
+              <div class="space-y-1">
+                <Label class="text-xs">列数</Label>
+                <Input v-model.number="tableCols" type="number" min="1" max="10" />
+              </div>
+            </div>
+            <div class="flex justify-end gap-2">
+              <Button size="sm" variant="outline" @click="showTablePopover = false">取消</Button>
+              <Button size="sm" @click="insertTable">插入</Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      <!-- 表格操作（仅在表格内显示） -->
+      <template v-if="editor.isActive('table')">
+        <Toggle
+          size="sm"
+          :pressed="false"
+          title="添加列"
+          @click="editor.chain().focus().addColumnAfter().run()"
+        >
+          <Plus class="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          :pressed="false"
+          title="添加行"
+          @click="editor.chain().focus().addRowAfter().run()"
+        >
+          <Plus class="h-4 w-4 rotate-90" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          :pressed="false"
+          title="删除列"
+          @click="editor.chain().focus().deleteColumn().run()"
+        >
+          <Trash2 class="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          :pressed="false"
+          title="删除行"
+          @click="editor.chain().focus().deleteRow().run()"
+        >
+          <Trash2 class="h-4 w-4 rotate-90" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          :pressed="false"
+          title="合并单元格"
+          @click="editor.chain().focus().mergeCells().run()"
+        >
+          <TableCellsMerge class="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          :pressed="false"
+          title="拆分单元格"
+          @click="editor.chain().focus().splitCell().run()"
+        >
+          <TableCellsSplit class="h-4 w-4" />
+        </Toggle>
+        <Toggle
+          size="sm"
+          :pressed="false"
+          title="删除表格"
+          @click="editor.chain().focus().deleteTable().run()"
+        >
+          <Trash2 class="h-4 w-4 text-destructive" />
+        </Toggle>
+      </template>
 
       <Separator orientation="vertical" class="mx-1 h-6" />
 

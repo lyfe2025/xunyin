@@ -32,6 +32,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/components/ui/toast/use-toast'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import {
   Plus,
   Search,
@@ -96,6 +97,11 @@ const form = reactive<CreateVersionParams>({
 })
 
 const editingId = ref<string | null>(null)
+
+// 删除确认对话框
+const showDeleteDialog = ref(false)
+const deleteTarget = ref<AppVersion | null>(null)
+const showBatchDeleteDialog = ref(false)
 
 // 获取列表
 async function getList() {
@@ -204,23 +210,33 @@ async function handleSubmit() {
 }
 
 // 删除
-async function handleDelete(row: AppVersion) {
-  if (!confirm('确定要删除该版本吗？')) return
-  await deleteVersion(row.id)
+function handleDelete(row: AppVersion) {
+  deleteTarget.value = row
+  showDeleteDialog.value = true
+}
+
+async function confirmDelete() {
+  if (!deleteTarget.value) return
+  await deleteVersion(deleteTarget.value.id)
   toast({ title: '删除成功' })
+  showDeleteDialog.value = false
   getList()
 }
 
 // 批量删除
-async function handleBatchDelete() {
+function handleBatchDelete() {
   if (selectedIds.value.length === 0) {
     toast({ title: '请选择要删除的数据', variant: 'destructive' })
     return
   }
-  if (!confirm(`确定要删除选中的 ${selectedIds.value.length} 条数据吗？`)) return
+  showBatchDeleteDialog.value = true
+}
+
+async function confirmBatchDelete() {
   await batchDeleteVersions(selectedIds.value)
   toast({ title: '删除成功' })
   selectedIds.value = []
+  showBatchDeleteDialog.value = false
   getList()
 }
 
@@ -551,5 +567,23 @@ onMounted(() => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ConfirmDialog
+      v-model:open="showDeleteDialog"
+      title="确认删除"
+      :description="`确定要删除版本「${deleteTarget?.versionName}」吗？`"
+      confirm-text="删除"
+      destructive
+      @confirm="confirmDelete"
+    />
+
+    <ConfirmDialog
+      v-model:open="showBatchDeleteDialog"
+      title="确认批量删除"
+      :description="`确定要删除选中的 ${selectedIds.length} 个版本吗？`"
+      confirm-text="删除"
+      destructive
+      @confirm="confirmBatchDelete"
+    />
   </div>
 </template>

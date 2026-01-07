@@ -21,9 +21,9 @@ export class UpdateAgreementDto {
 }
 
 export class QueryAgreementDto {
-  @ApiPropertyOptional({ description: '类型 user_agreement/privacy_policy' })
+  @ApiPropertyOptional({ description: '类型 user_agreement/privacy_policy/about_us' })
   @IsOptional()
   @IsString()
-  @IsIn(['user_agreement', 'privacy_policy'])
+  @IsIn(['user_agreement', 'privacy_policy', 'about_us'])
   type?: string
 }

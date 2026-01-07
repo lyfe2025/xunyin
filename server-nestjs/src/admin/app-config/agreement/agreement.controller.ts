@@ -6,7 +6,7 @@ import { CurrentUser, type JwtUser } from '../../../common/decorators/user.decor
 import { AgreementService } from './agreement.service'
 import { UpdateAgreementDto } from './dto/agreement.dto'
 
-@ApiTags('管理端-协议管理')
+@ApiTags('管理端-内容管理')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('admin/app-config/agreements')
