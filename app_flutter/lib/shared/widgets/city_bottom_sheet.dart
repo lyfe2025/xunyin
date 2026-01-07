@@ -167,7 +167,18 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
           icon: const Icon(Icons.search),
           color: AppColors.textSecondary,
           onPressed: () {
-            // TODO: 搜索景点
+            final journeysAsync = ref.read(
+              cityJourneysProvider(widget.city.id),
+            );
+            journeysAsync.whenData((journeys) {
+              showDialog(
+                context: context,
+                builder: (context) => _JourneySearchDialog(
+                  cityName: widget.city.name,
+                  journeys: journeys,
+                ),
+              );
+            });
           },
         ),
       ],
@@ -376,6 +387,153 @@ class _JourneyCard extends StatelessWidget {
                   ],
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 文化之旅搜索对话框
+class _JourneySearchDialog extends StatefulWidget {
+  final String cityName;
+  final List<JourneyBrief> journeys;
+
+  const _JourneySearchDialog({required this.cityName, required this.journeys});
+
+  @override
+  State<_JourneySearchDialog> createState() => _JourneySearchDialogState();
+}
+
+class _JourneySearchDialogState extends State<_JourneySearchDialog> {
+  final _searchController = TextEditingController();
+  List<JourneyBrief> _filteredJourneys = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredJourneys = widget.journeys;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredJourneys = widget.journeys;
+      } else {
+        _filteredJourneys = widget.journeys
+            .where(
+              (j) =>
+                  j.name.toLowerCase().contains(query.toLowerCase()) ||
+                  j.theme.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        width: double.maxFinite,
+        constraints: const BoxConstraints(maxHeight: 400),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 标题
+            Text(
+              '搜索 ${widget.cityName} 的文化之旅',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            // 搜索框
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: '输入名称或主题',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearchChanged('');
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              onChanged: _onSearchChanged,
+            ),
+            const SizedBox(height: 12),
+            // 结果列表
+            Flexible(
+              child: _filteredJourneys.isEmpty
+                  ? const Center(
+                      child: Text(
+                        '没有找到匹配的文化之旅',
+                        style: TextStyle(color: AppColors.textHint),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _filteredJourneys.length,
+                      itemBuilder: (context, index) {
+                        final journey = _filteredJourneys[index];
+                        return ListTile(
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              color: AppColors.surfaceVariant,
+                              child: journey.coverImage != null
+                                  ? Image.network(
+                                      UrlUtils.getFullImageUrl(
+                                        journey.coverImage,
+                                      ),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          const Icon(Icons.landscape, size: 20),
+                                    )
+                                  : const Icon(Icons.landscape, size: 20),
+                            ),
+                          ),
+                          title: Text(
+                            journey.name,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          subtitle: Text(
+                            journey.theme,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          dense: true,
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            if (!journey.isLocked) {
+                              context.push('/journey/${journey.id}');
+                            }
+                          },
+                        );
+                      },
+                    ),
             ),
           ],
         ),

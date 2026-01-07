@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/city.dart';
 import '../../../providers/city_providers.dart';
+import '../../../providers/audio_providers.dart';
 import '../../../shared/widgets/china_map.dart';
 import '../../../shared/widgets/floating_controls.dart';
 import '../../../shared/widgets/city_bottom_sheet.dart';
@@ -19,13 +20,28 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   City? _selectedCity;
 
+  @override
+  void initState() {
+    super.initState();
+    // 初始化首页背景音乐
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(audioStateProvider.notifier).switchContext(AudioContext.home);
+    });
+  }
+
   void _onCityTap(City city) {
     setState(() {
       // 如果点击的是同一个城市，关闭面板；否则切换到新城市
       if (_selectedCity?.id == city.id) {
         _selectedCity = null;
+        // 切回首页音乐
+        ref.read(audioStateProvider.notifier).switchContext(AudioContext.home);
       } else {
         _selectedCity = city;
+        // 切换到城市音乐
+        ref
+            .read(audioStateProvider.notifier)
+            .switchContext(AudioContext.city, contextId: city.id);
       }
     });
     ref.read(selectedCityIdProvider.notifier).state = _selectedCity?.id;
@@ -37,6 +53,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         _selectedCity = null;
       });
       ref.read(selectedCityIdProvider.notifier).state = null;
+      // 切回首页音乐
+      ref.read(audioStateProvider.notifier).switchContext(AudioContext.home);
     }
   }
 

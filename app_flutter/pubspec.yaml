@@ -63,6 +63,10 @@ dependencies:
   amap_flutter_base: ^3.0.0
   amap_flutter_location: ^3.0.0
   image_picker: ^1.2.1
+  
+  # 音频播放
+  just_audio: ^0.9.40
+  audio_session: ^0.1.21
 
 dev_dependencies:
   flutter_test:

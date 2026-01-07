@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
+import '../services/audio_service.dart';
+import 'service_providers.dart';
 
 /// 音频上下文类型
-enum AudioContext { home, city, journey, ar }
+enum AudioContext { home, city, journey, explorationPoint, ar }
 
 /// 音频播放状态
 class AudioState {
@@ -42,62 +45,135 @@ class AudioState {
 
 /// 音频状态 Notifier
 class AudioNotifier extends StateNotifier<AudioState> {
-  AudioNotifier() : super(AudioState());
+  final AudioPlayer _player = AudioPlayer();
+  final AudioApiService _audioApi;
+  bool _wasPlayingBeforeAR = false;
 
-  void play() {
-    state = state.copyWith(isPlaying: true);
+  AudioNotifier(this._audioApi) : super(AudioState()) {
+    _player.setLoopMode(LoopMode.one);
+    _player.setVolume(0.5);
+
+    // 监听播放状态
+    _player.playerStateStream.listen((playerState) {
+      final isPlaying = playerState.playing;
+      if (state.isPlaying != isPlaying) {
+        state = state.copyWith(isPlaying: isPlaying);
+      }
+    });
   }
 
-  void pause() {
-    state = state.copyWith(isPlaying: false);
+  Future<void> play() async {
+    if (state.currentTrackUrl != null) {
+      await _player.play();
+    }
   }
 
-  void togglePlay() {
-    state = state.copyWith(isPlaying: !state.isPlaying);
+  Future<void> pause() async {
+    await _player.pause();
   }
 
-  void toggleMute() {
-    state = state.copyWith(isMuted: !state.isMuted);
-  }
-
-  void setTrack(String url, {String? title}) {
-    state = state.copyWith(
-      currentTrackUrl: url,
-      currentTrackTitle: title,
-      isPlaying: true,
-    );
-  }
-
-  void switchContext(
-    AudioContext context, {
-    String? contextId,
-    String? trackUrl,
-    String? title,
-  }) {
-    state = AudioState(
-      isPlaying: trackUrl != null,
-      isMuted: state.isMuted,
-      currentTrackUrl: trackUrl,
-      currentTrackTitle: title,
-      context: context,
-      contextId: contextId,
-    );
-  }
-
-  void pauseForAR() {
+  Future<void> togglePlay() async {
     if (state.isPlaying) {
-      state = state.copyWith(isPlaying: false);
+      await pause();
+    } else if (state.currentTrackUrl != null) {
+      await play();
     }
   }
 
-  void resumeFromAR() {
-    if (state.currentTrackUrl != null && !state.isMuted) {
-      state = state.copyWith(isPlaying: true);
+  Future<void> toggleMute() async {
+    final newMuted = !state.isMuted;
+    await _player.setVolume(newMuted ? 0 : 0.5);
+    state = state.copyWith(isMuted: newMuted);
+  }
+
+  Future<void> setTrack(String url, {String? title}) async {
+    try {
+      await _player.setUrl(url);
+      state = state.copyWith(currentTrackUrl: url, currentTrackTitle: title);
+      await _player.play();
+    } catch (e) {
+      // 播放失败，静默处理
     }
   }
 
-  void stop() {
+  Future<void> switchContext(AudioContext context, {String? contextId}) async {
+    // 如果上下文相同且 ID 相同，不重复加载
+    if (state.context == context && state.contextId == contextId) {
+      return;
+    }
+
+    AudioInfo? audioInfo;
+
+    try {
+      switch (context) {
+        case AudioContext.home:
+          audioInfo = await _audioApi.getHomeBgm();
+          break;
+        case AudioContext.city:
+          if (contextId != null) {
+            audioInfo = await _audioApi.getCityBgm(contextId);
+          }
+          break;
+        case AudioContext.journey:
+          if (contextId != null) {
+            audioInfo = await _audioApi.getJourneyBgm(contextId);
+          }
+          break;
+        case AudioContext.explorationPoint:
+          if (contextId != null) {
+            audioInfo = await _audioApi.getExplorationPointBgm(contextId);
+          }
+          break;
+        case AudioContext.ar:
+          // AR 模式暂停音乐
+          break;
+      }
+    } catch (e) {
+      // API 调用失败，静默处理
+    }
+
+    if (audioInfo != null) {
+      await _player.setUrl(audioInfo.url);
+      state = AudioState(
+        isPlaying: true,
+        isMuted: state.isMuted,
+        currentTrackUrl: audioInfo.url,
+        currentTrackTitle: audioInfo.title,
+        context: context,
+        contextId: contextId,
+      );
+      if (!state.isMuted) {
+        await _player.play();
+      }
+    } else {
+      state = state.copyWith(context: context, contextId: contextId);
+    }
+  }
+
+  Future<void> pauseForAR() async {
+    _wasPlayingBeforeAR = state.isPlaying;
+    if (state.isPlaying) {
+      await _player.pause();
+    }
+  }
+
+  Future<void> resumeFromAR() async {
+    if (_wasPlayingBeforeAR &&
+        state.currentTrackUrl != null &&
+        !state.isMuted) {
+      await _player.play();
+    }
+  }
+
+  Future<void> stop() async {
+    await _player.stop();
     state = AudioState(isMuted: state.isMuted);
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
   }
 }
 
@@ -105,5 +181,6 @@ class AudioNotifier extends StateNotifier<AudioState> {
 final audioStateProvider = StateNotifierProvider<AudioNotifier, AudioState>((
   ref,
 ) {
-  return AudioNotifier();
+  final audioApi = ref.watch(audioApiServiceProvider);
+  return AudioNotifier(audioApi);
 });

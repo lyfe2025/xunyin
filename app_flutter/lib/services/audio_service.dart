@@ -50,4 +50,14 @@ class AudioApiService {
       return null;
     }
   }
+
+  /// 获取探索点背景音乐
+  Future<AudioInfo?> getExplorationPointBgm(String pointId) async {
+    try {
+      final response = await _api.get('/audio/exploration-point/$pointId');
+      return AudioInfo.fromJson(response['data']);
+    } catch (e) {
+      return null;
+    }
+  }
 }
