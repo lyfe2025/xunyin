@@ -3,14 +3,49 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/storage/token_storage.dart';
+import '../../../core/storage/settings_storage.dart';
 import '../../../providers/audio_providers.dart';
 
 /// 设置页面
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  bool _notificationEnabled = true;
+  bool _autoLocationEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final notification = await SettingsStorage.getNotificationEnabled();
+    final location = await SettingsStorage.getAutoLocationEnabled();
+    if (mounted) {
+      setState(() {
+        _notificationEnabled = notification;
+        _autoLocationEnabled = location;
+      });
+    }
+  }
+
+  Future<void> _clearCache() async {
+    await SettingsStorage.clearCache();
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('缓存已清除')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final audioState = ref.watch(audioStateProvider);
 
     return Scaffold(
@@ -33,13 +68,38 @@ class SettingsPage extends ConsumerWidget {
               onChanged: (v) =>
                   ref.read(audioStateProvider.notifier).togglePlay(),
             ),
-            _SwitchTile(title: '消息通知', value: true, onChanged: (v) {}),
-            _SwitchTile(title: '自动定位', value: true, onChanged: (v) {}),
+            _SwitchTile(
+              title: '消息通知',
+              value: _notificationEnabled,
+              onChanged: (v) async {
+                setState(() => _notificationEnabled = v);
+                await SettingsStorage.setNotificationEnabled(v);
+              },
+            ),
+            _SwitchTile(
+              title: '自动定位',
+              value: _autoLocationEnabled,
+              onChanged: (v) async {
+                setState(() => _autoLocationEnabled = v);
+                await SettingsStorage.setAutoLocationEnabled(v);
+              },
+            ),
           ]),
           _buildSection('账号', [
-            _MenuTile(title: '修改昵称', onTap: () {}),
-            _MenuTile(title: '修改头像', onTap: () {}),
-            _MenuTile(title: '绑定手机', onTap: () {}),
+            _MenuTile(
+              title: '修改昵称',
+              onTap: () => context.push('/settings/nickname'),
+            ),
+            _MenuTile(
+              title: '修改头像',
+              onTap: () => context.push('/settings/avatar'),
+            ),
+            _MenuTile(
+              title: '绑定手机',
+              onTap: () => ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('功能开发中'))),
+            ),
           ]),
           _buildSection('其他', [
             _MenuTile(
@@ -54,12 +114,7 @@ class SettingsPage extends ConsumerWidget {
               title: '隐私政策',
               onTap: () => context.push('/agreement/privacy_policy'),
             ),
-            _MenuTile(
-              title: '清除缓存',
-              onTap: () => ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('缓存已清除'))),
-            ),
+            _MenuTile(title: '清除缓存', onTap: _clearCache),
           ]),
           const SizedBox(height: 32),
           Padding(

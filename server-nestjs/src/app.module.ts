@@ -35,6 +35,7 @@ import { MapModule } from './map/map.module'
 import { AdminModule } from './admin/admin.module'
 import { HealthModule } from './health/health.module'
 import { AppConfigModule } from './app-config/app-config.module'
+import { AppProfileModule } from './app-profile/app-profile.module'
 
 @Module({
   imports: [
@@ -89,6 +90,8 @@ import { AppConfigModule } from './app-config/app-config.module'
     AdminModule,
     // App 端配置模块（公开 API）
     AppConfigModule,
+    // App 端用户资料模块
+    AppProfileModule,
     // 健康检查模块
     HealthModule,
   ],

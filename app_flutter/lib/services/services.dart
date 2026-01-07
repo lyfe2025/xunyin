@@ -8,3 +8,6 @@ export 'photo_service.dart';
 export 'audio_service.dart';
 export 'map_service.dart';
 export 'map_config_service.dart';
+export 'profile_service.dart';
+export 'agreement_service.dart';
+export 'upload_service.dart';

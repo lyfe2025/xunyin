@@ -15,6 +15,8 @@ import '../../features/album/pages/photo_detail_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../../features/profile/pages/settings_page.dart';
 import '../../features/profile/pages/agreement_page.dart';
+import '../../features/profile/pages/edit_nickname_page.dart';
+import '../../features/profile/pages/edit_avatar_page.dart';
 
 /// 路由配置
 class AppRouter {
@@ -83,6 +85,14 @@ class AppRouter {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/settings/nickname',
+        builder: (context, state) => const EditNicknamePage(),
+      ),
+      GoRoute(
+        path: '/settings/avatar',
+        builder: (context, state) => const EditAvatarPage(),
       ),
       GoRoute(
         path: '/agreement/:type',

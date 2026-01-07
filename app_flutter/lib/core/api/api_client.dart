@@ -105,6 +105,21 @@ class ApiClient {
     _checkResponse(respData);
     return respData;
   }
+
+  Future<Map<String, dynamic>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    final response = await _dio.patch<Map<String, dynamic>>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+    );
+    final respData = response.data!;
+    _checkResponse(respData);
+    return respData;
+  }
 }
 
 /// 认证拦截器

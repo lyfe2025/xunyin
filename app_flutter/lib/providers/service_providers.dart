@@ -51,3 +51,8 @@ final mapApiServiceProvider = Provider<MapApiService>((ref) {
 final mapConfigServiceProvider = Provider<MapConfigService>((ref) {
   return MapConfigService(ref.watch(apiClientProvider));
 });
+
+/// 用户资料服务 Provider
+final profileServiceProvider = Provider<ProfileService>((ref) {
+  return ProfileService(ref.watch(apiClientProvider));
+});
