@@ -42,22 +42,22 @@ import { AppProfileModule } from './app-profile/app-profile.module'
     ConfigModule.forRoot({
       isGlobal: true, // 全局可用
     }),
-    // 全局限流配置：每分钟最多 100 次请求
+    // 全局限流配置
     ThrottlerModule.forRoot([
       {
         name: 'short',
         ttl: 1000, // 1 秒
-        limit: 10, // 每秒最多 10 次
+        limit: 30, // 每秒最多 30 次（管理后台页面加载时可能有多个并发请求）
       },
       {
         name: 'medium',
         ttl: 10000, // 10 秒
-        limit: 50, // 每 10 秒最多 50 次
+        limit: 100, // 每 10 秒最多 100 次
       },
       {
         name: 'long',
         ttl: 60000, // 1 分钟
-        limit: 100, // 每分钟最多 100 次
+        limit: 300, // 每分钟最多 300 次
       },
     ]),
     LoggerModule,
