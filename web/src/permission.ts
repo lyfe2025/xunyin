@@ -9,12 +9,20 @@ NProgress.configure({ showSpinner: false })
 
 // 无需登录即可访问的页面（错误页面、公开页面）
 const publicPages = ['/404', '/403', '/download']
+// 公开页面前缀（支持动态路由）
+const publicPrefixes = ['/seal/']
+
+// 检查是否为公开页面
+function isPublicPage(path: string): boolean {
+  if (publicPages.includes(path)) return true
+  return publicPrefixes.some((prefix) => path.startsWith(prefix))
+}
 
 router.beforeEach(async (to, _from, next) => {
   NProgress.start()
 
-  // 错误页面直接放行
-  if (publicPages.includes(to.path)) {
+  // 公开页面直接放行
+  if (isPublicPage(to.path)) {
     next()
     return
   }

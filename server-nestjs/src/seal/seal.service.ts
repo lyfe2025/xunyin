@@ -69,6 +69,7 @@ export class SealService {
 
     return {
       id: seal.id,
+      userSealId: userSeal?.id,
       type: seal.type,
       name: seal.name,
       imageAsset: seal.imageAsset,

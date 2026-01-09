@@ -3,19 +3,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/journey_providers.dart';
+import '../../../shared/widgets/simple_share_sheet.dart';
+import '../../../services/share_service.dart';
 
 /// 任务完成页
 class TaskCompletePage extends ConsumerWidget {
   final String pointId;
   final String? photoPath;
-  const TaskCompletePage({super.key, required this.pointId, this.photoPath});
+  final int? pointsEarned;
+  final int? totalPoints;
+  final bool journeyCompleted;
+  final String? sealId;
+
+  const TaskCompletePage({
+    super.key,
+    required this.pointId,
+    this.photoPath,
+    this.pointsEarned,
+    this.totalPoints,
+    this.journeyCompleted = false,
+    this.sealId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(currentJourneyProvider);
     final point = state.currentPoint;
-    final hasNext = state.hasNextPoint;
+    final hasNext = state.hasNextPoint && !journeyCompleted;
     final journeyId = state.detail?.id;
+
+    // 使用后端返回的积分，如果没有则使用探索点配置的积分
+    final earnedPoints = pointsEarned ?? point?.pointsReward ?? 50;
 
     return Scaffold(
       body: SafeArea(
@@ -30,9 +48,12 @@ class TaskCompletePage extends ConsumerWidget {
                 '恭喜！',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              const Text(
-                '任务完成！',
-                style: TextStyle(fontSize: 20, color: AppColors.textSecondary),
+              Text(
+                journeyCompleted ? '文化之旅完成！' : '任务完成！',
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 32),
               _buildPhotoCard(),
@@ -45,7 +66,11 @@ class TaskCompletePage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildRewardCard(point?.pointsReward ?? 50),
+              _buildRewardCard(earnedPoints),
+              if (sealId != null) ...[
+                const SizedBox(height: 16),
+                _buildSealCard(),
+              ],
               const SizedBox(height: 24),
               if (point?.culturalKnowledge != null)
                 _buildKnowledgeCard(point!.culturalKnowledge!),
@@ -97,6 +122,31 @@ class TaskCompletePage extends ConsumerWidget {
     );
   }
 
+  Widget _buildSealCard() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.accent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.verified, color: AppColors.accent),
+          SizedBox(width: 8),
+          Text(
+            '🎖️ 获得新印记！',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.accent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildKnowledgeCard(String knowledge) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -141,9 +191,11 @@ class TaskCompletePage extends ConsumerWidget {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () => ScaffoldMessenger.of(
+            onPressed: () => SimpleShareSheet.show(
               context,
-            ).showSnackBar(const SnackBar(content: Text('分享功能开发中'))),
+              title: '分享探索成果',
+              shareLink: ShareService.generateSealShareLink(pointId),
+            ),
             child: const Text('分享'),
           ),
         ),
@@ -152,9 +204,11 @@ class TaskCompletePage extends ConsumerWidget {
           child: ElevatedButton(
             onPressed: () {
               if (hasNext) {
+                // 更新本地状态，进入下一个探索点
                 ref.read(currentJourneyProvider.notifier).nextPoint();
                 context.go('/journey/$journeyId/progress');
               } else {
+                // 整个文化之旅完成
                 context.go('/journey/$journeyId/complete');
               }
             },

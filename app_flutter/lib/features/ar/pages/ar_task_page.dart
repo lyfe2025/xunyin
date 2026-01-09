@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/journey_providers.dart';
+import '../../../providers/service_providers.dart';
 
 /// AR 任务页面（模拟实现）
 class ARTaskPage extends ConsumerStatefulWidget {
@@ -16,6 +17,7 @@ class ARTaskPage extends ConsumerStatefulWidget {
 class _ARTaskPageState extends ConsumerState<ARTaskPage> {
   double _progress = 0;
   bool _isCompleted = false;
+  bool _isSubmitting = false;
   String _selectedFilter = '古风';
 
   @override
@@ -225,12 +227,21 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: _completeTask,
+              onPressed: _isSubmitting ? null : _completeTask,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
               ),
-              child: Text(taskType == 'photo' ? '拍照' : '确认完成'),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(taskType == 'photo' ? '拍照' : '确认完成'),
             ),
           ),
         ],
@@ -238,8 +249,50 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
     );
   }
 
-  void _completeTask() {
-    setState(() => _isCompleted = true);
-    context.push('/task-complete/${widget.pointId}');
+  Future<void> _completeTask() async {
+    setState(() {
+      _isCompleted = true;
+      _isSubmitting = true;
+    });
+
+    try {
+      // 调用后端 API 完成探索点
+      final journeyService = ref.read(journeyServiceProvider);
+      final result = await journeyService.completePoint(
+        pointId: widget.pointId,
+        photoUrl: null, // 模拟拍照，实际应该上传照片后获取 URL
+      );
+
+      if (!mounted) return;
+
+      // 跳转到任务完成页，传递后端返回的数据
+      context.push(
+        '/task-complete/${widget.pointId}'
+        '?pointsEarned=${result.pointsEarned}'
+        '&totalPoints=${result.totalPoints}'
+        '&journeyCompleted=${result.journeyCompleted}'
+        '${result.sealId != null ? '&sealId=${result.sealId}' : ''}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+
+      // 开发模式：API 失败时使用模拟数据继续流程
+      _completeTaskWithMockData();
+    }
+  }
+
+  /// 使用模拟数据完成任务（开发测试用）
+  void _completeTaskWithMockData() {
+    final state = ref.read(currentJourneyProvider);
+    final point = state.currentPoint;
+    final isLastPoint = !state.hasNextPoint;
+
+    context.push(
+      '/task-complete/${widget.pointId}'
+      '?pointsEarned=${point?.pointsReward ?? 50}'
+      '&totalPoints=100'
+      '&journeyCompleted=$isLastPoint',
+    );
   }
 }

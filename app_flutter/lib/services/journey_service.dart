@@ -1,6 +1,30 @@
 import '../core/api/api_client.dart';
 import '../models/journey.dart';
 
+/// 完成探索点响应
+class CompletePointResponse {
+  final int pointsEarned;
+  final int totalPoints;
+  final bool journeyCompleted;
+  final String? sealId;
+
+  CompletePointResponse({
+    required this.pointsEarned,
+    required this.totalPoints,
+    required this.journeyCompleted,
+    this.sealId,
+  });
+
+  factory CompletePointResponse.fromJson(Map<String, dynamic> json) {
+    return CompletePointResponse(
+      pointsEarned: json['pointsEarned'] as int,
+      totalPoints: json['totalPoints'] as int,
+      journeyCompleted: json['journeyCompleted'] as bool,
+      sealId: json['sealId'] as String?,
+    );
+  }
+}
+
 class JourneyService {
   final ApiClient _api;
 
@@ -38,20 +62,22 @@ class JourneyService {
         .toList();
   }
 
-  /// 完成探索点
-  Future<void> completePoint({
-    required String journeyId,
+  /// 完成探索点（调用正确的后端 API 路径）
+  Future<CompletePointResponse> completePoint({
     required String pointId,
     String? photoUrl,
   }) async {
-    await _api.post(
-      '/journeys/$journeyId/points/$pointId/complete',
+    final response = await _api.post(
+      '/points/$pointId/complete',
       data: {if (photoUrl != null) 'photoUrl': photoUrl},
+    );
+    return CompletePointResponse.fromJson(
+      response['data'] as Map<String, dynamic>,
     );
   }
 
   /// 放弃文化之旅
   Future<void> abandonJourney(String journeyId) async {
-    await _api.post('/journeys/$journeyId/abandon');
+    await _api.put('/journeys/$journeyId/abandon');
   }
 }

@@ -54,10 +54,21 @@ class AppRouter {
       ),
       GoRoute(
         path: '/task-complete/:pointId',
-        builder: (context, state) => TaskCompletePage(
-          pointId: state.pathParameters['pointId']!,
-          photoPath: state.uri.queryParameters['photo'],
-        ),
+        builder: (context, state) {
+          final queryParams = state.uri.queryParameters;
+          return TaskCompletePage(
+            pointId: state.pathParameters['pointId']!,
+            photoPath: queryParams['photo'],
+            pointsEarned: queryParams['pointsEarned'] != null
+                ? int.tryParse(queryParams['pointsEarned']!)
+                : null,
+            totalPoints: queryParams['totalPoints'] != null
+                ? int.tryParse(queryParams['totalPoints']!)
+                : null,
+            journeyCompleted: queryParams['journeyCompleted'] == 'true',
+            sealId: queryParams['sealId'],
+          );
+        },
       ),
       GoRoute(
         path: '/journey/:id/complete',

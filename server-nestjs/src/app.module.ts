@@ -36,6 +36,7 @@ import { AdminModule } from './admin/admin.module'
 import { HealthModule } from './health/health.module'
 import { AppConfigModule } from './app-config/app-config.module'
 import { AppProfileModule } from './app-profile/app-profile.module'
+import { PublicModule } from './public/public.module'
 
 @Module({
   imports: [
@@ -94,6 +95,8 @@ import { AppProfileModule } from './app-profile/app-profile.module'
     AppProfileModule,
     // 健康检查模块
     HealthModule,
+    // 公开接口模块（无需登录）
+    PublicModule,
   ],
   controllers: [AppController],
   providers: [

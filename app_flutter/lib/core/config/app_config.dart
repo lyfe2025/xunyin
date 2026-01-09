@@ -19,6 +19,17 @@ class AppConfig {
     }
   }
 
+  // 分享链接域名
+  static String get shareBaseUrl {
+    switch (env) {
+      case 'prod':
+        return 'https://xunyin.app';
+      case 'dev':
+      default:
+        return 'http://localhost:5173'; // 开发环境使用前端地址
+    }
+  }
+
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 15);
 

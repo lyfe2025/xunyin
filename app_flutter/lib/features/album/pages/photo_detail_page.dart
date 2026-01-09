@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/simple_share_sheet.dart';
+import '../../../services/share_service.dart';
 
 /// 照片详情页
 class PhotoDetailPage extends StatelessWidget {
@@ -19,7 +21,14 @@ class PhotoDetailPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () => SimpleShareSheet.show(
+              context,
+              title: '分享照片',
+              shareLink: ShareService.generateSealShareLink(photoId),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _showDeleteDialog(context),

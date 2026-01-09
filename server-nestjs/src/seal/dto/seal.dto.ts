@@ -56,6 +56,9 @@ export class SealDetailVo {
   @ApiProperty({ description: '印记ID' })
   id: string
 
+  @ApiPropertyOptional({ description: '用户印记ID（用于分享）' })
+  userSealId?: string
+
   @ApiProperty({ description: '印记类型', enum: ['route', 'city', 'special'] })
   type: string
 

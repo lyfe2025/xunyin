@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { getDownloadConfig } from '@/api/app-config/download'
+import { getPublicDownloadConfig } from '@/api/public/config'
 
 const loading = ref(true)
-const config = ref<any>({})
+const config = ref<Record<string, unknown>>({})
+
 
 // 背景样式
 const backgroundStyle = computed(() => {
@@ -80,7 +81,7 @@ function handleAndroidDownload() {
 
 onMounted(async () => {
   try {
-    const res = await getDownloadConfig()
+    const res = await getPublicDownloadConfig()
     config.value = res.data || {}
   } catch (error) {
     console.error('获取下载页配置失败', error)

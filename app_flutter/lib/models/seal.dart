@@ -83,6 +83,7 @@ class UserSeal {
 /// 印记详情
 class SealDetail {
   final String id;
+  final String? userSealId;
   final SealType type;
   final String name;
   final String imageAsset;
@@ -103,6 +104,7 @@ class SealDetail {
 
   SealDetail({
     required this.id,
+    this.userSealId,
     required this.type,
     required this.name,
     required this.imageAsset,
@@ -126,6 +128,7 @@ class SealDetail {
     final imageAsset = json['imageAsset'] as String? ?? '';
     return SealDetail(
       id: json['id'] as String,
+      userSealId: json['userSealId'] as String?,
       type: SealType.fromString(json['type'] as String),
       name: json['name'] as String,
       imageAsset: imageAsset.isNotEmpty

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/journey_providers.dart';
+import '../../../shared/widgets/simple_share_sheet.dart';
+import '../../../services/share_service.dart';
 
 /// 文化之旅完成页
 class JourneyCompletePage extends ConsumerWidget {
@@ -148,9 +150,12 @@ class JourneyCompletePage extends ConsumerWidget {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () => ScaffoldMessenger.of(
+            onPressed: () => SimpleShareSheet.show(
               context,
-            ).showSnackBar(const SnackBar(content: Text('分享功能开发中'))),
+              title: '分享印记',
+              subtitle: '完成文化之旅',
+              shareLink: ShareService.generateSealShareLink(journeyId),
+            ),
             child: const Text('分享印记'),
           ),
         ),

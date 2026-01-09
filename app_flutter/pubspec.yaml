@@ -55,6 +55,10 @@ dependencies:
   # 权限管理
   permission_handler: ^11.3.0
   
+  # 截图分享
+  screenshot: ^3.0.0
+  image_gallery_saver_plus: ^4.0.1
+  
   # 地理位置
   geolocator: ^11.0.0
   

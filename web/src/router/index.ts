@@ -210,6 +210,12 @@ const router = createRouter({
       meta: { title: '下载 APP' },
     },
     {
+      path: '/seal/:id',
+      name: 'PublicSeal',
+      component: () => import('@/views/public/seal/index.vue'),
+      meta: { title: '印记分享' },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'CatchAll',
       component: () => import('@/views/error/404.vue'),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/seal_providers.dart';
 import '../../../providers/service_providers.dart';
+import '../../../shared/widgets/share_bottom_sheet.dart';
 
 /// 印记详情页
 class SealDetailPage extends ConsumerWidget {
@@ -81,7 +82,7 @@ class SealDetailPage extends ConsumerWidget {
             else
               _buildChainButton(context, ref),
             const SizedBox(height: 24),
-            _buildShareButton(context),
+            _buildShareButton(context, seal),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -242,13 +243,11 @@ class SealDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildShareButton(BuildContext context) {
+  Widget _buildShareButton(BuildContext context, seal) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () => ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('分享功能开发中'))),
+        onPressed: () => ShareBottomSheet.show(context, seal: seal),
         icon: const Icon(Icons.share),
         label: const Text('分享印记'),
       ),
