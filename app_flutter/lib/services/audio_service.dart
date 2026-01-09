@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import '../core/api/api_client.dart';
 
 class AudioInfo {
@@ -27,6 +28,7 @@ class AudioApiService {
       final response = await _api.get('/audio/city/$cityId');
       return AudioInfo.fromJson(response['data']);
     } catch (e) {
+      developer.log('获取城市背景音乐失败: $e', name: 'AudioService');
       return null;
     }
   }
@@ -37,6 +39,7 @@ class AudioApiService {
       final response = await _api.get('/audio/journey/$journeyId');
       return AudioInfo.fromJson(response['data']);
     } catch (e) {
+      developer.log('获取文化之旅背景音乐失败: $e', name: 'AudioService');
       return null;
     }
   }
@@ -47,6 +50,7 @@ class AudioApiService {
       final response = await _api.get('/audio/home');
       return AudioInfo.fromJson(response['data']);
     } catch (e) {
+      developer.log('获取首页背景音乐失败: $e', name: 'AudioService');
       return null;
     }
   }
@@ -57,6 +61,7 @@ class AudioApiService {
       final response = await _api.get('/audio/exploration-point/$pointId');
       return AudioInfo.fromJson(response['data']);
     } catch (e) {
+      developer.log('获取探索点背景音乐失败: $e', name: 'AudioService');
       return null;
     }
   }

@@ -5,6 +5,7 @@ import '../../features/auth/pages/login_page.dart';
 import '../../features/journey/pages/journey_detail_page.dart';
 import '../../features/journey/pages/journey_progress_page.dart';
 import '../../features/journey/pages/navigation_page.dart';
+import '../../features/journey/pages/my_journeys_page.dart';
 import '../../features/ar/pages/ar_task_page.dart';
 import '../../features/ar/pages/task_complete_page.dart';
 import '../../features/journey/pages/journey_complete_page.dart';
@@ -78,6 +79,10 @@ class AppRouter {
       GoRoute(
         path: '/seals',
         builder: (context, state) => const SealListPage(),
+      ),
+      GoRoute(
+        path: '/journeys',
+        builder: (context, state) => const MyJourneysPage(),
       ),
       GoRoute(
         path: '/seal/:id',

@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/seal.dart';
 import '../../../providers/seal_providers.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_page_header.dart';
+import '../../../shared/widgets/section_title.dart';
+import '../../../shared/widgets/app_loading.dart';
 
 /// 印记集页面 - Aurora UI + Glassmorphism 风格
 class SealListPage extends ConsumerWidget {
@@ -18,7 +22,7 @@ class SealListPage extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          _buildBackground(),
+          const AuroraBackground(variant: AuroraVariant.golden),
           SafeArea(
             child: Column(
               children: [
@@ -30,13 +34,17 @@ class SealListPage extends ConsumerWidget {
                       const SizedBox(height: 8),
                       progressAsync.when(
                         data: (progress) => _ProgressCard(progress: progress),
-                        loading: () => _buildProgressLoading(),
+                        loading: () => const AppLoadingCard(height: 160),
                         error: (e, _) => _buildErrorCard('加载失败'),
                       ),
                       const SizedBox(height: 24),
                       for (final type in SealType.values) ...[
                         if (selectedType == null || selectedType == type) ...[
-                          _buildSectionTitle(type.label, type),
+                          SectionTitle(
+                            title: type.label,
+                            icon: _getTypeIcon(type),
+                            color: _getTypeColor(type),
+                          ),
                           const SizedBox(height: 14),
                           sealsAsync.when(
                             data: (seals) => _SealGrid(
@@ -44,7 +52,7 @@ class SealListPage extends ConsumerWidget {
                                   .where((s) => s.type == type)
                                   .toList(),
                             ),
-                            loading: () => _buildGridLoading(),
+                            loading: () => const AppLoadingCard(height: 120),
                             error: (e, _) => _buildErrorCard('加载失败'),
                           ),
                           const SizedBox(height: 24),
@@ -62,97 +70,13 @@ class SealListPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildBackground() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFFDF8F5), Color(0xFFF8F5F0)],
-        ),
-      ),
-      child: CustomPaint(
-        painter: _SealBackgroundPainter(),
-        size: Size.infinite,
-      ),
-    );
-  }
-
   Widget _buildAppBar(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
-                size: 20,
-              ),
-            ),
-            onPressed: () => context.pop(),
-          ),
-          const Expanded(
-            child: Text(
-              '我的印记集',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.filter_list_rounded,
-                color: AppColors.textSecondary,
-                size: 20,
-              ),
-            ),
-            onPressed: () => _showFilterSheet(context, ref),
-          ),
-        ],
+    return AppPageHeader(
+      title: '我的印记集',
+      trailing: AppHeaderAction(
+        icon: Icons.filter_list_rounded,
+        onTap: () => _showFilterSheet(context, ref),
       ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title, SealType type) {
-    final iconData = _getTypeIcon(type);
-    final color = _getTypeColor(type);
-
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(iconData, size: 16, color: color),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
     );
   }
 
@@ -176,40 +100,6 @@ class SealListPage extends ConsumerWidget {
       case SealType.special:
         return AppColors.sealGold;
     }
-  }
-
-  Widget _buildProgressLoading() {
-    return Container(
-      height: 160,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2.5),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGridLoading() {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-    );
   }
 
   Widget _buildErrorCard(String message) {
@@ -281,30 +171,6 @@ class SealListPage extends ConsumerWidget {
       ),
     );
   }
-}
-
-class _SealBackgroundPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    paint.color = AppColors.sealGold.withValues(alpha: 0.04);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.1),
-      size.width * 0.4,
-      paint,
-    );
-
-    paint.color = AppColors.accent.withValues(alpha: 0.03);
-    canvas.drawCircle(
-      Offset(size.width * 0.15, size.height * 0.5),
-      size.width * 0.35,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _ProgressCard extends StatelessWidget {
@@ -649,21 +515,8 @@ class _FilterOption extends StatelessWidget {
           color: isSelected ? AppColors.accent.withValues(alpha: 0.05) : null,
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (iconColor ?? AppColors.textSecondary).withValues(
-                    alpha: 0.1,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: iconColor ?? AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: 14),
+              Icon(icon, size: 20, color: iconColor ?? AppColors.textSecondary),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,

@@ -59,36 +59,45 @@ class _JourneyCompletePageState extends ConsumerState<JourneyCompletePage>
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  const Spacer(),
-                  _buildCelebrationIcon(),
-                  const SizedBox(height: 20),
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: const Text(
-                      '恭喜完成文化之旅！',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 20),
+                          _buildCelebrationIcon(),
+                          const SizedBox(height: 20),
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: const Text(
+                              '恭喜完成文化之旅！',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildSealCard(detail?.name ?? '文化之旅'),
+                          ),
+                          const SizedBox(height: 20),
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildRewardCard(),
+                          ),
+                          const SizedBox(height: 20),
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildChainCard(context),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: _buildSealCard(detail?.name ?? '文化之旅'),
-                  ),
-                  const SizedBox(height: 20),
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: _buildRewardCard(),
-                  ),
-                  const SizedBox(height: 20),
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: _buildChainCard(context),
-                  ),
-                  const Spacer(),
                   FadeTransition(
                     opacity: _fadeAnimation,
                     child: _buildButtons(context, ref),

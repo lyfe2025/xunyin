@@ -62,6 +62,15 @@ class JourneyService {
         .toList();
   }
 
+  /// 获取用户所有文化之旅（包括已完成）
+  Future<List<JourneyProgress>> getAllUserJourneys() async {
+    final response = await _api.get('/journeys/my');
+    final list = response['data'] as List;
+    return list
+        .map((e) => JourneyProgress.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// 完成探索点（调用正确的后端 API 路径）
   Future<CompletePointResponse> completePoint({
     required String pointId,

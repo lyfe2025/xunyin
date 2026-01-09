@@ -136,7 +136,7 @@ async function getStats() {
     const [summaryRes, rankingRes] = await Promise.all([getStatsSummary({}), getChannelRanking({})])
     summary.value = summaryRes.data
     ranking.value = rankingRes.data
-  } catch (e) {
+  } catch {
     // 忽略错误
   }
 }
@@ -203,7 +203,7 @@ async function handleSubmit() {
   submitLoading.value = true
   try {
     if (editingId.value) {
-      const { channelCode, ...updateData } = form
+      const { channelCode: _channelCode, ...updateData } = form
       await updateChannel(editingId.value, updateData)
       toast({ title: '更新成功' })
     } else {

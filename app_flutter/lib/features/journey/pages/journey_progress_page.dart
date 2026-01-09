@@ -51,14 +51,15 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
                 _buildAppBar(context, detail, currentIndex, points.length),
                 _buildProgressBar(currentIndex, points.length),
                 Expanded(
-                  flex: 2,
-                  child: _buildMapPlaceholder(points, currentIndex),
-                ),
-                if (state.currentPoint != null)
-                  _buildCurrentPointCard(state.currentPoint!),
-                Expanded(
-                  flex: 1,
-                  child: _buildPointsList(points, currentIndex),
+                  child: ListView(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    children: [
+                      _buildMapPlaceholder(points, currentIndex),
+                      if (state.currentPoint != null)
+                        _buildCurrentPointCard(state.currentPoint!),
+                      _buildPointsList(points, currentIndex),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -115,6 +116,7 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
               ),
               child: Text(
                 detail?.name ?? '文化之旅',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 15,
@@ -186,6 +188,7 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
   Widget _buildMapPlaceholder(List<ExplorationPoint> points, int currentIndex) {
     return Container(
       margin: const EdgeInsets.all(16),
+      height: 200,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(20),
@@ -415,7 +418,7 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.8),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Column(
@@ -449,12 +452,12 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
               ],
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: points.length,
-              itemBuilder: (context, index) {
-                final point = points[index];
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              children: points.asMap().entries.map((entry) {
+                final index = entry.key;
+                final point = entry.value;
                 final isCompleted = index < currentIndex;
                 final isCurrent = index == currentIndex;
 
@@ -528,7 +531,7 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
                     ],
                   ),
                 );
-              },
+              }).toList(),
             ),
           ),
         ],

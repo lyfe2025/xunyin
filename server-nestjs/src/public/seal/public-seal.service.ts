@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
 export class PublicSealService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   /**
    * 获取印记公开详情（用于分享页面）

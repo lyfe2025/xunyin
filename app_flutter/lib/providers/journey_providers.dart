@@ -29,6 +29,14 @@ final inProgressJourneysProvider = FutureProvider<List<JourneyProgress>>((
   return service.getInProgressJourneys();
 });
 
+/// 用户所有文化之旅（包括已完成）
+final allUserJourneysProvider = FutureProvider<List<JourneyProgress>>((
+  ref,
+) async {
+  final service = ref.watch(journeyServiceProvider);
+  return service.getAllUserJourneys();
+});
+
 /// 当前进行中的文化之旅状态
 class CurrentJourneyState {
   final JourneyProgress? progress;

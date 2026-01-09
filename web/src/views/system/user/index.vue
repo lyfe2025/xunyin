@@ -27,7 +27,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -58,8 +57,6 @@ import {
   RefreshCw,
   Key,
   Eye,
-  CheckSquare,
-  XSquare,
   Filter,
   Edit,
   Settings2,
@@ -178,9 +175,6 @@ function isColumnVisible(key: string): boolean {
   const col = columns.value.find((c) => c.key === key)
   return col ? col.visible : true
 }
-
-// 计算属性:是否有选中的行
-const hasSelectedRows = computed(() => selectedRows.value.length > 0)
 
 const deptOptions = ref<any[]>([])
 const roleOptions = ref<SysRole[]>([])

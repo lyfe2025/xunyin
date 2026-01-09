@@ -107,15 +107,18 @@ class _AgreementPageState extends State<AgreementPage> {
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          Text(
-            _agreement?.title ?? widget.type.label,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          Expanded(
+            child: Text(
+              _agreement?.title ?? widget.type.label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
+          const SizedBox(width: 42),
         ],
       ),
     );

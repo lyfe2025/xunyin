@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/seal_providers.dart';
 import '../../../providers/service_providers.dart';
 import '../../../shared/widgets/share_bottom_sheet.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_page_header.dart';
+import '../../../shared/widgets/app_loading.dart';
 
 /// 印记详情页 - Aurora UI + Glassmorphism
 class SealDetailPage extends ConsumerWidget {
@@ -19,15 +21,15 @@ class SealDetailPage extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.golden),
           SafeArea(
             child: Column(
               children: [
-                _buildAppBar(context),
+                const AppPageHeader(title: '印记详情'),
                 Expanded(
                   child: sealAsync.when(
                     data: (seal) => _buildContent(context, ref, seal),
-                    loading: () => _buildLoadingState(),
+                    loading: () => const AppLoading(message: '加载中...'),
                     error: (e, _) => _buildErrorState(e.toString()),
                   ),
                 ),
@@ -35,66 +37,6 @@ class SealDetailPage extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            '印记详情',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(color: AppColors.accent),
-            SizedBox(height: 16),
-            Text('加载中...', style: TextStyle(color: AppColors.textSecondary)),
-          ],
-        ),
       ),
     );
   }
@@ -234,22 +176,15 @@ class SealDetailPage extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.info_rounded,
-                  size: 18,
+              Icon(Icons.info_rounded, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                '完成信息',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
                   color: AppColors.primary,
                 ),
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                '完成信息',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ],
           ),
@@ -313,19 +248,8 @@ class SealDetailPage extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.sealGold.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.verified_rounded,
-                  size: 18,
-                  color: AppColors.sealGold,
-                ),
-              ),
-              const SizedBox(width: 10),
+              Icon(Icons.verified_rounded, size: 18, color: AppColors.sealGold),
+              const SizedBox(width: 8),
               const Text(
                 '已上链',
                 style: TextStyle(
@@ -358,10 +282,14 @@ class SealDetailPage extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(Icons.copy_rounded, size: 16),
-                    label: const Text('复制哈希'),
+                    label: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('复制哈希'),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.sealGold,
                       side: const BorderSide(color: AppColors.sealGold),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -376,10 +304,14 @@ class SealDetailPage extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                    label: const Text('链上查看'),
+                    label: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('链上查看'),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.sealGold,
                       side: const BorderSide(color: AppColors.sealGold),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -413,22 +345,15 @@ class SealDetailPage extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.link_rounded,
-                  size: 18,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Text(
+              Icon(Icons.link_rounded, size: 18, color: AppColors.tertiary),
+              const SizedBox(width: 8),
+              Text(
                 '上链存证',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: AppColors.tertiary,
+                ),
               ),
             ],
           ),
@@ -506,51 +431,4 @@ class SealDetailPage extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.sealGold.withValues(alpha: 0.08);
-    canvas.drawCircle(
-      Offset(size.width * 0.5, size.height * 0.12),
-      size.width * 0.4,
-      paint,
-    );
-    paint.color = AppColors.primary.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.1, size.height * 0.5),
-      size.width * 0.35,
-      paint,
-    );
-    paint.color = AppColors.accent.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.75),
-      size.width * 0.3,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -97,6 +97,7 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
               ),
               child: Text(
                 '探索点 ${currentIndex + 1}/$totalPoints',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,

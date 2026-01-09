@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import {
   Table,
   TableBody,
@@ -28,6 +28,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useToast } from '@/components/ui/toast/use-toast'
 import {
@@ -63,6 +64,7 @@ const loading = ref(true)
 const userSealList = ref<UserSeal[]>([])
 const total = ref(0)
 const stats = ref<UserSealStats | null>(null)
+const activeTab = ref('all')
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 20,
@@ -71,6 +73,13 @@ const queryParams = reactive({
   sealType: undefined as string | undefined,
   isChained: undefined as string | undefined,
 })
+
+// Tab 配置
+const tabOptions = computed(() => [
+  { value: 'all', label: '全部', count: stats.value?.total ?? 0 },
+  { value: 'chained', label: '已上链', count: stats.value?.chained ?? 0 },
+  { value: 'unchained', label: '未上链', count: stats.value?.unchained ?? 0 },
+])
 
 const sealTypeOptions = [
   { value: 'route', label: '路线印记' },
@@ -92,17 +101,20 @@ const { toast } = useToast()
 async function getList() {
   loading.value = true
   try {
+    // 根据 tab 决定 isChained 参数
+    let isChainedParam: boolean | undefined
+    if (activeTab.value === 'chained') {
+      isChainedParam = true
+    } else if (activeTab.value === 'unchained') {
+      isChainedParam = false
+    } else {
+      isChainedParam = undefined
+    }
+
     const params = {
       ...queryParams,
       sealType: queryParams.sealType === 'all' ? undefined : queryParams.sealType,
-      isChained:
-        queryParams.isChained === 'all'
-          ? undefined
-          : queryParams.isChained === 'true'
-            ? true
-            : queryParams.isChained === 'false'
-              ? false
-              : undefined,
+      isChained: isChainedParam,
     }
     const res = await listUserSeal(params)
     userSealList.value = res.list
@@ -130,7 +142,14 @@ function resetQuery() {
   queryParams.sealName = ''
   queryParams.sealType = undefined
   queryParams.isChained = undefined
+  activeTab.value = 'all'
   handleQuery()
+}
+
+function handleTabChange(tab: string) {
+  activeTab.value = tab
+  queryParams.pageNum = 1
+  getList()
 }
 
 async function handleViewDetail(row: UserSeal) {
@@ -277,6 +296,18 @@ onMounted(() => {
       </Card>
     </div>
 
+    <!-- 标签页 -->
+    <Tabs :model-value="activeTab" @update:model-value="(val) => handleTabChange(String(val))">
+      <TabsList class="grid w-full grid-cols-3 lg:w-[300px]">
+        <TabsTrigger v-for="tab in tabOptions" :key="tab.value" :value="tab.value">
+          {{ tab.label }}
+          <Badge variant="secondary" class="ml-1.5 px-1.5 py-0.5 text-xs">
+            {{ tab.count }}
+          </Badge>
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+
     <!-- 筛选 -->
     <div
       class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
@@ -308,17 +339,6 @@ onMounted(() => {
             <SelectItem v-for="t in sealTypeOptions" :key="t.value" :value="t.value">
               {{ t.label }}
             </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">上链状态</span>
-        <Select v-model="queryParams.isChained" @update:model-value="handleQuery">
-          <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部</SelectItem>
-            <SelectItem value="true">已上链</SelectItem>
-            <SelectItem value="false">未上链</SelectItem>
           </SelectContent>
         </Select>
       </div>

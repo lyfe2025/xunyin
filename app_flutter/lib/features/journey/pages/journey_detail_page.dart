@@ -6,6 +6,9 @@ import '../../../core/utils/url_utils.dart';
 import '../../../models/journey.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../providers/service_providers.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_back_button.dart';
+import '../../../shared/widgets/app_loading.dart';
 
 /// 文化之旅详情页 - Aurora UI + Glassmorphism
 class JourneyDetailPage extends ConsumerWidget {
@@ -33,27 +36,8 @@ class JourneyDetailPage extends ConsumerWidget {
   Widget _buildLoadingState() {
     return Stack(
       children: [
-        const _AuroraBackground(),
-        Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(color: AppColors.accent),
-                SizedBox(height: 16),
-                Text(
-                  '加载中...',
-                  style: TextStyle(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-        ),
+        const AuroraBackground(variant: AuroraVariant.standard),
+        const AppLoadingOverlay(message: '加载中...'),
       ],
     );
   }
@@ -61,7 +45,7 @@ class JourneyDetailPage extends ConsumerWidget {
   Widget _buildErrorState(String error) {
     return Stack(
       children: [
-        const _AuroraBackground(),
+        const AuroraBackground(variant: AuroraVariant.standard),
         Center(
           child: Container(
             margin: const EdgeInsets.all(24),
@@ -89,59 +73,6 @@ class JourneyDetailPage extends ConsumerWidget {
   }
 }
 
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    // 黛青色光晕
-    paint.color = AppColors.primary.withValues(alpha: 0.08);
-    canvas.drawCircle(
-      Offset(size.width * 0.2, size.height * 0.15),
-      size.width * 0.4,
-      paint,
-    );
-
-    // 朱砂色光晕
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.3),
-      size.width * 0.35,
-      paint,
-    );
-
-    // 琥珀色光晕
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.5, size.height * 0.85),
-      size.width * 0.45,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 class _JourneyContent extends StatelessWidget {
   final JourneyDetail journey;
   final String journeyId;
@@ -157,7 +88,7 @@ class _JourneyContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const _AuroraBackground(),
+        const AuroraBackground(variant: AuroraVariant.standard),
         CustomScrollView(
           slivers: [
             _buildAppBar(context),
@@ -208,27 +139,10 @@ class _JourneyContent extends StatelessWidget {
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.all(8),
-        child: GestureDetector(
-          onTap: () => context.pop(),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.arrow_back_rounded,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
+        child: AppBackButton(onTap: () => context.pop()),
       ),
       flexibleSpace: FlexibleSpaceBar(
+        centerTitle: true,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(

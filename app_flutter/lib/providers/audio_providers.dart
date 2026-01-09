@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import '../core/utils/url_utils.dart';
@@ -74,10 +75,17 @@ class AudioNotifier extends StateNotifier<AudioState> {
   }
 
   Future<void> togglePlay() async {
+    developer.log(
+      'togglePlay 被调用, isPlaying: ${state.isPlaying}, currentTrackUrl: ${state.currentTrackUrl}',
+      name: 'AudioNotifier',
+    );
     if (state.isPlaying) {
       await pause();
     } else if (state.currentTrackUrl != null) {
       await play();
+    } else {
+      // 没有音乐时，加载首页背景音乐
+      await switchContext(AudioContext.home);
     }
   }
 
@@ -90,6 +98,7 @@ class AudioNotifier extends StateNotifier<AudioState> {
   Future<void> setTrack(String url, {String? title}) async {
     try {
       final fullUrl = UrlUtils.getFullImageUrl(url);
+      developer.log('设置音轨: $fullUrl', name: 'AudioNotifier');
       await _player.setUrl(fullUrl);
       state = state.copyWith(
         currentTrackUrl: fullUrl,
@@ -97,7 +106,7 @@ class AudioNotifier extends StateNotifier<AudioState> {
       );
       await _player.play();
     } catch (e) {
-      // 播放失败，静默处理
+      developer.log('播放失败: $e', name: 'AudioNotifier');
     }
   }
 
@@ -107,6 +116,10 @@ class AudioNotifier extends StateNotifier<AudioState> {
       return;
     }
 
+    developer.log(
+      '切换音频上下文: $context, contextId: $contextId',
+      name: 'AudioNotifier',
+    );
     AudioInfo? audioInfo;
 
     try {
@@ -134,24 +147,32 @@ class AudioNotifier extends StateNotifier<AudioState> {
           break;
       }
     } catch (e) {
-      // API 调用失败，静默处理
+      developer.log('获取音频信息失败: $e', name: 'AudioNotifier');
     }
 
+    developer.log('获取到音频信息: ${audioInfo?.url}', name: 'AudioNotifier');
+
     if (audioInfo != null) {
-      final fullUrl = UrlUtils.getFullImageUrl(audioInfo.url);
-      await _player.setUrl(fullUrl);
-      state = AudioState(
-        isPlaying: true,
-        isMuted: state.isMuted,
-        currentTrackUrl: fullUrl,
-        currentTrackTitle: audioInfo.title,
-        context: context,
-        contextId: contextId,
-      );
-      if (!state.isMuted) {
-        await _player.play();
+      try {
+        final fullUrl = UrlUtils.getFullImageUrl(audioInfo.url);
+        developer.log('加载音频: $fullUrl', name: 'AudioNotifier');
+        await _player.setUrl(fullUrl);
+        state = AudioState(
+          isPlaying: true,
+          isMuted: state.isMuted,
+          currentTrackUrl: fullUrl,
+          currentTrackTitle: audioInfo.title,
+          context: context,
+          contextId: contextId,
+        );
+        if (!state.isMuted) {
+          await _player.play();
+        }
+      } catch (e) {
+        developer.log('加载/播放音频失败: $e', name: 'AudioNotifier');
       }
     } else {
+      developer.log('未获取到音频信息', name: 'AudioNotifier');
       state = state.copyWith(context: context, contextId: contextId);
     }
   }

@@ -177,15 +177,18 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          const Text(
-            '绑定手机号',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          const Expanded(
+            child: Text(
+              '绑定手机号',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
+          const SizedBox(width: 42),
         ],
       ),
     );
@@ -314,38 +317,7 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                 ),
               ),
               const SizedBox(width: 12),
-              SizedBox(
-                width: 110,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: (_isSending || _countdown > 0) ? null : _sendCode,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.border,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: _isSending
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          _countdown > 0 ? '${_countdown}s' : '获取验证码',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              ),
+              _buildCodeButton(),
             ],
           ),
           const SizedBox(height: 24),
@@ -381,6 +353,54 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 获取验证码按钮 - 与登录页风格统一
+  Widget _buildCodeButton() {
+    final isDisabled = _isSending || _countdown > 0;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isDisabled ? null : _sendCode,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 100,
+          height: 52,
+          decoration: BoxDecoration(
+            color: isDisabled
+                ? AppColors.surfaceVariant
+                : AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDisabled
+                  ? AppColors.border
+                  : AppColors.primary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Center(
+            child: _isSending
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  )
+                : Text(
+                    _countdown > 0 ? '${_countdown}s' : '获取验证码',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: isDisabled
+                          ? AppColors.textHint
+                          : AppColors.primary,
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }

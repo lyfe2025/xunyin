@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import {
   Table,
   TableBody,
@@ -28,6 +28,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Search,
   RefreshCw,
@@ -96,6 +97,7 @@ const progressList = ref<JourneyProgress[]>([])
 const total = ref(0)
 const stats = ref<ProgressStats | null>(null)
 const cityOptions = ref<City[]>([])
+const activeTab = ref('all')
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 20,
@@ -104,6 +106,14 @@ const queryParams = reactive({
   cityId: undefined as string | undefined,
   status: undefined as string | undefined,
 })
+
+// Tab 配置
+const tabOptions = computed(() => [
+  { value: 'all', label: '全部', count: stats.value?.total ?? 0 },
+  { value: 'in_progress', label: '进行中', count: stats.value?.inProgress ?? 0 },
+  { value: 'completed', label: '已完成', count: stats.value?.completed ?? 0 },
+  { value: 'abandoned', label: '已放弃', count: stats.value?.abandoned ?? 0 },
+])
 
 const statusOptions = [
   { value: 'in_progress', label: '进行中', variant: 'default' as const, icon: Loader },
@@ -126,7 +136,12 @@ async function getList() {
     const params = {
       ...queryParams,
       cityId: queryParams.cityId === 'all' ? undefined : queryParams.cityId,
-      status: queryParams.status === 'all' ? undefined : queryParams.status,
+      status:
+        activeTab.value === 'all'
+          ? queryParams.status === 'all'
+            ? undefined
+            : queryParams.status
+          : activeTab.value,
     }
     const res = await listProgress(params)
     progressList.value = res.list
@@ -163,7 +178,16 @@ function resetQuery() {
   queryParams.journeyName = ''
   queryParams.cityId = undefined
   queryParams.status = undefined
+  activeTab.value = 'all'
   handleQuery()
+}
+
+function handleTabChange(tab: string) {
+  activeTab.value = tab
+  queryParams.pageNum = 1
+  // 切换 tab 时清除状态筛选，因为 tab 本身就是状态筛选
+  queryParams.status = undefined
+  getList()
 }
 
 async function handleViewDetail(row: JourneyProgress) {
@@ -260,6 +284,18 @@ onMounted(() => {
       </Card>
     </div>
 
+    <!-- 标签页 -->
+    <Tabs :model-value="activeTab" @update:model-value="handleTabChange">
+      <TabsList class="grid w-full grid-cols-4 lg:w-[400px]">
+        <TabsTrigger v-for="tab in tabOptions" :key="tab.value" :value="tab.value">
+          {{ tab.label }}
+          <Badge variant="secondary" class="ml-1.5 px-1.5 py-0.5 text-xs">
+            {{ tab.count }}
+          </Badge>
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+
     <!-- 筛选 -->
     <div
       class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
@@ -290,18 +326,6 @@ onMounted(() => {
             <SelectItem value="all">全部</SelectItem>
             <SelectItem v-for="c in cityOptions" :key="c.id" :value="c.id">
               {{ c.name }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">状态</span>
-        <Select v-model="queryParams.status" @update:model-value="handleQuery">
-          <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部</SelectItem>
-            <SelectItem v-for="s in statusOptions" :key="s.value" :value="s.value">
-              {{ s.label }}
             </SelectItem>
           </SelectContent>
         </Select>

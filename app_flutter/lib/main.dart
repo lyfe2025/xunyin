@@ -5,12 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/app_info.dart';
 import 'core/utils/error_handler.dart';
 
 void main() {
   runZonedGuarded(
-    () {
+    () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      // 初始化应用信息
+      await AppInfo.init();
 
       // 初始化全局错误处理
       ErrorHandler.init();

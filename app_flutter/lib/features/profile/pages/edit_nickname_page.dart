@@ -114,10 +114,10 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
               ),
             ),
           ),
-          const SizedBox(width: 16),
           const Expanded(
             child: Text(
               '修改昵称',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

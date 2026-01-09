@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { UpdateProfileDto } from './dto/update-profile.dto'
 
 @Injectable()
 export class AppProfileService {
+  private readonly logger = new Logger(AppProfileService.name)
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -108,5 +110,39 @@ export class AppProfileService {
       data: { phone },
       select: { id: true, phone: true },
     })
+  }
+
+  /**
+   * 注销账户（软删除）
+   */
+  async deleteAccount(userId: string) {
+    const user = await this.prisma.appUser.findUnique({
+      where: { id: userId },
+    })
+
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    this.logger.log(`User ${userId} requested account deletion`)
+
+    // 软删除：将用户状态设为已删除，清除敏感信息
+    await this.prisma.appUser.update({
+      where: { id: userId },
+      data: {
+        status: '2', // 已注销
+        phone: null,
+        email: null,
+        nickname: '已注销用户',
+        avatar: null,
+        bio: null,
+        openId: null,
+        unionId: null,
+        appleId: null,
+        googleId: null,
+      },
+    })
+
+    return { message: '账户已注销' }
   }
 }

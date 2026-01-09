@@ -191,6 +191,49 @@ export class JourneyService {
       id: progress.id,
       journeyId: progress.journeyId,
       journeyName: progress.journey.name,
+      coverImage: progress.journey.coverImage,
+      status: progress.status,
+      startTime: progress.startTime,
+      completeTime: progress.completeTime,
+      timeSpentMinutes: progress.timeSpentMinutes,
+      completedPoints: progress.pointCompletions.length,
+      totalPoints: pointCountMap.get(progress.journeyId) || 0,
+    }))
+  }
+
+  /**
+   * 获取用户所有文化之旅（包括已完成）
+   */
+  async findAllUserJourneys(userId: string) {
+    const progresses = await this.prisma.journeyProgress.findMany({
+      where: {
+        userId,
+        status: { in: ['in_progress', 'completed'] },
+      },
+      include: {
+        journey: true,
+        pointCompletions: true,
+      },
+      orderBy: { startTime: 'desc' },
+    })
+
+    // 获取每个文化之旅的总探索点数
+    const journeyIds = progresses.map((p) => p.journeyId)
+    const pointCounts = await this.prisma.explorationPoint.groupBy({
+      by: ['journeyId'],
+      where: {
+        journeyId: { in: journeyIds },
+        status: '0',
+      },
+      _count: { id: true },
+    })
+
+    const pointCountMap = new Map(pointCounts.map((pc) => [pc.journeyId, pc._count.id]))
+
+    return progresses.map((progress) => ({
+      id: progress.id,
+      journeyId: progress.journeyId,
+      journeyName: progress.journey.name,
       status: progress.status,
       startTime: progress.startTime,
       completeTime: progress.completeTime,

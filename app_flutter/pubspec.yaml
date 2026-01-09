@@ -71,6 +71,12 @@ dependencies:
   # 音频播放
   just_audio: ^0.9.40
   audio_session: ^0.1.21
+  
+  # 应用信息
+  package_info_plus: ^8.0.0
+  
+  # 路径获取
+  path_provider: ^2.1.2
 
 dev_dependencies:
   flutter_test:

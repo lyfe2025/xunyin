@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Patch, UseGuards } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { AppAuthGuard } from '../app-auth/guards/app-auth.guard'
 import { CurrentUser } from '../app-auth/decorators/current-user.decorator'
@@ -34,5 +34,11 @@ export class AppProfileController {
   @ApiOperation({ summary: '更新头像' })
   async updateAvatar(@CurrentUser() user: CurrentAppUser, @Body('avatar') avatar: string) {
     return this.profileService.updateAvatar(user.userId, avatar)
+  }
+
+  @Delete()
+  @ApiOperation({ summary: '注销账户' })
+  async deleteAccount(@CurrentUser() user: CurrentAppUser): Promise<{ message: string }> {
+    return this.profileService.deleteAccount(user.userId)
   }
 }

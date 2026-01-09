@@ -226,6 +226,7 @@ class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
           const Expanded(
             child: Text(
               '修改头像',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

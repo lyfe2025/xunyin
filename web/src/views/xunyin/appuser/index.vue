@@ -278,6 +278,7 @@ function nextImage() {
 
 // ========== 实名认证管理 ==========
 const activeTab = ref('users')
+const verificationActiveTab = ref('all')
 const verificationLoading = ref(false)
 const verificationList = ref<UserVerification[]>([])
 const verificationTotal = ref(0)
@@ -288,6 +289,14 @@ const verificationQuery = reactive({
   realName: '',
   status: undefined as 'pending' | 'approved' | 'rejected' | 'all' | undefined,
 })
+
+// 实名认证 Tab 配置
+const verificationTabOptions = computed(() => [
+  { value: 'all', label: '全部', count: verificationStats.value?.total ?? 0 },
+  { value: 'pending', label: '待审核', count: verificationStats.value?.pending ?? 0 },
+  { value: 'approved', label: '已通过', count: verificationStats.value?.approved ?? 0 },
+  { value: 'rejected', label: '已拒绝', count: verificationStats.value?.rejected ?? 0 },
+])
 
 // 批量选择（实名认证）
 const selectedVerificationIds = ref<string[]>([])
@@ -306,13 +315,15 @@ const isBatchAudit = ref(false)
 async function getVerificationList() {
   verificationLoading.value = true
   try {
+    // 根据 tab 决定 status 参数
+    const statusParam =
+      verificationActiveTab.value === 'all'
+        ? undefined
+        : (verificationActiveTab.value as 'pending' | 'approved' | 'rejected')
+
     const params = {
       ...verificationQuery,
-      status: normalizeQueryValue(verificationQuery.status) as
-        | 'pending'
-        | 'approved'
-        | 'rejected'
-        | undefined,
+      status: statusParam,
     }
     const res = await listVerifications(params)
     verificationList.value = res.list
@@ -340,7 +351,14 @@ function handleVerificationQuery() {
 function resetVerificationQuery() {
   verificationQuery.realName = ''
   verificationQuery.status = undefined
+  verificationActiveTab.value = 'all'
   handleVerificationQuery()
+}
+
+function handleVerificationTabChange(tab: string) {
+  verificationActiveTab.value = tab
+  verificationQuery.pageNum = 1
+  getVerificationList()
 }
 
 // 批量选择（实名认证）
@@ -749,6 +767,21 @@ onMounted(() => {
           </Card>
         </div>
 
+        <!-- 状态标签页 -->
+        <Tabs
+          :model-value="verificationActiveTab"
+          @update:model-value="(val) => handleVerificationTabChange(String(val))"
+        >
+          <TabsList class="grid w-full grid-cols-4 lg:w-[400px]">
+            <TabsTrigger v-for="tab in verificationTabOptions" :key="tab.value" :value="tab.value">
+              {{ tab.label }}
+              <Badge variant="secondary" class="ml-1.5 px-1.5 py-0.5 text-xs">
+                {{ tab.count }}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <!-- 筛选 -->
         <div
           class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
@@ -761,21 +794,6 @@ onMounted(() => {
               class="w-[130px]"
               @keyup.enter="handleVerificationQuery"
             />
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-medium">状态</span>
-            <Select
-              v-model="verificationQuery.status"
-              @update:model-value="handleVerificationQuery"
-            >
-              <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部</SelectItem>
-                <SelectItem value="pending">待审核</SelectItem>
-                <SelectItem value="approved">已通过</SelectItem>
-                <SelectItem value="rejected">已拒绝</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div class="flex gap-2 ml-auto">
             <Button

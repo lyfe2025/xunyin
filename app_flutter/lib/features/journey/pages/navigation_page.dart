@@ -93,43 +93,23 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.navigation_rounded,
-                    color: AppColors.accent,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '导航到：$pointName',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                '导航到：$pointName',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
+          // 右侧占位，平衡左侧关闭按钮
+          const SizedBox(width: 42),
         ],
       ),
     );
@@ -353,11 +333,15 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textSecondary,
                       side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('稍后再来'),
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('稍后再来'),
+                    ),
                   ),
                 ),
               ),
@@ -367,15 +351,19 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                   height: 44,
                   child: ElevatedButton.icon(
                     onPressed: () => context.push('/ar-task/${widget.pointId}'),
-                    icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                    label: const Text(
-                      '开始任务',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                    label: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '开始任务',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accent,
                       foregroundColor: Colors.white,
                       elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

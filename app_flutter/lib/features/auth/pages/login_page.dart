@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/api/api_client.dart';
 import '../../../services/auth_service.dart';
+import '../../../shared/widgets/aurora_background.dart';
 
 /// 登录页 - Aurora UI + Glassmorphism 风格
 class LoginPage extends ConsumerStatefulWidget {
@@ -127,7 +128,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       body: Stack(
         children: [
           // Aurora 渐变背景
-          _buildAuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.warm),
           // 主内容
           SafeArea(
             child: SingleChildScrollView(
@@ -150,27 +151,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// Aurora 渐变背景
-  Widget _buildAuroraBackground() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFFDF8F5), // 暖白
-            Color(0xFFF8F5F0), // 宣纸色
-            Color(0xFFF5F0EB), // 米色
-          ],
-        ),
-      ),
-      child: CustomPaint(
-        painter: _AuroraBackgroundPainter(),
-        size: Size.infinite,
       ),
     );
   }
@@ -519,39 +499,4 @@ class _LoginPageState extends ConsumerState<LoginPage>
       textAlign: TextAlign.center,
     );
   }
-}
-
-/// Aurora 背景绘制
-class _AuroraBackgroundPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    // 右上角光晕
-    paint.color = AppColors.accent.withValues(alpha: 0.04);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.1),
-      size.width * 0.5,
-      paint,
-    );
-
-    // 左下角光晕
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.15, size.height * 0.85),
-      size.width * 0.45,
-      paint,
-    );
-
-    // 中间光晕
-    paint.color = AppColors.sealGold.withValues(alpha: 0.02);
-    canvas.drawCircle(
-      Offset(size.width * 0.5, size.height * 0.4),
-      size.width * 0.35,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

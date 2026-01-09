@@ -25,6 +25,15 @@ export class JourneyController {
     return this.journeyService.findUserProgress(user.userId)
   }
 
+  @Get('my')
+  @UseGuards(AppAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '获取用户所有文化之旅（包括已完成）' })
+  @ApiResponse({ status: 200, description: '成功', type: [JourneyProgressVo] })
+  async findAllUserJourneys(@CurrentUser() user: CurrentAppUser) {
+    return this.journeyService.findAllUserJourneys(user.userId)
+  }
+
   @Get(':id')
   @ApiOperation({ summary: '获取文化之旅详情' })
   @ApiResponse({ status: 200, description: '成功', type: JourneyDetailVo })

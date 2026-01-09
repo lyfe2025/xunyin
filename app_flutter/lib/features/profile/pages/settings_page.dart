@@ -3,63 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/storage/token_storage.dart';
-import '../../../core/storage/settings_storage.dart';
+import '../../../core/utils/app_info.dart';
 import '../../../providers/audio_providers.dart';
+import '../../../providers/user_providers.dart';
+import '../../../providers/settings_providers.dart';
+import '../../../providers/service_providers.dart';
+import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_page_header.dart';
+import '../../../shared/widgets/section_title.dart';
 
 /// 设置页面 - Aurora UI + Glassmorphism
-class SettingsPage extends ConsumerStatefulWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  ConsumerState<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends ConsumerState<SettingsPage> {
-  bool _notificationEnabled = true;
-  bool _autoLocationEnabled = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    final notification = await SettingsStorage.getNotificationEnabled();
-    final location = await SettingsStorage.getAutoLocationEnabled();
-    if (mounted) {
-      setState(() {
-        _notificationEnabled = notification;
-        _autoLocationEnabled = location;
-      });
-    }
-  }
-
-  Future<void> _clearCache() async {
-    await SettingsStorage.clearCache();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('缓存已清除'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final audioState = ref.watch(audioStateProvider);
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.standard),
           SafeArea(
             child: Column(
               children: [
-                _buildAppBar(context),
-                Expanded(child: _buildContent(audioState)),
+                const AppPageHeader(title: '设置'),
+                Expanded(child: _SettingsContent()),
               ],
             ),
           ),
@@ -67,98 +35,165 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
     );
   }
+}
 
-  Widget _buildAppBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            '设置',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
+class _SettingsContent extends ConsumerWidget {
+  Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context: context,
+      title: '清除缓存',
+      content: '确定要清除所有缓存数据吗？',
+      confirmText: '清除',
+      confirmColor: AppColors.warning,
     );
+
+    if (confirmed == true) {
+      await ref.read(settingsProvider.notifier).clearCache();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('缓存已清除'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    }
   }
 
-  Widget _buildContent(audioState) {
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context: context,
+      title: '退出登录',
+      content: '确定要退出登录吗？',
+      confirmText: '退出',
+      confirmColor: AppColors.error,
+    );
+
+    if (confirmed == true && context.mounted) {
+      // 清除 Token
+      await TokenStorage.clearTokens();
+      // 清除用户状态
+      ref.read(authStateProvider.notifier).setLoggedOut();
+      // 刷新用户信息（使缓存失效）
+      ref.invalidate(currentUserProvider);
+      ref.invalidate(userStatsProvider);
+
+      if (context.mounted) {
+        context.go('/login');
+      }
+    }
+  }
+
+  Future<void> _handleDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context: context,
+      title: '注销账户',
+      content: '注销后，您的账户数据将被永久删除，包括收集的印记、旅程进度等。此操作不可恢复，确定要继续吗？',
+      confirmText: '确认注销',
+      confirmColor: AppColors.error,
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        // 调用注销 API
+        final userService = ref.read(userServiceProvider);
+        await userService.deleteAccount();
+
+        // 清除本地数据
+        await TokenStorage.clearTokens();
+        ref.read(authStateProvider.notifier).setLoggedOut();
+        ref.invalidate(currentUserProvider);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('账户已注销'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          context.go('/login');
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('注销失败: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final audioState = ref.watch(audioStateProvider);
+    final settings = ref.watch(settingsProvider);
+    final userAsync = ref.watch(currentUserProvider);
+    final user = userAsync.valueOrNull;
+
+    // 手机号脱敏显示
+    String? maskedPhone;
+    if (user?.phone != null && user!.phone!.length >= 7) {
+      maskedPhone =
+          '${user.phone!.substring(0, 3)}****${user.phone!.substring(user.phone!.length - 4)}';
+    }
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
-        _buildSection('通用', Icons.settings_rounded, AppColors.primary, [
+        _buildSection('通用', [
           _SwitchTile(
             icon: Icons.music_note_rounded,
             title: '背景音乐',
             value: audioState.isPlaying,
-            onChanged: (v) =>
+            onChanged: (_) =>
                 ref.read(audioStateProvider.notifier).togglePlay(),
           ),
           _SwitchTile(
             icon: Icons.notifications_rounded,
             title: '消息通知',
-            value: _notificationEnabled,
-            onChanged: (v) async {
-              setState(() => _notificationEnabled = v);
-              await SettingsStorage.setNotificationEnabled(v);
-            },
+            value: settings.notificationEnabled,
+            onChanged: (v) =>
+                ref.read(settingsProvider.notifier).setNotificationEnabled(v),
           ),
           _SwitchTile(
             icon: Icons.location_on_rounded,
             title: '自动定位',
-            value: _autoLocationEnabled,
-            onChanged: (v) async {
-              setState(() => _autoLocationEnabled = v);
-              await SettingsStorage.setAutoLocationEnabled(v);
-            },
+            value: settings.autoLocationEnabled,
+            onChanged: (v) =>
+                ref.read(settingsProvider.notifier).setAutoLocationEnabled(v),
           ),
         ]),
         const SizedBox(height: 16),
-        _buildSection('账号', Icons.person_rounded, AppColors.accent, [
+        _buildSection('账号', [
           _MenuTile(
             icon: Icons.edit_rounded,
             title: '修改昵称',
+            subtitle: user?.nickname,
             onTap: () => context.push('/settings/nickname'),
           ),
           _MenuTile(
             icon: Icons.face_rounded,
             title: '修改头像',
+            trailing: user?.avatarUrl != null
+                ? CircleAvatar(
+                    radius: 14,
+                    backgroundImage: NetworkImage(user!.avatarUrl!),
+                  )
+                : null,
             onTap: () => context.push('/settings/avatar'),
           ),
           _MenuTile(
             icon: Icons.phone_rounded,
             title: '绑定手机',
+            subtitle: maskedPhone ?? '未绑定',
             onTap: () => context.push('/settings/phone'),
           ),
         ]),
         const SizedBox(height: 16),
-        _buildSection('其他', Icons.more_horiz_rounded, AppColors.tertiary, [
+        _buildSection('其他', [
           _MenuTile(
             icon: Icons.info_rounded,
             title: '关于我们',
@@ -177,16 +212,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _MenuTile(
             icon: Icons.cleaning_services_rounded,
             title: '清除缓存',
-            onTap: _clearCache,
+            subtitle: settings.cacheSize,
+            onTap: () => _clearCache(context, ref),
+          ),
+          _MenuTile(
+            icon: Icons.delete_forever_rounded,
+            title: '注销账户',
+            titleColor: AppColors.error,
+            iconColor: AppColors.error,
+            onTap: () => _handleDeleteAccount(context, ref),
           ),
         ]),
         const SizedBox(height: 24),
-        _buildLogoutButton(),
+        _LogoutButton(onTap: () => _handleLogout(context, ref)),
         const SizedBox(height: 16),
-        const Center(
+        Center(
           child: Text(
-            '版本 1.0.0',
-            style: TextStyle(fontSize: 12, color: AppColors.textHint),
+            '版本 ${AppInfo.version}',
+            style: const TextStyle(fontSize: 12, color: AppColors.textHint),
           ),
         ),
         const SizedBox(height: 32),
@@ -194,38 +237,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildSection(
-    String title,
-    IconData icon,
-    Color color,
-    List<Widget> children,
-  ) {
+  Widget _buildSection(String title, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 10),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, size: 16, color: color),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
+          child: SectionTitle(title: title, color: AppColors.textSecondary),
         ),
         Container(
           decoration: BoxDecoration(
@@ -234,7 +252,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
             boxShadow: [
               BoxShadow(
-                color: color.withValues(alpha: 0.06),
+                color: AppColors.primary.withValues(alpha: 0.06),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -245,8 +263,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ],
     );
   }
+}
 
-  Widget _buildLogoutButton() {
+class _LogoutButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _LogoutButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       height: 52,
       decoration: BoxDecoration(
@@ -257,7 +282,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showLogoutDialog(context),
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: const Center(
             child: Row(
@@ -280,33 +305,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
     );
   }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('退出登录'),
-        content: const Text('确定要退出登录吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await TokenStorage.clearTokens();
-              if (context.mounted) {
-                Navigator.pop(ctx);
-                context.go('/login');
-              }
-            },
-            child: const Text('退出', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _SwitchTile extends StatelessWidget {
@@ -324,27 +322,41 @@ class _SwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.textSecondary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppColors.textPrimary,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onChanged(!value),
+        child: SizedBox(
+          height: 52,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Icon(icon, size: 20, color: AppColors.textSecondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                IgnorePointer(
+                  child: Transform.scale(
+                    scale: 0.85,
+                    child: Switch(
+                      value: value,
+                      onChanged: onChanged,
+                      activeColor: AppColors.accent,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColors.accent,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -353,11 +365,19 @@ class _SwitchTile extends StatelessWidget {
 class _MenuTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? subtitle;
+  final Color? titleColor;
+  final Color? iconColor;
+  final Widget? trailing;
   final VoidCallback onTap;
 
   const _MenuTile({
     required this.icon,
     required this.title,
+    this.subtitle,
+    this.titleColor,
+    this.iconColor,
+    this.trailing,
     required this.onTap,
   });
 
@@ -367,77 +387,53 @@ class _MenuTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Icon(icon, size: 20, color: AppColors.textSecondary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: AppColors.textPrimary,
+        child: SizedBox(
+          height: 52,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: iconColor ?? AppColors.textSecondary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: titleColor ?? AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.textHint,
-                size: 20,
-              ),
-            ],
+                if (subtitle != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                  ),
+                if (trailing != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: trailing!,
+                  ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textHint,
+                  size: 20,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-}
-
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.primary.withValues(alpha: 0.08);
-    canvas.drawCircle(
-      Offset(size.width * 0.2, size.height * 0.1),
-      size.width * 0.35,
-      paint,
-    );
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.35),
-      size.width * 0.3,
-      paint,
-    );
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.4, size.height * 0.85),
-      size.width * 0.4,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
+import '../services/user_service.dart';
 import 'service_providers.dart';
 
 /// 当前用户信息
@@ -16,6 +17,18 @@ final currentUserProvider = FutureProvider<AppUser?>((ref) async {
 final userStatsProvider = FutureProvider<UserStats>((ref) async {
   final service = ref.watch(userServiceProvider);
   return service.getUserStats();
+});
+
+/// 用户最近动态
+final userActivitiesProvider = FutureProvider<List<UserActivity>>((ref) async {
+  final service = ref.watch(userServiceProvider);
+  return service.getUserActivities(limit: 10);
+});
+
+/// 旅行统计详情
+final travelStatsProvider = FutureProvider<TravelStats>((ref) async {
+  final service = ref.watch(userServiceProvider);
+  return service.getTravelStats();
 });
 
 /// 认证状态

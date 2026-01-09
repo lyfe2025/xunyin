@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/photo_providers.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_page_header.dart';
+import '../../../shared/widgets/section_title.dart';
+import '../../../shared/widgets/app_loading.dart';
 
 /// 相册页面 - Aurora UI + Glassmorphism
 class AlbumPage extends ConsumerWidget {
@@ -16,7 +19,7 @@ class AlbumPage extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.standard),
           SafeArea(
             child: Column(
               children: [
@@ -30,11 +33,14 @@ class AlbumPage extends ConsumerWidget {
                           stats.totalPhotos,
                           stats.journeyCount,
                         ),
-                        loading: () => _buildStatsLoading(),
+                        loading: () => const AppLoadingCard(height: 80),
                         error: (e, _) => _buildStatsCard(0, 0),
                       ),
                       const SizedBox(height: 24),
-                      _buildSectionTitle('按文化之旅分类'),
+                      const SectionTitle(
+                        title: '按文化之旅分类',
+                        color: AppColors.accent,
+                      ),
                       const SizedBox(height: 14),
                       journeyPhotosAsync.when(
                         data: (journeyPhotos) => journeyPhotos.isEmpty
@@ -57,14 +63,7 @@ class AlbumPage extends ConsumerWidget {
                                     )
                                     .toList(),
                               ),
-                        loading: () => const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32),
-                            child: CircularProgressIndicator(
-                              color: AppColors.accent,
-                            ),
-                          ),
-                        ),
+                        loading: () => const AppLoading(message: '加载中...'),
                         error: (e, _) => _buildEmptyState(e.toString()),
                       ),
                       const SizedBox(height: 32),
@@ -80,73 +79,13 @@ class AlbumPage extends ConsumerWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            '我的相册',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.filter_list_rounded,
-              color: AppColors.textSecondary,
-              size: 22,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatsLoading() {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Center(
-        child: CircularProgressIndicator(color: AppColors.accent),
+    return AppPageHeader(
+      title: '我的相册',
+      trailing: AppHeaderAction(
+        icon: Icons.filter_list_rounded,
+        onTap: () {
+          // TODO: 筛选功能
+        },
       ),
     );
   }
@@ -217,34 +156,6 @@ class AlbumPage extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 20,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.accent, AppColors.primary],
-            ),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
     );
   }
 
@@ -409,51 +320,4 @@ class _JourneyPhotoCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.primary.withValues(alpha: 0.08);
-    canvas.drawCircle(
-      Offset(size.width * 0.2, size.height * 0.12),
-      size.width * 0.4,
-      paint,
-    );
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.4),
-      size.width * 0.35,
-      paint,
-    );
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.4, size.height * 0.85),
-      size.width * 0.4,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
