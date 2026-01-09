@@ -50,3 +50,6 @@ uploads/
 # 备份文件
 *.bak
 backups/
+
+# UI/UX Pro Max 设计数据库（外部工具）
+.shared/
