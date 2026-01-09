@@ -172,4 +172,7 @@ export class AvailableSealVo {
 
   @ApiProperty({ description: '是否已拥有' })
   owned: boolean
+
+  @ApiPropertyOptional({ description: '获得时间' })
+  earnedTime?: Date
 }

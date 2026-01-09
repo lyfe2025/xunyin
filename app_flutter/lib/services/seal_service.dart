@@ -34,7 +34,7 @@ class SealService {
     final params = <String, dynamic>{};
     if (type != null) params['type'] = type;
 
-    final response = await _api.get('/seals/all', queryParameters: params);
+    final response = await _api.get('/seals/available', queryParameters: params);
     final list = response['data'] as List;
     return list.map((e) => SealDetail.fromJson(e)).toList();
   }

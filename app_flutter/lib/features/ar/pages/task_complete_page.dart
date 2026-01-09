@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../../providers/journey_providers.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_buttons.dart';
+import '../../../shared/widgets/app_glass_card.dart';
 import '../../../shared/widgets/simple_share_sheet.dart';
 import '../../../services/share_service.dart';
 
@@ -39,7 +43,6 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
   @override
   void initState() {
     super.initState();
-    // 庆祝动画
     _celebrationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -50,7 +53,6 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
     _celebrationController.forward();
 
-    // 浮动动画
     _floatController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
@@ -78,33 +80,34 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     return Scaffold(
       body: Stack(
         children: [
-          // Aurora 渐变背景
-          _buildAuroraBackground(),
-          // 主内容
+          const AuroraBackground(variant: AuroraVariant.celebration),
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xxl,
+                vertical: AppSpacing.lg,
+              ),
               child: Column(
                 children: [
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxxl),
                   _buildCelebrationHeader(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxxl),
                   _buildPhotoCard(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   _buildPointName(point?.name ?? '探索点'),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
                   _buildRewardCard(earnedPoints),
                   if (widget.sealId != null) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     _buildSealCard(),
                   ],
                   if (point?.culturalKnowledge != null) ...[
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xxl),
                     _buildKnowledgeCard(point!.culturalKnowledge!),
                   ],
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxxl),
                   _buildButtons(context, hasNext, journeyId),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
                 ],
               ),
             ),
@@ -114,27 +117,6 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
   }
 
-  /// Aurora 渐变背景
-  Widget _buildAuroraBackground() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF8F5F0), // 宣纸色
-            Color(0xFFFDF2F8), // 淡粉
-            Color(0xFFF0F9FF), // 淡蓝
-            Color(0xFFF8F5F0), // 宣纸色
-          ],
-          stops: [0.0, 0.3, 0.7, 1.0],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPatternPainter(), size: Size.infinite),
-    );
-  }
-
-  /// 庆祝头部
   Widget _buildCelebrationHeader() {
     return ScaleTransition(
       scale: _scaleAnimation,
@@ -148,7 +130,6 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
         },
         child: Column(
           children: [
-            // 印章图标
             Container(
               width: 80,
               height: 80,
@@ -159,13 +140,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
                   colors: [AppColors.accent, AppColors.accentDark],
                 ),
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accent.withValues(alpha: 0.4),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                boxShadow: AppShadow.accent(AppColors.accent),
               ),
               child: const Icon(
                 Icons.verified_rounded,
@@ -173,7 +148,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.xl),
             Text(
               widget.journeyCompleted ? '文化之旅完成！' : '探索成功！',
               style: const TextStyle(
@@ -183,7 +158,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
                 letterSpacing: 2,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               widget.journeyCompleted ? '恭喜你完成了整个文化之旅' : '恭喜你完成了这个探索点',
               style: TextStyle(
@@ -197,35 +172,13 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
   }
 
-  /// 照片卡片 - Glassmorphism 风格
   Widget _buildPhotoCard() {
-    return Container(
+    return AppGlassCard(
       width: 200,
       height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.8),
-            Colors.white.withValues(alpha: 0.4),
-          ],
-        ),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.6),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      borderRadius: AppRadius.cardLarge,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
         child: widget.photoPath != null
             ? Image.network(widget.photoPath!, fit: BoxFit.cover)
             : Column(
@@ -236,7 +189,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
                     size: 48,
                     color: AppColors.textHint.withValues(alpha: 0.5),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     '探索记录',
                     style: TextStyle(
@@ -250,7 +203,6 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
   }
 
-  /// 探索点名称
   Widget _buildPointName(String name) {
     return Text(
       '$name 探索成功',
@@ -262,12 +214,14 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
   }
 
-  /// 奖励卡片 - Glassmorphism 风格
   Widget _buildRewardCard(int points) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xxl + 4,
+        vertical: AppSpacing.lg,
+      ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -292,7 +246,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.sealGold.withValues(alpha: 0.2),
               shape: BoxShape.circle,
@@ -303,7 +257,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
               size: 24,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -326,12 +280,14 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
   }
 
-  /// 印记卡片
   Widget _buildSealCard() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xxl,
+        vertical: AppSpacing.md + 2,
+      ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -374,33 +330,9 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
   }
 
-  /// 文化知识卡片 - Glassmorphism 风格
   Widget _buildKnowledgeCard(String knowledge) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.9),
-            Colors.white.withValues(alpha: 0.6),
-          ],
-        ),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.8),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return AppSimpleGlassCard(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -410,7 +342,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: AppColors.tertiary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.tag),
                 ),
                 child: const Icon(
                   Icons.auto_stories_rounded,
@@ -429,7 +361,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.md + 2),
           Text(
             knowledge,
             style: const TextStyle(
@@ -443,12 +375,11 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
     );
   }
 
-  /// 操作按钮
   Widget _buildButtons(BuildContext context, bool hasNext, String? journeyId) {
     return Row(
       children: [
         Expanded(
-          child: _GlassButton(
+          child: AppGlassButton(
             onPressed: () => SimpleShareSheet.show(
               context,
               title: '分享探索成果',
@@ -464,10 +395,11 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           flex: 2,
-          child: _PrimaryButton(
+          child: AppPrimaryButton(
+            height: AppSize.buttonHeightSmall,
             onPressed: () {
               if (hasNext) {
                 ref.read(currentJourneyProvider.notifier).nextPoint();
@@ -487,139 +419,6 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Aurora 背景图案绘制
-class _AuroraPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    // 绘制柔和的圆形光晕
-    paint.color = AppColors.accent.withValues(alpha: 0.03);
-    canvas.drawCircle(
-      Offset(size.width * 0.8, size.height * 0.2),
-      size.width * 0.4,
-      paint,
-    );
-
-    paint.color = AppColors.tertiary.withValues(alpha: 0.04);
-    canvas.drawCircle(
-      Offset(size.width * 0.2, size.height * 0.7),
-      size.width * 0.35,
-      paint,
-    );
-
-    paint.color = AppColors.sealGold.withValues(alpha: 0.02);
-    canvas.drawCircle(
-      Offset(size.width * 0.6, size.height * 0.5),
-      size.width * 0.3,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// 玻璃态按钮
-class _GlassButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final Widget child;
-
-  const _GlassButton({required this.onPressed, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.8),
-                Colors.white.withValues(alpha: 0.5),
-              ],
-            ),
-            border: Border.all(color: AppColors.border, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: DefaultTextStyle(
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
-            ),
-            child: IconTheme(
-              data: const IconThemeData(color: AppColors.textPrimary),
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 主要操作按钮
-class _PrimaryButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final Widget child;
-
-  const _PrimaryButton({required this.onPressed, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.accent, AppColors.accentDark],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.accent.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: DefaultTextStyle(
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-            child: IconTheme(
-              data: const IconThemeData(color: Colors.white),
-              child: child,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

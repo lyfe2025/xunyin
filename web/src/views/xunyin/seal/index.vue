@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import {
   Table,
   TableBody,
@@ -28,9 +28,25 @@ import {
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { Plus, Search, Trash2, Loader2, RefreshCw, Edit, Award, Copy } from 'lucide-vue-next'
+import {
+  Plus,
+  Search,
+  Trash2,
+  Loader2,
+  RefreshCw,
+  Edit,
+  Award,
+  Copy,
+  Users,
+  Sparkles,
+  MapPin,
+  Route,
+  X,
+} from 'lucide-vue-next'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import RichTextEditor from '@/components/common/RichTextEditor.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
@@ -44,8 +60,10 @@ import {
   updateSealStatus,
   batchDeleteSeal,
   batchUpdateSealStatus,
+  getSealStats,
   type Seal,
   type SealForm,
+  type SealStats,
 } from '@/api/xunyin/seal'
 import { listJourney, type Journey } from '@/api/xunyin/journey'
 import { listCity, type City } from '@/api/xunyin/city'
@@ -55,22 +73,47 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { exportToCsv, exportToJson, exportToExcel, getExportFilename } from '@/utils/export'
 import { getResourceUrl } from '@/utils/url'
+import { getDictDataByType, type DictData } from '@/api/system/dict'
 
 const loading = ref(true)
 const sealList = ref<Seal[]>([])
 const journeyOptions = ref<Journey[]>([])
 const cityOptions = ref<City[]>([])
 const total = ref(0)
+const stats = ref<SealStats | null>(null)
+const activeTab = ref('all')
+
+// 字典数据
+const sealTypeOptions = ref<DictData[]>([])
+const rarityOptions = ref<DictData[]>([])
+
+// 稀有度颜色映射（可通过字典的 cssClass 配置）
+const rarityColorMap: Record<string, string> = {
+  common: 'bg-gray-100 text-gray-800',
+  rare: 'bg-blue-100 text-blue-800',
+  legendary: 'bg-amber-100 text-amber-800',
+}
+
+// 类型图标映射
+const typeIconMap: Record<string, typeof Route> = {
+  route: Route,
+  city: MapPin,
+  special: Sparkles,
+}
+
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 20,
   type: undefined as string | undefined,
+  rarity: undefined as string | undefined,
   name: '',
   status: undefined as string | undefined,
 })
 
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
+const showImageDialog = ref(false)
+const previewImage = ref('')
 const sealToDelete = ref<Seal | null>(null)
 const isEdit = ref(false)
 const submitLoading = ref(false)
@@ -80,14 +123,9 @@ const selectedIds = ref<string[]>([])
 const selectAll = ref(false)
 const showBatchDeleteDialog = ref(false)
 
-const sealTypeOptions = [
-  { value: 'route', label: '路线印记' },
-  { value: 'city', label: '城市印记' },
-  { value: 'special', label: '特殊印记' },
-]
-
 const form = reactive<SealForm>({
   type: 'route',
+  rarity: 'common',
   name: '',
   imageAsset: '',
   description: '',
@@ -101,12 +139,49 @@ const form = reactive<SealForm>({
 
 const { toast } = useToast()
 
+// 统计卡片数据
+const statsCards = computed(() => {
+  if (!stats.value) return []
+  const cards = [
+    {
+      title: '印记总数',
+      value: stats.value.total,
+      icon: Award,
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+    },
+  ]
+  // 根据字典动态生成类型统计卡片
+  sealTypeOptions.value.forEach((opt) => {
+    const typeKey = opt.dictValue as keyof typeof stats.value.byType
+    cards.push({
+      title: opt.dictLabel || opt.dictValue || '',
+      value: stats.value?.byType[typeKey] || 0,
+      icon: typeIconMap[opt.dictValue || ''] || Award,
+      color:
+        opt.dictValue === 'route'
+          ? 'text-purple-500'
+          : opt.dictValue === 'city'
+            ? 'text-blue-500'
+            : 'text-amber-500',
+      bgColor:
+        opt.dictValue === 'route'
+          ? 'bg-purple-50'
+          : opt.dictValue === 'city'
+            ? 'bg-blue-50'
+            : 'bg-amber-50',
+    })
+  })
+  return cards
+})
+
 async function getList() {
   loading.value = true
   try {
     const params = {
       ...queryParams,
       type: queryParams.type === 'all' ? undefined : queryParams.type,
+      rarity: queryParams.rarity === 'all' ? undefined : queryParams.rarity,
       status: queryParams.status === 'all' ? undefined : queryParams.status,
     }
     const res = await listSeal(params)
@@ -119,6 +194,27 @@ async function getList() {
   }
 }
 
+async function loadStats() {
+  try {
+    stats.value = await getSealStats()
+  } catch {
+    // 忽略统计加载失败
+  }
+}
+
+async function loadDictData() {
+  try {
+    const [typeData, rarityData] = await Promise.all([
+      getDictDataByType('xunyin_seal_type'),
+      getDictDataByType('xunyin_seal_rarity'),
+    ])
+    sealTypeOptions.value = typeData
+    rarityOptions.value = rarityData
+  } catch {
+    // 忽略字典加载失败
+  }
+}
+
 async function getOptions() {
   try {
     const [journeyRes, cityRes] = await Promise.all([
@@ -128,8 +224,16 @@ async function getOptions() {
     journeyOptions.value = journeyRes.list
     cityOptions.value = cityRes.list
   } catch {
-    // 忽略错误，下拉选项加载失败不影响主列表
+    // 忽略错误
   }
+}
+
+function handleTabChange(tab: string | number) {
+  const tabValue = String(tab)
+  activeTab.value = tabValue
+  queryParams.type = tabValue === 'all' ? undefined : tabValue
+  queryParams.pageNum = 1
+  getList()
 }
 
 function handleQuery() {
@@ -138,7 +242,9 @@ function handleQuery() {
 }
 
 function resetQuery() {
+  activeTab.value = 'all'
   queryParams.type = undefined
+  queryParams.rarity = undefined
   queryParams.name = ''
   queryParams.status = undefined
   handleQuery()
@@ -147,6 +253,7 @@ function resetQuery() {
 function resetForm() {
   form.id = undefined
   form.type = 'route'
+  form.rarity = 'common'
   form.name = ''
   form.imageAsset = ''
   form.description = ''
@@ -188,6 +295,7 @@ async function handleSubmit() {
     }
     showDialog.value = false
     getList()
+    loadStats()
   } finally {
     submitLoading.value = false
   }
@@ -204,6 +312,7 @@ async function confirmDelete() {
     await delSeal(sealToDelete.value.id)
     toast({ title: '删除成功' })
     getList()
+    loadStats()
     showDeleteDialog.value = false
   } catch {
     // 错误已由拦截器处理
@@ -224,6 +333,7 @@ async function confirmBatchDelete() {
     await batchDeleteSeal(selectedIds.value)
     toast({ title: `成功删除 ${selectedIds.value.length} 条数据` })
     getList()
+    loadStats()
     showBatchDeleteDialog.value = false
   } catch {
     // 错误已由拦截器处理
@@ -240,8 +350,10 @@ async function handleBatchStatus(status: string) {
     await batchUpdateSealStatus(selectedIds.value, status)
     toast({ title: status === '0' ? '批量启用成功' : '批量停用成功' })
     getList()
-  } catch (e: any) {
-    toast({ title: '操作失败', description: e.message, variant: 'destructive' })
+    loadStats()
+  } catch (e: unknown) {
+    const error = e as Error
+    toast({ title: '操作失败', description: error.message, variant: 'destructive' })
   }
 }
 
@@ -273,10 +385,12 @@ watch(
 )
 
 function getSealTypeLabel(type: string) {
-  return sealTypeOptions.find((t) => t.value === type)?.label || type
+  const opt = sealTypeOptions.value.find((t) => t.dictValue === type)
+  return opt?.dictLabel || type
 }
 
 function getSealTypeVariant(type: string) {
+  // 可以通过字典的 listClass 配置，这里保留默认映射
   switch (type) {
     case 'route':
       return 'default'
@@ -289,11 +403,24 @@ function getSealTypeVariant(type: string) {
   }
 }
 
+function getRarityLabel(rarity: string) {
+  const opt = rarityOptions.value.find((r) => r.dictValue === rarity)
+  return opt?.dictLabel || rarity
+}
+
+function getRarityClass(rarity: string) {
+  // 优先使用字典的 cssClass，否则使用默认映射
+  const opt = rarityOptions.value.find((r) => r.dictValue === rarity)
+  if (opt?.cssClass) return opt.cssClass
+  return rarityColorMap[rarity] || 'bg-gray-100 text-gray-800'
+}
+
 // 状态切换
 async function handleStatusChange(id: string, status: string) {
   await updateSealStatus(id, status)
   const seal = sealList.value.find((s) => s.id === id)
   if (seal) seal.status = status
+  loadStats()
 }
 
 // 复制数据
@@ -307,15 +434,23 @@ async function handleCopy(row: Seal) {
   showDialog.value = true
 }
 
+// 图片预览
+function handleImagePreview(url: string) {
+  previewImage.value = getResourceUrl(url)
+  showImageDialog.value = true
+}
+
 // 导出
 function handleExport(format: 'xlsx' | 'csv' | 'json') {
   const filename = getExportFilename('印记数据')
   const columns = [
     { key: 'name' as const, label: '名称' },
     { key: 'type' as const, label: '类型' },
+    { key: 'rarity' as const, label: '稀有度' },
     { key: 'journeyName' as const, label: '关联文化之旅' },
     { key: 'cityName' as const, label: '关联城市' },
     { key: 'badgeTitle' as const, label: '称号' },
+    { key: 'collectedCount' as const, label: '收集人数' },
     { key: 'unlockCondition' as const, label: '解锁条件' },
     { key: 'orderNum' as const, label: '排序号' },
     { key: 'status' as const, label: '状态' },
@@ -330,13 +465,16 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
 }
 
 onMounted(() => {
+  loadDictData()
   getList()
   getOptions()
+  loadStats()
 })
 </script>
 
 <template>
   <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <!-- 页面标题 -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-xl sm:text-2xl font-bold tracking-tight">印记管理</h2>
@@ -352,18 +490,56 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- 统计卡片 -->
+    <div v-if="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <Card v-for="card in statsCards" :key="card.title" class="overflow-hidden">
+        <CardContent class="p-4">
+          <div class="flex items-center gap-3">
+            <div :class="['p-2 rounded-lg', card.bgColor]">
+              <component :is="card.icon" :class="['h-5 w-5', card.color]" />
+            </div>
+            <div>
+              <p class="text-sm text-muted-foreground">{{ card.title }}</p>
+              <p class="text-2xl font-bold">{{ card.value }}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- 标签页切换 -->
+    <Tabs :model-value="activeTab" @update:model-value="handleTabChange" class="w-full">
+      <TabsList
+        :class="['grid w-full lg:w-auto lg:inline-grid', `grid-cols-${sealTypeOptions.length + 1}`]"
+      >
+        <TabsTrigger value="all">
+          <Award class="h-4 w-4 mr-2" />
+          全部
+          <Badge variant="secondary" class="ml-2">{{ stats?.total || 0 }}</Badge>
+        </TabsTrigger>
+        <TabsTrigger v-for="opt in sealTypeOptions" :key="opt.dictValue" :value="opt.dictValue">
+          <component :is="typeIconMap[opt.dictValue || ''] || Award" class="h-4 w-4 mr-2" />
+          {{ opt.dictLabel }}
+          <Badge variant="secondary" class="ml-2">
+            {{ stats?.byType[opt.dictValue as keyof typeof stats.byType] || 0 }}
+          </Badge>
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+
+    <!-- 筛选条件 -->
     <div
       class="flex flex-wrap gap-3 sm:gap-4 items-center bg-background/95 p-3 sm:p-4 border rounded-lg"
     >
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">印记类型</span>
-        <Select v-model="queryParams.type" @update:model-value="handleQuery">
-          <SelectTrigger class="w-[130px]"><SelectValue placeholder="全部" /></SelectTrigger>
+        <span class="text-sm font-medium">稀有度</span>
+        <Select v-model="queryParams.rarity" @update:model-value="handleQuery">
+          <SelectTrigger class="w-[120px]"><SelectValue placeholder="全部" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">全部</SelectItem>
-            <SelectItem v-for="t in sealTypeOptions" :key="t.value" :value="t.value">{{
-              t.label
-            }}</SelectItem>
+            <SelectItem v-for="r in rarityOptions" :key="r.dictValue" :value="r.dictValue || ''">
+              {{ r.dictLabel }}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -406,15 +582,16 @@ onMounted(() => {
       <Button size="sm" variant="destructive" @click="handleBatchDelete">批量删除</Button>
     </div>
 
+    <!-- 数据表格 -->
     <div class="border rounded-md bg-card overflow-x-auto">
-      <TableSkeleton v-if="loading" :columns="8" :rows="10" />
+      <TableSkeleton v-if="loading" :columns="9" :rows="10" />
       <EmptyState
         v-else-if="sealList.length === 0"
         title="暂无印记数据"
         action-text="新增印记"
         @action="handleAdd"
       />
-      <Table v-else class="min-w-[900px]">
+      <Table v-else class="min-w-[1000px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">
@@ -422,8 +599,9 @@ onMounted(() => {
             </TableHead>
             <TableHead>印记</TableHead>
             <TableHead>类型</TableHead>
+            <TableHead>稀有度</TableHead>
             <TableHead>关联</TableHead>
-            <TableHead>称号</TableHead>
+            <TableHead>收集人数</TableHead>
             <TableHead>排序</TableHead>
             <TableHead>状态</TableHead>
             <TableHead class="text-right">操作</TableHead>
@@ -439,24 +617,17 @@ onMounted(() => {
             </TableCell>
             <TableCell>
               <div class="flex items-center gap-3">
-                <TooltipProvider v-if="seal.imageAsset">
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <img
-                        :src="getResourceUrl(seal.imageAsset)"
-                        :alt="seal.name"
-                        class="w-10 h-10 rounded-full object-cover border"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent side="right" class="p-0">
-                      <img
-                        :src="getResourceUrl(seal.imageAsset)"
-                        :alt="seal.name"
-                        class="max-w-[200px] max-h-[200px] rounded-lg"
-                      />
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <div
+                  v-if="seal.imageAsset"
+                  class="cursor-pointer"
+                  @click="handleImagePreview(seal.imageAsset)"
+                >
+                  <img
+                    :src="getResourceUrl(seal.imageAsset)"
+                    :alt="seal.name"
+                    class="w-10 h-10 rounded-full object-cover border hover:ring-2 hover:ring-primary transition-all"
+                  />
+                </div>
                 <div
                   v-else
                   class="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
@@ -464,24 +635,56 @@ onMounted(() => {
                   <Award class="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <div class="font-medium">{{ seal.name }}</div>
-                  <div class="text-xs text-muted-foreground line-clamp-1">
-                    {{ seal.description || '-' }}
+                  <div class="font-medium flex items-center gap-2">
+                    {{ seal.name }}
+                    <span
+                      v-if="seal.badgeTitle"
+                      class="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded"
+                    >
+                      {{ seal.badgeTitle }}
+                    </span>
+                  </div>
+                  <div class="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
+                    {{ seal.description || seal.unlockCondition || '-' }}
                   </div>
                 </div>
               </div>
             </TableCell>
             <TableCell>
-              <Badge :variant="getSealTypeVariant(seal.type)">{{
-                getSealTypeLabel(seal.type)
-              }}</Badge>
+              <Badge :variant="getSealTypeVariant(seal.type)">
+                {{ getSealTypeLabel(seal.type) }}
+              </Badge>
             </TableCell>
             <TableCell>
-              <span v-if="seal.journeyName">文化之旅: {{ seal.journeyName }}</span>
-              <span v-else-if="seal.cityName">城市: {{ seal.cityName }}</span>
+              <span
+                :class="['text-xs px-2 py-1 rounded-full font-medium', getRarityClass(seal.rarity)]"
+              >
+                {{ getRarityLabel(seal.rarity) }}
+              </span>
+            </TableCell>
+            <TableCell>
+              <div v-if="seal.journeyName" class="flex items-center gap-1.5">
+                <Badge variant="outline" class="text-purple-600 border-purple-200 bg-purple-50">
+                  <Route class="w-3 h-3 mr-1" />
+                  {{ seal.journeyName }}
+                </Badge>
+              </div>
+              <div v-else-if="seal.cityName" class="flex items-center gap-1.5">
+                <Badge variant="outline" class="text-blue-600 border-blue-200 bg-blue-50">
+                  <MapPin class="w-3 h-3 mr-1" />
+                  {{ seal.cityName }}
+                </Badge>
+              </div>
               <span v-else class="text-muted-foreground">-</span>
             </TableCell>
-            <TableCell>{{ seal.badgeTitle || '-' }}</TableCell>
+            <TableCell>
+              <div class="flex items-center gap-1.5">
+                <Users class="w-4 h-4 text-muted-foreground" />
+                <span :class="{ 'font-medium text-primary': (seal.collectedCount || 0) > 0 }">
+                  {{ seal.collectedCount || 0 }}
+                </span>
+              </div>
+            </TableCell>
             <TableCell>{{ seal.orderNum }}</TableCell>
             <TableCell>
               <StatusSwitch
@@ -502,16 +705,17 @@ onMounted(() => {
                   <TooltipContent>复制</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <Button variant="ghost" size="icon" @click="handleUpdate(seal)"
-                ><Edit class="w-4 h-4"
-              /></Button>
+              <Button variant="ghost" size="icon" @click="handleUpdate(seal)">
+                <Edit class="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 class="text-destructive"
                 @click="handleDelete(seal)"
-                ><Trash2 class="w-4 h-4"
-              /></Button>
+              >
+                <Trash2 class="w-4 h-4" />
+              </Button>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -525,6 +729,7 @@ onMounted(() => {
       @change="getList"
     />
 
+    <!-- 新增/编辑对话框 -->
     <Dialog v-model:open="showDialog">
       <DialogContent class="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -538,16 +743,35 @@ onMounted(() => {
               <Select v-model="form.type">
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="t in sealTypeOptions" :key="t.value" :value="t.value">{{
-                    t.label
-                  }}</SelectItem>
+                  <SelectItem
+                    v-for="t in sealTypeOptions"
+                    :key="t.dictValue"
+                    :value="t.dictValue || ''"
+                  >
+                    {{ t.dictLabel }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div class="grid gap-2">
-              <Label>名称 *</Label>
-              <Input v-model="form.name" placeholder="如：西湖探索者" />
+              <Label>稀有度</Label>
+              <Select v-model="form.rarity">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="r in rarityOptions"
+                    :key="r.dictValue"
+                    :value="r.dictValue || ''"
+                  >
+                    {{ r.dictLabel }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+          <div class="grid gap-2">
+            <Label>名称 *</Label>
+            <Input v-model="form.name" placeholder="如：西湖探索者" />
           </div>
           <div class="grid gap-2">
             <Label>图片资源 *</Label>
@@ -559,9 +783,9 @@ onMounted(() => {
               <Select v-model="form.journeyId">
                 <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="j in journeyOptions" :key="j.id" :value="j.id">{{
-                    j.name
-                  }}</SelectItem>
+                  <SelectItem v-for="j in journeyOptions" :key="j.id" :value="j.id">
+                    {{ j.name }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -572,9 +796,9 @@ onMounted(() => {
               <Select v-model="form.cityId">
                 <SelectTrigger><SelectValue placeholder="请选择" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="c in cityOptions" :key="c.id" :value="c.id">{{
-                    c.name
-                  }}</SelectItem>
+                  <SelectItem v-for="c in cityOptions" :key="c.id" :value="c.id">
+                    {{ c.name }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -619,6 +843,27 @@ onMounted(() => {
       </DialogContent>
     </Dialog>
 
+    <!-- 图片预览对话框 -->
+    <Dialog v-model:open="showImageDialog">
+      <DialogContent class="sm:max-w-[500px] p-0 overflow-hidden">
+        <DialogHeader class="sr-only">
+          <DialogTitle>图片预览</DialogTitle>
+        </DialogHeader>
+        <div class="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full"
+            @click="showImageDialog = false"
+          >
+            <X class="w-4 h-4" />
+          </Button>
+          <img :src="previewImage" alt="预览" class="w-full h-auto max-h-[80vh] object-contain" />
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 删除确认对话框 -->
     <ConfirmDialog
       v-model:open="showDeleteDialog"
       title="确认删除"
@@ -628,6 +873,7 @@ onMounted(() => {
       @confirm="confirmDelete"
     />
 
+    <!-- 批量删除确认对话框 -->
     <ConfirmDialog
       v-model:open="showBatchDeleteDialog"
       title="确认批量删除"

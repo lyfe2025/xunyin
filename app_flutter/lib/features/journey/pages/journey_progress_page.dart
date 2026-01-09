@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../../models/journey.dart';
 import '../../../providers/journey_providers.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_buttons.dart';
 
 /// 文化之旅进行中页面 - Aurora UI + Glassmorphism
 class JourneyProgressPage extends ConsumerStatefulWidget {
@@ -44,7 +47,7 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.navigation),
           SafeArea(
             child: Column(
               children: [
@@ -52,7 +55,7 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
                 _buildProgressBar(currentIndex, points.length),
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                     children: [
                       _buildMapPlaceholder(points, currentIndex),
                       if (state.currentPoint != null)
@@ -76,43 +79,24 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
     int total,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => _showExitDialog(context),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.close_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
+          AppCloseButton(onTap: () => _showExitDialog(context)),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: 10,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(AppRadius.iconButton),
+                boxShadow: AppShadow.light,
               ),
               child: Text(
                 detail?.name ?? '文化之旅',
@@ -126,14 +110,14 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [AppColors.accent, Color(0xFFE85A4F)],
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.iconButton),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.accent.withValues(alpha: 0.3),
@@ -158,11 +142,14 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
   Widget _buildProgressBar(int currentIndex, int total) {
     final progress = total == 0 ? 0.0 : (currentIndex + 1) / total;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       height: 6,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(AppRadius.progress),
       ),
       child: FractionallySizedBox(
         alignment: Alignment.centerLeft,
@@ -172,7 +159,7 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
             gradient: const LinearGradient(
               colors: [AppColors.accent, AppColors.primary],
             ),
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(AppRadius.progress),
             boxShadow: [
               BoxShadow(
                 color: AppColors.accent.withValues(alpha: 0.4),
@@ -187,18 +174,13 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
 
   Widget _buildMapPlaceholder(List<ExplorationPoint> points, int currentIndex) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(AppSpacing.lg),
       height: 200,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
         border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            blurRadius: 20,
-          ),
-        ],
+        boxShadow: AppShadow.medium,
       ),
       child: Stack(
         children: [
@@ -298,11 +280,11 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
 
   Widget _buildCurrentPointCard(ExplorationPoint point) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
         boxShadow: [
           BoxShadow(
@@ -380,10 +362,10 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           SizedBox(
             width: double.infinity,
-            height: 52,
+            height: AppSize.buttonHeight,
             child: ElevatedButton(
               onPressed: () {
                 context.push(
@@ -395,15 +377,21 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.navigation_rounded, size: 18),
-                  SizedBox(width: 8),
-                  Text('开始导航', style: TextStyle(fontWeight: FontWeight.w600)),
+                  SizedBox(width: AppSpacing.sm),
+                  Flexible(
+                    child: Text(
+                      '开始导航',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -415,10 +403,15 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
 
   Widget _buildPointsList(List<ExplorationPoint> points, int currentIndex) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        0,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
         border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Column(
@@ -543,7 +536,9 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
         title: const Text('退出文化之旅？'),
         content: const Text('当前进度将被保存，你可以稍后继续。'),
         actions: [
@@ -562,51 +557,4 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
       ),
     );
   }
-}
-
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.primary.withValues(alpha: 0.08);
-    canvas.drawCircle(
-      Offset(size.width * 0.15, size.height * 0.1),
-      size.width * 0.35,
-      paint,
-    );
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.9, size.height * 0.25),
-      size.width * 0.3,
-      paint,
-    );
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.5, size.height * 0.9),
-      size.width * 0.4,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

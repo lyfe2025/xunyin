@@ -29,11 +29,43 @@ enum SealType {
   }
 }
 
+/// 印记稀有度
+enum SealRarity {
+  common,
+  rare,
+  legendary;
+
+  static SealRarity fromString(String value) {
+    switch (value) {
+      case 'common':
+        return SealRarity.common;
+      case 'rare':
+        return SealRarity.rare;
+      case 'legendary':
+        return SealRarity.legendary;
+      default:
+        return SealRarity.common;
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case SealRarity.common:
+        return '普通';
+      case SealRarity.rare:
+        return '稀有';
+      case SealRarity.legendary:
+        return '传说';
+    }
+  }
+}
+
 /// 用户印记
 class UserSeal {
   final String id;
   final String sealId;
   final SealType type;
+  final SealRarity rarity;
   final String name;
   final String imageAsset;
   final String? description;
@@ -48,6 +80,7 @@ class UserSeal {
     required this.id,
     required this.sealId,
     required this.type,
+    required this.rarity,
     required this.name,
     required this.imageAsset,
     this.description,
@@ -65,6 +98,7 @@ class UserSeal {
       id: json['id'] as String,
       sealId: json['sealId'] as String,
       type: SealType.fromString(json['type'] as String),
+      rarity: SealRarity.fromString(json['rarity'] as String? ?? 'common'),
       name: json['name'] as String,
       imageAsset: imageAsset.isNotEmpty
           ? imageAsset
@@ -85,6 +119,7 @@ class SealDetail {
   final String id;
   final String? userSealId;
   final SealType type;
+  final SealRarity rarity;
   final String name;
   final String imageAsset;
   final String? description;
@@ -106,6 +141,7 @@ class SealDetail {
     required this.id,
     this.userSealId,
     required this.type,
+    required this.rarity,
     required this.name,
     required this.imageAsset,
     this.description,
@@ -130,6 +166,7 @@ class SealDetail {
       id: json['id'] as String,
       userSealId: json['userSealId'] as String?,
       type: SealType.fromString(json['type'] as String),
+      rarity: SealRarity.fromString(json['rarity'] as String? ?? 'common'),
       name: json['name'] as String,
       imageAsset: imageAsset.isNotEmpty
           ? imageAsset

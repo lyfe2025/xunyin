@@ -707,6 +707,7 @@ model PointCompletion {
 model Seal {
   id              String    @id @default(cuid())
   type            String    @db.VarChar(20)                          // route, city, special
+  rarity          String    @default("common") @db.VarChar(20)       // common, rare, legendary
   name            String    @db.VarChar(100)
   imageAsset      String    @map("image_asset") @db.VarChar(255)
   description     String?   @db.Text
@@ -724,6 +725,7 @@ model Seal {
   userSeals       UserSeal[]
 
   @@index([type])
+  @@index([rarity])
   @@index([journeyId])
   @@index([cityId])
   @@index([status])

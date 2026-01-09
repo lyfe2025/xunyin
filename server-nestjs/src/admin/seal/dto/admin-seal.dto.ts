@@ -8,6 +8,11 @@ export class QueryAdminSealDto {
   @IsString()
   type?: string
 
+  @ApiPropertyOptional({ description: '稀有度 common/rare/legendary' })
+  @IsOptional()
+  @IsString()
+  rarity?: string
+
   @ApiPropertyOptional({ description: '印记名称' })
   @IsOptional()
   @IsString()
@@ -39,6 +44,12 @@ export class CreateSealDto {
   @IsString()
   @MaxLength(20)
   type: string
+
+  @ApiPropertyOptional({ description: '稀有度 common/rare/legendary', default: 'common' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  rarity?: string = 'common'
 
   @ApiProperty({ description: '印记名称' })
   @IsString()
@@ -92,6 +103,12 @@ export class UpdateSealDto {
   @IsString()
   @MaxLength(20)
   type?: string
+
+  @ApiPropertyOptional({ description: '稀有度 common/rare/legendary' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  rarity?: string
 
   @ApiPropertyOptional({ description: '印记名称' })
   @IsOptional()

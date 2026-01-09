@@ -3,6 +3,7 @@ import request from '@/utils/request'
 export interface Seal {
   id: string
   type: string
+  rarity: string
   name: string
   imageAsset: string
   description?: string
@@ -12,6 +13,7 @@ export interface Seal {
   journeyName?: string
   cityId?: string
   cityName?: string
+  collectedCount?: number
   orderNum: number
   status: string
   createTime: string
@@ -20,6 +22,7 @@ export interface Seal {
 
 export interface SealQuery {
   type?: string
+  rarity?: string
   name?: string
   status?: string
   pageNum?: number
@@ -29,6 +32,7 @@ export interface SealQuery {
 export interface SealForm {
   id?: string
   type: string
+  rarity?: string
   name: string
   imageAsset: string
   description?: string
@@ -40,11 +44,44 @@ export interface SealForm {
   status?: string
 }
 
+export interface SealStats {
+  total: number
+  byType: {
+    route: number
+    city: number
+    special: number
+  }
+  byRarity: {
+    common: number
+    rare: number
+    legendary: number
+  }
+  byStatus: {
+    enabled: number
+    disabled: number
+  }
+  topCollected: {
+    id: string
+    name: string
+    type: string
+    rarity: string
+    imageAsset: string
+    collectedCount: number
+  }[]
+}
+
 export function listSeal(query: SealQuery) {
   return request<{ data: { list: Seal[]; total: number; pageNum: number; pageSize: number } }>({
     url: '/admin/seals',
     method: 'get',
     params: query,
+  }).then((res: any) => res.data)
+}
+
+export function getSealStats() {
+  return request<{ data: SealStats }>({
+    url: '/admin/seals/stats',
+    method: 'get',
   }).then((res: any) => res.data)
 }
 

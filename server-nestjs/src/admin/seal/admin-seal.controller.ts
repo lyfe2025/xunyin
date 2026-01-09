@@ -37,6 +37,13 @@ export class AdminSealController {
     return this.adminSealService.findAll(query)
   }
 
+  @Get('stats')
+  @ApiOperation({ summary: '印记统计' })
+  @RequirePermission('xunyin:seal:query')
+  async getStats() {
+    return this.adminSealService.getStats()
+  }
+
   @Get(':id')
   @ApiOperation({ summary: '印记详情' })
   @RequirePermission('xunyin:seal:query')

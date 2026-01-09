@@ -1,27 +1,153 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 
+/**
+ * 用户动态类型枚举
+ */
+export enum ActivityType {
+  JOURNEY_STARTED = 'journey_started',
+  JOURNEY_COMPLETED = 'journey_completed',
+  SEAL_EARNED = 'seal_earned',
+  SEAL_CHAINED = 'seal_chained',
+  POINT_COMPLETED = 'point_completed',
+  PHOTO_TAKEN = 'photo_taken',
+  LEVEL_UP = 'level_up',
+}
+
 @Injectable()
 export class UserStatsService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * 获取用户统计概览
+   * 获取个人中心首页聚合数据（一次请求返回所有数据）
+   */
+  async getHomeData(userId: string) {
+    const [user, stats, inProgressJourneys, recentActivities] = await Promise.all([
+      this.getUserInfo(userId),
+      this.getOverview(userId),
+      this.getInProgressJourneys(userId, 5),
+      this.getActivities(userId, 5),
+    ])
+
+    return {
+      user,
+      stats,
+      inProgressJourneys,
+      recentActivities,
+    }
+  }
+
+  /**
+   * 获取用户基本信息
+   */
+  private async getUserInfo(userId: string) {
+    const user = await this.prisma.appUser.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        phone: true,
+        nickname: true,
+        avatar: true,
+        badgeTitle: true,
+        totalPoints: true,
+        level: true,
+        createTime: true,
+      },
+    })
+
+    return user
+      ? {
+          id: user.id,
+          phone: user.phone,
+          nickname: user.nickname,
+          avatar: user.avatar,
+          badgeTitle: user.badgeTitle,
+          totalPoints: user.totalPoints,
+          level: user.level,
+          createTime: user.createTime,
+        }
+      : null
+  }
+
+  /**
+   * 获取进行中的旅程列表（包含城市名称）
+   */
+  async getInProgressJourneys(userId: string, limit = 5) {
+    const progresses = await this.prisma.journeyProgress.findMany({
+      where: { userId, status: 'in_progress' },
+      include: {
+        journey: {
+          select: {
+            id: true,
+            name: true,
+            cityId: true,
+            city: { select: { name: true } },
+          },
+        },
+        _count: {
+          select: { pointCompletions: true },
+        },
+      },
+      orderBy: { startTime: 'desc' },
+      take: limit,
+    })
+
+    // 获取每个旅程的总探索点数
+    const journeyIds = progresses.map((p) => p.journeyId)
+    const pointCounts = await this.prisma.explorationPoint.groupBy({
+      by: ['journeyId'],
+      where: { journeyId: { in: journeyIds } },
+      _count: { id: true },
+    })
+    const pointCountMap = new Map(pointCounts.map((p) => [p.journeyId, p._count.id]))
+
+    return progresses.map((p) => ({
+      id: p.id,
+      journeyId: p.journeyId,
+      journeyName: p.journey.name,
+      cityName: p.journey.city.name,
+      status: p.status,
+      startTime: p.startTime,
+      completedPoints: p._count.pointCompletions,
+      totalPoints: pointCountMap.get(p.journeyId) || 0,
+    }))
+  }
+
+  /**
+   * 获取用户统计概览（包含城市解锁统计）
    */
   async getOverview(userId: string) {
-    const [user, completedJourneys, inProgressJourneys, totalSeals, chainedSeals, totalPhotos] =
-      await Promise.all([
-        this.prisma.appUser.findUnique({ where: { id: userId } }),
-        this.prisma.journeyProgress.count({
-          where: { userId, status: 'completed' },
-        }),
-        this.prisma.journeyProgress.count({
-          where: { userId, status: 'in_progress' },
-        }),
-        this.prisma.userSeal.count({ where: { userId } }),
-        this.prisma.userSeal.count({ where: { userId, isChained: true } }),
-        this.prisma.explorationPhoto.count({ where: { userId } }),
-      ])
+    const [
+      user,
+      completedJourneys,
+      inProgressJourneys,
+      totalSeals,
+      chainedSeals,
+      totalPhotos,
+      totalCities,
+      userJourneyProgresses,
+    ] = await Promise.all([
+      this.prisma.appUser.findUnique({ where: { id: userId } }),
+      this.prisma.journeyProgress.count({
+        where: { userId, status: 'completed' },
+      }),
+      this.prisma.journeyProgress.count({
+        where: { userId, status: 'in_progress' },
+      }),
+      this.prisma.userSeal.count({ where: { userId } }),
+      this.prisma.userSeal.count({ where: { userId, isChained: true } }),
+      this.prisma.explorationPhoto.count({ where: { userId } }),
+      this.prisma.city.count({ where: { status: '0' } }),
+      // 获取用户所有进行中或已完成的旅程，用于计算解锁城市
+      this.prisma.journeyProgress.findMany({
+        where: { userId, status: { in: ['in_progress', 'completed'] } },
+        select: { journey: { select: { cityId: true } } },
+      }),
+    ])
+
+    // 计算已解锁城市数（去重）
+    const unlockedCityIds = new Set(userJourneyProgresses.map((p) => p.journey.cityId))
+    const unlockedCities = unlockedCityIds.size
 
     // 计算总行程距离
     const completedJourneyIds = await this.prisma.journeyProgress.findMany({
@@ -47,6 +173,8 @@ export class UserStatsService {
     return {
       totalPoints: user?.totalPoints || 0,
       badgeTitle: user?.badgeTitle,
+      unlockedCities,
+      totalCities,
       completedJourneys,
       inProgressJourneys,
       totalSeals,

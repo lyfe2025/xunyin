@@ -1,7 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
+import '../models/profile_home.dart';
 import '../services/user_service.dart';
 import 'service_providers.dart';
+
+/// 个人中心首页聚合数据（推荐使用，一次请求获取所有数据）
+final profileHomeProvider = FutureProvider<ProfileHomeData>((ref) async {
+  final service = ref.watch(userServiceProvider);
+  return service.getProfileHomeData();
+});
 
 /// 当前用户信息
 final currentUserProvider = FutureProvider<AppUser?>((ref) async {

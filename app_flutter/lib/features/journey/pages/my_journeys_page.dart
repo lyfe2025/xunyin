@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/journey_providers.dart';
@@ -28,7 +29,7 @@ class MyJourneysPage extends ConsumerWidget {
                 Expanded(
                   child: journeysAsync.when(
                     data: (journeys) => journeys.isEmpty
-                        ? _buildEmpty()
+                        ? _buildEmpty(context)
                         : _buildList(context, journeys),
                     loading: () => const AppLoading(message: '加载中...'),
                     error: (e, _) => _buildError(e.toString()),
@@ -42,41 +43,76 @@ class MyJourneysPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmpty() {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.88),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.route_rounded,
-              size: 64,
-              color: AppColors.textHint.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '还没有开始任何旅程',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+  Widget _buildEmpty(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.go('/'),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.88),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                'assets/illustrations/empty_journey.svg',
+                width: 180,
+                height: 135,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '去探索城市，开启你的文化之旅吧',
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textHint.withValues(alpha: 0.7),
+              const SizedBox(height: 20),
+              const Text(
+                '还没有开始任何旅程',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              const Text(
+                '去探索城市，开启你的文化之旅吧',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textHint,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.accent],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '发现城市',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

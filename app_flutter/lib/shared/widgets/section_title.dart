@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 
-/// 统一的分组标题组件 - 带竖条装饰
+/// 统一的分组标题组件 - 简洁风格
 class SectionTitle extends StatelessWidget {
   final String title;
   final Color? color;
@@ -18,23 +18,10 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.accent;
+    final effectiveColor = color ?? AppColors.textPrimary;
 
     return Row(
       children: [
-        Container(
-          width: 4,
-          height: 18,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [effectiveColor, effectiveColor.withValues(alpha: 0.5)],
-            ),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 10),
         if (icon != null) ...[
           Icon(icon, size: 18, color: effectiveColor),
           const SizedBox(width: 8),
@@ -43,7 +30,7 @@ class SectionTitle extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w600,
               color: effectiveColor,
             ),
@@ -55,7 +42,7 @@ class SectionTitle extends StatelessWidget {
   }
 }
 
-/// 带数量徽章的分组标题
+/// 带数量徽章的分组标题 - 简洁风格
 class SectionTitleWithBadge extends StatelessWidget {
   final String title;
   final int count;
@@ -70,23 +57,14 @@ class SectionTitleWithBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.accent;
+    final effectiveColor = color ?? AppColors.textPrimary;
 
     return Row(
       children: [
-        Container(
-          width: 4,
-          height: 18,
-          decoration: BoxDecoration(
-            color: effectiveColor,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 10),
         Text(
           title,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
             color: effectiveColor,
           ),
@@ -95,15 +73,15 @@ class SectionTitleWithBadge extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
-            color: effectiveColor.withValues(alpha: 0.1),
+            color: AppColors.accent.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             '$count',
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: effectiveColor,
+              fontWeight: FontWeight.w600,
+              color: AppColors.accent,
             ),
           ),
         ),

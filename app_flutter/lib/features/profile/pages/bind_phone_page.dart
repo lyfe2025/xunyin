@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../../providers/service_providers.dart';
 import '../../../services/sms_service.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_buttons.dart';
 
 /// 绑定手机页面 - Aurora UI + Glassmorphism
 class BindPhonePage extends ConsumerStatefulWidget {
@@ -137,7 +140,7 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.form),
           SafeArea(
             child: Column(
               children: [
@@ -153,30 +156,10 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
 
   Widget _buildAppBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.pageHorizontal),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
-              ),
-            ),
-          ),
+          AppBackButton(onTap: () => Navigator.of(context).pop()),
           const Expanded(
             child: Text(
               '绑定手机号',
@@ -188,7 +171,7 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
               ),
             ),
           ),
-          const SizedBox(width: 42),
+          const SizedBox(width: AppSize.iconButtonSize),
         ],
       ),
     );
@@ -196,14 +179,14 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
 
   Widget _buildContent() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.pageHorizontal),
       child: Form(
         key: _formKey,
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.xl),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(AppSpacing.cardPadding),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
@@ -214,7 +197,7 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                 color: AppColors.primary,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.xl),
             const Text(
               '绑定手机号',
               style: TextStyle(
@@ -223,14 +206,14 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             const Text(
               '绑定手机号后可用于账号安全验证',
               style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xxxl),
             _buildFormCard(),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             const Text(
               '验证码将发送到您的手机，5分钟内有效',
               style: TextStyle(fontSize: 12, color: AppColors.textHint),
@@ -243,17 +226,14 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
 
   Widget _buildFormCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
-            blurRadius: 16,
-          ),
-        ],
+        color: Colors.white.withValues(alpha: AppOpacity.glassCard),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: AppOpacity.glassBorder),
+        ),
+        boxShadow: AppShadow.glass,
       ),
       child: Column(
         children: [
@@ -274,17 +254,19 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
               filled: true,
               fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.input),
                 borderSide: BorderSide.none,
               ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) return '请输入手机号';
-              if (!RegExp(r'^1[3-9]\d{9}$').hasMatch(value)) return '请输入正确的手机号';
+              if (!RegExp(r'^1[3-9]\d{9}$').hasMatch(value)) {
+                return '请输入正确的手机号';
+              }
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
               Expanded(
@@ -305,7 +287,7 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                     filled: true,
                     fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.input),
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -316,63 +298,36 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                   },
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               _buildCodeButton(),
             ],
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _bindPhone,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      '确认绑定',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
+          const SizedBox(height: AppSpacing.xxl),
+          AppPrimaryButton(
+            onPressed: _isLoading ? null : _bindPhone,
+            isLoading: _isLoading,
+            child: const Text('确认绑定'),
           ),
         ],
       ),
     );
   }
 
-  /// 获取验证码按钮 - 与登录页风格统一
   Widget _buildCodeButton() {
     final isDisabled = _isSending || _countdown > 0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: isDisabled ? null : _sendCode,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.input),
         child: Container(
           width: 100,
-          height: 52,
+          height: AppSize.buttonHeight,
           decoration: BoxDecoration(
             color: isDisabled
                 ? AppColors.surfaceVariant
                 : AppColors.primary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.input),
             border: Border.all(
               color: isDisabled
                   ? AppColors.border
@@ -394,9 +349,7 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: isDisabled
-                          ? AppColors.textHint
-                          : AppColors.primary,
+                      color: isDisabled ? AppColors.textHint : AppColors.primary,
                     ),
                   ),
           ),
@@ -404,51 +357,4 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
       ),
     );
   }
-}
-
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.primary.withValues(alpha: 0.1);
-    canvas.drawCircle(
-      Offset(size.width * 0.5, size.height * 0.1),
-      size.width * 0.45,
-      paint,
-    );
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.1, size.height * 0.45),
-      size.width * 0.35,
-      paint,
-    );
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.7),
-      size.width * 0.3,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -181,6 +181,7 @@ class JourneyProgress {
   final String id;
   final String journeyId;
   final String journeyName;
+  final String? cityName;
   final String status; // in_progress, completed, abandoned
   final DateTime startTime;
   final DateTime? completeTime;
@@ -192,6 +193,7 @@ class JourneyProgress {
     required this.id,
     required this.journeyId,
     required this.journeyName,
+    this.cityName,
     required this.status,
     required this.startTime,
     this.completeTime,
@@ -205,6 +207,7 @@ class JourneyProgress {
       id: json['id'] as String,
       journeyId: json['journeyId'] as String,
       journeyName: json['journeyName'] as String,
+      cityName: json['cityName'] as String?,
       status: json['status'] as String,
       startTime: DateTime.parse(json['startTime'] as String),
       completeTime: json['completeTime'] != null

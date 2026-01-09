@@ -9,10 +9,11 @@ export class AdminSealService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryAdminSealDto) {
-    const { type, name, status, pageNum = 1, pageSize = 20 } = query
+    const { type, rarity, name, status, pageNum = 1, pageSize = 20 } = query
 
     const where = {
       ...(type && { type }),
+      ...(rarity && { rarity }),
       ...(name && { name: { contains: name } }),
       ...(status && { status }),
     }
@@ -23,6 +24,7 @@ export class AdminSealService {
         include: {
           journey: { select: { id: true, name: true } },
           city: { select: { id: true, name: true } },
+          _count: { select: { userSeals: true } },
         },
         orderBy: { orderNum: 'asc' },
         skip: (pageNum - 1) * pageSize,
@@ -36,10 +38,78 @@ export class AdminSealService {
         ...seal,
         journeyName: seal.journey?.name,
         cityName: seal.city?.name,
+        collectedCount: seal._count.userSeals,
       })),
       total,
       pageNum,
       pageSize,
+    }
+  }
+
+  async getStats() {
+    const [total, byType, byRarity, byStatus, topCollected] = await Promise.all([
+      // 总数
+      this.prisma.seal.count(),
+      // 按类型统计
+      this.prisma.seal.groupBy({
+        by: ['type'],
+        _count: { id: true },
+      }),
+      // 按稀有度统计
+      this.prisma.seal.groupBy({
+        by: ['rarity'],
+        _count: { id: true },
+      }),
+      // 按状态统计
+      this.prisma.seal.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+      // 收集人数最多的印记
+      this.prisma.seal.findMany({
+        include: {
+          _count: { select: { userSeals: true } },
+        },
+        orderBy: {
+          userSeals: { _count: 'desc' },
+        },
+        take: 5,
+      }),
+    ])
+
+    const typeStats = { route: 0, city: 0, special: 0 }
+    byType.forEach((item) => {
+      if (item.type in typeStats) {
+        typeStats[item.type as keyof typeof typeStats] = item._count.id
+      }
+    })
+
+    const rarityStats = { common: 0, rare: 0, legendary: 0 }
+    byRarity.forEach((item) => {
+      if (item.rarity in rarityStats) {
+        rarityStats[item.rarity as keyof typeof rarityStats] = item._count.id
+      }
+    })
+
+    const statusStats = { enabled: 0, disabled: 0 }
+    byStatus.forEach((item) => {
+      if (item.status === '0') statusStats.enabled = item._count.id
+      else if (item.status === '1') statusStats.disabled = item._count.id
+    })
+
+    return {
+      total,
+      byType: typeStats,
+      byRarity: rarityStats,
+      byStatus: statusStats,
+      topCollected: topCollected.map((seal) => ({
+        id: seal.id,
+        name: seal.name,
+        type: seal.type,
+        rarity: seal.rarity,
+        imageAsset: seal.imageAsset,
+        collectedCount: seal._count.userSeals,
+      })),
     }
   }
 

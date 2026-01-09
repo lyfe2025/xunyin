@@ -12,6 +12,16 @@ import type { CurrentAppUser } from '../app-auth/decorators/current-user.decorat
 export class UserStatsController {
   constructor(private readonly userStatsService: UserStatsService) {}
 
+  @Get('home')
+  @ApiOperation({
+    summary: '获取个人中心首页数据（聚合）',
+    description: '一次请求返回用户信息、统计数据、进行中旅程、最近动态',
+  })
+  @ApiResponse({ status: 200, description: '成功' })
+  async getHomeData(@CurrentUser() user: CurrentAppUser) {
+    return this.userStatsService.getHomeData(user.userId)
+  }
+
   @Get('overview')
   @ApiOperation({ summary: '获取用户统计概览' })
   @ApiResponse({ status: 200, description: '成功' })

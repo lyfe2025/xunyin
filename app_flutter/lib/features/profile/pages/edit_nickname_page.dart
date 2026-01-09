@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../../services/profile_service.dart';
 import '../../../providers/service_providers.dart';
 import '../../../providers/user_providers.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_back_button.dart';
 
 /// 修改昵称页面 - Aurora UI + Glassmorphism
 class EditNicknamePage extends ConsumerStatefulWidget {
@@ -74,7 +77,7 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.form),
           SafeArea(
             child: Column(
               children: [
@@ -90,30 +93,10 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
 
   Widget _buildAppBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
-              ),
-            ),
-          ),
+          const AppBackButton(),
           const Expanded(
             child: Text(
               '修改昵称',
@@ -133,13 +116,8 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
                 gradient: const LinearGradient(
                   colors: [AppColors.accent, Color(0xFFE85A4F)],
                 ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accent.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(AppRadius.iconButton),
+                boxShadow: AppShadow.accent(AppColors.accent),
               ),
               child: _isLoading
                   ? const SizedBox(
@@ -166,21 +144,16 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
 
   Widget _buildForm() {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Form(
         key: _formKey,
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
             border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.06),
-                blurRadius: 16,
-              ),
-            ],
+            boxShadow: AppShadow.medium,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +176,7 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
                   filled: true,
                   fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                     borderSide: BorderSide.none,
                   ),
                   counterText: '',
@@ -233,45 +206,4 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
       ),
     );
   }
-}
-
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.primary.withValues(alpha: 0.08);
-    canvas.drawCircle(
-      Offset(size.width * 0.2, size.height * 0.15),
-      size.width * 0.4,
-      paint,
-    );
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.4),
-      size.width * 0.35,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

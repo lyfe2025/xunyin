@@ -32,6 +32,7 @@ export class SealService {
       id: us.id,
       sealId: us.sealId,
       type: us.seal.type,
+      rarity: us.seal.rarity,
       name: us.seal.name,
       imageAsset: us.seal.imageAsset,
       description: us.seal.description,
@@ -71,6 +72,7 @@ export class SealService {
       id: seal.id,
       userSealId: userSeal?.id,
       type: seal.type,
+      rarity: seal.rarity,
       name: seal.name,
       imageAsset: seal.imageAsset,
       description: seal.description,
@@ -151,16 +153,17 @@ export class SealService {
       orderBy: { orderNum: 'asc' },
     })
 
-    // 获取用户已拥有的印记
+    // 获取用户已拥有的印记（包含获得时间）
     const userSeals = await this.prisma.userSeal.findMany({
       where: { userId },
-      select: { sealId: true },
+      select: { sealId: true, earnedTime: true },
     })
-    const ownedSealIds = new Set(userSeals.map((us) => us.sealId))
+    const userSealMap = new Map(userSeals.map((us) => [us.sealId, us.earnedTime]))
 
     return seals.map((seal) => ({
       id: seal.id,
       type: seal.type,
+      rarity: seal.rarity,
       name: seal.name,
       imageAsset: seal.imageAsset,
       description: seal.description,
@@ -170,7 +173,8 @@ export class SealService {
       journeyName: seal.journey?.name,
       cityId: seal.cityId,
       cityName: seal.city?.name,
-      owned: ownedSealIds.has(seal.id),
+      owned: userSealMap.has(seal.id),
+      earnedTime: userSealMap.get(seal.id) ?? null,
     }))
   }
 }

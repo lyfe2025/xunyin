@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/url_utils.dart';
@@ -263,31 +264,13 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 18,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.accent, AppColors.accentLight],
-            ),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
     );
   }
 
@@ -295,16 +278,31 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
     if (journeys.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(40),
+          padding: const EdgeInsets.all(32),
           child: Column(
             children: [
-              Icon(
-                Icons.explore_off_rounded,
-                size: 48,
-                color: AppColors.textHint.withValues(alpha: 0.5),
+              SvgPicture.asset(
+                'assets/illustrations/empty_city.svg',
+                width: 140,
+                height: 105,
               ),
-              const SizedBox(height: 12),
-              const Text('暂无文化之旅', style: TextStyle(color: AppColors.textHint)),
+              const SizedBox(height: 16),
+              const Text(
+                '暂无文化之旅',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '敬请期待更多精彩内容',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textHint.withValues(alpha: 0.7),
+                ),
+              ),
             ],
           ),
         ),
@@ -324,16 +322,26 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
         padding: const EdgeInsets.all(32),
         child: Column(
           children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 48,
-              color: AppColors.textHint,
+            SvgPicture.asset(
+              'assets/illustrations/error_network.svg',
+              width: 140,
+              height: 105,
             ),
-            const SizedBox(height: 12),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               '加载失败',
               style: TextStyle(
-                color: AppColors.textSecondary.withValues(alpha: 0.8),
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '请检查网络后重试',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textHint.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -631,15 +639,26 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.search_off_rounded,
-                            size: 40,
-                            color: AppColors.textHint.withValues(alpha: 0.5),
+                          SvgPicture.asset(
+                            'assets/illustrations/no_search_result.svg',
+                            width: 120,
+                            height: 90,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           const Text(
                             '没有找到匹配的文化之旅',
-                            style: TextStyle(color: AppColors.textHint),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '换个关键词试试吧',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textHint.withValues(alpha: 0.7),
+                            ),
                           ),
                         ],
                       ),

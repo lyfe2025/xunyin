@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../../providers/journey_providers.dart';
+import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_buttons.dart';
 
 /// 导航页面 - Aurora UI + Glassmorphism
 class NavigationPage extends ConsumerStatefulWidget {
@@ -51,7 +54,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     return Scaffold(
       body: Stack(
         children: [
-          const _AuroraBackground(),
+          const AuroraBackground(variant: AuroraVariant.navigation),
           SafeArea(
             child: Column(
               children: [
@@ -69,33 +72,13 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
 
   Widget _buildAppBar(BuildContext context, String pointName) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.close_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
-              ),
-            ),
-          ),
+          AppCloseButton(onTap: () => context.pop()),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Text(
                 '导航到：$pointName',
                 textAlign: TextAlign.center,
@@ -109,7 +92,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
             ),
           ),
           // 右侧占位，平衡左侧关闭按钮
-          const SizedBox(width: 42),
+          const SizedBox(width: AppSize.iconButtonSize),
         ],
       ),
     );
@@ -117,17 +100,12 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
 
   Widget _buildMapPlaceholder() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
         border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            blurRadius: 20,
-          ),
-        ],
+        boxShadow: AppShadow.medium,
       ),
       child: const Center(
         child: Column(
@@ -148,18 +126,13 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
 
   Widget _buildNavigationInfo() {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            blurRadius: 16,
-          ),
-        ],
+        boxShadow: AppShadow.medium,
       ),
       child: Column(
         children: [
@@ -242,27 +215,20 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   Widget _buildNavigatingCard() {
     return Padding(
       padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
       ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: OutlinedButton.icon(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.close_rounded, size: 20),
-          label: const Text(
-            '结束导航',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.accent,
-            side: const BorderSide(color: AppColors.accent),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
+      child: AppSecondaryButton(
+        onPressed: () => context.pop(),
+        height: AppSize.buttonHeight,
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.close_rounded, size: 20),
+            SizedBox(width: AppSpacing.sm),
+            Text('结束导航'),
+          ],
         ),
       ),
     );
@@ -274,11 +240,11 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
 
     return Container(
       margin: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -288,13 +254,13 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
             AppColors.accent.withValues(alpha: 0.08),
           ],
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: AppColors.accent.withValues(alpha: 0.15),
               shape: BoxShape.circle,
@@ -305,7 +271,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
               color: AppColors.accent,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           const Text(
             '你已到达探索点！',
             style: TextStyle(
@@ -314,7 +280,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             point?.name ?? '',
             style: const TextStyle(
@@ -322,12 +288,12 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
               fontSize: 14,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.cardPadding),
           Row(
             children: [
               Expanded(
                 child: SizedBox(
-                  height: 44,
+                  height: AppSize.buttonHeightSmall,
                   child: OutlinedButton(
                     onPressed: () => context.pop(),
                     style: OutlinedButton.styleFrom(
@@ -335,7 +301,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                       side: const BorderSide(color: AppColors.border),
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                     ),
                     child: const FittedBox(
@@ -345,10 +311,10 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: SizedBox(
-                  height: 44,
+                  height: AppSize.buttonHeightSmall,
                   child: ElevatedButton.icon(
                     onPressed: () => context.push('/ar-task/${widget.pointId}'),
                     icon: const Icon(Icons.play_arrow_rounded, size: 18),
@@ -365,7 +331,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                     ),
                   ),
@@ -377,51 +343,4 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
       ),
     );
   }
-}
-
-/// Aurora 背景
-class _AuroraBackground extends StatelessWidget {
-  const _AuroraBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
-        ),
-      ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.primary.withValues(alpha: 0.08);
-    canvas.drawCircle(
-      Offset(size.width * 0.2, size.height * 0.15),
-      size.width * 0.4,
-      paint,
-    );
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.35),
-      size.width * 0.35,
-      paint,
-    );
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
-    canvas.drawCircle(
-      Offset(size.width * 0.4, size.height * 0.85),
-      size.width * 0.4,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

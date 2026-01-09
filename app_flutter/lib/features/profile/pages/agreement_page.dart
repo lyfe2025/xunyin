@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
@@ -157,14 +158,30 @@ class _AgreementPageState extends State<AgreementPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: AppColors.textHint,
+              SvgPicture.asset(
+                'assets/illustrations/error_network.svg',
+                width: 160,
+                height: 120,
               ),
-              const SizedBox(height: 16),
-              Text(_error!, style: const TextStyle(color: AppColors.textHint)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+              const Text(
+                '加载失败',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textHint,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
               TextButton.icon(
                 onPressed: _loadAgreement,
                 icon: const Icon(Icons.refresh_rounded),
@@ -177,8 +194,26 @@ class _AgreementPageState extends State<AgreementPage> {
     }
 
     if (_agreement == null) {
-      return const Center(
-        child: Text('暂无内容', style: TextStyle(color: AppColors.textHint)),
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              'assets/illustrations/no_search_result.svg',
+              width: 140,
+              height: 105,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '暂无内容',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       );
     }
 

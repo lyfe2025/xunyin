@@ -1,10 +1,17 @@
 import '../core/api/api_client.dart';
 import '../models/user.dart';
+import '../models/profile_home.dart';
 
 class UserService {
   final ApiClient _api;
 
   UserService(this._api);
+
+  /// 获取个人中心首页聚合数据（推荐使用，减少请求次数）
+  Future<ProfileHomeData> getProfileHomeData() async {
+    final response = await _api.get('/stats/home');
+    return ProfileHomeData.fromJson(response['data']);
+  }
 
   /// 获取当前用户信息
   Future<AppUser> getCurrentUser() async {

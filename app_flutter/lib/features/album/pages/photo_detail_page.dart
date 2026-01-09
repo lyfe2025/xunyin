@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
+import '../../../shared/widgets/app_buttons.dart';
 import '../../../shared/widgets/simple_share_sheet.dart';
 import '../../../services/share_service.dart';
 
@@ -27,24 +29,10 @@ class PhotoDetailPage extends StatelessWidget {
 
   Widget _buildAppBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.pageHorizontal),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.close_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-          ),
+          AppCloseButtonDark(onTap: () => context.pop()),
           const Spacer(),
           GestureDetector(
             onTap: () => SimpleShareSheet.show(
@@ -56,28 +44,28 @@ class PhotoDetailPage extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.iconButton),
               ),
               child: const Icon(
                 Icons.share_rounded,
                 color: Colors.white,
-                size: 22,
+                size: AppSize.appBarIconSize,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           GestureDetector(
             onTap: () => _showDeleteDialog(context),
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: AppColors.error.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.iconButton),
               ),
               child: const Icon(
                 Icons.delete_outline_rounded,
                 color: AppColors.error,
-                size: 22,
+                size: AppSize.appBarIconSize,
               ),
             ),
           ),
@@ -88,10 +76,10 @@ class PhotoDetailPage extends StatelessWidget {
 
   Widget _buildPhotoViewer() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pageHorizontal),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: InteractiveViewer(
@@ -104,11 +92,11 @@ class PhotoDetailPage extends StatelessWidget {
 
   Widget _buildPhotoInfo(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.all(AppSpacing.pageHorizontal),
+      padding: const EdgeInsets.all(AppSpacing.xl - 2),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
       ),
       child: Row(
@@ -117,15 +105,15 @@ class PhotoDetailPage extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: AppColors.accent.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.iconButton),
             ),
             child: const Icon(
               Icons.route_rounded,
               color: AppColors.accent,
-              size: 22,
+              size: AppSize.appBarIconSize,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSpacing.md + 2),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +143,9 @@ class PhotoDetailPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
         title: const Text('删除照片'),
         content: const Text('确定要删除这张照片吗？'),
         actions: [

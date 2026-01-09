@@ -1776,6 +1776,7 @@ async function main() {
     // 寻印业务字典类型
     { dictName: '任务类型', dictType: 'xunyin_task_type' },
     { dictName: '印记类型', dictType: 'xunyin_seal_type' },
+    { dictName: '印记稀有度', dictType: 'xunyin_seal_rarity' },
     { dictName: '进度状态', dictType: 'xunyin_progress_status' },
     { dictName: '动态类型', dictType: 'xunyin_activity_type' },
     { dictName: '音频场景', dictType: 'xunyin_audio_context' },
@@ -2053,6 +2054,28 @@ async function main() {
       dictType: 'xunyin_seal_type',
       dictLabel: '特殊印记',
       dictValue: 'special',
+      dictSort: 3,
+      isDefault: 'N',
+    },
+    // 印记稀有度
+    {
+      dictType: 'xunyin_seal_rarity',
+      dictLabel: '普通',
+      dictValue: 'common',
+      dictSort: 1,
+      isDefault: 'Y',
+    },
+    {
+      dictType: 'xunyin_seal_rarity',
+      dictLabel: '稀有',
+      dictValue: 'rare',
+      dictSort: 2,
+      isDefault: 'N',
+    },
+    {
+      dictType: 'xunyin_seal_rarity',
+      dictLabel: '传说',
+      dictValue: 'legendary',
       dictSort: 3,
       isDefault: 'N',
     },

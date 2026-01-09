@@ -243,7 +243,7 @@ class _SettingsContent extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 10),
-          child: SectionTitle(title: title, color: AppColors.textSecondary),
+          child: SectionTitle(title: title),
         ),
         Container(
           decoration: BoxDecoration(

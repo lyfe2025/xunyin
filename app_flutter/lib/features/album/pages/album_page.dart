@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/photo_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
@@ -16,6 +18,10 @@ class AlbumPage extends ConsumerWidget {
     final statsAsync = ref.watch(photoStatsProvider);
     final journeyPhotosAsync = ref.watch(photosByJourneyProvider);
 
+    // 获取照片总数，用于控制筛选按钮显示
+    final totalPhotos = statsAsync.valueOrNull?.totalPhotos ?? 0;
+    final hasPhotos = totalPhotos > 0;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -23,7 +29,7 @@ class AlbumPage extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                _buildAppBar(context),
+                _buildAppBar(context, hasPhotos),
                 Expanded(
                   child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -37,14 +43,16 @@ class AlbumPage extends ConsumerWidget {
                         error: (e, _) => _buildStatsCard(0, 0),
                       ),
                       const SizedBox(height: 24),
-                      const SectionTitle(
-                        title: '按文化之旅分类',
-                        color: AppColors.accent,
-                      ),
-                      const SizedBox(height: 14),
+                      // 优化2: 只有在有照片时才显示分类标题
+                      if (hasPhotos) ...[
+                        const SectionTitle(
+                          title: '按文化之旅分类',
+                        ),
+                        const SizedBox(height: 14),
+                      ],
                       journeyPhotosAsync.when(
                         data: (journeyPhotos) => journeyPhotos.isEmpty
-                            ? _buildEmptyState(null)
+                            ? _buildEmptyState(context, null)
                             : Column(
                                 children: journeyPhotos
                                     .map(
@@ -64,7 +72,7 @@ class AlbumPage extends ConsumerWidget {
                                     .toList(),
                               ),
                         loading: () => const AppLoading(message: '加载中...'),
-                        error: (e, _) => _buildEmptyState(e.toString()),
+                        error: (e, _) => _buildEmptyState(context, e.toString()),
                       ),
                       const SizedBox(height: 32),
                     ],
@@ -78,18 +86,22 @@ class AlbumPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  // 优化3: 筛选按钮在无照片时隐藏
+  Widget _buildAppBar(BuildContext context, bool hasPhotos) {
     return AppPageHeader(
       title: '我的相册',
-      trailing: AppHeaderAction(
-        icon: Icons.filter_list_rounded,
-        onTap: () {
-          // TODO: 筛选功能
-        },
-      ),
+      trailing: hasPhotos
+          ? AppHeaderAction(
+              icon: Icons.filter_list_rounded,
+              onTap: () {
+                // TODO: 筛选功能
+              },
+            )
+          : null,
     );
   }
 
+  // 优化5&6: 改进统计卡片文案和信息展示
   Widget _buildStatsCard(int totalPhotos, int journeyCount) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -124,74 +136,142 @@ class AlbumPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    '$totalPhotos',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '$totalPhotos',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    '张照片',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
+                    const SizedBox(width: 4),
+                    const Text(
+                      '张照片',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                // 优化5: 改进文案表述
+                Text(
+                  '已参与 $journeyCount 条文化之旅',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textHint,
                   ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '来自 $journeyCount 条文化之旅',
-                style: const TextStyle(fontSize: 13, color: AppColors.textHint),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState(String? error) {
+  // 优化1&4&7: 改进空状态设计，使用品牌插画
+  Widget _buildEmptyState(BuildContext context, String? error) {
     final needLogin =
         error != null && (error.contains('请先登录') || error.contains('20001'));
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.textHint.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+
+    return GestureDetector(
+      // 优化4: 空状态区域可点击，跳转到文化之旅列表
+      onTap: needLogin ? null : () => context.push('/journeys'),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 优化7: 使用品牌插画替代图标
+              if (needLogin)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.textHint.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.lock_outline_rounded,
+                    size: 48,
+                    color: AppColors.textHint,
+                  ),
+                )
+              else
+                SvgPicture.asset(
+                  'assets/illustrations/empty_album.svg',
+                  width: 180,
+                  height: 135,
+                ),
+              const SizedBox(height: 20),
+              // 优化1: 添加引导性文案
+              Text(
+                needLogin ? '请先登录' : '还没有照片',
+                style: TextStyle(
+                  color: needLogin ? AppColors.textHint : AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              child: Icon(
-                needLogin
-                    ? Icons.lock_outline_rounded
-                    : Icons.photo_library_outlined,
-                size: 48,
-                color: AppColors.textHint,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              needLogin ? '请先登录' : '暂无照片',
-              style: const TextStyle(color: AppColors.textHint, fontSize: 15),
-            ),
-          ],
+              if (!needLogin) ...[
+                const SizedBox(height: 8),
+                const Text(
+                  '去完成文化之旅，收集你的第一张照片吧',
+                  style: TextStyle(
+                    color: AppColors.textHint,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                // 优化1: 添加行动按钮
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.accent],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '探索文化之旅',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

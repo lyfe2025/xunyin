@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../providers/service_providers.dart';
+import '../../../shared/widgets/app_buttons.dart';
 
 /// AR 任务页面 - Aurora UI + Glassmorphism
 class ARTaskPage extends ConsumerStatefulWidget {
@@ -69,31 +71,20 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
     String taskType,
   ) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.pageHorizontal),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.close_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
+          AppCloseButtonDark(onTap: () => context.pop()),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: 10,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.iconButton),
               ),
               child: Text(
                 '探索点 ${currentIndex + 1}/$totalPoints',
@@ -106,9 +97,12 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md + 2,
+              vertical: 10,
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -116,7 +110,7 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
                   AppColors.sealGold.withValues(alpha: 0.15),
                 ],
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.iconButton),
               border: Border.all(
                 color: AppColors.sealGold.withValues(alpha: 0.5),
               ),
@@ -141,10 +135,10 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
 
   Widget _buildCameraPreview(String taskType) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pageHorizontal),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Stack(
@@ -248,11 +242,11 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
 
   Widget _buildTaskInfo(String name, String description) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.all(AppSpacing.pageHorizontal),
+      padding: const EdgeInsets.all(AppSpacing.xl - 2),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
       ),
       child: Column(
@@ -302,16 +296,16 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
   Widget _buildControls(String taskType) {
     return Container(
       padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
+        left: AppSpacing.pageHorizontal,
+        right: AppSpacing.pageHorizontal,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
       ),
       child: Column(
         children: [
           if (taskType == 'photo')
             Container(
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: AppSpacing.lg),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -322,7 +316,7 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
                         onTap: () => setState(() => _selectedFilter = filter),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
+                            horizontal: AppSpacing.xl - 2,
                             vertical: 10,
                           ),
                           decoration: BoxDecoration(
@@ -363,7 +357,7 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
             ),
           SizedBox(
             width: double.infinity,
-            height: 52,
+            height: AppSize.buttonHeight,
             child: ElevatedButton.icon(
               onPressed: _isSubmitting ? null : _completeTask,
               icon: _isSubmitting
@@ -379,7 +373,7 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
                       taskType == 'photo'
                           ? Icons.camera_alt_rounded
                           : Icons.check_rounded,
-                      size: 22,
+                      size: AppSize.appBarIconSize,
                     ),
               label: Text(
                 taskType == 'photo' ? '拍照' : '确认完成',
@@ -393,7 +387,7 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
               ),
             ),

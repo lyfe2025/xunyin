@@ -63,6 +63,7 @@ export class PublicSealService {
     return {
       id: userSeal.id,
       type: userSeal.seal.type,
+      rarity: userSeal.seal.rarity,
       name: userSeal.seal.name,
       imageAsset: userSeal.seal.imageAsset,
       description: userSeal.seal.description,

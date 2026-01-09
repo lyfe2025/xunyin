@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { Search, Plus, Edit, Trash2, RefreshCw, List } from 'lucide-vue-next'
 import TablePagination from '@/components/common/TablePagination.vue'
 import TableSkeleton from '@/components/common/TableSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import StatusSwitch from '@/components/common/StatusSwitch.vue'
+import DictDataSheet from './DictDataSheet.vue'
 import { formatDate } from '@/utils/format'
 import {
   Table,
@@ -47,7 +47,6 @@ import {
   type DictType,
 } from '@/api/system/dict'
 
-const router = useRouter()
 const { toast } = useToast()
 
 // Query parameters
@@ -78,6 +77,11 @@ const form = reactive<Partial<DictType>>({
 // 批量选择
 const selectedIds = ref<string[]>([])
 const selectAll = ref(false)
+
+// 字典数据侧边栏
+const showDataSheet = ref(false)
+const currentDictType = ref('')
+const currentDictName = ref('')
 
 // Fetch data
 async function getList() {
@@ -135,20 +139,16 @@ function handleDelete(row: DictType) {
 }
 
 function handleDictData(row: DictType) {
-  router.push({
-    path: '/system/dict/data',
-    query: { dictType: row.dictType, dictName: row.dictName },
-  })
+  currentDictType.value = row.dictType
+  currentDictName.value = row.dictName
+  showDataSheet.value = true
 }
 
 async function confirmDelete() {
   if (!dictToDelete.value) return
   try {
     await delType([dictToDelete.value.dictId])
-    toast({
-      title: '删除成功',
-      description: '字典类型已删除',
-    })
+    toast({ title: '删除成功', description: '字典类型已删除' })
     getList()
   } finally {
     showDeleteDialog.value = false
@@ -168,16 +168,10 @@ async function submitForm() {
   try {
     if (form.dictId) {
       await updateType(form)
-      toast({
-        title: '修改成功',
-        description: '字典类型已更新',
-      })
+      toast({ title: '修改成功', description: '字典类型已更新' })
     } else {
       await addType(form)
-      toast({
-        title: '添加成功',
-        description: '字典类型已添加',
-      })
+      toast({ title: '添加成功', description: '字典类型已添加' })
     }
     showDialog.value = false
     getList()
@@ -198,7 +192,7 @@ function resetForm() {
 async function handleStatusChange(dictId: string, status: string) {
   await changeDictTypeStatus(dictId, status)
   const dict = typeList.value.find((d) => d.dictId === dictId)
-  if (dict) dict.status = status
+  if (dict) dict.status = status as '0' | '1'
 }
 
 // 批量选择
@@ -259,8 +253,9 @@ async function handleBatchStatus(status: string) {
     await batchChangeDictTypeStatus(selectedIds.value, status)
     toast({ title: status === '0' ? '批量启用成功' : '批量停用成功' })
     getList()
-  } catch (e: any) {
-    toast({ title: '操作失败', description: e.message, variant: 'destructive' })
+  } catch (e: unknown) {
+    const err = e as Error
+    toast({ title: '操作失败', description: err.message, variant: 'destructive' })
   }
 }
 
@@ -345,10 +340,7 @@ onMounted(() => {
 
     <!-- Table -->
     <div class="border rounded-md bg-card overflow-x-auto">
-      <!-- 骨架屏 -->
       <TableSkeleton v-if="loading" :columns="8" :rows="10" />
-
-      <!-- 空状态 -->
       <EmptyState
         v-else-if="typeList.length === 0"
         title="暂无字典数据"
@@ -356,8 +348,6 @@ onMounted(() => {
         action-text="新增字典"
         @action="handleAdd"
       />
-
-      <!-- 数据表格 -->
       <Table v-else>
         <TableHeader>
           <TableRow>
@@ -430,7 +420,7 @@ onMounted(() => {
       <DialogContent class="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{{ dialogTitle }}</DialogTitle>
-          <DialogDescription> 请填写字典类型信息 </DialogDescription>
+          <DialogDescription>请填写字典类型信息</DialogDescription>
         </DialogHeader>
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
@@ -483,6 +473,13 @@ onMounted(() => {
       confirm-text="删除"
       destructive
       @confirm="confirmBatchDelete"
+    />
+
+    <!-- 字典数据侧边栏 -->
+    <DictDataSheet
+      v-model:open="showDataSheet"
+      :dict-type="currentDictType"
+      :dict-name="currentDictName"
     />
   </div>
 </template>

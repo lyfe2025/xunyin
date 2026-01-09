@@ -514,8 +514,13 @@ class _StartButton extends ConsumerWidget {
       child: SizedBox(
         width: double.infinity,
         height: 52,
-        child: ElevatedButton(
+        child: ElevatedButton.icon(
           onPressed: () => _startJourney(context, ref),
+          icon: const Icon(Icons.explore_rounded, size: 20),
+          label: const Text(
+            '开始这条文化之旅',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.accent,
             foregroundColor: Colors.white,
@@ -524,17 +529,6 @@ class _StartButton extends ConsumerWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(26),
             ),
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.explore_rounded, size: 20),
-              SizedBox(width: 8),
-              Text(
-                '开始这条文化之旅',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ],
           ),
         ),
       ),

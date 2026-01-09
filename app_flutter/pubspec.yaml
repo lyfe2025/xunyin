@@ -95,6 +95,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/lottie/
+    - assets/illustrations/
   
   fonts:
     - family: NotoSansSC
