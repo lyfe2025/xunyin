@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import '../core/utils/url_utils.dart';
 import '../services/audio_service.dart';
 import 'service_providers.dart';
 
@@ -88,8 +89,12 @@ class AudioNotifier extends StateNotifier<AudioState> {
 
   Future<void> setTrack(String url, {String? title}) async {
     try {
-      await _player.setUrl(url);
-      state = state.copyWith(currentTrackUrl: url, currentTrackTitle: title);
+      final fullUrl = UrlUtils.getFullImageUrl(url);
+      await _player.setUrl(fullUrl);
+      state = state.copyWith(
+        currentTrackUrl: fullUrl,
+        currentTrackTitle: title,
+      );
       await _player.play();
     } catch (e) {
       // 播放失败，静默处理
@@ -133,11 +138,12 @@ class AudioNotifier extends StateNotifier<AudioState> {
     }
 
     if (audioInfo != null) {
-      await _player.setUrl(audioInfo.url);
+      final fullUrl = UrlUtils.getFullImageUrl(audioInfo.url);
+      await _player.setUrl(fullUrl);
       state = AudioState(
         isPlaying: true,
         isMuted: state.isMuted,
-        currentTrackUrl: audioInfo.url,
+        currentTrackUrl: fullUrl,
         currentTrackTitle: audioInfo.title,
         context: context,
         contextId: contextId,

@@ -15,7 +15,7 @@ enum AgreementType {
   const AgreementType(this.value, this.label);
 }
 
-/// 协议/关于我们页面
+/// 协议/关于我们页面 - Aurora UI + Glassmorphism
 class AgreementPage extends StatefulWidget {
   final AgreementType type;
 
@@ -65,93 +65,54 @@ class _AgreementPageState extends State<AgreementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          _agreement?.title ?? widget.type.label,
-          style: const TextStyle(color: AppColors.textPrimary),
-        ),
+      body: Stack(
+        children: [
+          const _AuroraBackground(),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(context),
+                Expanded(child: _buildBody()),
+              ],
+            ),
+          ),
+        ],
       ),
-      body: _buildBody(),
     );
   }
 
-  Widget _buildBody() {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: AppColors.textHint,
-            ),
-            const SizedBox(height: 16),
-            Text(_error!, style: const TextStyle(color: AppColors.textHint)),
-            const SizedBox(height: 16),
-            TextButton(onPressed: _loadAgreement, child: const Text('重试')),
-          ],
-        ),
-      );
-    }
-
-    if (_agreement == null) {
-      return const Center(child: Text('暂无内容'));
-    }
-
-    return SingleChildScrollView(
+  Widget _buildAppBar(BuildContext context) {
+    return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          // 版本和更新时间
-          if (_agreement!.version.isNotEmpty || _agreement!.updateTime != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Row(
-                children: [
-                  if (_agreement!.version.isNotEmpty)
-                    Text(
-                      '版本 ${_agreement!.version}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textHint,
-                      ),
-                    ),
-                  if (_agreement!.version.isNotEmpty &&
-                      _agreement!.updateTime != null)
-                    const Text(
-                      ' · ',
-                      style: TextStyle(color: AppColors.textHint),
-                    ),
-                  if (_agreement!.updateTime != null)
-                    Text(
-                      '更新于 ${_formatDate(_agreement!.updateTime!)}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textHint,
-                      ),
-                    ),
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                  ),
                 ],
               ),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.textPrimary,
+                size: 22,
+              ),
             ),
-          // HTML 内容
-          HtmlWidget(
-            _agreement!.content,
-            textStyle: const TextStyle(
-              fontSize: 14,
-              height: 1.8,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            _agreement?.title ?? widget.type.label,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
@@ -160,7 +121,184 @@ class _AgreementPageState extends State<AgreementPage> {
     );
   }
 
+  Widget _buildBody() {
+    if (_loading) {
+      return Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: AppColors.accent),
+              SizedBox(height: 16),
+              Text('加载中...', style: TextStyle(color: AppColors.textSecondary)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: AppColors.textHint,
+              ),
+              const SizedBox(height: 16),
+              Text(_error!, style: const TextStyle(color: AppColors.textHint)),
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: _loadAgreement,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('重试'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_agreement == null) {
+      return const Center(
+        child: Text('暂无内容', style: TextStyle(color: AppColors.textHint)),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.06),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_agreement!.version.isNotEmpty ||
+                _agreement!.updateTime != null)
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_agreement!.version.isNotEmpty)
+                      Text(
+                        '版本 ${_agreement!.version}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textHint,
+                        ),
+                      ),
+                    if (_agreement!.version.isNotEmpty &&
+                        _agreement!.updateTime != null)
+                      const Text(
+                        ' · ',
+                        style: TextStyle(color: AppColors.textHint),
+                      ),
+                    if (_agreement!.updateTime != null)
+                      Text(
+                        '更新于 ${_formatDate(_agreement!.updateTime!)}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textHint,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            HtmlWidget(
+              _agreement!.content,
+              textStyle: const TextStyle(
+                fontSize: 14,
+                height: 1.8,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
+}
+
+/// Aurora 背景
+class _AuroraBackground extends StatelessWidget {
+  const _AuroraBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
+        ),
+      ),
+      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
+    );
+  }
+}
+
+class _AuroraPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    paint.color = AppColors.primary.withValues(alpha: 0.08);
+    canvas.drawCircle(
+      Offset(size.width * 0.2, size.height * 0.1),
+      size.width * 0.35,
+      paint,
+    );
+    paint.color = AppColors.accent.withValues(alpha: 0.06);
+    canvas.drawCircle(
+      Offset(size.width * 0.85, size.height * 0.4),
+      size.width * 0.3,
+      paint,
+    );
+    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
+    canvas.drawCircle(
+      Offset(size.width * 0.4, size.height * 0.85),
+      size.width * 0.4,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

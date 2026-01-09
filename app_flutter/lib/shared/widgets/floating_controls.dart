@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/audio_providers.dart';
 
-/// 右侧浮动控件（我的、印记、相册、音乐、定位）
+/// 右侧浮动控件 - Glassmorphism 风格
 class FloatingControls extends ConsumerWidget {
   final VoidCallback onProfileTap;
   final VoidCallback onSealsTap;
@@ -24,57 +24,73 @@ class FloatingControls extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        color: Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.8),
+          width: 1,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 2),
+            color: AppColors.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _FloatingButton(
-              icon: Icons.person_outline,
+              icon: Icons.person_outline_rounded,
               label: '我的',
               onTap: onProfileTap,
             ),
-            const _Divider(),
+            _buildDivider(),
             _FloatingButton(
-              icon: Icons.emoji_events_outlined,
+              icon: Icons.workspace_premium_rounded,
               label: '印记',
               onTap: onSealsTap,
             ),
-            const _Divider(),
+            _buildDivider(),
             _FloatingButton(
               icon: Icons.photo_library_outlined,
               label: '相册',
               onTap: onAlbumTap,
             ),
-            const _Divider(),
+            _buildDivider(),
             _FloatingButton(
               icon: audioState.isPlaying
-                  ? Icons.music_note
-                  : Icons.music_off_outlined,
+                  ? Icons.music_note_rounded
+                  : Icons.music_off_rounded,
               label: '音乐',
               isActive: audioState.isPlaying,
               onTap: () {
                 ref.read(audioStateProvider.notifier).togglePlay();
               },
             ),
-            const _Divider(),
+            _buildDivider(),
             _FloatingButton(
-              icon: Icons.my_location,
+              icon: Icons.my_location_rounded,
               label: '定位',
               onTap: onLocationTap,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      width: 28,
+      height: 1,
+      decoration: BoxDecoration(
+        color: AppColors.divider.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(1),
       ),
     );
   }
@@ -95,39 +111,44 @@ class _FloatingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isActive ? AppColors.accent : AppColors.textSecondary,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                color: isActive ? AppColors.accent : AppColors.textSecondary,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? AppColors.accent.withValues(alpha: 0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: isActive ? AppColors.accent : AppColors.textSecondary,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                  color: isActive ? AppColors.accent : AppColors.textHint,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(width: 32, height: 1, color: AppColors.divider);
   }
 }

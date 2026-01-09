@@ -23,7 +23,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    // 初始化首页背景音乐
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(audioStateProvider.notifier).switchContext(AudioContext.home);
     });
@@ -31,14 +30,11 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _onCityTap(City city) {
     setState(() {
-      // 如果点击的是同一个城市，关闭面板；否则切换到新城市
       if (_selectedCity?.id == city.id) {
         _selectedCity = null;
-        // 切回首页音乐
         ref.read(audioStateProvider.notifier).switchContext(AudioContext.home);
       } else {
         _selectedCity = city;
-        // 切换到城市音乐
         ref
             .read(audioStateProvider.notifier)
             .switchContext(AudioContext.city, contextId: city.id);
@@ -49,11 +45,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _closePanel() {
     if (_selectedCity != null) {
-      setState(() {
-        _selectedCity = null;
-      });
+      setState(() => _selectedCity = null);
       ref.read(selectedCityIdProvider.notifier).state = null;
-      // 切回首页音乐
       ref.read(audioStateProvider.notifier).switchContext(AudioContext.home);
     }
   }
@@ -65,7 +58,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       body: Stack(
         children: [
-          // 全屏地图（点击空白处关闭面板）
+          // 全屏地图
           Positioned.fill(
             child: GestureDetector(
               onTap: _closePanel,
@@ -75,10 +68,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   selectedCityId: _selectedCity?.id,
                   onCityTap: _onCityTap,
                 ),
-                loading: () => Container(
-                  color: AppColors.background,
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
+                loading: () => _buildLoadingState(),
                 error: (e, _) => _buildErrorView(e, ref),
               ),
             ),
@@ -111,12 +101,60 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  Widget _buildLoadingState() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF8F5F0), Color(0xFFF5F0EB)],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: AppColors.accent.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '正在加载地图...',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _handleLocationTap() {
-    // TODO: 实现定位功能
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('正在获取位置...'),
-        duration: Duration(seconds: 1),
+      SnackBar(
+        content: const Row(
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('正在获取位置...'),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -130,42 +168,54 @@ class _HomePageState extends ConsumerState<HomePage> {
     if (errorStr.contains('SocketException') ||
         errorStr.contains('Connection refused') ||
         errorStr.contains('Failed host lookup')) {
-      // 网络连接问题
       title = '无法连接服务器';
       message = '请检查网络连接，或稍后重试';
-      icon = Icons.wifi_off;
+      icon = Icons.wifi_off_rounded;
     } else if (errorStr.contains('404')) {
-      // 接口不存在
       title = '服务暂不可用';
       message = '后端服务可能未启动，请联系管理员';
-      icon = Icons.cloud_off;
+      icon = Icons.cloud_off_rounded;
     } else if (errorStr.contains('timeout') || errorStr.contains('Timeout')) {
-      // 超时
       title = '请求超时';
       message = '服务器响应太慢，请稍后重试';
-      icon = Icons.timer_off;
+      icon = Icons.timer_off_rounded;
     } else if (errorStr.contains('401') || errorStr.contains('403')) {
-      // 认证问题
       title = '登录已过期';
       message = '请重新登录';
-      icon = Icons.lock_outline;
+      icon = Icons.lock_outline_rounded;
     } else {
-      // 其他错误
       title = '加载失败';
       message = '请稍后重试';
-      icon = Icons.error_outline;
+      icon = Icons.error_outline_rounded;
     }
 
     return Container(
-      color: AppColors.background,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF8F5F0), Color(0xFFF5F0EB)],
+        ),
+      ),
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(40),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 64, color: AppColors.textHint),
-              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant.withValues(alpha: 0.6),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 48,
+                  color: AppColors.textHint.withValues(alpha: 0.6),
+                ),
+              ),
+              const SizedBox(height: 24),
               Text(
                 title,
                 style: const TextStyle(
@@ -178,22 +228,47 @@ class _HomePageState extends ConsumerState<HomePage> {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondary.withValues(alpha: 0.8),
+                  height: 1.5,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => ref.invalidate(citiesProvider),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                width: 160,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => ref.invalidate(citiesProvider),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '重试',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Text('重试'),
                 ),
               ),
             ],

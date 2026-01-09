@@ -7,7 +7,7 @@ import '../../models/city.dart';
 import '../../models/journey.dart';
 import '../../providers/city_providers.dart';
 
-/// 城市底部面板
+/// 城市底部面板 - Glassmorphism 风格
 class CityBottomSheet extends ConsumerStatefulWidget {
   final City city;
   final VoidCallback? onClose;
@@ -41,14 +41,14 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
       snapSizes: const [0.4, 0.9],
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.98),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                offset: Offset(0, -2),
+                color: AppColors.primary.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
               ),
             ],
           ),
@@ -60,7 +60,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.border,
+                  color: AppColors.border.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -68,33 +68,25 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
-                    // 城市标题
                     _buildHeader(),
-                    const SizedBox(height: 16),
-                    // 城市描述（展开时显示）
+                    const SizedBox(height: 20),
                     if (widget.city.description != null) ...[
                       _buildDescription(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                     ],
-                    // 文化之旅列表
                     _buildSectionTitle('文化之旅'),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     journeysAsync.when(
                       data: (journeys) => _buildJourneyList(journeys),
                       loading: () => const Center(
                         child: Padding(
                           padding: EdgeInsets.all(32),
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
                         ),
                       ),
-                      error: (e, _) => Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Text('加载失败: $e'),
-                        ),
-                      ),
+                      error: (e, _) => _buildErrorState(e.toString()),
                     ),
                     const SizedBox(height: 32),
                   ],
@@ -119,105 +111,150 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                   Text(
                     widget.city.name,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
+                      letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    '· 文化之书',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.tertiary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      '文化之书',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.tertiary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
-                    Icons.people_outline,
-                    size: 14,
-                    color: AppColors.textHint,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.city.explorerCount}人探索过',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textHint,
-                    ),
+                  _buildInfoChip(
+                    Icons.people_outline_rounded,
+                    '${widget.city.explorerCount}人探索',
                   ),
                   const SizedBox(width: 12),
-                  Text(
+                  _buildInfoChip(
+                    Icons.location_on_outlined,
                     widget.city.province,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textHint,
-                    ),
                   ),
                 ],
               ),
             ],
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.search),
-          color: AppColors.textSecondary,
-          onPressed: () {
-            final journeysAsync = ref.read(
-              cityJourneysProvider(widget.city.id),
-            );
-            journeysAsync.whenData((journeys) {
-              showDialog(
-                context: context,
-                builder: (context) => _JourneySearchDialog(
-                  cityName: widget.city.name,
-                  journeys: journeys,
-                ),
-              );
-            });
-          },
+        _buildSearchButton(),
+      ],
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppColors.textHint),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 12, color: AppColors.textHint),
         ),
       ],
     );
   }
 
+  Widget _buildSearchButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          final journeysAsync = ref.read(cityJourneysProvider(widget.city.id));
+          journeysAsync.whenData((journeys) {
+            showDialog(
+              context: context,
+              builder: (context) => _JourneySearchDialog(
+                cityName: widget.city.name,
+                journeys: journeys,
+              ),
+            );
+          });
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceVariant.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.search_rounded,
+            color: AppColors.textSecondary,
+            size: 22,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDescription() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.surfaceVariant.withValues(alpha: 0.5),
+            AppColors.surfaceVariant.withValues(alpha: 0.3),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.city.coverImage != null) ...[
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               child: Image.network(
                 UrlUtils.getFullImageUrl(widget.city.coverImage),
-                height: 120,
+                height: 140,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
-                  height: 120,
-                  color: AppColors.border,
-                  child: const Icon(Icons.image, size: 48),
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.image_rounded,
+                    size: 48,
+                    color: AppColors.textHint,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
           ],
           Text(
             widget.city.description!,
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
-              height: 1.6,
+              height: 1.7,
             ),
           ),
         ],
@@ -229,20 +266,25 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
     return Row(
       children: [
         Container(
-          width: 3,
-          height: 16,
+          width: 4,
+          height: 18,
           decoration: BoxDecoration(
-            color: AppColors.accent,
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.accent, AppColors.accentLight],
+            ),
             borderRadius: BorderRadius.circular(2),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Text(
           title,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 17,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
+            letterSpacing: 0.5,
           ),
         ),
       ],
@@ -251,10 +293,20 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
 
   Widget _buildJourneyList(List<JourneyBrief> journeys) {
     if (journeys.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Text('暂无文化之旅', style: TextStyle(color: AppColors.textHint)),
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            children: [
+              Icon(
+                Icons.explore_off_rounded,
+                size: 48,
+                color: AppColors.textHint.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 12),
+              const Text('暂无文化之旅', style: TextStyle(color: AppColors.textHint)),
+            ],
+          ),
         ),
       );
     }
@@ -265,8 +317,33 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
           .toList(),
     );
   }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: AppColors.textHint,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '加载失败',
+              style: TextStyle(
+                color: AppColors.textSecondary.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
+/// 文化之旅卡片 - 现代卡片风格
 class _JourneyCard extends StatelessWidget {
   final JourneyBrief journey;
 
@@ -274,123 +351,179 @@ class _JourneyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (!journey.isLocked) {
-          context.push('/journey/${journey.id}');
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: journey.isLocked ? AppColors.surfaceVariant : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            // 封面图
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: 80,
-                height: 80,
-                color: AppColors.surfaceVariant,
-                child: journey.coverImage != null
-                    ? Image.network(
-                        UrlUtils.getFullImageUrl(journey.coverImage),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.landscape, size: 32),
-                      )
-                    : Icon(
-                        journey.isLocked ? Icons.lock : Icons.landscape,
-                        size: 32,
-                        color: AppColors.textHint,
-                      ),
+    final isLocked = journey.isLocked;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLocked ? null : () => context.push('/journey/${journey.id}'),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isLocked
+                  ? AppColors.surfaceVariant.withValues(alpha: 0.5)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isLocked
+                    ? AppColors.border.withValues(alpha: 0.3)
+                    : AppColors.border.withValues(alpha: 0.5),
               ),
+              boxShadow: isLocked
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
-            const SizedBox(width: 12),
-            // 信息
+            child: Row(
+              children: [
+                // 封面图
+                _buildCoverImage(),
+                const SizedBox(width: 14),
+                // 信息
+                Expanded(child: _buildInfo()),
+                // 箭头
+                if (!isLocked)
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textHint.withValues(alpha: 0.5),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCoverImage() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: journey.coverImage != null
+            ? Image.network(
+                UrlUtils.getFullImageUrl(journey.coverImage),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _buildPlaceholder(),
+              )
+            : _buildPlaceholder(),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Center(
+      child: Icon(
+        journey.isLocked ? Icons.lock_rounded : Icons.landscape_rounded,
+        size: 28,
+        color: AppColors.textHint.withValues(alpha: 0.5),
+      ),
+    );
+  }
+
+  Widget _buildInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            if (journey.isLocked)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Icon(
+                  Icons.lock_rounded,
+                  size: 14,
+                  color: AppColors.textHint.withValues(alpha: 0.6),
+                ),
+              ),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      if (journey.isLocked)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 4),
-                          child: Icon(
-                            Icons.lock,
-                            size: 14,
-                            color: AppColors.textHint,
-                          ),
-                        ),
-                      Expanded(
-                        child: Text(
-                          journey.name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: journey.isLocked
-                                ? AppColors.textHint
-                                : AppColors.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    journey.theme,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      // 星级
-                      ...List.generate(
-                        5,
-                        (i) => Icon(
-                          i < journey.rating ? Icons.star : Icons.star_border,
-                          size: 14,
-                          color: AppColors.sealGold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${(journey.totalDistance / 1000).toStringAsFixed(1)}km',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textHint,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (journey.isLocked && journey.unlockCondition != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      journey.unlockCondition!,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textHint,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ],
+              child: Text(
+                journey.name,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: journey.isLocked
+                      ? AppColors.textHint
+                      : AppColors.textPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 4),
+        Text(
+          journey.theme,
+          style: TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary.withValues(alpha: 0.8),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            // 星级
+            _buildRating(),
+            const SizedBox(width: 12),
+            // 距离
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${(journey.totalDistance / 1000).toStringAsFixed(1)}km',
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (journey.isLocked && journey.unlockCondition != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            journey.unlockCondition!,
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textHint.withValues(alpha: 0.7),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRating() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (i) {
+        return Icon(
+          i < journey.rating ? Icons.star_rounded : Icons.star_outline_rounded,
+          size: 14,
+          color: i < journey.rating
+              ? AppColors.sealGold
+              : AppColors.textHint.withValues(alpha: 0.3),
+        );
+      }),
     );
   }
 }
@@ -441,30 +574,38 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: double.maxFinite,
-        constraints: const BoxConstraints(maxHeight: 400),
-        padding: const EdgeInsets.all(16),
+        constraints: const BoxConstraints(maxHeight: 420),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 标题
             Text(
               '搜索 ${widget.cityName} 的文化之旅',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             // 搜索框
             TextField(
               controller: _searchController,
               autofocus: true,
+              style: const TextStyle(fontSize: 15),
               decoration: InputDecoration(
                 hintText: '输入名称或主题',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                filled: true,
+                fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                prefixIcon: const Icon(Icons.search_rounded, size: 20),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, size: 20),
+                        icon: const Icon(Icons.clear_rounded, size: 18),
                         onPressed: () {
                           _searchController.clear();
                           _onSearchChanged('');
@@ -472,37 +613,56 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                       )
                     : null,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                  horizontal: 16,
+                  vertical: 12,
                 ),
               ),
               onChanged: _onSearchChanged,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             // 结果列表
             Flexible(
               child: _filteredJourneys.isEmpty
-                  ? const Center(
-                      child: Text(
-                        '没有找到匹配的文化之旅',
-                        style: TextStyle(color: AppColors.textHint),
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 40,
+                            color: AppColors.textHint.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            '没有找到匹配的文化之旅',
+                            style: TextStyle(color: AppColors.textHint),
+                          ),
+                        ],
                       ),
                     )
-                  : ListView.builder(
+                  : ListView.separated(
                       shrinkWrap: true,
                       itemCount: _filteredJourneys.length,
+                      separatorBuilder: (_, __) => Divider(
+                        color: AppColors.divider.withValues(alpha: 0.5),
+                        height: 1,
+                      ),
                       itemBuilder: (context, index) {
                         final journey = _filteredJourneys[index];
                         return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 4,
+                          ),
                           leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(8),
                             child: Container(
-                              width: 40,
-                              height: 40,
+                              width: 44,
+                              height: 44,
                               color: AppColors.surfaceVariant,
                               child: journey.coverImage != null
                                   ? Image.network(
@@ -510,21 +670,39 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                                         journey.coverImage,
                                       ),
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Icon(Icons.landscape, size: 20),
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.landscape_rounded,
+                                        size: 20,
+                                        color: AppColors.textHint,
+                                      ),
                                     )
-                                  : const Icon(Icons.landscape, size: 20),
+                                  : const Icon(
+                                      Icons.landscape_rounded,
+                                      size: 20,
+                                      color: AppColors.textHint,
+                                    ),
                             ),
                           ),
                           title: Text(
                             journey.name,
-                            style: const TextStyle(fontSize: 14),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           subtitle: Text(
                             journey.theme,
                             style: const TextStyle(fontSize: 12),
                           ),
-                          dense: true,
+                          trailing: journey.isLocked
+                              ? Icon(
+                                  Icons.lock_rounded,
+                                  size: 16,
+                                  color: AppColors.textHint.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                )
+                              : null,
                           onTap: () {
                             Navigator.of(context).pop();
                             if (!journey.isLocked) {

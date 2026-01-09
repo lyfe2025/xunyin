@@ -5,7 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../providers/service_providers.dart';
 
-/// AR 任务页面（模拟实现）
+/// AR 任务页面 - Aurora UI + Glassmorphism
 class ARTaskPage extends ConsumerStatefulWidget {
   final String pointId;
   const ARTaskPage({super.key, required this.pointId});
@@ -43,36 +43,96 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
     final currentIndex = state.currentPointIndex;
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.pop(),
+      backgroundColor: const Color(0xFF1A1A2E),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildAppBar(
+              context,
+              currentIndex,
+              totalPoints,
+              point?.taskType ?? 'photo',
+            ),
+            Expanded(child: _buildCameraPreview(point?.taskType ?? 'photo')),
+            _buildTaskInfo(point?.name ?? '', point?.taskDescription ?? ''),
+            _buildControls(point?.taskType ?? 'photo'),
+          ],
         ),
-        title: Text('探索点 ${currentIndex + 1}/$totalPoints'),
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Text(
-                point?.taskType == 'gesture'
-                    ? 'AR手势'
-                    : point?.taskType == 'photo'
-                    ? '拍照'
-                    : 'AR寻宝',
-                style: const TextStyle(color: AppColors.sealGold),
+      ),
+    );
+  }
+
+  Widget _buildAppBar(
+    BuildContext context,
+    int currentIndex,
+    int totalPoints,
+    String taskType,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.close_rounded,
+                color: Colors.white,
+                size: 22,
               ),
             ),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(child: _buildCameraPreview(point?.taskType ?? 'photo')),
-          _buildTaskInfo(point?.name ?? '', point?.taskDescription ?? ''),
-          _buildControls(point?.taskType ?? 'photo'),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '探索点 ${currentIndex + 1}/$totalPoints',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.sealGold.withValues(alpha: 0.3),
+                  AppColors.sealGold.withValues(alpha: 0.15),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.sealGold.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Text(
+              taskType == 'gesture'
+                  ? 'AR手势'
+                  : taskType == 'photo'
+                  ? '拍照'
+                  : 'AR寻宝',
+              style: const TextStyle(
+                color: AppColors.sealGold,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -80,14 +140,19 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
 
   Widget _buildCameraPreview(String taskType) {
     return Container(
-      color: Colors.grey[900],
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
       child: Stack(
         children: [
           const Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.camera_alt, size: 64, color: Colors.white24),
+                Icon(Icons.camera_alt_rounded, size: 56, color: Colors.white24),
                 SizedBox(height: 8),
                 Text('AR 相机预览', style: TextStyle(color: Colors.white24)),
                 Text(
@@ -99,21 +164,41 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
           ),
           if (taskType == 'gesture')
             Positioned(
-              top: 100,
+              top: 80,
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
                   ),
-                  child: const Column(
+                  child: Column(
                     children: [
-                      Text('🌙', style: TextStyle(fontSize: 48)),
-                      SizedBox(height: 8),
-                      Text('目标手势：赏月手势', style: TextStyle(color: Colors.white)),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.sealGold.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.nights_stay_rounded,
+                          size: 40,
+                          color: AppColors.sealGold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        '目标手势：赏月手势',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -121,18 +206,33 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
             ),
           if (taskType == 'photo')
             Positioned(
-              top: 80,
-              right: 40,
+              top: 60,
+              right: 30,
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Text('👘', style: TextStyle(fontSize: 32)),
-                    Text(
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.person_rounded,
+                        size: 28,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
                       '白娘子',
                       style: TextStyle(color: Colors.white, fontSize: 12),
                     ),
@@ -147,8 +247,13 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
 
   Widget _buildTaskInfo(String name, String description) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.grey[900],
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -160,30 +265,34 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             description,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
-          ),
-          const SizedBox(height: 12),
-          if (_progress > 0 && _progress < 1)
-            Column(
-              children: [
-                LinearProgressIndicator(
-                  value: _progress,
-                  backgroundColor: Colors.white24,
-                  valueColor: const AlwaysStoppedAnimation(AppColors.accent),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '识别中 ${(_progress * 100).toInt()}%',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 14,
             ),
+          ),
+          if (_progress > 0 && _progress < 1) ...[
+            const SizedBox(height: 14),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: _progress,
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                valueColor: const AlwaysStoppedAnimation(AppColors.accent),
+                minHeight: 6,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '识别中 ${(_progress * 100).toInt()}%',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 12,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -197,42 +306,66 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
         top: 16,
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
-      color: Colors.grey[900],
       child: Column(
         children: [
           if (taskType == 'photo')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (final filter in ['古风', '水墨', '原图'])
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: ChoiceChip(
-                      label: Text(filter),
-                      selected: _selectedFilter == filter,
-                      onSelected: (v) =>
-                          setState(() => _selectedFilter = filter),
-                      selectedColor: AppColors.accent,
-                      labelStyle: TextStyle(
-                        color: _selectedFilter == filter
-                            ? Colors.white
-                            : Colors.white70,
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final filter in ['古风', '水墨', '原图'])
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedFilter = filter),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: _selectedFilter == filter
+                                ? const LinearGradient(
+                                    colors: [
+                                      AppColors.accent,
+                                      Color(0xFFE85A4F),
+                                    ],
+                                  )
+                                : null,
+                            color: _selectedFilter != filter
+                                ? Colors.white.withValues(alpha: 0.1)
+                                : null,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _selectedFilter == filter
+                                  ? Colors.transparent
+                                  : Colors.white.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Text(
+                            filter,
+                            style: TextStyle(
+                              color: _selectedFilter == filter
+                                  ? Colors.white
+                                  : Colors.white70,
+                              fontWeight: _selectedFilter == filter
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
+            height: 52,
+            child: ElevatedButton.icon(
               onPressed: _isSubmitting ? null : _completeTask,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-              ),
-              child: _isSubmitting
+              icon: _isSubmitting
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -241,7 +374,27 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
                         color: Colors.white,
                       ),
                     )
-                  : Text(taskType == 'photo' ? '拍照' : '确认完成'),
+                  : Icon(
+                      taskType == 'photo'
+                          ? Icons.camera_alt_rounded
+                          : Icons.check_rounded,
+                      size: 22,
+                    ),
+              label: Text(
+                taskType == 'photo' ? '拍照' : '确认完成',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
             ),
           ),
         ],
@@ -256,16 +409,14 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
     });
 
     try {
-      // 调用后端 API 完成探索点
       final journeyService = ref.read(journeyServiceProvider);
       final result = await journeyService.completePoint(
         pointId: widget.pointId,
-        photoUrl: null, // 模拟拍照，实际应该上传照片后获取 URL
+        photoUrl: null,
       );
 
       if (!mounted) return;
 
-      // 跳转到任务完成页，传递后端返回的数据
       context.push(
         '/task-complete/${widget.pointId}'
         '?pointsEarned=${result.pointsEarned}'
@@ -276,13 +427,10 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-
-      // 开发模式：API 失败时使用模拟数据继续流程
       _completeTaskWithMockData();
     }
   }
 
-  /// 使用模拟数据完成任务（开发测试用）
   void _completeTaskWithMockData() {
     final state = ref.read(currentJourneyProvider);
     final point = state.currentPoint;
