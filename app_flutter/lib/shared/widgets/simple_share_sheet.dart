@@ -57,10 +57,11 @@ class _SimpleShareSheetState extends State<SimpleShareSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
         child: Column(
@@ -71,20 +72,27 @@ class _SimpleShareSheetState extends State<SimpleShareSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: AppColors.borderAdaptive(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               widget.title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimaryAdaptive(context),
+              ),
             ),
             if (widget.subtitle != null) ...[
               const SizedBox(height: 4),
               Text(
                 widget.subtitle!,
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondaryAdaptive(context),
+                ),
               ),
             ],
             const SizedBox(height: 20),
@@ -116,7 +124,10 @@ class _SimpleShareSheetState extends State<SimpleShareSheet> {
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
                 '取消',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                style: TextStyle(
+                  color: AppColors.textSecondaryAdaptive(context),
+                  fontSize: 16,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -151,7 +162,7 @@ class _ShareOption extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: AppColors.surfaceVariantAdaptive(context),
               borderRadius: BorderRadius.circular(16),
             ),
             child: isLoading
@@ -167,7 +178,10 @@ class _ShareOption extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondaryAdaptive(context),
+            ),
           ),
         ],
       ),

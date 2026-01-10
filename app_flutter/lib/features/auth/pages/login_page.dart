@@ -199,12 +199,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             '寻印',
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryAdaptive(context),
               letterSpacing: 4,
             ),
           ),
@@ -213,7 +213,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             '探索城市文化，收集专属印记',
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary.withValues(alpha: 0.8),
+              color: AppColors.textSecondaryAdaptive(context).withValues(alpha: 0.8),
               letterSpacing: 1,
             ),
           ),
@@ -224,18 +224,25 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   /// 登录表单
   Widget _buildLoginForm() {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.85),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.9)
+            : Colors.white.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.9),
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.9),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : AppColors.primary.withValues(alpha: 0.06),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -285,13 +292,21 @@ class _LoginPageState extends ConsumerState<LoginPage>
       controller: controller,
       keyboardType: keyboardType,
       maxLength: maxLength,
-      style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+      style: TextStyle(
+        fontSize: 16,
+        color: AppColors.textPrimaryAdaptive(context),
+      ),
       decoration: InputDecoration(
         hintText: hintText,
+        hintStyle: TextStyle(color: AppColors.textHintAdaptive(context)),
         counterText: '',
         filled: true,
-        fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
-        prefixIcon: Icon(prefixIcon, size: 20),
+        fillColor: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5),
+        prefixIcon: Icon(
+          prefixIcon,
+          size: 20,
+          color: AppColors.textHintAdaptive(context),
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -315,6 +330,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   /// 获取验证码按钮
   Widget _buildCodeButton() {
     final isDisabled = _countdown > 0;
+    final isDark = context.isDarkMode;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -325,13 +341,13 @@ class _LoginPageState extends ConsumerState<LoginPage>
           height: 48,
           decoration: BoxDecoration(
             color: isDisabled
-                ? AppColors.surfaceVariant
-                : AppColors.primary.withValues(alpha: 0.08),
+                ? AppColors.surfaceVariantAdaptive(context)
+                : AppColors.accent.withValues(alpha: isDark ? 0.15 : 0.08),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDisabled
-                  ? AppColors.border
-                  : AppColors.primary.withValues(alpha: 0.3),
+                  ? AppColors.borderAdaptive(context)
+                  : AppColors.accent.withValues(alpha: 0.3),
             ),
           ),
           child: Center(
@@ -340,7 +356,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: isDisabled ? AppColors.textHint : AppColors.primary,
+                color: isDisabled
+                    ? AppColors.textHintAdaptive(context)
+                    : AppColors.accent,
               ),
             ),
           ),
@@ -365,14 +383,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
               end: Alignment.bottomRight,
               colors: _isLoading
                   ? [AppColors.textHint, AppColors.textHint]
-                  : [AppColors.primary, AppColors.primaryDark],
+                  : [AppColors.accent, AppColors.accentDark],
             ),
             borderRadius: BorderRadius.circular(14),
             boxShadow: _isLoading
                 ? []
                 : [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.35),
+                      color: AppColors.accent.withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -410,20 +428,24 @@ class _LoginPageState extends ConsumerState<LoginPage>
         Row(
           children: [
             Expanded(
-              child: Divider(color: AppColors.border.withValues(alpha: 0.6)),
+              child: Divider(
+                color: AppColors.borderAdaptive(context).withValues(alpha: 0.6),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '其他登录方式',
                 style: TextStyle(
-                  color: AppColors.textHint.withValues(alpha: 0.8),
+                  color: AppColors.textHintAdaptive(context).withValues(alpha: 0.8),
                   fontSize: 13,
                 ),
               ),
             ),
             Expanded(
-              child: Divider(color: AppColors.border.withValues(alpha: 0.6)),
+              child: Divider(
+                color: AppColors.borderAdaptive(context).withValues(alpha: 0.6),
+              ),
             ),
           ],
         ),
@@ -434,9 +456,22 @@ class _LoginPageState extends ConsumerState<LoginPage>
             _buildSocialButton(
               icon: Icons.wechat,
               color: const Color(0xFF07C160),
-              onTap: () {
-                // TODO: 微信登录
-              },
+              label: '微信',
+              onTap: () => _showSnackBar('微信登录开发中'),
+            ),
+            const SizedBox(width: 24),
+            _buildSocialButton(
+              icon: Icons.apple,
+              color: context.isDarkMode ? Colors.white : Colors.black87,
+              label: 'Apple',
+              onTap: () => _showSnackBar('Apple 登录开发中'),
+            ),
+            const SizedBox(width: 24),
+            _buildSocialButton(
+              icon: Icons.g_mobiledata_rounded,
+              color: const Color(0xFF4285F4),
+              label: 'Google',
+              onTap: () => _showSnackBar('Google 登录开发中'),
             ),
           ],
         ),
@@ -448,28 +483,38 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget _buildSocialButton({
     required IconData icon,
     required Color color,
+    required String label,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDarkMode;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(28),
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.35),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: isDark ? 0.15 : 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: color.withValues(alpha: isDark ? 0.3 : 0.2),
+                ),
               ),
-            ],
-          ),
-          child: Icon(icon, color: Colors.white, size: 28),
+              child: Icon(icon, color: color, size: 26),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: AppColors.textSecondaryAdaptive(context).withValues(alpha: 0.8),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -481,18 +526,18 @@ class _LoginPageState extends ConsumerState<LoginPage>
       TextSpan(
         text: '登录即表示同意',
         style: TextStyle(
-          color: AppColors.textHint.withValues(alpha: 0.8),
+          color: AppColors.textHintAdaptive(context).withValues(alpha: 0.8),
           fontSize: 12,
         ),
         children: [
           TextSpan(
             text: '《用户协议》',
-            style: TextStyle(color: AppColors.primary.withValues(alpha: 0.9)),
+            style: TextStyle(color: AppColors.accent.withValues(alpha: 0.9)),
           ),
           const TextSpan(text: '和'),
           TextSpan(
             text: '《隐私政策》',
-            style: TextStyle(color: AppColors.primary.withValues(alpha: 0.9)),
+            style: TextStyle(color: AppColors.accent.withValues(alpha: 0.9)),
           ),
         ],
       ),

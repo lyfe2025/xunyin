@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,7 +61,7 @@ class _SealListPageState extends ConsumerState<SealListPage> {
                   child: RefreshIndicator(
                     onRefresh: _onRefresh,
                     color: AppColors.accent,
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.cardBackground(context),
                     child: _buildContent(
                       context,
                       progressAsync,
@@ -187,7 +186,7 @@ class _SealListPageState extends ConsumerState<SealListPage> {
 }
 
 
-// ==================== 环形进度卡片（带动画） ====================
+// ==================== 环形进度卡片（带动画和渐变） ====================
 
 class _CircularProgressCard extends StatefulWidget {
   final SealProgress progress;
@@ -198,10 +197,12 @@ class _CircularProgressCard extends StatefulWidget {
 }
 
 class _CircularProgressCardState extends State<_CircularProgressCard>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _progressAnimation;
   late Animation<int> _countAnimation;
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
@@ -222,6 +223,16 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
     _countAnimation = IntTween(begin: 0, end: widget.progress.collected).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
+
+    // 光晕呼吸动画
+    _glowController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _glowAnimation = Tween<double>(begin: 0.3, end: 0.6).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+    _glowController.repeat(reverse: true);
 
     _controller.forward();
   }
@@ -251,27 +262,40 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
   @override
   void dispose() {
     _controller.dispose();
+    _glowController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.95),
-            Colors.white.withValues(alpha: 0.8),
-          ],
+          colors: isDark
+              ? [
+                  AppColors.darkSurface.withValues(alpha: 0.95),
+                  AppColors.darkSurface.withValues(alpha: 0.85),
+                ]
+              : [
+                  Colors.white.withValues(alpha: 0.95),
+                  Colors.white.withValues(alpha: 0.8),
+                ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.8),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.2)
+                : AppColors.primary.withValues(alpha: 0.08),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -279,15 +303,31 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
       ),
       child: Row(
         children: [
-          // 环形进度（带动画）
+          // 环形进度（带渐变和光晕）
           SizedBox(
             width: 100,
             height: 100,
             child: AnimatedBuilder(
-              animation: _controller,
+              animation: Listenable.merge([_controller, _glowController]),
               builder: (context, child) => Stack(
                 alignment: Alignment.center,
                 children: [
+                  // 光晕效果
+                  if (_progressAnimation.value > 0)
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accent.withValues(alpha: _glowAnimation.value * 0.3),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
                   // 背景圆环
                   SizedBox(
                     width: 100,
@@ -295,22 +335,30 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
                     child: CircularProgressIndicator(
                       value: 1,
                       strokeWidth: 10,
-                      backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.4),
+                      backgroundColor: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.4),
                       valueColor: AlwaysStoppedAnimation(
-                        AppColors.surfaceVariant.withValues(alpha: 0.4),
+                        AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.4),
                       ),
                     ),
                   ),
-                  // 进度圆环
+                  // 渐变进度圆环
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: CircularProgressIndicator(
-                      value: _progressAnimation.value,
-                      strokeWidth: 10,
-                      strokeCap: StrokeCap.round,
-                      backgroundColor: Colors.transparent,
-                      valueColor: const AlwaysStoppedAnimation(AppColors.accent),
+                    child: CustomPaint(
+                      painter: _GradientCircularProgressPainter(
+                        progress: _progressAnimation.value,
+                        strokeWidth: 10,
+                        gradient: const SweepGradient(
+                          startAngle: -1.5708,
+                          endAngle: 4.7124,
+                          colors: [
+                            Color(0xFFFF6B6B),
+                            AppColors.accent,
+                            Color(0xFFE6B422),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   // 中心文字
@@ -329,7 +377,7 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
                         '/ ${widget.progress.total}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.textHint,
+                          color: AppColors.textHintAdaptive(context),
                         ),
                       ),
                     ],
@@ -344,12 +392,12 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '收集进度',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textPrimaryAdaptive(context),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -363,7 +411,7 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
                       '已收集 $percentage%',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textHint,
+                        color: AppColors.textHintAdaptive(context),
                       ),
                     );
                   },
@@ -380,6 +428,47 @@ class _CircularProgressCardState extends State<_CircularProgressCard>
         ],
       ),
     );
+  }
+}
+
+/// 渐变圆环进度绘制器
+class _GradientCircularProgressPainter extends CustomPainter {
+  final double progress;
+  final double strokeWidth;
+  final Gradient gradient;
+
+  _GradientCircularProgressPainter({
+    required this.progress,
+    required this.strokeWidth,
+    required this.gradient,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0) return;
+
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final paint = Paint()
+      ..shader = gradient.createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -1.5708, // 从顶部开始 (-90度)
+      progress * 2 * 3.14159,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _GradientCircularProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }
 
@@ -400,6 +489,7 @@ class _MiniProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Row(
       children: [
         SizedBox(
@@ -408,7 +498,7 @@ class _MiniProgressBar extends StatelessWidget {
             typeProgress.type.label.replaceAll('印记', ''),
             style: TextStyle(
               fontSize: 11,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryAdaptive(context),
             ),
           ),
         ),
@@ -416,7 +506,9 @@ class _MiniProgressBar extends StatelessWidget {
           child: Container(
             height: 6,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+              color: isDark
+                  ? AppColors.darkBorder.withValues(alpha: 0.5)
+                  : AppColors.surfaceVariant.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(3),
             ),
             child: FractionallySizedBox(
@@ -437,7 +529,7 @@ class _MiniProgressBar extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w500,
-            color: AppColors.textHint,
+            color: AppColors.textHintAdaptive(context),
           ),
         ),
       ],
@@ -455,10 +547,13 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.8)
+            : Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -466,12 +561,12 @@ class _ErrorCard extends StatelessWidget {
           Icon(
             Icons.error_outline_rounded,
             size: 40,
-            color: AppColors.textHint.withValues(alpha: 0.5),
+            color: AppColors.textHintAdaptive(context).withValues(alpha: 0.5),
           ),
           const SizedBox(height: 12),
           Text(
             message,
-            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondaryAdaptive(context)),
           ),
           const SizedBox(height: 16),
           GestureDetector(
@@ -558,6 +653,28 @@ class _SectionHeader extends StatelessWidget {
     }
   }
 
+  Color get _rarityBgColor {
+    switch (type) {
+      case SealType.route:
+        return _color.withValues(alpha: 0.1);
+      case SealType.city:
+        return const Color(0xFF9C27B0).withValues(alpha: 0.1); // 紫色
+      case SealType.special:
+        return AppColors.sealGold.withValues(alpha: 0.15);
+    }
+  }
+
+  Color get _rarityTextColor {
+    switch (type) {
+      case SealType.route:
+        return _color;
+      case SealType.city:
+        return const Color(0xFF9C27B0); // 紫色
+      case SealType.special:
+        return AppColors.sealGold;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -572,24 +689,36 @@ class _SectionHeader extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryAdaptive(context),
             ),
           ),
           const SizedBox(width: 8),
-          // 稀有度标签
+          // 稀有度标签 - 更突出的样式
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: _color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: _rarityBgColor,
+              borderRadius: BorderRadius.circular(10),
+              border: type == SealType.special
+                  ? Border.all(color: AppColors.sealGold.withValues(alpha: 0.3))
+                  : null,
             ),
-            child: Text(
-              _rarityLabel,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: _color,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (type == SealType.special) ...[
+                  Icon(Icons.auto_awesome, size: 10, color: _rarityTextColor),
+                  const SizedBox(width: 3),
+                ],
+                Text(
+                  _rarityLabel,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: _rarityTextColor,
+                  ),
+                ),
+              ],
             ),
           ),
           const Spacer(),
@@ -599,7 +728,7 @@ class _SectionHeader extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textHint,
+              color: AppColors.textHintAdaptive(context),
             ),
           ),
           const SizedBox(width: 8),
@@ -610,7 +739,7 @@ class _SectionHeader extends StatelessWidget {
             child: Icon(
               Icons.keyboard_arrow_down_rounded,
               size: 20,
-              color: AppColors.textHint,
+              color: AppColors.textHintAdaptive(context),
             ),
           ),
         ],
@@ -681,12 +810,17 @@ class _EmptySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.5),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.5)
+            : Colors.white.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: AppColors.borderAdaptive(context).withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         children: [
@@ -698,16 +832,19 @@ class _EmptySection extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             '暂无${type.label}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryAdaptive(context),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             _hint,
-            style: const TextStyle(fontSize: 12, color: AppColors.textHint),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textHintAdaptive(context),
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -741,7 +878,7 @@ class _SealGrid extends StatelessWidget {
   }
 }
 
-// ==================== 印记卡片 ====================
+// ==================== 印记卡片（优化版） ====================
 
 class _SealCard extends StatefulWidget {
   final SealDetail seal;
@@ -751,37 +888,41 @@ class _SealCard extends StatefulWidget {
   State<_SealCard> createState() => _SealCardState();
 }
 
-class _SealCardState extends State<_SealCard> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _SealCardState extends State<_SealCard> with TickerProviderStateMixin {
+  late AnimationController _tapController;
   late Animation<double> _scaleAnimation;
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _tapController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _tapController, curve: Curves.easeInOut),
     );
+
+    // 已获得印记的微光动画
+    _glowController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+    if (widget.seal.owned) {
+      _glowController.repeat(reverse: true);
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _tapController.dispose();
+    _glowController.dispose();
     super.dispose();
-  }
-
-  Color get _rarityColor {
-    switch (widget.seal.rarity) {
-      case SealRarity.common:
-        return AppColors.primary;
-      case SealRarity.rare:
-        return AppColors.tertiary;
-      case SealRarity.legendary:
-        return AppColors.sealGold;
-    }
   }
 
   String _formatEarnedTime(DateTime time) {
@@ -814,11 +955,12 @@ class _SealCardState extends State<_SealCard> with SingleTickerProviderStateMixi
   Widget build(BuildContext context) {
     final seal = widget.seal;
     final isLocked = !seal.owned;
+    final isDark = context.isDarkMode;
 
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
+      onTapDown: (_) => _tapController.forward(),
       onTapUp: (_) {
-        _controller.reverse();
+        _tapController.reverse();
         HapticFeedback.lightImpact();
         if (isLocked) {
           _showUnlockHint(context);
@@ -826,185 +968,150 @@ class _SealCardState extends State<_SealCard> with SingleTickerProviderStateMixi
           context.push('/seal/${seal.id}');
         }
       },
-      onTapCancel: () => _controller.reverse(),
+      onTapCancel: () => _tapController.reverse(),
       child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: isLocked
-                ? null
-                : LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.95),
-                      Colors.white.withValues(alpha: 0.85),
-                    ],
-                  ),
-            color: isLocked ? AppColors.surfaceVariant.withValues(alpha: 0.4) : null,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isLocked
-                  ? AppColors.border.withValues(alpha: 0.2)
-                  : _rarityColor.withValues(alpha: 0.3),
-              width: isLocked ? 1 : 1.5,
-            ),
-            boxShadow: isLocked
-                ? []
-                : [
-                    BoxShadow(
-                      color: _rarityColor.withValues(alpha: 0.1),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 印记图片/图标
-              _buildSealImage(seal, isLocked),
-              const SizedBox(height: 8),
-              // 印记名称
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Text(
-                  seal.name,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: isLocked ? AppColors.textHint : AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+        animation: Listenable.merge([_scaleAnimation, _glowAnimation]),
+        builder: (context, child) {
+          final glowValue = _glowAnimation.value;
+
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                color: isLocked
+                    ? (isDark
+                        ? AppColors.darkSurfaceVariant.withValues(alpha: 0.6)
+                        : Colors.white.withValues(alpha: 0.6))
+                    : AppColors.cardBackground(context),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isLocked
+                      ? AppColors.borderAdaptive(context).withValues(alpha: 0.3)
+                      : AppColors.sealGold.withValues(alpha: 0.5 + glowValue * 0.3),
+                  width: isLocked ? 1 : 2,
                 ),
+                boxShadow: isLocked
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: AppColors.sealGold.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
-              // 获取时间 / 上链标识
-              if (!isLocked) ...[
-                const SizedBox(height: 4),
-                _buildSealMeta(seal),
-              ],
+              child: child,
+            ),
+          );
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 印记图片/图标
+            _buildSealImage(context, seal, isLocked),
+            const SizedBox(height: 8),
+            // 印记名称
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text(
+                seal.name,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isLocked ? FontWeight.w400 : FontWeight.w600,
+                  color: isLocked
+                      ? AppColors.textHintAdaptive(context)
+                      : AppColors.textPrimaryAdaptive(context),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            // 获取时间 / 上链标识
+            if (!isLocked) ...[
+              const SizedBox(height: 4),
+              _buildSealMeta(context, seal),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSealImage(SealDetail seal, bool isLocked) {
+  Widget _buildSealImage(BuildContext context, SealDetail seal, bool isLocked) {
     final hasImage = seal.imageAsset.isNotEmpty &&
         !seal.imageAsset.contains('placeholder');
 
     if (isLocked) {
-      // 未解锁：模糊轮廓
-      return Stack(
-        alignment: Alignment.center,
-        children: [
-          if (hasImage)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Colors.grey.withValues(alpha: 0.7),
-                    BlendMode.saturation,
-                  ),
-                  child: CachedNetworkImage(
-                    imageUrl: seal.imageAsset,
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => _buildPlaceholderIcon(true),
-                  ),
-                ),
-              ),
-            )
-          else
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.textHint.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          // 锁图标
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.lock_rounded,
-              size: 18,
-              color: Colors.white70,
-            ),
-          ),
-        ],
+      // 未解锁：简洁锁图标
+      return Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          Icons.lock_outline_rounded,
+          size: 22,
+          color: AppColors.textHintAdaptive(context).withValues(alpha: 0.5),
+        ),
       );
     }
 
-    // 已解锁：显示图片
-    if (hasImage) {
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: _rarityColor.withValues(alpha: 0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
+    // 已解锁：显示图标，带金色光晕
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          colors: [
+            AppColors.sealGold.withValues(alpha: 0.15),
+            AppColors.sealGold.withValues(alpha: 0.05),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: CachedNetworkImage(
-            imageUrl: seal.imageAsset,
-            width: 56,
-            height: 56,
-            fit: BoxFit.cover,
-            placeholder: (_, __) => _buildPlaceholderIcon(false),
-            errorWidget: (_, __, ___) => _buildPlaceholderIcon(false),
-          ),
-        ),
-      );
-    }
-
-    return _buildPlaceholderIcon(false);
-  }
-
-  Widget _buildPlaceholderIcon(bool isLocked) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: isLocked
-            ? AppColors.textHint.withValues(alpha: 0.1)
-            : _rarityColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.sealGold.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
       ),
-      child: Icon(
-        Icons.workspace_premium_rounded,
-        size: 28,
-        color: isLocked ? AppColors.textHint.withValues(alpha: 0.4) : _rarityColor,
-      ),
+      child: hasImage
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl: seal.imageAsset,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => _buildMedalIcon(),
+                errorWidget: (_, __, ___) => _buildMedalIcon(),
+              ),
+            )
+          : _buildMedalIcon(),
     );
   }
 
-  Widget _buildSealMeta(SealDetail seal) {
+  /// 勋章图标
+  Widget _buildMedalIcon() {
+    return Icon(
+      Icons.workspace_premium_rounded,
+      size: 28,
+      color: AppColors.sealGold,
+    );
+  }
+
+  Widget _buildSealMeta(BuildContext context, SealDetail seal) {
     if (seal.isChained == true) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: AppColors.sealGold.withValues(alpha: 0.15),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.sealGold.withValues(alpha: 0.2),
+              AppColors.sealGold.withValues(alpha: 0.1),
+            ],
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Row(
@@ -1017,7 +1124,7 @@ class _SealCardState extends State<_SealCard> with SingleTickerProviderStateMixi
               style: TextStyle(
                 fontSize: 9,
                 color: AppColors.sealGold,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -1030,7 +1137,7 @@ class _SealCardState extends State<_SealCard> with SingleTickerProviderStateMixi
         _formatEarnedTime(seal.earnedTime!),
         style: TextStyle(
           fontSize: 9,
-          color: AppColors.textHint,
+          color: AppColors.textHintAdaptive(context),
         ),
       );
     }
@@ -1038,8 +1145,6 @@ class _SealCardState extends State<_SealCard> with SingleTickerProviderStateMixi
     return const SizedBox.shrink();
   }
 }
-
-
 // ==================== 解锁提示弹窗 ====================
 
 class _UnlockHintSheet extends StatelessWidget {
@@ -1049,11 +1154,11 @@ class _UnlockHintSheet extends StatelessWidget {
   Color get _rarityColor {
     switch (seal.rarity) {
       case SealRarity.common:
-        return AppColors.primary;
+        return AppColors.sealGold; // 金色
       case SealRarity.rare:
-        return AppColors.tertiary;
+        return const Color(0xFF9C27B0); // 紫色
       case SealRarity.legendary:
-        return AppColors.sealGold;
+        return const Color(0xFFFF6B35); // 橙红色
     }
   }
 
@@ -1062,9 +1167,9 @@ class _UnlockHintSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         child: Padding(
@@ -1077,7 +1182,7 @@ class _UnlockHintSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.border,
+                  color: AppColors.borderAdaptive(context),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1104,10 +1209,10 @@ class _UnlockHintSheet extends StatelessWidget {
                       children: [
                         Text(
                           seal.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textPrimaryAdaptive(context),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -1137,7 +1242,7 @@ class _UnlockHintSheet extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                  color: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -1146,7 +1251,7 @@ class _UnlockHintSheet extends StatelessWidget {
                     Icon(
                       Icons.lock_open_rounded,
                       size: 16,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSecondaryAdaptive(context),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -1154,7 +1259,7 @@ class _UnlockHintSheet extends StatelessWidget {
                         seal.unlockCondition ?? _getDefaultUnlockHint(),
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.textPrimary,
+                          color: AppColors.textPrimaryAdaptive(context),
                           height: 1.4,
                         ),
                       ),
@@ -1240,7 +1345,7 @@ class _UnlockHintSheet extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.surfaceVariant.withValues(alpha: 0.2),
+          color: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -1248,7 +1353,7 @@ class _UnlockHintSheet extends StatelessWidget {
             Icon(
               seal.journeyName != null ? Icons.route_rounded : Icons.location_city_rounded,
               size: 16,
-              color: AppColors.textHint,
+              color: AppColors.textHintAdaptive(context),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -1256,14 +1361,14 @@ class _UnlockHintSheet extends StatelessWidget {
                 seal.journeyName ?? seal.cityName ?? '',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryAdaptive(context),
                 ),
               ),
             ),
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 12,
-              color: AppColors.textHint,
+              color: AppColors.textHintAdaptive(context),
             ),
           ],
         ),
@@ -1283,9 +1388,9 @@ class _FilterSheet extends StatelessWidget {
     final selectedType = ref.watch(selectedSealTypeProvider);
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         child: Column(
@@ -1296,23 +1401,27 @@ class _FilterSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: AppColors.borderAdaptive(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  Icon(Icons.filter_list_rounded, size: 20, color: AppColors.textSecondary),
-                  SizedBox(width: 8),
+                  Icon(
+                    Icons.filter_list_rounded,
+                    size: 20,
+                    color: AppColors.textSecondaryAdaptive(context),
+                  ),
+                  const SizedBox(width: 8),
                   Text(
                     '筛选印记类型',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryAdaptive(context),
                     ),
                   ),
                 ],
@@ -1398,7 +1507,7 @@ class _FilterOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.textSecondary;
+    final effectiveColor = color ?? AppColors.textSecondaryAdaptive(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -1407,7 +1516,7 @@ class _FilterOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? effectiveColor.withValues(alpha: 0.1)
-              : AppColors.surfaceVariant.withValues(alpha: 0.3),
+              : AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? effectiveColor.withValues(alpha: 0.3) : Colors.transparent,
@@ -1415,7 +1524,11 @@ class _FilterOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: isSelected ? effectiveColor : AppColors.textHint),
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected ? effectiveColor : AppColors.textHintAdaptive(context),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -1423,7 +1536,7 @@ class _FilterOption extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? effectiveColor : AppColors.textSecondary,
+                  color: isSelected ? effectiveColor : AppColors.textSecondaryAdaptive(context),
                 ),
               ),
             ),

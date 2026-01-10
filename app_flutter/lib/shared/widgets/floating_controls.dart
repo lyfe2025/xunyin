@@ -21,18 +21,25 @@ class FloatingControls extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final audioState = ref.watch(audioStateProvider);
+    final isDark = context.isDarkMode;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.95)
+            : Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.8),
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.8),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : AppColors.primary.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -48,19 +55,19 @@ class FloatingControls extends ConsumerWidget {
               label: '我的',
               onTap: onProfileTap,
             ),
-            _buildDivider(),
+            _buildDivider(context),
             _FloatingButton(
               icon: Icons.workspace_premium_rounded,
               label: '印记',
               onTap: onSealsTap,
             ),
-            _buildDivider(),
+            _buildDivider(context),
             _FloatingButton(
               icon: Icons.photo_library_outlined,
               label: '相册',
               onTap: onAlbumTap,
             ),
-            _buildDivider(),
+            _buildDivider(context),
             _FloatingButton(
               icon: audioState.isPlaying
                   ? Icons.music_note_rounded
@@ -71,7 +78,7 @@ class FloatingControls extends ConsumerWidget {
                 ref.read(audioStateProvider.notifier).togglePlay();
               },
             ),
-            _buildDivider(),
+            _buildDivider(context),
             _FloatingButton(
               icon: Icons.my_location_rounded,
               label: '定位',
@@ -83,13 +90,16 @@ class FloatingControls extends ConsumerWidget {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       width: 28,
       height: 1,
       decoration: BoxDecoration(
-        color: AppColors.divider.withValues(alpha: 0.6),
+        color: isDark
+            ? AppColors.darkBorder.withValues(alpha: 0.6)
+            : AppColors.divider.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(1),
       ),
     );
@@ -133,7 +143,9 @@ class _FloatingButton extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 22,
-                  color: isActive ? AppColors.accent : AppColors.textSecondary,
+                  color: isActive
+                      ? AppColors.accent
+                      : AppColors.textSecondaryAdaptive(context),
                 ),
               ),
               const SizedBox(height: 2),
@@ -142,7 +154,9 @@ class _FloatingButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                  color: isActive ? AppColors.accent : AppColors.textHint,
+                  color: isActive
+                      ? AppColors.accent
+                      : AppColors.textHintAdaptive(context),
                 ),
               ),
             ],

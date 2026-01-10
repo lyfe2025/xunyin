@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/city.dart';
@@ -127,7 +128,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               '正在加载地图...',
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textSecondary.withValues(alpha: 0.8),
+                color: AppColors.textSecondaryAdaptive(context).withValues(alpha: 0.8),
               ),
             ),
           ],
@@ -163,30 +164,24 @@ class _HomePageState extends ConsumerState<HomePage> {
     final errorStr = error.toString();
     String title;
     String message;
-    IconData icon;
 
     if (errorStr.contains('SocketException') ||
         errorStr.contains('Connection refused') ||
         errorStr.contains('Failed host lookup')) {
       title = '无法连接服务器';
       message = '请检查网络连接，或稍后重试';
-      icon = Icons.wifi_off_rounded;
     } else if (errorStr.contains('404')) {
       title = '服务暂不可用';
       message = '后端服务可能未启动，请联系管理员';
-      icon = Icons.cloud_off_rounded;
     } else if (errorStr.contains('timeout') || errorStr.contains('Timeout')) {
       title = '请求超时';
       message = '服务器响应太慢，请稍后重试';
-      icon = Icons.timer_off_rounded;
     } else if (errorStr.contains('401') || errorStr.contains('403')) {
       title = '登录已过期';
       message = '请重新登录';
-      icon = Icons.lock_outline_rounded;
     } else {
       title = '加载失败';
       message = '请稍后重试';
-      icon = Icons.error_outline_rounded;
     }
 
     return Container(
@@ -203,25 +198,19 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withValues(alpha: 0.6),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: 48,
-                  color: AppColors.textHint.withValues(alpha: 0.6),
-                ),
+              // 使用插画替代图标
+              SvgPicture.asset(
+                'assets/illustrations/error_network.svg',
+                width: 180,
+                height: 135,
               ),
               const SizedBox(height: 24),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryAdaptive(context),
                 ),
               ),
               const SizedBox(height: 8),
@@ -230,7 +219,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.textSecondary.withValues(alpha: 0.8),
+                  color: AppColors.textSecondaryAdaptive(context).withValues(alpha: 0.8),
                   height: 1.5,
                 ),
               ),
@@ -246,12 +235,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [AppColors.primary, AppColors.primaryDark],
+                          colors: [AppColors.accent, AppColors.accentDark],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
+                            color: AppColors.accent.withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),

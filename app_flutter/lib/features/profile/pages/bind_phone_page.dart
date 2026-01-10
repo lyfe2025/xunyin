@@ -160,14 +160,14 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
       child: Row(
         children: [
           AppBackButton(onTap: () => Navigator.of(context).pop()),
-          const Expanded(
+          Expanded(
             child: Text(
               '绑定手机号',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
           ),
@@ -188,35 +188,41 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.cardPadding),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.accent.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.phone_android_rounded,
                 size: 56,
-                color: AppColors.primary,
+                color: AppColors.accent,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            const Text(
+            Text(
               '绑定手机号',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            const Text(
+            Text(
               '绑定手机号后可用于账号安全验证',
-              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondaryAdaptive(context),
+              ),
             ),
             const SizedBox(height: AppSpacing.xxxl),
             _buildFormCard(),
             const SizedBox(height: AppSpacing.lg),
-            const Text(
+            Text(
               '验证码将发送到您的手机，5分钟内有效',
-              style: TextStyle(fontSize: 12, color: AppColors.textHint),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textHintAdaptive(context),
+              ),
             ),
           ],
         ),
@@ -224,14 +230,20 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
     );
   }
 
+
   Widget _buildFormCard() {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: AppOpacity.glassCard),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: AppOpacity.glassCard)
+            : Colors.white.withValues(alpha: AppOpacity.glassCard),
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: Colors.white.withValues(alpha: AppOpacity.glassBorder),
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: AppOpacity.glassBorder)
+              : Colors.white.withValues(alpha: AppOpacity.glassBorder),
         ),
         boxShadow: AppShadow.glass,
       ),
@@ -247,12 +259,12 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
             decoration: InputDecoration(
               labelText: '手机号',
               hintText: '请输入手机号',
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.phone_rounded,
-                color: AppColors.textHint,
+                color: AppColors.textHintAdaptive(context),
               ),
               filled: true,
-              fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+              fillColor: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.input),
                 borderSide: BorderSide.none,
@@ -280,12 +292,12 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                   decoration: InputDecoration(
                     labelText: '验证码',
                     hintText: '请输入验证码',
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.lock_outline_rounded,
-                      color: AppColors.textHint,
+                      color: AppColors.textHintAdaptive(context),
                     ),
                     filled: true,
-                    fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                    fillColor: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.input),
                       borderSide: BorderSide.none,
@@ -325,13 +337,13 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
           height: AppSize.buttonHeight,
           decoration: BoxDecoration(
             color: isDisabled
-                ? AppColors.surfaceVariant
-                : AppColors.primary.withValues(alpha: 0.08),
+                ? AppColors.surfaceVariantAdaptive(context)
+                : AppColors.accent.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(AppRadius.input),
             border: Border.all(
               color: isDisabled
-                  ? AppColors.border
-                  : AppColors.primary.withValues(alpha: 0.3),
+                  ? AppColors.borderAdaptive(context)
+                  : AppColors.accent.withValues(alpha: 0.3),
             ),
           ),
           child: Center(
@@ -341,7 +353,7 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: AppColors.accent,
                     ),
                   )
                 : Text(
@@ -349,7 +361,9 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: isDisabled ? AppColors.textHint : AppColors.primary,
+                      color: isDisabled
+                          ? AppColors.textHintAdaptive(context)
+                          : AppColors.accent,
                     ),
                   ),
           ),

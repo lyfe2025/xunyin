@@ -21,17 +21,32 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
   final _controller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  String _originalNickname = '';
+
+  // 是否可以保存：有修改 + 长度符合要求
+  bool get _canSave =>
+      !_isLoading &&
+      _controller.text.trim() != _originalNickname &&
+      _controller.text.trim().length >= 2;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userAsync = ref.read(currentUserProvider);
-      userAsync.whenData((user) {
-        if (user != null && mounted) {
-          _controller.text = user.nickname ?? '';
-        }
-      });
+    _controller.addListener(() => setState(() {}));
+    // 页面创建时立即加载最新数据
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadNickname());
+  }
+
+  void _loadNickname() {
+    final homeDataAsync = ref.read(profileHomeProvider);
+    homeDataAsync.whenData((data) {
+      if (mounted && data.user != null) {
+        final nickname = data.user?.nickname ?? '';
+        setState(() {
+          _originalNickname = nickname;
+          _controller.text = nickname;
+        });
+      }
     });
   }
 
@@ -50,7 +65,9 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
       final api = ref.read(apiClientProvider);
       final service = ProfileService(api);
       await service.updateNickname(_controller.text.trim());
+      // 刷新用户数据和个人中心数据
       ref.invalidate(currentUserProvider);
+      ref.invalidate(profileHomeProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -74,6 +91,9 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 监听数据变化，但不在这里初始化（已在 initState 中处理）
+    ref.watch(profileHomeProvider);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -82,7 +102,12 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
             child: Column(
               children: [
                 _buildAppBar(context),
-                Expanded(child: _buildForm()),
+                Expanded(
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: _buildForm(),
+                  ),
+                ),
               ],
             ),
           ),
@@ -97,27 +122,34 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
       child: Row(
         children: [
           const AppBackButton(),
-          const Expanded(
+          Expanded(
             child: Text(
               '修改昵称',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
           ),
           GestureDetector(
-            onTap: _isLoading ? null : _save,
-            child: Container(
+            onTap: _canSave ? _save : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.accent, Color(0xFFE85A4F)],
-                ),
+                gradient: _canSave
+                    ? const LinearGradient(
+                        colors: [AppColors.accent, Color(0xFFE85A4F)],
+                      )
+                    : LinearGradient(
+                        colors: context.isDarkMode
+                            ? [Colors.grey.shade700, Colors.grey.shade800]
+                            : [Colors.grey.shade300, Colors.grey.shade400],
+                      ),
                 borderRadius: BorderRadius.circular(AppRadius.iconButton),
-                boxShadow: AppShadow.accent(AppColors.accent),
+                boxShadow: _canSave ? AppShadow.accent(AppColors.accent) : null,
               ),
               child: _isLoading
                   ? const SizedBox(
@@ -128,10 +160,14 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text(
+                  : Text(
                       '保存',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: _canSave
+                            ? Colors.white
+                            : (context.isDarkMode
+                                ? Colors.grey.shade500
+                                : Colors.grey.shade500),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -143,6 +179,7 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
   }
 
   Widget _buildForm() {
+    final isDark = context.isDarkMode;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Form(
@@ -150,20 +187,26 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.cardPadding),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.92)
+                : Colors.white.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.darkBorder.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.5),
+            ),
             boxShadow: AppShadow.medium,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 '昵称',
                 style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryAdaptive(context),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -171,23 +214,35 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
               TextFormField(
                 controller: _controller,
                 maxLength: 20,
+                style: TextStyle(
+                  color: AppColors.textPrimaryAdaptive(context),
+                ),
                 decoration: InputDecoration(
                   hintText: '请输入昵称',
+                  hintStyle: TextStyle(
+                    color: AppColors.textHintAdaptive(context),
+                  ),
                   filled: true,
-                  fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                  fillColor: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                     borderSide: BorderSide.none,
                   ),
-                  counterText: '',
-                  suffixIcon: IconButton(
-                    icon: const Icon(
-                      Icons.clear_rounded,
-                      size: 20,
-                      color: AppColors.textHint,
-                    ),
-                    onPressed: () => _controller.clear(),
+                  counterText: '${_controller.text.length}/20',
+                  counterStyle: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textHintAdaptive(context),
                   ),
+                  suffixIcon: _controller.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.clear_rounded,
+                            size: 20,
+                            color: AppColors.textHintAdaptive(context),
+                          ),
+                          onPressed: () => _controller.clear(),
+                        )
+                      : null,
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) return '请输入昵称';
@@ -196,9 +251,12 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
                 },
               ),
               const SizedBox(height: 10),
-              const Text(
+              Text(
                 '昵称长度2-20个字符',
-                style: TextStyle(fontSize: 12, color: AppColors.textHint),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textHintAdaptive(context),
+                ),
               ),
             ],
           ),

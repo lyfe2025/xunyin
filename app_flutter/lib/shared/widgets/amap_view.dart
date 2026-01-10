@@ -61,18 +61,30 @@ class AMapView extends ConsumerWidget {
 
         return _buildMap(config.amap.androidKey, config.amap.iosKey);
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(
+        child: CircularProgressIndicator(color: AppColors.accent),
+      ),
       error: (error, stack) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.map_outlined, size: 48, color: AppColors.textHint),
+            Icon(
+              Icons.map_outlined,
+              size: 48,
+              color: AppColors.textHintAdaptive(context),
+            ),
             const SizedBox(height: 8),
-            Text('地图加载失败', style: TextStyle(color: AppColors.textHint)),
+            Text(
+              '地图加载失败',
+              style: TextStyle(color: AppColors.textHintAdaptive(context)),
+            ),
             const SizedBox(height: 4),
             Text(
               error.toString(),
-              style: TextStyle(color: AppColors.textHint, fontSize: 12),
+              style: TextStyle(
+                color: AppColors.textHintAdaptive(context),
+                fontSize: 12,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

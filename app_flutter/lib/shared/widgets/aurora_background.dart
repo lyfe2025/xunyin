@@ -10,16 +10,18 @@ class AuroraBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: variant.gradientBegin,
           end: variant.gradientEnd,
-          colors: variant.gradientColors,
+          colors: isDark ? variant.darkGradientColors : variant.gradientColors,
         ),
       ),
       child: CustomPaint(
-        painter: _AuroraPainter(variant: variant),
+        painter: _AuroraPainter(variant: variant, isDark: isDark),
         size: Size.infinite,
       ),
     );
@@ -92,6 +94,22 @@ extension AuroraVariantExtension on AuroraVariant {
     }
   }
 
+  /// 深色模式渐变色
+  List<Color> get darkGradientColors {
+    switch (this) {
+      case AuroraVariant.standard:
+      case AuroraVariant.form:
+      case AuroraVariant.navigation:
+        return const [Color(0xFF121218), Color(0xFF1A1A22), Color(0xFF1E1E26)];
+      case AuroraVariant.warm:
+        return const [Color(0xFF1A1518), Color(0xFF181418), Color(0xFF161216)];
+      case AuroraVariant.golden:
+        return const [Color(0xFF1A1814), Color(0xFF181612), Color(0xFF161410)];
+      case AuroraVariant.celebration:
+        return const [Color(0xFF1E1A14), Color(0xFF1A1816), Color(0xFF181614)];
+    }
+  }
+
   List<AuroraCircle> get circles {
     switch (this) {
       case AuroraVariant.standard:
@@ -131,6 +149,17 @@ extension AuroraVariantExtension on AuroraVariant {
         ];
     }
   }
+
+  /// 深色模式下的圆形光晕（透明度更低）
+  List<AuroraCircle> get darkCircles {
+    return circles.map((c) => AuroraCircle(
+      c.x,
+      c.y,
+      c.radiusFactor,
+      c.color,
+      c.opacity * 0.5, // 深色模式下透明度减半
+    )).toList();
+  }
 }
 
 /// Aurora 背景中的圆形光晕配置
@@ -152,14 +181,16 @@ class AuroraCircle {
 
 class _AuroraPainter extends CustomPainter {
   final AuroraVariant variant;
+  final bool isDark;
 
-  _AuroraPainter({required this.variant});
+  _AuroraPainter({required this.variant, required this.isDark});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
+    final circles = isDark ? variant.darkCircles : variant.circles;
 
-    for (final circle in variant.circles) {
+    for (final circle in circles) {
       paint.color = circle.color.withValues(alpha: circle.opacity);
       canvas.drawCircle(
         Offset(size.width * circle.x, size.height * circle.y),
@@ -170,5 +201,7 @@ class _AuroraPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _AuroraPainter oldDelegate) {
+    return oldDelegate.isDark != isDark;
+  }
 }

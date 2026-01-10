@@ -83,6 +83,7 @@ class _AgreementPageState extends State<AgreementPage> {
   }
 
   Widget _buildAppBar(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -92,7 +93,9 @@ class _AgreementPageState extends State<AgreementPage> {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: isDark
+                    ? AppColors.darkSurface.withValues(alpha: 0.9)
+                    : Colors.white.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -101,9 +104,9 @@ class _AgreementPageState extends State<AgreementPage> {
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
                 size: 22,
               ),
             ),
@@ -112,10 +115,10 @@ class _AgreementPageState extends State<AgreementPage> {
             child: Text(
               _agreement?.title ?? widget.type.label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
           ),
@@ -126,20 +129,26 @@ class _AgreementPageState extends State<AgreementPage> {
   }
 
   Widget _buildBody() {
+    final isDark = context.isDarkMode;
     if (_loading) {
       return Center(
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.9)
+                : Colors.white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Column(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: AppColors.accent),
-              SizedBox(height: 16),
-              Text('加载中...', style: TextStyle(color: AppColors.textSecondary)),
+              const CircularProgressIndicator(color: AppColors.accent),
+              const SizedBox(height: 16),
+              Text(
+                '加载中...',
+                style: TextStyle(color: AppColors.textSecondaryAdaptive(context)),
+              ),
             ],
           ),
         ),
@@ -152,7 +161,9 @@ class _AgreementPageState extends State<AgreementPage> {
           margin: const EdgeInsets.all(24),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.9)
+                : Colors.white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -164,20 +175,20 @@ class _AgreementPageState extends State<AgreementPage> {
                 height: 120,
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '加载失败',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryAdaptive(context),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 _error!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.textHint,
+                  color: AppColors.textHintAdaptive(context),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -204,12 +215,12 @@ class _AgreementPageState extends State<AgreementPage> {
               height: 105,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               '暂无内容',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: AppColors.textSecondaryAdaptive(context),
               ),
             ),
           ],
@@ -220,9 +231,15 @@ class _AgreementPageState extends State<AgreementPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.92)
+            : Colors.white.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.06),
@@ -244,7 +261,7 @@ class _AgreementPageState extends State<AgreementPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                  color: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -253,23 +270,23 @@ class _AgreementPageState extends State<AgreementPage> {
                     if (_agreement!.version.isNotEmpty)
                       Text(
                         '版本 ${_agreement!.version}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textHint,
+                          color: AppColors.textHintAdaptive(context),
                         ),
                       ),
                     if (_agreement!.version.isNotEmpty &&
                         _agreement!.updateTime != null)
-                      const Text(
+                      Text(
                         ' · ',
-                        style: TextStyle(color: AppColors.textHint),
+                        style: TextStyle(color: AppColors.textHintAdaptive(context)),
                       ),
                     if (_agreement!.updateTime != null)
                       Text(
                         '更新于 ${_formatDate(_agreement!.updateTime!)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textHint,
+                          color: AppColors.textHintAdaptive(context),
                         ),
                       ),
                   ],
@@ -277,10 +294,10 @@ class _AgreementPageState extends State<AgreementPage> {
               ),
             HtmlWidget(
               _agreement!.content,
-              textStyle: const TextStyle(
+              textStyle: TextStyle(
                 fontSize: 14,
                 height: 1.8,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
           ],
@@ -300,36 +317,42 @@ class _AuroraBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6F3), Color(0xFFF0EDE8), Color(0xFFE8E4DD)],
+          colors: isDark
+              ? [AppColors.darkBackground, const Color(0xFF1A1A22), const Color(0xFF151518)]
+              : [const Color(0xFFF8F6F3), const Color(0xFFF0EDE8), const Color(0xFFE8E4DD)],
         ),
       ),
-      child: CustomPaint(painter: _AuroraPainter(), size: Size.infinite),
+      child: CustomPaint(painter: _AuroraPainter(isDark: isDark), size: Size.infinite),
     );
   }
 }
 
 class _AuroraPainter extends CustomPainter {
+  final bool isDark;
+  _AuroraPainter({this.isDark = false});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-    paint.color = AppColors.primary.withValues(alpha: 0.08);
+    paint.color = AppColors.primary.withValues(alpha: isDark ? 0.12 : 0.08);
     canvas.drawCircle(
       Offset(size.width * 0.2, size.height * 0.1),
       size.width * 0.35,
       paint,
     );
-    paint.color = AppColors.accent.withValues(alpha: 0.06);
+    paint.color = AppColors.accent.withValues(alpha: isDark ? 0.1 : 0.06);
     canvas.drawCircle(
       Offset(size.width * 0.85, size.height * 0.4),
       size.width * 0.3,
       paint,
     );
-    paint.color = AppColors.tertiary.withValues(alpha: 0.05);
+    paint.color = AppColors.tertiary.withValues(alpha: isDark ? 0.08 : 0.05);
     canvas.drawCircle(
       Offset(size.width * 0.4, size.height * 0.85),
       size.width * 0.4,
@@ -338,5 +361,5 @@ class _AuroraPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _AuroraPainter oldDelegate) => oldDelegate.isDark != isDark;
 }

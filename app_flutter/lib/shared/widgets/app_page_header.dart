@@ -26,10 +26,10 @@ class AppPageHeader extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
           ),
@@ -58,23 +58,28 @@ class AppHeaderAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
+          color: isDark
+              ? AppColors.darkSurface.withValues(alpha: 0.9)
+              : Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
             ),
           ],
         ),
         child: Icon(
           icon,
-          color: iconColor ?? AppColors.textSecondary,
+          color: iconColor ?? AppColors.textSecondaryAdaptive(context),
           size: 22,
         ),
       ),

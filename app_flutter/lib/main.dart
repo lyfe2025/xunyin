@@ -7,6 +7,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/app_info.dart';
 import 'core/utils/error_handler.dart';
+import 'providers/settings_providers.dart';
 
 void main() {
   runZonedGuarded(
@@ -40,15 +41,19 @@ void main() {
   );
 }
 
-class XunyinApp extends StatelessWidget {
+class XunyinApp extends ConsumerWidget {
   const XunyinApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+
     return MaterialApp.router(
       title: '寻印',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: settings.flutterThemeMode,
       routerConfig: AppRouter.router,
     );
   }

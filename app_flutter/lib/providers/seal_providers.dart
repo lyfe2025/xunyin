@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/seal.dart';
+import '../models/badge.dart';
 import 'service_providers.dart';
 
 /// 用户印记列表
@@ -38,3 +39,9 @@ final allSealsProvider = FutureProvider<List<SealDetail>>((ref) async {
 
 /// 当前选中的印记类型筛选
 final selectedSealTypeProvider = StateProvider<SealType?>((ref) => null);
+
+/// 用户已解锁的称号列表
+final userBadgesProvider = FutureProvider<List<UserBadge>>((ref) async {
+  final service = ref.watch(sealServiceProvider);
+  return service.getUserBadges();
+});

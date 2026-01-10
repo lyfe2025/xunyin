@@ -27,6 +27,10 @@ class AppGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+    final defaultColor = isDark ? AppColors.darkSurface : Colors.white;
+    final borderColor = isDark ? AppColors.darkBorder : Colors.white;
+
     final card = Container(
       width: width,
       height: height,
@@ -37,16 +41,16 @@ class AppGlassCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            (backgroundColor ?? Colors.white).withValues(alpha: 0.9),
-            (backgroundColor ?? Colors.white).withValues(alpha: 0.7),
+            (backgroundColor ?? defaultColor).withValues(alpha: 0.9),
+            (backgroundColor ?? defaultColor).withValues(alpha: 0.7),
           ],
         ),
         borderRadius: BorderRadius.circular(borderRadius ?? AppRadius.cardLarge),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.8),
+          color: borderColor.withValues(alpha: 0.8),
           width: 1,
         ),
-        boxShadow: AppShadow.glass,
+        boxShadow: isDark ? AppShadow.glassDark : AppShadow.glass,
       ),
       child: child,
     );
@@ -85,18 +89,22 @@ class AppSimpleGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+    final cardColor = isDark ? AppColors.darkSurface : Colors.white;
+    final borderColor = isDark ? AppColors.darkBorder : Colors.white;
+
     final card = Container(
       margin: margin,
       padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: AppOpacity.glassCard),
+        color: cardColor.withValues(alpha: AppOpacity.glassCard),
         borderRadius: BorderRadius.circular(borderRadius ?? AppRadius.card),
         border: Border.all(
-          color: Colors.white.withValues(alpha: AppOpacity.glassBorder),
+          color: borderColor.withValues(alpha: AppOpacity.glassBorder),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
+            color: AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.06),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),

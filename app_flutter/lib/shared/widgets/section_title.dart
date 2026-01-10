@@ -18,7 +18,7 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.textPrimary;
+    final effectiveColor = color ?? AppColors.textPrimaryAdaptive(context);
 
     return Row(
       children: [
@@ -57,7 +57,7 @@ class SectionTitleWithBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.textPrimary;
+    final effectiveColor = color ?? AppColors.textPrimaryAdaptive(context);
 
     return Row(
       children: [

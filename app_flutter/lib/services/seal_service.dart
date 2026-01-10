@@ -1,11 +1,29 @@
 import '../core/api/api_client.dart';
 import '../models/seal.dart';
 import '../models/blockchain.dart';
+import '../models/badge.dart';
 
 class SealService {
   final ApiClient _api;
 
   SealService(this._api);
+
+  /// 获取用户已解锁的称号列表
+  Future<List<UserBadge>> getUserBadges() async {
+    final response = await _api.get('/seals/badges');
+    final list = response['data'] as List;
+    return list.map((e) => UserBadge.fromJson(e)).toList();
+  }
+
+  /// 设置当前展示的称号
+  Future<void> setBadgeTitle(String badgeTitle) async {
+    await _api.put('/seals/badges/current', data: {'badgeTitle': badgeTitle});
+  }
+
+  /// 清除当前称号
+  Future<void> clearBadgeTitle() async {
+    await _api.delete('/seals/badges/current');
+  }
 
   /// 获取用户印记列表
   Future<List<UserSeal>> getUserSeals({String? type}) async {

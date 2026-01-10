@@ -2,11 +2,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../providers/settings_providers.dart';
 
 /// 设置偏好存储
 class SettingsStorage {
   static const _keyNotificationEnabled = 'notification_enabled';
   static const _keyAutoLocationEnabled = 'auto_location_enabled';
+  static const _keyThemeMode = 'theme_mode';
 
   /// 获取消息通知开关状态
   static Future<bool> getNotificationEnabled() async {
@@ -30,6 +32,19 @@ class SettingsStorage {
   static Future<void> setAutoLocationEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyAutoLocationEnabled, enabled);
+  }
+
+  /// 获取主题模式
+  static Future<AppThemeMode> getThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final index = prefs.getInt(_keyThemeMode) ?? 0;
+    return AppThemeMode.values[index.clamp(0, AppThemeMode.values.length - 1)];
+  }
+
+  /// 设置主题模式
+  static Future<void> setThemeMode(AppThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyThemeMode, mode.index);
   }
 
   /// 获取缓存大小（字节）

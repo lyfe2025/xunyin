@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Xunyin App</string>
+	<string>寻印</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -55,5 +55,11 @@
 	<string>寻印需要获取您的位置信息以提供文化之旅导航服务</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>寻印需要获取您的位置信息以提供文化之旅导航服务</string>
+	<!-- 相机权限描述 -->
+	<key>NSCameraUsageDescription</key>
+	<string>寻印需要使用相机拍摄头像和探索点打卡照片</string>
+	<!-- 相册权限描述 -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>寻印需要访问相册以选择头像和保存探索照片</string>
 </dict>
 </plist>

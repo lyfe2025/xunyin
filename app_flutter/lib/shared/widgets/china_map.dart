@@ -25,8 +25,9 @@ class _ChinaMapState extends State<ChinaMap> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
-      color: const Color(0xFFF5F0E6), // 宣纸色背景
+      color: isDark ? AppColors.darkBackground : const Color(0xFFF5F0E6), // 宣纸色背景
       child: GestureDetector(
         onScaleUpdate: (details) {
           setState(() {
@@ -44,20 +45,21 @@ class _ChinaMapState extends State<ChinaMap> {
                 child: Transform.scale(
                   scale: _scale,
                   child: CustomPaint(
-                    painter: _MapBackgroundPainter(),
-                    child: Stack(
-                      children: widget.cities.map((city) {
-                        return _CityMarker(
-                          city: city,
-                          isSelected: city.id == widget.selectedCityId,
-                          onTap: () => widget.onCityTap?.call(city),
-                        );
-                      }).toList(),
-                    ),
+                    painter: _MapBackgroundPainter(isDark: isDark),
                   ),
                 ),
               ),
             ),
+            // 城市标记（独立于背景变换）
+            ...widget.cities.map((city) {
+              return _CityMarker(
+                city: city,
+                isSelected: city.id == widget.selectedCityId,
+                onTap: () => widget.onCityTap?.call(city),
+                scale: _scale,
+                offset: _offset,
+              );
+            }),
             // 地图说明
             Positioned(
               left: 16,
@@ -68,14 +70,19 @@ class _ChinaMapState extends State<ChinaMap> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark
+                      ? AppColors.darkSurface.withValues(alpha: 0.9)
+                      : Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(8),
+                  border: isDark
+                      ? Border.all(color: AppColors.darkBorder.withValues(alpha: 0.5))
+                      : null,
                 ),
-                child: const Text(
+                child: Text(
                   '点击城市图标查看详情',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textSecondaryAdaptive(context),
                   ),
                 ),
               ),
@@ -91,16 +98,29 @@ class _CityMarker extends StatelessWidget {
   final City city;
   final bool isSelected;
   final VoidCallback? onTap;
+  final double scale;
+  final Offset offset;
 
-  const _CityMarker({required this.city, this.isSelected = false, this.onTap});
+  const _CityMarker({
+    required this.city,
+    required this.scale,
+    required this.offset,
+    this.isSelected = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     // 将经纬度转换为屏幕坐标（简化版）
     // 中国大致范围：经度 73-135，纬度 18-54
     final screenSize = MediaQuery.of(context).size;
-    final x = ((city.longitude - 73) / 62) * screenSize.width;
-    final y = ((54 - city.latitude) / 36) * screenSize.height;
+    final baseX = ((city.longitude - 73) / 62) * screenSize.width;
+    final baseY = ((54 - city.latitude) / 36) * screenSize.height;
+
+    // 应用缩放和偏移
+    final x = baseX * scale + offset.dx + screenSize.width * (1 - scale) / 2;
+    final y = baseY * scale + offset.dy + screenSize.height * (1 - scale) / 2;
 
     return Positioned(
       left: x - 24,
@@ -113,17 +133,23 @@ class _CityMarker extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.accent : Colors.white,
+                color: isSelected
+                    ? AppColors.accent
+                    : (isDark ? AppColors.darkSurface : Colors.white),
                 shape: BoxShape.circle,
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Colors.black26,
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.4)
+                        : Colors.black26,
                     blurRadius: 8,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
                 border: Border.all(
-                  color: isSelected ? AppColors.accent : AppColors.border,
+                  color: isSelected
+                      ? AppColors.accent
+                      : AppColors.borderAdaptive(context),
                   width: 2,
                 ),
               ),
@@ -139,7 +165,9 @@ class _CityMarker extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.accent
-                    : Colors.white.withValues(alpha: 0.9),
+                    : (isDark
+                        ? AppColors.darkSurface.withValues(alpha: 0.9)
+                        : Colors.white.withValues(alpha: 0.9)),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -147,7 +175,9 @@ class _CityMarker extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                  color: isSelected
+                      ? Colors.white
+                      : AppColors.textPrimaryAdaptive(context),
                 ),
               ),
             ),
@@ -170,6 +200,7 @@ class _CityMarker extends StatelessWidget {
       '深圳': Icons.business,
       '南京': Icons.park,
       '苏州': Icons.yard,
+      '福州': Icons.forest, // 榕城
       '哈尔滨': Icons.ac_unit,
       '昆明': Icons.local_florist,
       '长沙': Icons.restaurant,
@@ -180,16 +211,21 @@ class _CityMarker extends StatelessWidget {
 }
 
 class _MapBackgroundPainter extends CustomPainter {
+  final bool isDark;
+  _MapBackgroundPainter({this.isDark = false});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFE8E0D0)
+      ..color = isDark ? const Color(0xFF2A2A34) : const Color(0xFFE8E0D0)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
     // 绘制简单的网格线作为地图背景
     const gridSize = 50.0;
-    const gridColor = Color(0x80E8E0D0);
+    final gridColor = isDark
+        ? const Color(0xFF3A3A44).withValues(alpha: 0.5)
+        : const Color(0x80E8E0D0);
     for (var x = 0.0; x < size.width; x += gridSize) {
       canvas.drawLine(
         Offset(x, 0),
@@ -207,5 +243,6 @@ class _MapBackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _MapBackgroundPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }

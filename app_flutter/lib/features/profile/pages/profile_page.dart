@@ -59,7 +59,7 @@ class ProfilePage extends ConsumerWidget {
                   child: RefreshIndicator(
                     onRefresh: () => _onRefresh(ref),
                     color: AppColors.accent,
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.cardBackground(context),
                     child: homeDataAsync.when(
                       data: (data) => _buildContent(context, data),
                       loading: () => _buildSkeletonState(),
@@ -81,14 +81,14 @@ class ProfilePage extends ConsumerWidget {
       child: Row(
         children: [
           const AppBackButton(),
-          const Expanded(
+          Expanded(
             child: Text(
               '个人中心',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
           ),
@@ -119,20 +119,20 @@ class ProfilePage extends ConsumerWidget {
         const SizedBox(height: 8),
         // 1. 用户卡片
         _UserCard(user: data.user),
+
+        // 2. 成就概览（紧跟用户卡片，作为用户信息延伸）
+        if (!isNew) ...[
+          const SizedBox(height: 12),
+          _AchievementCard(stats: data.stats),
+        ],
         const SizedBox(height: 16),
 
-        // 2. 进行中的旅程 / 新用户引导
+        // 3. 进行中的旅程 / 新用户引导
         if (data.inProgressJourneys.isNotEmpty)
           _InProgressSection(journeys: data.inProgressJourneys)
         else
           _StartJourneyCard(isNewUser: isNew),
         const SizedBox(height: 16),
-
-        // 3. 成就概览（新用户隐藏）
-        if (!isNew) ...[
-          _AchievementCard(stats: data.stats),
-          const SizedBox(height: 16),
-        ],
 
         // 4. 最近动态
         if (data.recentActivities.isNotEmpty || !isNew) ...[
@@ -230,12 +230,15 @@ class ProfilePage extends ConsumerWidget {
           Icon(
             Icons.error_outline_rounded,
             size: 48,
-            color: AppColors.textHint.withValues(alpha: 0.5),
+            color: AppColors.textHintAdaptive(context).withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             '加载失败',
-            style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.textSecondaryAdaptive(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextButton(
@@ -258,11 +261,14 @@ class _SkeletonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       height: height,
       padding: child != null ? const EdgeInsets.all(16) : null,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.6),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.6)
+            : Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(16),
       ),
       child: child,
@@ -282,11 +288,14 @@ class _SkeletonBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.divider.withValues(alpha: 0.5),
+        color: isDark
+            ? AppColors.darkBorder.withValues(alpha: 0.5)
+            : AppColors.divider.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(radius),
       ),
     );
@@ -299,11 +308,14 @@ class _SkeletonCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.divider.withValues(alpha: 0.5),
+        color: isDark
+            ? AppColors.darkBorder.withValues(alpha: 0.5)
+            : AppColors.divider.withValues(alpha: 0.5),
         shape: BoxShape.circle,
       ),
     );
@@ -319,6 +331,7 @@ class _UserCard extends StatelessWidget {
   Widget _buildAvatar(BuildContext context) {
     final displayName = user?.displayName ?? '旅行者';
     final avatarColor = _generateColorFromName(displayName);
+    final isDark = context.isDarkMode;
 
     Widget avatar;
     if (user?.avatarUrl != null) {
@@ -336,28 +349,61 @@ class _UserCard extends StatelessWidget {
       avatar = _buildTextAvatar(displayName, avatarColor);
     }
 
-    // 头像可点击修改
+    // 头像可点击修改，添加编辑图标
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
         context.push('/settings/avatar');
       },
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.8),
-            width: 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isDark
+                    ? AppColors.darkBorder.withValues(alpha: 0.8)
+                    : Colors.white.withValues(alpha: 0.8),
+                width: 3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : AppColors.primary.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: avatar,
+            child: avatar,
+          ),
+          // 编辑图标
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.accent,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accent.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.camera_alt_rounded,
+                size: 12,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -390,22 +436,34 @@ class _UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.9),
-            Colors.white.withValues(alpha: 0.7),
-          ],
+          colors: isDark
+              ? [
+                  AppColors.darkSurface.withValues(alpha: 0.95),
+                  AppColors.darkSurface.withValues(alpha: 0.85),
+                ]
+              : [
+                  Colors.white.withValues(alpha: 0.9),
+                  Colors.white.withValues(alpha: 0.7),
+                ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.8),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.2)
+                : AppColors.primary.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),
@@ -419,12 +477,30 @@ class _UserCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  user?.displayName ?? '旅行者',
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                // 昵称可点击修改
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    context.push('/settings/nickname');
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        user?.displayName ?? '旅行者',
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimaryAdaptive(context),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 18,
+                        color: AppColors.textHintAdaptive(context),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -462,21 +538,77 @@ class _UserCard extends StatelessWidget {
                     ),
                     if (user?.badgeTitle != null) ...[
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/badges');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                user!.badgeTitle!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.accent,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 14,
+                                color: AppColors.accent,
+                              ),
+                            ],
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          user!.badgeTitle!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.accent,
+                      ),
+                    ] else ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/badges');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBorder.withValues(alpha: 0.5)
+                                : AppColors.divider.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '设置称号',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textHintAdaptive(context),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 14,
+                                color: AppColors.textHintAdaptive(context),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -484,24 +616,6 @@ class _UserCard extends StatelessWidget {
                   ],
                 ),
               ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              context.push('/settings/nickname');
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.edit_rounded,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
             ),
           ),
         ],
@@ -567,18 +681,18 @@ class _StartJourneyCard extends StatelessWidget {
                 children: [
                   Text(
                     isNewUser ? '开始你的第一段旅程' : '继续探索新城市',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryAdaptive(context),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     isNewUser ? '发现城市文化，收集专属印记' : '更多精彩旅程等你解锁',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSecondaryAdaptive(context),
                     ),
                   ),
                 ],
@@ -616,7 +730,7 @@ class _InProgressSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryAdaptive(context),
                 ),
               ),
               const SizedBox(width: 6),
@@ -639,7 +753,7 @@ class _InProgressSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 105,
+          height: 135,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: journeys.length,
@@ -653,7 +767,7 @@ class _InProgressSection extends StatelessWidget {
   }
 }
 
-/// 进行中旅程卡片 - 显示城市名称
+/// 进行中旅程卡片 - 显示城市名称，带呼吸动画
 class _InProgressCard extends StatefulWidget {
   final JourneyProgress journey;
   const _InProgressCard({required this.journey});
@@ -663,25 +777,39 @@ class _InProgressCard extends StatefulWidget {
 }
 
 class _InProgressCardState extends State<_InProgressCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  late AnimationController _tapController;
   late Animation<double> _scaleAnimation;
+  late AnimationController _breathController;
+  late Animation<double> _breathAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    // 点击缩放动画
+    _tapController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _tapController, curve: Curves.easeInOut),
     );
+
+    // 呼吸动画 - 边框和阴影微微变化
+    _breathController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _breathAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
+    );
+    _breathController.repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _tapController.dispose();
+    _breathController.dispose();
     super.dispose();
   }
 
@@ -691,115 +819,202 @@ class _InProgressCardState extends State<_InProgressCard>
     final progress = journey.totalPoints > 0
         ? journey.completedPoints / journey.totalPoints
         : 0.0;
+    final isNotStarted = journey.completedPoints == 0;
+    final isCompleted = journey.completedPoints >= journey.totalPoints &&
+        journey.totalPoints > 0;
+    final progressColor = isNotStarted
+        ? AppColors.warning
+        : isCompleted
+            ? AppColors.success
+            : AppColors.accent;
+    final isDark = context.isDarkMode;
 
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
+      onTapDown: (_) => _tapController.forward(),
       onTapUp: (_) {
-        _controller.reverse();
+        _tapController.reverse();
         HapticFeedback.lightImpact();
         context.push('/journey/${journey.journeyId}/progress');
       },
-      onTapCancel: () => _controller.reverse(),
+      onTapCancel: () => _tapController.reverse(),
       child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
-        child: Container(
-          width: 175,
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      size: 14,
-                      color: AppColors.accent,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      journey.journeyName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+        animation: Listenable.merge([_scaleAnimation, _breathAnimation]),
+        builder: (context, child) {
+          final breathValue = _breathAnimation.value;
+          // 呼吸效果：边框透明度和阴影强度微微变化
+          final borderAlpha = 0.12 + breathValue * 0.08;
+          final shadowAlpha = 0.06 + breathValue * 0.06;
+
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              width: 180,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? [
+                          AppColors.darkSurface.withValues(alpha: 0.95),
+                          AppColors.darkSurface.withValues(alpha: 0.85),
+                        ]
+                      : [
+                          Colors.white.withValues(alpha: 0.88),
+                          Colors.white.withValues(alpha: 0.75),
+                        ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: progressColor.withValues(alpha: borderAlpha),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: progressColor.withValues(alpha: shadowAlpha),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              // 城市名称
-              if (journey.cityName != null) ...[
-                const SizedBox(height: 4),
-                Padding(
-                  padding: const EdgeInsets.only(left: 26),
+              child: child,
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        progressColor,
+                        progressColor.withValues(alpha: 0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: progressColor.withValues(alpha: 0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    isNotStarted
+                        ? Icons.schedule_rounded
+                        : Icons.play_arrow_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
                   child: Text(
-                    journey.cityName!,
+                    journey.journeyName,
                     style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textHint,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimaryAdaptive(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
-              const Spacer(),
-              // 进度条
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: AppColors.divider.withValues(alpha: 0.3),
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
-                  minHeight: 6,
+            ),
+            // 城市名称
+            if (journey.cityName != null) ...[
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.only(left: 30),
+                child: Text(
+                  journey.cityName!,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textHintAdaptive(context),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+            ],
+            const Spacer(),
+            // 进度条
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: progressColor.withValues(alpha: 0.12),
+                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                minHeight: 5,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // 0% 时显示"未开始"，100% 显示"已完成"
+                if (isNotStarted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '未开始',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.warning,
+                      ),
+                    ),
+                  )
+                else if (isCompleted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '已完成',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.success,
+                      ),
+                    ),
+                  )
+                else
                   Text(
                     '${(progress * 100).toInt()}%',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                      color: progressColor,
                     ),
                   ),
-                  Text(
-                    '${journey.completedPoints}/${journey.totalPoints}',
-                    style: TextStyle(fontSize: 11, color: AppColors.textHint),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                Text(
+                  '${journey.completedPoints}/${journey.totalPoints}',
+                  style: TextStyle(fontSize: 11, color: AppColors.textHintAdaptive(context)),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -815,22 +1030,34 @@ class _AchievementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.9),
-            Colors.white.withValues(alpha: 0.7),
-          ],
+          colors: isDark
+              ? [
+                  AppColors.darkSurface.withValues(alpha: 0.95),
+                  AppColors.darkSurface.withValues(alpha: 0.85),
+                ]
+              : [
+                  Colors.white.withValues(alpha: 0.9),
+                  Colors.white.withValues(alpha: 0.7),
+                ],
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.8),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.15)
+                : AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -852,7 +1079,7 @@ class _AchievementCard extends StatelessWidget {
               },
             ),
           ),
-          _buildDivider(),
+          _buildDivider(context),
           Expanded(
             child: _AchievementItem(
               icon: Icons.workspace_premium_rounded,
@@ -865,7 +1092,7 @@ class _AchievementCard extends StatelessWidget {
               },
             ),
           ),
-          _buildDivider(),
+          _buildDivider(context),
           Expanded(
             child: _AchievementItem(
               icon: Icons.route_rounded,
@@ -878,7 +1105,7 @@ class _AchievementCard extends StatelessWidget {
               },
             ),
           ),
-          _buildDivider(),
+          _buildDivider(context),
           Expanded(
             child: _AchievementItem(
               icon: Icons.straighten_rounded,
@@ -892,11 +1119,14 @@ class _AchievementCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       width: 1,
       height: 36,
-      color: AppColors.divider.withValues(alpha: 0.4),
+      color: isDark
+          ? AppColors.darkBorder.withValues(alpha: 0.4)
+          : AppColors.divider.withValues(alpha: 0.4),
     );
   }
 }
@@ -953,16 +1183,16 @@ class _AchievementItemState extends State<_AchievementItem>
         const SizedBox(height: 6),
         Text(
           widget.value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: AppColors.textPrimaryAdaptive(context),
           ),
         ),
         const SizedBox(height: 2),
         Text(
           widget.label,
-          style: TextStyle(fontSize: 11, color: AppColors.textHint),
+          style: TextStyle(fontSize: 11, color: AppColors.textHintAdaptive(context)),
         ),
       ],
     );
@@ -1003,6 +1233,7 @@ class _ActivitiesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1013,15 +1244,21 @@ class _ActivitiesSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryAdaptive(context),
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.85),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.9)
+                : Colors.white.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.darkBorder.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.5),
+            ),
           ),
           child: activities.isEmpty
               ? _buildEmptyState(context)
@@ -1035,7 +1272,9 @@ class _ActivitiesSection extends StatelessWidget {
                             padding: const EdgeInsets.only(left: 48),
                             child: Divider(
                               height: 1,
-                              color: AppColors.divider.withValues(alpha: 0.4),
+                              color: isDark
+                                  ? AppColors.darkBorder.withValues(alpha: 0.4)
+                                  : AppColors.divider.withValues(alpha: 0.4),
                             ),
                           ),
                         _ActivityItem(activity: activity),
@@ -1059,20 +1298,20 @@ class _ActivitiesSection extends StatelessWidget {
             height: 105,
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             '暂无动态',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryAdaptive(context),
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             '完成探索后，你的足迹会显示在这里',
             style: TextStyle(
               fontSize: 12,
-              color: AppColors.textHint,
+              color: AppColors.textHintAdaptive(context),
             ),
             textAlign: TextAlign.center,
           ),
@@ -1090,7 +1329,7 @@ class _ActivityItem extends StatelessWidget {
   IconData get _icon {
     switch (activity.type) {
       case 'journey_started':
-        return Icons.play_arrow_rounded;
+        return Icons.play_circle_rounded;
       case 'journey_completed':
         return Icons.check_circle_rounded;
       case 'seal_earned':
@@ -1111,19 +1350,19 @@ class _ActivityItem extends StatelessWidget {
   Color get _iconColor {
     switch (activity.type) {
       case 'journey_started':
-        return AppColors.info;
+        return const Color(0xFF2196F3); // 蓝色 - 开始
       case 'journey_completed':
-        return AppColors.success;
+        return const Color(0xFF4CAF50); // 绿色 - 完成
       case 'seal_earned':
-        return AppColors.sealGold;
+        return const Color(0xFFE6B422); // 金色 - 印记
       case 'seal_chained':
-        return AppColors.tertiary;
+        return const Color(0xFF9C27B0); // 紫色 - 上链
       case 'photo_taken':
-        return AppColors.accent;
+        return const Color(0xFFFF5722); // 橙色 - 拍照
       case 'point_completed':
-        return AppColors.primary;
+        return const Color(0xFF00BCD4); // 青色 - 打卡
       case 'level_up':
-        return AppColors.warning;
+        return const Color(0xFFFF9800); // 橙黄 - 升级
       default:
         return AppColors.textSecondary;
     }
@@ -1147,14 +1386,22 @@ class _ActivityItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            Icon(_icon, size: 18, color: _iconColor),
+            // 图标带背景色
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: _iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(_icon, size: 16, color: _iconColor),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 activity.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryAdaptive(context),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -1164,7 +1411,7 @@ class _ActivityItem extends StatelessWidget {
               _timeAgo,
               style: TextStyle(
                 fontSize: 12,
-                color: AppColors.textHint.withValues(alpha: 0.7),
+                color: AppColors.textHintAdaptive(context).withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -1189,7 +1436,7 @@ class _QuickActions extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryAdaptive(context),
             ),
           ),
         ),
@@ -1280,6 +1527,7 @@ class _QuickActionItemState extends State<_QuickActionItem>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
       onTapUp: (_) {
@@ -1296,9 +1544,15 @@ class _QuickActionItemState extends State<_QuickActionItem>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.85),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.9)
+                : Colors.white.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.darkBorder.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.5),
+            ),
           ),
           child: Column(
             children: [
@@ -1316,7 +1570,7 @@ class _QuickActionItemState extends State<_QuickActionItem>
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryAdaptive(context),
                 ),
               ),
             ],

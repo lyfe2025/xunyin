@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Param, Query, Put, Delete, Body, UseGuards } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { SealService } from './seal.service'
 import { AppAuthGuard } from '../app-auth/guards/app-auth.guard'
@@ -11,11 +11,41 @@ import {
   SealProgressVo,
   AvailableSealVo,
 } from './dto/seal.dto'
+import { UserBadgeVo, SetBadgeTitleDto } from './dto/badge.dto'
 
 @ApiTags('印记')
 @Controller('app/seals')
 export class SealController {
   constructor(private readonly sealService: SealService) {}
+
+  @Get('badges')
+  @UseGuards(AppAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '获取用户已解锁的称号列表' })
+  @ApiResponse({ status: 200, description: '成功', type: [UserBadgeVo] })
+  async getUserBadges(@CurrentUser() user: CurrentAppUser) {
+    return this.sealService.getUserBadges(user.userId)
+  }
+
+  @Put('badges/current')
+  @UseGuards(AppAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '设置当前展示的称号' })
+  @ApiResponse({ status: 200, description: '成功' })
+  async setBadgeTitle(@CurrentUser() user: CurrentAppUser, @Body() dto: SetBadgeTitleDto) {
+    await this.sealService.setBadgeTitle(user.userId, dto.badgeTitle)
+    return { success: true }
+  }
+
+  @Delete('badges/current')
+  @UseGuards(AppAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '清除当前称号' })
+  @ApiResponse({ status: 200, description: '成功' })
+  async clearBadgeTitle(@CurrentUser() user: CurrentAppUser) {
+    await this.sealService.clearBadgeTitle(user.userId)
+    return { success: true }
+  }
 
   @Get()
   @UseGuards(AppAuthGuard)

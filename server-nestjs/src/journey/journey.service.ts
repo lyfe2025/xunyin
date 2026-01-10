@@ -211,7 +211,11 @@ export class JourneyService {
         status: { in: ['in_progress', 'completed'] },
       },
       include: {
-        journey: true,
+        journey: {
+          include: {
+            city: { select: { id: true, name: true } },
+          },
+        },
         pointCompletions: true,
       },
       orderBy: { startTime: 'desc' },
@@ -230,17 +234,51 @@ export class JourneyService {
 
     const pointCountMap = new Map(pointCounts.map((pc) => [pc.journeyId, pc._count.id]))
 
-    return progresses.map((progress) => ({
-      id: progress.id,
-      journeyId: progress.journeyId,
-      journeyName: progress.journey.name,
-      status: progress.status,
-      startTime: progress.startTime,
-      completeTime: progress.completeTime,
-      timeSpentMinutes: progress.timeSpentMinutes,
-      completedPoints: progress.pointCompletions.length,
-      totalPoints: pointCountMap.get(progress.journeyId) || 0,
-    }))
+    // 检查并自动更新已完成所有探索点但 status 还是 in_progress 的旅程
+    const toUpdate: string[] = []
+    for (const progress of progresses) {
+      const totalPoints = pointCountMap.get(progress.journeyId) || 0
+      const completedPoints = progress.pointCompletions.length
+      if (progress.status === 'in_progress' && totalPoints > 0 && completedPoints >= totalPoints) {
+        toUpdate.push(progress.id)
+      }
+    }
+
+    // 批量更新状态
+    if (toUpdate.length > 0) {
+      await this.prisma.journeyProgress.updateMany({
+        where: { id: { in: toUpdate } },
+        data: {
+          status: 'completed',
+          completeTime: new Date(),
+        },
+      })
+    }
+
+    return progresses.map((progress) => {
+      const totalPoints = pointCountMap.get(progress.journeyId) || 0
+      const completedPoints = progress.pointCompletions.length
+      // 如果刚刚被更新，返回正确的状态
+      const actualStatus =
+        progress.status === 'in_progress' && totalPoints > 0 && completedPoints >= totalPoints
+          ? 'completed'
+          : progress.status
+
+      return {
+        id: progress.id,
+        journeyId: progress.journeyId,
+        journeyName: progress.journey.name,
+        coverImage: progress.journey.coverImage,
+        cityId: progress.journey.city?.id,
+        cityName: progress.journey.city?.name,
+        status: actualStatus,
+        startTime: progress.startTime,
+        completeTime: actualStatus === 'completed' ? progress.completeTime || new Date() : null,
+        timeSpentMinutes: progress.timeSpentMinutes,
+        completedPoints,
+        totalPoints,
+      }
+    })
   }
 
   /**

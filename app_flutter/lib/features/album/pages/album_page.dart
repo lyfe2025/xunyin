@@ -36,11 +36,12 @@ class AlbumPage extends ConsumerWidget {
                     children: [
                       statsAsync.when(
                         data: (stats) => _buildStatsCard(
+                          context,
                           stats.totalPhotos,
                           stats.journeyCount,
                         ),
                         loading: () => const AppLoadingCard(height: 80),
-                        error: (e, _) => _buildStatsCard(0, 0),
+                        error: (e, _) => _buildStatsCard(context, 0, 0),
                       ),
                       const SizedBox(height: 24),
                       // 优化2: 只有在有照片时才显示分类标题
@@ -102,16 +103,25 @@ class AlbumPage extends ConsumerWidget {
   }
 
   // 优化5&6: 改进统计卡片文案和信息展示
-  Widget _buildStatsCard(int totalPhotos, int journeyCount) {
+  Widget _buildStatsCard(BuildContext context, int totalPhotos, int journeyCount) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.9)
+            : Colors.white.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkBorder.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : AppColors.primary.withValues(alpha: 0.08),
             blurRadius: 20,
           ),
         ],
@@ -123,8 +133,8 @@ class AlbumPage extends ConsumerWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primary.withValues(alpha: 0.15),
-                  AppColors.accent.withValues(alpha: 0.1),
+                  AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.15),
+                  AppColors.accent.withValues(alpha: isDark ? 0.2 : 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(14),
@@ -144,18 +154,18 @@ class AlbumPage extends ConsumerWidget {
                   children: [
                     Text(
                       '$totalPhotos',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textPrimaryAdaptive(context),
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Text(
+                    Text(
                       '张照片',
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSecondaryAdaptive(context),
                       ),
                     ),
                   ],
@@ -164,9 +174,9 @@ class AlbumPage extends ConsumerWidget {
                 // 优化5: 改进文案表述
                 Text(
                   '已参与 $journeyCount 条文化之旅',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textHint,
+                    color: AppColors.textHintAdaptive(context),
                   ),
                 ),
               ],
@@ -181,6 +191,7 @@ class AlbumPage extends ConsumerWidget {
   Widget _buildEmptyState(BuildContext context, String? error) {
     final needLogin =
         error != null && (error.contains('请先登录') || error.contains('20001'));
+    final isDark = context.isDarkMode;
 
     return GestureDetector(
       // 优化4: 空状态区域可点击，跳转到文化之旅列表
@@ -190,7 +201,9 @@ class AlbumPage extends ConsumerWidget {
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.9)
+                : Colors.white.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -201,13 +214,13 @@ class AlbumPage extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.textHint.withValues(alpha: 0.1),
+                    color: AppColors.textHintAdaptive(context).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock_outline_rounded,
                     size: 48,
-                    color: AppColors.textHint,
+                    color: AppColors.textHintAdaptive(context),
                   ),
                 )
               else
@@ -221,17 +234,19 @@ class AlbumPage extends ConsumerWidget {
               Text(
                 needLogin ? '请先登录' : '还没有照片',
                 style: TextStyle(
-                  color: needLogin ? AppColors.textHint : AppColors.textPrimary,
+                  color: needLogin
+                      ? AppColors.textHintAdaptive(context)
+                      : AppColors.textPrimaryAdaptive(context),
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               if (!needLogin) ...[
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   '去完成文化之旅，收集你的第一张照片吧',
                   style: TextStyle(
-                    color: AppColors.textHint,
+                    color: AppColors.textHintAdaptive(context),
                     fontSize: 13,
                   ),
                   textAlign: TextAlign.center,
@@ -245,7 +260,7 @@ class AlbumPage extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.accent],
+                      colors: [AppColors.accent, AppColors.accentDark],
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -293,18 +308,27 @@ class _JourneyPhotoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.88),
+          color: isDark
+              ? AppColors.darkSurface.withValues(alpha: 0.9)
+              : Colors.white.withValues(alpha: 0.88),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: isDark
+                ? AppColors.darkBorder.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.5),
+          ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.06),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.2)
+                  : AppColors.primary.withValues(alpha: 0.06),
               blurRadius: 16,
             ),
           ],
@@ -318,9 +342,10 @@ class _JourneyPhotoCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     journeyName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
+                      color: AppColors.textPrimaryAdaptive(context),
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -346,9 +371,9 @@ class _JourneyPhotoCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
+                    Icon(
                       Icons.chevron_right_rounded,
-                      color: AppColors.textHint,
+                      color: AppColors.textHintAdaptive(context),
                       size: 20,
                     ),
                   ],
@@ -364,10 +389,10 @@ class _JourneyPhotoCard extends StatelessWidget {
                       margin: EdgeInsets.only(right: i < 2 ? 10 : 0),
                       height: 85,
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
+                        color: AppColors.surfaceVariantAdaptive(context),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: AppColors.borderAdaptive(context).withValues(alpha: 0.5),
                         ),
                       ),
                       child: i < photos.length
@@ -376,18 +401,18 @@ class _JourneyPhotoCard extends StatelessWidget {
                               child: Image.network(
                                 photos[i],
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Center(
+                                errorBuilder: (_, __, ___) => Center(
                                   child: Icon(
                                     Icons.photo_rounded,
-                                    color: AppColors.textHint,
+                                    color: AppColors.textHintAdaptive(context),
                                   ),
                                 ),
                               ),
                             )
-                          : const Center(
+                          : Center(
                               child: Icon(
                                 Icons.photo_rounded,
-                                color: AppColors.textHint,
+                                color: AppColors.textHintAdaptive(context),
                                 size: 24,
                               ),
                             ),

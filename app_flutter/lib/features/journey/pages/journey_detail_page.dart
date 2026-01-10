@@ -46,27 +46,34 @@ class JourneyDetailPage extends ConsumerWidget {
     return Stack(
       children: [
         const AuroraBackground(variant: AuroraVariant.standard),
-        Center(
-          child: Container(
-            margin: const EdgeInsets.all(24),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: AppColors.error,
+        Builder(
+          builder: (context) {
+            final isDark = context.isDarkMode;
+            return Center(
+              child: Container(
+                margin: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurface.withValues(alpha: 0.9)
+                      : Colors.white.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(height: 16),
-                Text('加载失败: $error', textAlign: TextAlign.center),
-              ],
-            ),
-          ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const SizedBox(height: 16),
+                    Text(
+                      '加载失败: $error',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textPrimaryAdaptive(context)),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -116,10 +123,7 @@ class _JourneyContent extends StatelessWidget {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(32),
-                    child: Text(
-                      '$e',
-                      style: const TextStyle(color: AppColors.error),
-                    ),
+                    child: Text('$e', style: const TextStyle(color: AppColors.error)),
                   ),
                 ),
               ),
@@ -164,16 +168,12 @@ class _JourneyContent extends StatelessWidget {
                     errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
                   )
                 : _buildPlaceholderImage(),
-            // 渐变遮罩
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.5),
-                  ],
+                  colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
                 ),
               ),
             ),
@@ -195,122 +195,130 @@ class _JourneyContent extends StatelessWidget {
           ],
         ),
       ),
-      child: const Icon(
-        Icons.landscape_rounded,
-        size: 64,
-        color: Colors.white54,
-      ),
+      child: const Icon(Icons.landscape_rounded, size: 64, color: Colors.white54),
     );
   }
 
   Widget _buildInfoSection() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 信息卡片 - Glassmorphism
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.88),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    _InfoItem(
-                      icon: Icons.category_rounded,
-                      label: '主题',
-                      value: journey.theme,
-                      color: AppColors.primary,
-                    ),
-                    _InfoItem(
-                      icon: Icons.schedule_rounded,
-                      label: '时长',
-                      value: '${journey.estimatedMinutes}分钟',
-                      color: AppColors.accent,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _InfoItem(
-                      icon: Icons.straighten_rounded,
-                      label: '距离',
-                      value:
-                          '${(journey.totalDistance / 1000).toStringAsFixed(1)}km',
-                      color: AppColors.tertiary,
-                    ),
-                    _InfoItem(
-                      icon: Icons.people_rounded,
-                      label: '完成',
-                      value: '${journey.completedCount}人',
-                      color: AppColors.success,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (journey.description != null) ...[
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                journey.description!,
-                style: const TextStyle(
-                  height: 1.7,
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 24),
-          // 探索点标题
-          Row(
+    return Builder(
+      builder: (context) {
+        final isDark = context.isDarkMode;
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 信息卡片
               Container(
-                width: 4,
-                height: 20,
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.accent, AppColors.primary],
+                  color: isDark
+                      ? AppColors.darkSurface.withValues(alpha: 0.88)
+                      : Colors.white.withValues(alpha: 0.88),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkBorder.withValues(alpha: 0.5)
+                        : Colors.white.withValues(alpha: 0.5),
                   ),
-                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        _InfoItem(
+                          icon: Icons.category_rounded,
+                          label: '主题',
+                          value: journey.theme,
+                          color: AppColors.primary,
+                        ),
+                        _InfoItem(
+                          icon: Icons.schedule_rounded,
+                          label: '时长',
+                          value: '${journey.estimatedMinutes}分钟',
+                          color: AppColors.accent,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        _InfoItem(
+                          icon: Icons.straighten_rounded,
+                          label: '距离',
+                          value: '${(journey.totalDistance / 1000).toStringAsFixed(1)}km',
+                          color: AppColors.tertiary,
+                        ),
+                        _InfoItem(
+                          icon: Icons.people_rounded,
+                          label: '完成',
+                          value: '${journey.completedCount}人',
+                          color: AppColors.success,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 10),
-              const Text(
-                '探索点列表',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+              if (journey.description != null) ...[
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurface.withValues(alpha: 0.7)
+                        : Colors.white.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    journey.description!,
+                    style: TextStyle(
+                      height: 1.7,
+                      color: AppColors.textSecondaryAdaptive(context),
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
+              ],
+              const SizedBox(height: 24),
+              // 探索点标题
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [AppColors.accent, AppColors.primary],
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '探索点列表',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimaryAdaptive(context),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 16),
             ],
           ),
-          const SizedBox(height: 16),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -347,15 +355,15 @@ class _InfoItem extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, color: AppColors.textHint),
+                style: TextStyle(fontSize: 11, color: AppColors.textHintAdaptive(context)),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryAdaptive(context),
                 ),
               ),
             ],
@@ -366,6 +374,7 @@ class _InfoItem extends StatelessWidget {
   }
 }
 
+/// 探索点卡片 - 优化版，添加任务类型图标
 class _PointCard extends StatelessWidget {
   final ExplorationPoint point;
   final int index;
@@ -377,8 +386,48 @@ class _PointCard extends StatelessWidget {
     this.isLast = false,
   });
 
+  IconData get _taskIcon {
+    switch (point.taskType) {
+      case 'gesture':
+        return Icons.pan_tool_rounded;
+      case 'photo':
+        return Icons.camera_alt_rounded;
+      case 'treasure':
+        return Icons.search_rounded;
+      default:
+        return Icons.explore_rounded;
+    }
+  }
+
+  String get _taskLabel {
+    switch (point.taskType) {
+      case 'gesture':
+        return 'AR手势';
+      case 'photo':
+        return '拍照打卡';
+      case 'treasure':
+        return 'AR寻宝';
+      default:
+        return '探索任务';
+    }
+  }
+
+  Color get _taskColor {
+    switch (point.taskType) {
+      case 'gesture':
+        return AppColors.sealGold;
+      case 'photo':
+        return AppColors.accent;
+      case 'treasure':
+        return AppColors.tertiary;
+      default:
+        return AppColors.primary;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: IntrinsicHeight(
@@ -444,10 +493,14 @@ class _PointCard extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.88),
+                  color: isDark
+                      ? AppColors.darkSurface.withValues(alpha: 0.88)
+                      : Colors.white.withValues(alpha: 0.88),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: isDark
+                        ? AppColors.darkBorder.withValues(alpha: 0.6)
+                        : Colors.white.withValues(alpha: 0.6),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -460,23 +513,107 @@ class _PointCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      point.name,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                    // 标题行 + 任务类型
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            point.name,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimaryAdaptive(context),
+                            ),
+                          ),
+                        ),
+                        // 任务类型标签
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _taskColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _taskColor.withValues(alpha: 0.2)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(_taskIcon, size: 12, color: _taskColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                _taskLabel,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: _taskColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
+                    // 任务描述
                     Text(
                       point.taskDescription,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSecondaryAdaptive(context),
                         height: 1.5,
                       ),
                     ),
+                    // 底部信息
+                    if (point.distanceFromPrev != null || point.pointsReward > 0) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          if (point.distanceFromPrev != null) ...[
+                            Icon(
+                              Icons.straighten_rounded,
+                              size: 12,
+                              color: AppColors.textHintAdaptive(context),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${point.distanceFromPrev!.toInt()}m',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textHintAdaptive(context),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+                          const Spacer(),
+                          // 积分奖励
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.sealGold.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.stars_rounded,
+                                  size: 12,
+                                  color: AppColors.sealGold,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '+${point.pointsReward}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.sealGold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -488,12 +625,59 @@ class _PointCard extends StatelessWidget {
   }
 }
 
-class _StartButton extends ConsumerWidget {
+/// 开始按钮 - 优化脉冲动画
+class _StartButton extends ConsumerStatefulWidget {
   final String journeyId;
   const _StartButton({required this.journeyId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_StartButton> createState() => _StartButtonState();
+}
+
+class _StartButtonState extends ConsumerState<_StartButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    _glowAnimation = Tween<double>(begin: 0.3, end: 0.5).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _startJourney(BuildContext context) async {
+    try {
+      final service = ref.read(journeyServiceProvider);
+      await service.startJourney(widget.journeyId);
+      if (context.mounted) context.push('/journey/${widget.journeyId}/progress');
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('开始失败: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: EdgeInsets.only(
         left: 20,
@@ -502,7 +686,9 @@ class _StartButton extends ConsumerWidget {
         top: 16,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.95),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.95)
+            : Colors.white.withValues(alpha: 0.95),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -511,41 +697,46 @@ class _StartButton extends ConsumerWidget {
           ),
         ],
       ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: ElevatedButton.icon(
-          onPressed: () => _startJourney(context, ref),
-          icon: const Icon(Icons.explore_rounded, size: 20),
-          label: const Text(
-            '开始这条文化之旅',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.accent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shadowColor: AppColors.accent.withValues(alpha: 0.4),
-            shape: RoundedRectangleBorder(
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) => Transform.scale(
+          scale: _pulseAnimation.value,
+          child: Container(
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(26),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: _glowAnimation.value),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: child,
+          ),
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton.icon(
+            onPressed: () => _startJourney(context),
+            icon: const Icon(Icons.explore_rounded, size: 20),
+            label: const Text(
+              '开始这条文化之旅',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(26),
+              ),
             ),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _startJourney(BuildContext context, WidgetRef ref) async {
-    try {
-      final service = ref.read(journeyServiceProvider);
-      await service.startJourney(journeyId);
-      if (context.mounted) context.push('/journey/$journeyId/progress');
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('开始失败: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    }
   }
 }

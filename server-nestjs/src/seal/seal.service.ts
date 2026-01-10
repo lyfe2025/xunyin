@@ -3,10 +3,90 @@ import { PrismaService } from '../prisma/prisma.service'
 import { BusinessException } from '../common/exceptions'
 import { ErrorCode } from '../common/enums'
 import type { QuerySealDto } from './dto/seal.dto'
+import type { UserBadgeVo } from './dto/badge.dto'
 
 @Injectable()
 export class SealService {
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * 获取用户已解锁的所有称号
+   */
+  async getUserBadges(userId: string): Promise<UserBadgeVo[]> {
+    // 获取当前用户的称号
+    const user = await this.prisma.appUser.findUnique({
+      where: { id: userId },
+      select: { badgeTitle: true },
+    })
+
+    // 获取用户所有带称号的印记
+    const userSeals = await this.prisma.userSeal.findMany({
+      where: {
+        userId,
+        seal: {
+          status: '0',
+          badgeTitle: { not: null },
+        },
+      },
+      include: {
+        seal: {
+          select: {
+            id: true,
+            name: true,
+            badgeTitle: true,
+            rarity: true,
+          },
+        },
+      },
+      orderBy: { earnedTime: 'desc' },
+    })
+
+    return userSeals
+      .filter((us) => us.seal.badgeTitle)
+      .map((us) => ({
+        badgeTitle: us.seal.badgeTitle!,
+        sealId: us.seal.id,
+        sealName: us.seal.name,
+        rarity: us.seal.rarity,
+        earnedTime: us.earnedTime,
+        isActive: us.seal.badgeTitle === user?.badgeTitle,
+      }))
+  }
+
+  /**
+   * 设置用户当前称号
+   */
+  async setBadgeTitle(userId: string, badgeTitle: string): Promise<void> {
+    // 验证用户是否拥有该称号
+    const userSeal = await this.prisma.userSeal.findFirst({
+      where: {
+        userId,
+        seal: {
+          status: '0',
+          badgeTitle,
+        },
+      },
+    })
+
+    if (!userSeal) {
+      throw new BusinessException(ErrorCode.FORBIDDEN, '您尚未解锁该称号')
+    }
+
+    await this.prisma.appUser.update({
+      where: { id: userId },
+      data: { badgeTitle },
+    })
+  }
+
+  /**
+   * 清除用户当前称号
+   */
+  async clearBadgeTitle(userId: string): Promise<void> {
+    await this.prisma.appUser.update({
+      where: { id: userId },
+      data: { badgeTitle: null },
+    })
+  }
 
   /**
    * 获取用户印记列表

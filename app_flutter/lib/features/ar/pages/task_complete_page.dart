@@ -151,10 +151,10 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
             const SizedBox(height: AppSpacing.xl),
             Text(
               widget.journeyCompleted ? '文化之旅完成！' : '探索成功！',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
                 letterSpacing: 2,
               ),
             ),
@@ -163,7 +163,7 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
               widget.journeyCompleted ? '恭喜你完成了整个文化之旅' : '恭喜你完成了这个探索点',
               style: TextStyle(
                 fontSize: 15,
-                color: AppColors.textSecondary.withValues(alpha: 0.8),
+                color: AppColors.textSecondaryAdaptive(context).withValues(alpha: 0.8),
               ),
             ),
           ],
@@ -187,14 +187,14 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
                   Icon(
                     Icons.photo_camera_rounded,
                     size: 48,
-                    color: AppColors.textHint.withValues(alpha: 0.5),
+                    color: AppColors.textHintAdaptive(context).withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     '探索记录',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textHint.withValues(alpha: 0.6),
+                      color: AppColors.textHintAdaptive(context).withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -206,10 +206,10 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
   Widget _buildPointName(String name) {
     return Text(
       '$name 探索成功',
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: AppColors.textPrimaryAdaptive(context),
       ),
     );
   }
@@ -261,9 +261,12 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '获得积分',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondaryAdaptive(context),
+                ),
               ),
               Text(
                 '+$points',
@@ -351,12 +354,12 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
                 ),
               ),
               const SizedBox(width: 10),
-              const Text(
+              Text(
                 '文化小知识',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryAdaptive(context),
                 ),
               ),
             ],
@@ -364,9 +367,9 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
           const SizedBox(height: AppSpacing.md + 2),
           Text(
             knowledge,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryAdaptive(context),
               height: 1.6,
             ),
           ),

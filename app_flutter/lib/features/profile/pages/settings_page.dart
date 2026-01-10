@@ -38,6 +38,80 @@ class SettingsPage extends ConsumerWidget {
 }
 
 class _SettingsContent extends ConsumerWidget {
+  void _showThemeModeSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AppThemeMode currentMode,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground(ctx),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.borderAdaptive(ctx),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '选择主题模式',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimaryAdaptive(ctx),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _ThemeModeOption(
+                icon: Icons.brightness_auto_rounded,
+                title: '跟随系统',
+                subtitle: '自动切换浅色/深色模式',
+                isSelected: currentMode == AppThemeMode.system,
+                onTap: () {
+                  ref.read(settingsProvider.notifier).setThemeMode(AppThemeMode.system);
+                  Navigator.pop(ctx);
+                },
+              ),
+              _ThemeModeOption(
+                icon: Icons.light_mode_rounded,
+                title: '浅色模式',
+                subtitle: '始终使用浅色主题',
+                isSelected: currentMode == AppThemeMode.light,
+                onTap: () {
+                  ref.read(settingsProvider.notifier).setThemeMode(AppThemeMode.light);
+                  Navigator.pop(ctx);
+                },
+              ),
+              _ThemeModeOption(
+                icon: Icons.dark_mode_rounded,
+                title: '深色模式',
+                subtitle: '始终使用深色主题',
+                isSelected: currentMode == AppThemeMode.dark,
+                onTap: () {
+                  ref.read(settingsProvider.notifier).setThemeMode(AppThemeMode.dark);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
     final confirmed = await ConfirmDialog.show(
       context: context,
@@ -143,7 +217,7 @@ class _SettingsContent extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
-        _buildSection('通用', [
+        _buildSection(context, '通用', [
           _SwitchTile(
             icon: Icons.music_note_rounded,
             title: '背景音乐',
@@ -165,9 +239,15 @@ class _SettingsContent extends ConsumerWidget {
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setAutoLocationEnabled(v),
           ),
+          _MenuTile(
+            icon: Icons.dark_mode_rounded,
+            title: '深色模式',
+            subtitle: settings.themeModeLabel,
+            onTap: () => _showThemeModeSheet(context, ref, settings.themeMode),
+          ),
         ]),
         const SizedBox(height: 16),
-        _buildSection('账号', [
+        _buildSection(context, '账号', [
           _MenuTile(
             icon: Icons.edit_rounded,
             title: '修改昵称',
@@ -193,7 +273,7 @@ class _SettingsContent extends ConsumerWidget {
           ),
         ]),
         const SizedBox(height: 16),
-        _buildSection('其他', [
+        _buildSection(context, '其他', [
           _MenuTile(
             icon: Icons.info_rounded,
             title: '关于我们',
@@ -220,6 +300,8 @@ class _SettingsContent extends ConsumerWidget {
             title: '注销账户',
             titleColor: AppColors.error,
             iconColor: AppColors.error,
+            showDivider: false,
+            backgroundColor: AppColors.error.withValues(alpha: 0.05),
             onTap: () => _handleDeleteAccount(context, ref),
           ),
         ]),
@@ -229,7 +311,10 @@ class _SettingsContent extends ConsumerWidget {
         Center(
           child: Text(
             '版本 ${AppInfo.version}',
-            style: const TextStyle(fontSize: 12, color: AppColors.textHint),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textHintAdaptive(context),
+            ),
           ),
         ),
         const SizedBox(height: 32),
@@ -237,7 +322,8 @@ class _SettingsContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children) {
+  Widget _buildSection(BuildContext context, String title, List<Widget> children) {
+    final isDark = context.isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -247,12 +333,20 @@ class _SettingsContent extends ConsumerWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.88),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.9)
+                : Colors.white.withValues(alpha: 0.88),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.darkBorder.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.5),
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.06),
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : AppColors.primary.withValues(alpha: 0.06),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -272,10 +366,13 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       height: 52,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.9)
+            : Colors.white.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
       ),
@@ -332,14 +429,14 @@ class _SwitchTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Icon(icon, size: 20, color: AppColors.textSecondary),
+                Icon(icon, size: 20, color: AppColors.textSecondaryAdaptive(context)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryAdaptive(context),
                     ),
                   ),
                 ),
@@ -368,7 +465,9 @@ class _MenuTile extends StatelessWidget {
   final String? subtitle;
   final Color? titleColor;
   final Color? iconColor;
+  final Color? backgroundColor;
   final Widget? trailing;
+  final bool showDivider;
   final VoidCallback onTap;
 
   const _MenuTile({
@@ -377,14 +476,16 @@ class _MenuTile extends StatelessWidget {
     this.subtitle,
     this.titleColor,
     this.iconColor,
+    this.backgroundColor,
     this.trailing,
+    this.showDivider = true,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: backgroundColor ?? Colors.transparent,
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
@@ -396,7 +497,7 @@ class _MenuTile extends StatelessWidget {
                 Icon(
                   icon,
                   size: 20,
-                  color: iconColor ?? AppColors.textSecondary,
+                  color: iconColor ?? AppColors.textSecondaryAdaptive(context),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -404,7 +505,7 @@ class _MenuTile extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 15,
-                      color: titleColor ?? AppColors.textPrimary,
+                      color: titleColor ?? AppColors.textPrimaryAdaptive(context),
                     ),
                   ),
                 ),
@@ -413,9 +514,9 @@ class _MenuTile extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 8),
                     child: Text(
                       subtitle!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textHint,
+                        color: AppColors.textHintAdaptive(context),
                       ),
                     ),
                   ),
@@ -424,13 +525,101 @@ class _MenuTile extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 8),
                     child: trailing!,
                   ),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.textHint,
+                  color: AppColors.textHintAdaptive(context),
                   size: 20,
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 主题模式选项
+class _ThemeModeOption extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ThemeModeOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.accent.withValues(alpha: 0.08) : null,
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.borderAdaptive(context).withValues(alpha: 0.5),
+                width: 0.5,
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.accent.withValues(alpha: 0.15)
+                      : AppColors.surfaceVariantAdaptive(context),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: isSelected ? AppColors.accent : AppColors.textSecondaryAdaptive(context),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: isSelected ? AppColors.accent : AppColors.textPrimaryAdaptive(context),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textHintAdaptive(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isSelected)
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.accent,
+                  size: 22,
+                ),
+            ],
           ),
         ),
       ),

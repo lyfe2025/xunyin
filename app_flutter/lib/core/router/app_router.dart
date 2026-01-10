@@ -19,6 +19,7 @@ import '../../features/profile/pages/agreement_page.dart';
 import '../../features/profile/pages/edit_nickname_page.dart';
 import '../../features/profile/pages/edit_avatar_page.dart';
 import '../../features/profile/pages/bind_phone_page.dart';
+import '../../features/profile/pages/badges_page.dart';
 
 /// 路由配置
 class AppRouter {
@@ -114,6 +115,10 @@ class AppRouter {
       GoRoute(
         path: '/settings/phone',
         builder: (context, state) => const BindPhonePage(),
+      ),
+      GoRoute(
+        path: '/badges',
+        builder: (context, state) => const BadgesPage(),
       ),
       GoRoute(
         path: '/agreement/:type',

@@ -158,6 +158,7 @@ class AppGlassButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return SizedBox(
       width: width,
       height: height,
@@ -173,12 +174,17 @@ class AppGlassButton extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withValues(alpha: 0.8),
-                  Colors.white.withValues(alpha: 0.5),
-                ],
+                colors: isDark
+                    ? [
+                        AppColors.darkSurface.withValues(alpha: 0.9),
+                        AppColors.darkSurface.withValues(alpha: 0.7),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.8),
+                        Colors.white.withValues(alpha: 0.5),
+                      ],
               ),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: AppColors.borderAdaptive(context)),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.primary.withValues(alpha: 0.05),
@@ -189,14 +195,14 @@ class AppGlassButton extends StatelessWidget {
             ),
             child: Center(
               child: DefaultTextStyle(
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textPrimaryAdaptive(context),
                 ),
                 child: IconTheme(
-                  data: const IconThemeData(
-                    color: AppColors.textPrimary,
+                  data: IconThemeData(
+                    color: AppColors.textPrimaryAdaptive(context),
                     size: 18,
                   ),
                   child: child,
@@ -225,18 +231,22 @@ class AppCloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return GestureDetector(
       onTap: onTap ?? () => Navigator.of(context).pop(),
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: backgroundColor ?? Colors.white.withValues(alpha: 0.9),
+          color: backgroundColor ??
+              (isDark
+                  ? AppColors.darkSurface.withValues(alpha: 0.9)
+                  : Colors.white.withValues(alpha: 0.9)),
           borderRadius: BorderRadius.circular(AppRadius.iconButton),
           boxShadow: AppShadow.light,
         ),
         child: Icon(
           Icons.close_rounded,
-          color: iconColor ?? AppColors.textPrimary,
+          color: iconColor ?? AppColors.textPrimaryAdaptive(context),
           size: AppSize.appBarIconSize,
         ),
       ),
@@ -286,18 +296,22 @@ class AppBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return GestureDetector(
       onTap: onTap ?? () => Navigator.of(context).pop(),
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: backgroundColor ?? Colors.white.withValues(alpha: 0.9),
+          color: backgroundColor ??
+              (isDark
+                  ? AppColors.darkSurface.withValues(alpha: 0.9)
+                  : Colors.white.withValues(alpha: 0.9)),
           borderRadius: BorderRadius.circular(AppRadius.iconButton),
           boxShadow: AppShadow.light,
         ),
         child: Icon(
           Icons.arrow_back_rounded,
-          color: iconColor ?? AppColors.textPrimary,
+          color: iconColor ?? AppColors.textPrimaryAdaptive(context),
           size: AppSize.appBarIconSize,
         ),
       ),

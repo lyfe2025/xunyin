@@ -269,4 +269,274 @@ class AppTheme {
       ),
     );
   }
+
+  /// 深色主题
+  static ThemeData get dark {
+    const darkBackground = Color(0xFF121218);
+    const darkSurface = Color(0xFF1E1E26);
+    const darkSurfaceVariant = Color(0xFF2A2A34);
+    const darkBorder = Color(0xFF3A3A44);
+    const darkTextPrimary = Color(0xFFF5F5F5);
+    const darkTextSecondary = Color(0xFFB0B0B0);
+    const darkTextHint = Color(0xFF808080);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      primaryColor: AppColors.primary,
+      scaffoldBackgroundColor: darkBackground,
+      fontFamily: 'NotoSansSC',
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.primaryLight,
+        onPrimary: Colors.white,
+        secondary: AppColors.accent,
+        onSecondary: Colors.white,
+        tertiary: AppColors.tertiary,
+        surface: darkSurface,
+        onSurface: darkTextPrimary,
+        error: AppColors.error,
+      ),
+
+      // AppBar
+      appBarTheme: const AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        foregroundColor: darkTextPrimary,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        titleTextStyle: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+          color: darkTextPrimary,
+          letterSpacing: 0.5,
+        ),
+        iconTheme: IconThemeData(color: darkTextPrimary, size: 22),
+      ),
+
+      // Card
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: darkSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: darkBorder.withValues(alpha: 0.5)),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+
+      // ElevatedButton
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: AppColors.accent,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(double.infinity, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+
+      // OutlinedButton
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: darkTextPrimary,
+          backgroundColor: darkSurfaceVariant.withValues(alpha: 0.6),
+          minimumSize: const Size(double.infinity, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          side: BorderSide(color: darkBorder.withValues(alpha: 0.8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+      ),
+
+      // TextButton
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primaryLight,
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        ),
+      ),
+
+      // Input
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurfaceVariant.withValues(alpha: 0.8),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: darkBorder.withValues(alpha: 0.5)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: darkBorder.withValues(alpha: 0.5)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.primaryLight, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.error),
+        ),
+        hintStyle: TextStyle(
+          color: darkTextHint.withValues(alpha: 0.7),
+          fontSize: 15,
+        ),
+        prefixIconColor: darkTextHint,
+        suffixIconColor: darkTextHint,
+      ),
+
+      // Divider
+      dividerTheme: DividerThemeData(
+        color: darkBorder.withValues(alpha: 0.6),
+        thickness: 1,
+        space: 1,
+      ),
+
+      // BottomNavigationBar
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: darkSurface.withValues(alpha: 0.95),
+        selectedItemColor: AppColors.accent,
+        unselectedItemColor: darkTextHint,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(fontSize: 11),
+      ),
+
+      // BottomSheet
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: darkSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+
+      // Dialog
+      dialogTheme: DialogThemeData(
+        backgroundColor: darkSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titleTextStyle: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: darkTextPrimary,
+        ),
+      ),
+
+      // Chip
+      chipTheme: ChipThemeData(
+        backgroundColor: darkSurfaceVariant,
+        selectedColor: AppColors.accent.withValues(alpha: 0.25),
+        labelStyle: const TextStyle(fontSize: 13, color: darkTextPrimary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        side: BorderSide.none,
+      ),
+
+      // ListTile
+      listTileTheme: const ListTileThemeData(
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        minLeadingWidth: 24,
+        textColor: darkTextPrimary,
+      ),
+
+      // SnackBar
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: darkSurfaceVariant,
+        contentTextStyle: const TextStyle(color: darkTextPrimary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        behavior: SnackBarBehavior.floating,
+      ),
+
+      // FloatingActionButton
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColors.accent,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+
+      // TabBar
+      tabBarTheme: TabBarThemeData(
+        labelColor: AppColors.accent,
+        unselectedLabelColor: darkTextSecondary,
+        indicatorColor: AppColors.accent,
+        labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w400,
+        ),
+        dividerColor: Colors.transparent,
+      ),
+
+      // ProgressIndicator
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: AppColors.accent,
+        linearTrackColor: darkSurfaceVariant,
+      ),
+
+      // Slider
+      sliderTheme: SliderThemeData(
+        activeTrackColor: AppColors.accent,
+        inactiveTrackColor: darkSurfaceVariant,
+        thumbColor: AppColors.accent,
+        overlayColor: AppColors.accent.withValues(alpha: 0.2),
+      ),
+
+      // Switch
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.accent;
+          }
+          return darkTextHint;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.accent.withValues(alpha: 0.3);
+          }
+          return darkSurfaceVariant;
+        }),
+      ),
+
+      // Checkbox
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.accent;
+          }
+          return Colors.transparent;
+        }),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+
+      // Radio
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.accent;
+          }
+          return darkTextHint;
+        }),
+      ),
+    );
+  }
 }

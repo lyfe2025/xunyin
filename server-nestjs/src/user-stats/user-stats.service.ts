@@ -101,16 +101,23 @@ export class UserStatsService {
     })
     const pointCountMap = new Map(pointCounts.map((p) => [p.journeyId, p._count.id]))
 
-    return progresses.map((p) => ({
-      id: p.id,
-      journeyId: p.journeyId,
-      journeyName: p.journey.name,
-      cityName: p.journey.city.name,
-      status: p.status,
-      startTime: p.startTime,
-      completedPoints: p._count.pointCompletions,
-      totalPoints: pointCountMap.get(p.journeyId) || 0,
-    }))
+    // 过滤掉已完成所有探索点的旅程（状态可能未及时更新）
+    return progresses
+      .map((p) => {
+        const totalPoints = pointCountMap.get(p.journeyId) || 0
+        const completedPoints = p._count.pointCompletions
+        return {
+          id: p.id,
+          journeyId: p.journeyId,
+          journeyName: p.journey.name,
+          cityName: p.journey.city.name,
+          status: p.status,
+          startTime: p.startTime,
+          completedPoints,
+          totalPoints,
+        }
+      })
+      .filter((p) => p.completedPoints < p.totalPoints || p.totalPoints === 0)
   }
 
   /**

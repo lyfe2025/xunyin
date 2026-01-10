@@ -132,6 +132,15 @@ class AppShadow {
       offset: const Offset(0, 6),
     ),
   ];
+
+  /// 玻璃态卡片阴影（深色模式）
+  static List<BoxShadow> get glassDark => [
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.3),
+      blurRadius: 20,
+      offset: const Offset(0, 6),
+    ),
+  ];
 }
 
 /// 设计 Token - 透明度

@@ -32,6 +32,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final journeysAsync = ref.watch(cityJourneysProvider(widget.city.id));
+    final isDark = context.isDarkMode;
 
     return DraggableScrollableSheet(
       controller: _controller,
@@ -43,11 +44,15 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.98),
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.98)
+                : Colors.white.withValues(alpha: 0.98),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : AppColors.primary.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, -4),
               ),
@@ -61,7 +66,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.border.withValues(alpha: 0.6),
+                  color: AppColors.borderAdaptive(context).withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -71,23 +76,23 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
-                    _buildHeader(),
+                    _buildHeader(context),
                     const SizedBox(height: 20),
                     if (widget.city.description != null) ...[
-                      _buildDescription(),
+                      _buildDescription(context),
                       const SizedBox(height: 20),
                     ],
-                    _buildSectionTitle('文化之旅'),
+                    _buildSectionTitle(context),
                     const SizedBox(height: 14),
                     journeysAsync.when(
-                      data: (journeys) => _buildJourneyList(journeys),
+                      data: (journeys) => _buildJourneyList(context, journeys),
                       loading: () => const Center(
                         child: Padding(
                           padding: EdgeInsets.all(32),
                           child: CircularProgressIndicator(strokeWidth: 2.5),
                         ),
                       ),
-                      error: (e, _) => _buildErrorState(e.toString()),
+                      error: (e, _) => _buildErrorState(context, e.toString()),
                     ),
                     const SizedBox(height: 32),
                   ],
@@ -100,7 +105,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         Expanded(
@@ -111,10 +116,10 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                 children: [
                   Text(
                     widget.city.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textPrimaryAdaptive(context),
                       letterSpacing: 1,
                     ),
                   ),
@@ -143,11 +148,13 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
               Row(
                 children: [
                   _buildInfoChip(
+                    context,
                     Icons.people_outline_rounded,
                     '${widget.city.explorerCount}人探索',
                   ),
                   const SizedBox(width: 12),
                   _buildInfoChip(
+                    context,
                     Icons.location_on_outlined,
                     widget.city.province,
                   ),
@@ -156,26 +163,29 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
             ],
           ),
         ),
-        _buildSearchButton(),
+        _buildSearchButton(context),
       ],
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String text) {
+  Widget _buildInfoChip(BuildContext context, IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: AppColors.textHint),
+        Icon(icon, size: 14, color: AppColors.textHintAdaptive(context)),
         const SizedBox(width: 4),
         Text(
           text,
-          style: const TextStyle(fontSize: 12, color: AppColors.textHint),
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.textHintAdaptive(context),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildSearchButton() {
+  Widget _buildSearchButton(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -195,12 +205,12 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant.withValues(alpha: 0.6),
+            color: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.search_rounded,
-            color: AppColors.textSecondary,
+            color: AppColors.textSecondaryAdaptive(context),
             size: 22,
           ),
         ),
@@ -208,20 +218,28 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.surfaceVariant.withValues(alpha: 0.5),
-            AppColors.surfaceVariant.withValues(alpha: 0.3),
-          ],
+          colors: isDark
+              ? [
+                  AppColors.darkSurfaceVariant.withValues(alpha: 0.6),
+                  AppColors.darkSurfaceVariant.withValues(alpha: 0.4),
+                ]
+              : [
+                  AppColors.surfaceVariant.withValues(alpha: 0.5),
+                  AppColors.surfaceVariant.withValues(alpha: 0.3),
+                ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: AppColors.borderAdaptive(context).withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,13 +255,13 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                 errorBuilder: (_, __, ___) => Container(
                   height: 140,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
+                    color: AppColors.surfaceVariantAdaptive(context),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.image_rounded,
                     size: 48,
-                    color: AppColors.textHint,
+                    color: AppColors.textHintAdaptive(context),
                   ),
                 ),
               ),
@@ -252,9 +270,9 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
           ],
           Text(
             widget.city.description!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondaryAdaptive(context),
               height: 1.7,
             ),
           ),
@@ -263,18 +281,18 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context) {
     return Text(
-      title,
-      style: const TextStyle(
+      '文化之旅',
+      style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: AppColors.textPrimaryAdaptive(context),
       ),
     );
   }
 
-  Widget _buildJourneyList(List<JourneyBrief> journeys) {
+  Widget _buildJourneyList(BuildContext context, List<JourneyBrief> journeys) {
     if (journeys.isEmpty) {
       return Center(
         child: Padding(
@@ -287,12 +305,12 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                 height: 105,
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 '暂无文化之旅',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryAdaptive(context),
                 ),
               ),
               const SizedBox(height: 6),
@@ -300,7 +318,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
                 '敬请期待更多精彩内容',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.textHint.withValues(alpha: 0.7),
+                  color: AppColors.textHintAdaptive(context).withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -316,7 +334,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
     );
   }
 
-  Widget _buildErrorState(String error) {
+  Widget _buildErrorState(BuildContext context, String error) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -328,12 +346,12 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
               height: 105,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               '加载失败',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: AppColors.textSecondaryAdaptive(context),
               ),
             ),
             const SizedBox(height: 6),
@@ -341,7 +359,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
               '请检查网络后重试',
               style: TextStyle(
                 fontSize: 13,
-                color: AppColors.textHint.withValues(alpha: 0.7),
+                color: AppColors.textHintAdaptive(context).withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -360,6 +378,7 @@ class _JourneyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLocked = journey.isLocked;
+    final isDark = context.isDarkMode;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -372,19 +391,21 @@ class _JourneyCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: isLocked
-                  ? AppColors.surfaceVariant.withValues(alpha: 0.5)
-                  : Colors.white,
+                  ? AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5)
+                  : AppColors.cardBackground(context),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isLocked
-                    ? AppColors.border.withValues(alpha: 0.3)
-                    : AppColors.border.withValues(alpha: 0.5),
+                    ? AppColors.borderAdaptive(context).withValues(alpha: 0.3)
+                    : AppColors.borderAdaptive(context).withValues(alpha: 0.5),
               ),
               boxShadow: isLocked
                   ? []
                   : [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.04),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.2)
+                            : AppColors.primary.withValues(alpha: 0.04),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -393,15 +414,15 @@ class _JourneyCard extends StatelessWidget {
             child: Row(
               children: [
                 // 封面图
-                _buildCoverImage(),
+                _buildCoverImage(context),
                 const SizedBox(width: 14),
                 // 信息
-                Expanded(child: _buildInfo()),
+                Expanded(child: _buildInfo(context)),
                 // 箭头
                 if (!isLocked)
                   Icon(
                     Icons.chevron_right_rounded,
-                    color: AppColors.textHint.withValues(alpha: 0.5),
+                    color: AppColors.textHintAdaptive(context).withValues(alpha: 0.5),
                   ),
               ],
             ),
@@ -411,38 +432,38 @@ class _JourneyCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCoverImage() {
+  Widget _buildCoverImage(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
+          color: AppColors.surfaceVariantAdaptive(context),
           borderRadius: BorderRadius.circular(12),
         ),
         child: journey.coverImage != null
             ? Image.network(
                 UrlUtils.getFullImageUrl(journey.coverImage),
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                errorBuilder: (_, __, ___) => _buildPlaceholder(context),
               )
-            : _buildPlaceholder(),
+            : _buildPlaceholder(context),
       ),
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Center(
       child: Icon(
         journey.isLocked ? Icons.lock_rounded : Icons.landscape_rounded,
         size: 28,
-        color: AppColors.textHint.withValues(alpha: 0.5),
+        color: AppColors.textHintAdaptive(context).withValues(alpha: 0.5),
       ),
     );
   }
 
-  Widget _buildInfo() {
+  Widget _buildInfo(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -454,7 +475,7 @@ class _JourneyCard extends StatelessWidget {
                 child: Icon(
                   Icons.lock_rounded,
                   size: 14,
-                  color: AppColors.textHint.withValues(alpha: 0.6),
+                  color: AppColors.textHintAdaptive(context).withValues(alpha: 0.6),
                 ),
               ),
             Expanded(
@@ -464,8 +485,8 @@ class _JourneyCard extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: journey.isLocked
-                      ? AppColors.textHint
-                      : AppColors.textPrimary,
+                      ? AppColors.textHintAdaptive(context)
+                      : AppColors.textPrimaryAdaptive(context),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -478,27 +499,27 @@ class _JourneyCard extends StatelessWidget {
           journey.theme,
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.textSecondary.withValues(alpha: 0.8),
+            color: AppColors.textSecondaryAdaptive(context).withValues(alpha: 0.8),
           ),
         ),
         const SizedBox(height: 10),
         Row(
           children: [
             // 星级
-            _buildRating(),
+            _buildRating(context),
             const SizedBox(width: 12),
             // 距离
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant.withValues(alpha: 0.6),
+                color: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 '${(journey.totalDistance / 1000).toStringAsFixed(1)}km',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryAdaptive(context),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -511,7 +532,7 @@ class _JourneyCard extends StatelessWidget {
             journey.unlockCondition!,
             style: TextStyle(
               fontSize: 11,
-              color: AppColors.textHint.withValues(alpha: 0.7),
+              color: AppColors.textHintAdaptive(context).withValues(alpha: 0.7),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -520,7 +541,7 @@ class _JourneyCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRating() {
+  Widget _buildRating(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (i) {
@@ -529,7 +550,7 @@ class _JourneyCard extends StatelessWidget {
           size: 14,
           color: i < journey.rating
               ? AppColors.sealGold
-              : AppColors.textHint.withValues(alpha: 0.3),
+              : AppColors.textHintAdaptive(context).withValues(alpha: 0.3),
         );
       }),
     );
@@ -582,7 +603,7 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.cardBackground(context),
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
@@ -594,10 +615,10 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
           children: [
             Text(
               '搜索 ${widget.cityName} 的文化之旅',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: AppColors.textPrimaryAdaptive(context),
               ),
             ),
             const SizedBox(height: 16),
@@ -605,15 +626,29 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
             TextField(
               controller: _searchController,
               autofocus: true,
-              style: const TextStyle(fontSize: 15),
+              style: TextStyle(
+                fontSize: 15,
+                color: AppColors.textPrimaryAdaptive(context),
+              ),
               decoration: InputDecoration(
                 hintText: '输入名称或主题',
+                hintStyle: TextStyle(
+                  color: AppColors.textHintAdaptive(context),
+                ),
                 filled: true,
-                fillColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                fillColor: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: AppColors.textHintAdaptive(context),
+                ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        icon: Icon(
+                          Icons.clear_rounded,
+                          size: 18,
+                          color: AppColors.textHintAdaptive(context),
+                        ),
                         onPressed: () {
                           _searchController.clear();
                           _onSearchChanged('');
@@ -645,11 +680,11 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                             height: 90,
                           ),
                           const SizedBox(height: 12),
-                          const Text(
+                          Text(
                             '没有找到匹配的文化之旅',
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textSecondaryAdaptive(context),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -657,7 +692,7 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                             '换个关键词试试吧',
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textHint.withValues(alpha: 0.7),
+                              color: AppColors.textHintAdaptive(context).withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -667,7 +702,7 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                       shrinkWrap: true,
                       itemCount: _filteredJourneys.length,
                       separatorBuilder: (_, __) => Divider(
-                        color: AppColors.divider.withValues(alpha: 0.5),
+                        color: AppColors.borderAdaptive(context).withValues(alpha: 0.5),
                         height: 1,
                       ),
                       itemBuilder: (context, index) {
@@ -682,42 +717,46 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                             child: Container(
                               width: 44,
                               height: 44,
-                              color: AppColors.surfaceVariant,
+                              color: AppColors.surfaceVariantAdaptive(context),
                               child: journey.coverImage != null
                                   ? Image.network(
                                       UrlUtils.getFullImageUrl(
                                         journey.coverImage,
                                       ),
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(
+                                      errorBuilder: (_, __, ___) => Icon(
                                         Icons.landscape_rounded,
                                         size: 20,
-                                        color: AppColors.textHint,
+                                        color: AppColors.textHintAdaptive(context),
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.landscape_rounded,
                                       size: 20,
-                                      color: AppColors.textHint,
+                                      color: AppColors.textHintAdaptive(context),
                                     ),
                             ),
                           ),
                           title: Text(
                             journey.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimaryAdaptive(context),
                             ),
                           ),
                           subtitle: Text(
                             journey.theme,
-                            style: const TextStyle(fontSize: 12),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondaryAdaptive(context),
+                            ),
                           ),
                           trailing: journey.isLocked
                               ? Icon(
                                   Icons.lock_rounded,
                                   size: 16,
-                                  color: AppColors.textHint.withValues(
+                                  color: AppColors.textHintAdaptive(context).withValues(
                                     alpha: 0.5,
                                   ),
                                 )

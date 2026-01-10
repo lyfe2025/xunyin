@@ -27,9 +27,9 @@ class AppLoading extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: AppColors.textSecondaryAdaptive(context),
               ),
             ),
           ],
@@ -48,10 +48,13 @@ class AppLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.88)
+            : Colors.white.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(16),
       ),
       child: AppLoading(message: message),
@@ -67,11 +70,14 @@ class AppLoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Center(
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
+          color: isDark
+              ? AppColors.darkSurface.withValues(alpha: 0.9)
+              : Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -82,7 +88,7 @@ class AppLoadingOverlay extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 message!,
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: AppColors.textSecondaryAdaptive(context)),
               ),
             ],
           ],

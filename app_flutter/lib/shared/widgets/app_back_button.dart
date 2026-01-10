@@ -11,23 +11,28 @@ class AppBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return GestureDetector(
       onTap: onTap ?? () => context.pop(),
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
+          color: isDark
+              ? AppColors.darkSurface.withValues(alpha: 0.9)
+              : Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
             ),
           ],
         ),
         child: Icon(
           Icons.arrow_back_rounded,
-          color: iconColor ?? AppColors.textPrimary,
+          color: iconColor ?? AppColors.textPrimaryAdaptive(context),
           size: 22,
         ),
       ),
