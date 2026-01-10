@@ -3,6 +3,10 @@ import 'package:flutter/services.dart';
 import 'app_colors.dart';
 
 /// 寻印 App 主题 - Aurora UI + Glassmorphism 风格
+/// 
+/// 配色说明：
+/// - ColorScheme.primary 使用 accent（中国红）作为品牌主色
+/// - ColorScheme.secondary 使用 primary（黛青）作为辅助色
 class AppTheme {
   AppTheme._();
 
@@ -10,13 +14,13 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: AppColors.primary,
+      primaryColor: AppColors.accent, // 品牌主色：中国红
       scaffoldBackgroundColor: AppColors.background,
       fontFamily: 'NotoSansSC',
       colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
+        primary: AppColors.accent, // 品牌主色：中国红
         onPrimary: AppColors.textOnPrimary,
-        secondary: AppColors.accent,
+        secondary: AppColors.primary, // 辅助色：黛青
         onSecondary: AppColors.textOnPrimary,
         tertiary: AppColors.tertiary,
         surface: AppColors.surface,
@@ -87,10 +91,10 @@ class AppTheme {
         ),
       ),
 
-      // TextButton
+      // TextButton - 使用品牌主色
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.accent,
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
@@ -117,7 +121,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -283,13 +287,13 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: AppColors.primary,
+      primaryColor: AppColors.accent, // 品牌主色：中国红
       scaffoldBackgroundColor: darkBackground,
       fontFamily: 'NotoSansSC',
       colorScheme: ColorScheme.dark(
-        primary: AppColors.primaryLight,
+        primary: AppColors.accentLight, // 品牌主色（深色模式用亮色变体）
         onPrimary: Colors.white,
-        secondary: AppColors.accent,
+        secondary: AppColors.primaryLight, // 辅助色：黛青
         onSecondary: Colors.white,
         tertiary: AppColors.tertiary,
         surface: darkSurface,
@@ -360,10 +364,10 @@ class AppTheme {
         ),
       ),
 
-      // TextButton
+      // TextButton - 使用品牌主色
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryLight,
+          foregroundColor: AppColors.accentLight,
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
@@ -386,7 +390,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: AppColors.primaryLight, width: 1.5),
+          borderSide: BorderSide(color: AppColors.accentLight, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

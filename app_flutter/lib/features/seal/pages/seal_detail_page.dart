@@ -9,6 +9,7 @@ import '../../../shared/widgets/share_bottom_sheet.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_page_header.dart';
 import '../../../shared/widgets/app_loading.dart';
+import '../../../shared/widgets/app_buttons.dart';
 
 /// 印记详情页 - Aurora UI + Glassmorphism + 3D翻转效果
 class SealDetailPage extends ConsumerStatefulWidget {
@@ -464,14 +465,14 @@ class _SealDetailPageState extends ConsumerState<SealDetailPage>
             children: [
               Row(
                 children: [
-                  Icon(Icons.info_rounded, size: 18, color: AppColors.primary),
+                  Icon(Icons.info_rounded, size: 18, color: AppColors.accent),
                   const SizedBox(width: 8),
                   Text(
                     '完成信息',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: AppColors.primary,
+                      color: AppColors.accent,
                     ),
                   ),
                 ],
@@ -669,47 +670,37 @@ class _SealDetailPageState extends ConsumerState<SealDetailPage>
             style: TextStyle(fontSize: 13, color: AppColors.textSecondaryAdaptive(context)),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                try {
-                  await ref.read(sealServiceProvider).chainSeal(widget.sealId);
-                  ref.invalidate(sealDetailProvider(widget.sealId));
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('上链成功'),
-                        backgroundColor: AppColors.success,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('上链失败: $e'),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
-                  }
+          AppPrimaryButton(
+            onPressed: () async {
+              try {
+                await ref.read(sealServiceProvider).chainSeal(widget.sealId);
+                ref.invalidate(sealDetailProvider(widget.sealId));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('上链成功'),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
                 }
-              },
-              icon: const Icon(Icons.rocket_launch_rounded, size: 18),
-              label: const Text(
-                '立即上链',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('上链失败: $e'),
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.rocket_launch_rounded, size: 18),
+                SizedBox(width: 8),
+                Text('立即上链'),
+              ],
             ),
           ),
         ],

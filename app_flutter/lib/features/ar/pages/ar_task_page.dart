@@ -470,30 +470,19 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
           SizedBox(
             width: double.infinity,
             height: AppSize.buttonHeight,
-            child: ElevatedButton.icon(
+            child: AppPrimaryButton(
               onPressed: _isSubmitting ? null : _completeTask,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : Icon(
-                      taskType == 'photo' ? Icons.camera_alt_rounded : Icons.check_rounded,
-                      size: AppSize.appBarIconSize,
-                    ),
-              label: Text(
-                taskType == 'photo' ? '拍照' : '确认完成',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                ),
+              isLoading: _isSubmitting,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    taskType == 'photo' ? Icons.camera_alt_rounded : Icons.check_rounded,
+                    size: AppSize.appBarIconSize,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(taskType == 'photo' ? '拍照' : '确认完成'),
+                ],
               ),
             ),
           ),

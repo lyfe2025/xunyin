@@ -701,29 +701,17 @@ class _CurrentPointCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            width: double.infinity,
-            height: AppSize.buttonHeight,
-            child: ElevatedButton(
-              onPressed: () {
-                context.push('/journey/$journeyId/navigate/${point.id}');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.navigation_rounded, size: 18),
-                  SizedBox(width: AppSpacing.sm),
-                  Text('开始导航', style: TextStyle(fontWeight: FontWeight.w600)),
-                ],
-              ),
+          AppPrimaryButton(
+            onPressed: () {
+              context.push('/journey/$journeyId/navigate/${point.id}');
+            },
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.navigation_rounded, size: 18),
+                SizedBox(width: AppSpacing.sm),
+                Text('开始导航'),
+              ],
             ),
           ),
         ],

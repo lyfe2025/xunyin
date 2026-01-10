@@ -1469,7 +1469,7 @@ class _QuickActions extends StatelessWidget {
             Expanded(
               child: _QuickActionItem(
                 icon: Icons.route_rounded,
-                color: AppColors.primary,
+                color: AppColors.accent,
                 label: '旅程',
                 onTap: () {
                   HapticFeedback.lightImpact();

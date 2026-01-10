@@ -543,27 +543,16 @@ class _NavigationPageState extends ConsumerState<NavigationPage>
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   flex: 2,
-                  child: SizedBox(
+                  child: AppPrimaryButton(
+                    onPressed: () => context.push('/ar-task/${widget.pointId}'),
                     height: AppSize.buttonHeightSmall,
-                    child: ElevatedButton.icon(
-                      onPressed: () => context.push('/ar-task/${widget.pointId}'),
-                      icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                      label: const FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          '开始任务',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                      ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.play_arrow_rounded, size: 18),
+                        SizedBox(width: 6),
+                        Text('开始任务'),
+                      ],
                     ),
                   ),
                 ),

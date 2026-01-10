@@ -327,12 +327,12 @@ class _JourneyCompletePageState extends ConsumerState<JourneyCompletePage>
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: AppColors.sealGold.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.link_rounded,
-                  color: AppColors.primary,
+                  color: AppColors.sealGold,
                   size: 20,
                 ),
               ),
@@ -370,8 +370,8 @@ class _JourneyCompletePageState extends ConsumerState<JourneyCompletePage>
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
+                foregroundColor: AppColors.sealGold,
+                side: const BorderSide(color: AppColors.sealGold),
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.sm),
