@@ -9,6 +9,7 @@ import '../../../providers/service_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_back_button.dart';
 import '../../../shared/widgets/app_loading.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 /// 文化之旅详情页 - Aurora UI + Glassmorphism
 class JourneyDetailPage extends ConsumerWidget {
@@ -148,14 +149,24 @@ class _JourneyContent extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             journey.name,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black,
+                  blurRadius: 8,
+                ),
+              ],
+            ),
           ),
         ),
         background: Stack(
@@ -190,12 +201,12 @@ class _JourneyContent extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withValues(alpha: 0.8),
-            AppColors.accent.withValues(alpha: 0.6),
+            AppColors.primary.withValues(alpha: 0.95),
+            AppColors.primaryDark.withValues(alpha: 0.9),
           ],
         ),
       ),
-      child: const Icon(Icons.landscape_rounded, size: 64, color: Colors.white54),
+      child: const Icon(Icons.landscape_rounded, size: 64, color: Colors.white38),
     );
   }
 
@@ -668,9 +679,7 @@ class _StartButtonState extends ConsumerState<_StartButton>
       if (context.mounted) context.push('/journey/${widget.journeyId}/progress');
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('开始失败: $e'), backgroundColor: AppColors.error),
-        );
+        AppSnackBar.error(context, '开始失败: $e');
       }
     }
   }

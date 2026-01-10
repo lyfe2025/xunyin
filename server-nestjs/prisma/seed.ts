@@ -1,39 +1,39 @@
-import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-import * as bcrypt from 'bcrypt';
-import Redis from 'ioredis';
+import 'dotenv/config'
+import { PrismaClient } from '@prisma/client'
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
+import * as bcrypt from 'bcrypt'
+import Redis from 'ioredis'
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL
 
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter }) as PrismaClient;
+const pool = new Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+const prisma = new PrismaClient({ adapter }) as PrismaClient
 
 async function main() {
-  console.log('Start seeding ...');
+  console.log('Start seeding ...')
 
   // 1. Init Dept (层级结构)
   const ensureDept = async (data: {
-    deptName: string;
-    orderNum?: number;
-    status?: '0' | '1';
-    parentId?: bigint | null;
-    leader?: string;
-    phone?: string;
-    email?: string;
+    deptName: string
+    orderNum?: number
+    status?: '0' | '1'
+    parentId?: bigint | null
+    leader?: string
+    phone?: string
+    email?: string
   }) => {
     const existed = await prisma.sysDept.findFirst({
       where: { deptName: data.deptName, delFlag: '0' },
-    });
-    let ancestors = '0';
+    })
+    let ancestors = '0'
     if (data.parentId) {
       const parent = await prisma.sysDept.findUnique({
         where: { deptId: data.parentId },
-      });
+      })
       if (parent) {
-        ancestors = `${parent.ancestors || '0'},${data.parentId}`;
+        ancestors = `${parent.ancestors || '0'},${data.parentId}`
       }
     }
     if (existed) {
@@ -43,7 +43,7 @@ async function main() {
           ...data,
           ancestors,
         },
-      });
+      })
     }
     return prisma.sysDept.create({
       data: {
@@ -56,8 +56,8 @@ async function main() {
         email: data.email ?? '',
         ancestors,
       },
-    });
-  };
+    })
+  }
 
   const rootDept = await ensureDept({
     deptName: '总公司',
@@ -65,71 +65,71 @@ async function main() {
     status: '0',
     parentId: null,
     leader: '张总',
-  });
+  })
   const techDept = await ensureDept({
     deptName: '技术部',
     orderNum: 1,
     parentId: rootDept.deptId,
     leader: '李工',
-  });
+  })
   const devDept = await ensureDept({
     deptName: '研发一部',
     orderNum: 2,
     parentId: techDept.deptId,
     leader: '王工',
-  });
+  })
   const testDept = await ensureDept({
     deptName: '测试一部',
     orderNum: 3,
     parentId: techDept.deptId,
     leader: '赵工',
-  });
+  })
   await ensureDept({
     deptName: '人事部',
     orderNum: 4,
     parentId: rootDept.deptId,
     leader: '刘姐',
-  });
+  })
   await ensureDept({
     deptName: '财务部',
     orderNum: 5,
     parentId: rootDept.deptId,
     leader: '钱会',
-  });
+  })
   const eastBranch = await ensureDept({
     deptName: '华东分公司',
     orderNum: 6,
     parentId: rootDept.deptId,
     leader: '孙总',
-  });
+  })
   await ensureDept({
     deptName: '上海办事处',
     orderNum: 7,
     parentId: eastBranch.deptId,
     leader: '周主任',
-  });
+  })
   await ensureDept({
     deptName: '杭州办事处',
     orderNum: 8,
     parentId: eastBranch.deptId,
     leader: '吴主任',
-  });
-  console.log('Initialized department hierarchy');
+  })
+  console.log('Initialized department hierarchy')
 
   // 2. Init Roles (管理后台角色体系 - 幂等,所有角色启用状态)
   const ensureRole = async (data: {
-    roleKey: string;
-    roleName: string;
-    roleSort: number;
-    status?: '0' | '1';
-    dataScope?: '1' | '2' | '3' | '4';
-    menuCheckStrictly?: boolean;
-    deptCheckStrictly?: boolean;
-    remark?: string;
+    roleKey: string
+    roleName: string
+    roleSort: number
+    status?: '0' | '1'
+    dataScope?: '1' | '2' | '3' | '4'
+    menuCheckStrictly?: boolean
+    deptCheckStrictly?: boolean
+    remark?: string
   }) => {
     const existed = await prisma.sysRole.findFirst({
       where: { roleKey: data.roleKey, delFlag: '0' },
-    });
+    })
     if (existed) {
       return prisma.sysRole.update({
         where: { roleId: existed.roleId },
@@ -142,7 +142,7 @@ async function main() {
           deptCheckStrictly: data.deptCheckStrictly ?? true,
           remark: data.remark,
         },
-      });
+      })
     }
     return prisma.sysRole.create({
       data: {
@@ -155,8 +155,8 @@ async function main() {
         deptCheckStrictly: data.deptCheckStrictly ?? true,
         remark: data.remark,
       },
-    });
-  };
+    })
+  }
 
   const adminRole = await ensureRole({
     roleKey: 'admin',
@@ -165,8 +165,8 @@ async function main() {
     status: '0',
     dataScope: '1',
     remark: '拥有系统所有权限',
-  });
-  console.log(`Ensured admin role with id: ${adminRole.roleId}`);
+  })
+  console.log(`Ensured admin role with id: ${adminRole.roleId}`)
 
   const systemAdminRole = await ensureRole({
     roleKey: 'system_admin',
@@ -175,7 +175,7 @@ async function main() {
     status: '0',
     dataScope: '2',
     remark: '负责系统管理模块',
-  });
+  })
 
   const monitorAdminRole = await ensureRole({
     roleKey: 'monitor_admin',
@@ -184,7 +184,7 @@ async function main() {
     status: '0',
     dataScope: '1',
     remark: '负责系统监控模块',
-  });
+  })
 
   const commonUserRole = await ensureRole({
     roleKey: 'common_user',
@@ -193,24 +193,24 @@ async function main() {
     status: '0',
     dataScope: '3',
     remark: '只读权限,无增删改权限',
-  });
-  console.log('Ensured all admin roles');
+  })
+  console.log('Ensured all admin roles')
 
   // 3. 初始化用户（使用 bcrypt 加密密码，保持与服务层一致 - 幂等）
   const ensureUser = async (data: {
-    userName: string;
-    nickName: string;
-    password: string;
-    deptId: bigint;
-    status?: '0' | '1';
-    email?: string;
-    phonenumber?: string;
-    sex?: '0' | '1' | '2';
-    remark?: string;
+    userName: string
+    nickName: string
+    password: string
+    deptId: bigint
+    status?: '0' | '1'
+    email?: string
+    phonenumber?: string
+    sex?: '0' | '1' | '2'
+    remark?: string
   }) => {
     const existed = await prisma.sysUser.findFirst({
       where: { userName: data.userName, delFlag: '0' },
-    });
+    })
     if (existed) {
       // 存在则更新(但不更新密码,避免覆盖用户修改的密码)
       return prisma.sysUser.update({
@@ -224,7 +224,7 @@ async function main() {
           sex: data.sex,
           remark: data.remark,
         },
-      });
+      })
     }
     return prisma.sysUser.create({
       data: {
@@ -238,12 +238,12 @@ async function main() {
         sex: data.sex,
         remark: data.remark,
       },
-    });
-  };
+    })
+  }
 
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(10)
   // 默认密码与文档保持一致
-  const hashedPassword = await bcrypt.hash('admin123', salt);
+  const hashedPassword = await bcrypt.hash('admin123', salt)
 
   const adminUser = await ensureUser({
     userName: 'admin',
@@ -254,8 +254,8 @@ async function main() {
     phonenumber: '13800000000',
     sex: '0',
     remark: '系统超级管理员账号',
-  });
-  console.log(`Ensured admin user with id: ${adminUser.userId}`);
+  })
+  console.log(`Ensured admin user with id: ${adminUser.userId}`)
 
   const systemAdminUser = await ensureUser({
     userName: 'system_admin',
@@ -266,7 +266,7 @@ async function main() {
     phonenumber: '13800000001',
     sex: '0',
     remark: '负责系统管理',
-  });
+  })
 
   const monitorAdminUser = await ensureUser({
     userName: 'monitor_admin',
@@ -277,7 +277,7 @@ async function main() {
     phonenumber: '13800000002',
     sex: '1',
     remark: '负责系统监控',
-  });
+  })
 
   const commonUser = await ensureUser({
     userName: 'user',
@@ -288,60 +288,60 @@ async function main() {
     phonenumber: '13800000003',
     sex: '1',
     remark: '普通用户账号',
-  });
-  console.log('Ensured all users');
+  })
+  console.log('Ensured all users')
 
   // 4. Link User and Role (幂等)
   const ensureUserRole = async (userId: bigint, roleId: bigint) => {
     const existed = await prisma.sysUserRole.findFirst({
       where: { userId, roleId },
-    });
+    })
     if (!existed) {
       await prisma.sysUserRole.create({
         data: { userId, roleId },
-      });
+      })
     }
-  };
+  }
 
-  await ensureUserRole(adminUser.userId, adminRole.roleId);
-  await ensureUserRole(systemAdminUser.userId, systemAdminRole.roleId);
-  await ensureUserRole(monitorAdminUser.userId, monitorAdminRole.roleId);
-  await ensureUserRole(commonUser.userId, commonUserRole.roleId);
-  console.log('Linked all users and roles');
+  await ensureUserRole(adminUser.userId, adminRole.roleId)
+  await ensureUserRole(systemAdminUser.userId, systemAdminRole.roleId)
+  await ensureUserRole(monitorAdminUser.userId, monitorAdminRole.roleId)
+  await ensureUserRole(commonUser.userId, commonUserRole.roleId)
+  console.log('Linked all users and roles')
 
   // 5. 初始化基础菜单（存在则跳过，避免重复）
   const ensureMenu = async (data: {
-    menuName: string;
-    path: string;
-    component: string;
-    orderNum: number;
-    menuType: 'M' | 'C' | 'F';
-    visible?: '0' | '1';
-    status?: '0' | '1';
-    icon?: string;
-    isFrame?: number;
-    parentId?: bigint | null;
-    perms?: string | null;
+    menuName: string
+    path: string
+    component: string
+    orderNum: number
+    menuType: 'M' | 'C' | 'F'
+    visible?: '0' | '1'
+    status?: '0' | '1'
+    icon?: string
+    isFrame?: number
+    parentId?: bigint | null
+    perms?: string | null
   }) => {
     const existed = await prisma.sysMenu.findFirst({
       where: { path: data.path },
-    });
+    })
     if (existed) {
-      return prisma.sysMenu.update({ where: { menuId: existed.menuId }, data });
+      return prisma.sysMenu.update({ where: { menuId: existed.menuId }, data })
     }
-    return prisma.sysMenu.create({ data });
-  };
+    return prisma.sysMenu.create({ data })
+  }
 
   const ensureButton = async (data: {
-    menuName: string;
-    parentId: bigint;
-    perms: string;
-    orderNum?: number;
+    menuName: string
+    parentId: bigint
+    perms: string
+    orderNum?: number
   }) => {
     const existed = await prisma.sysMenu.findFirst({
       where: { perms: data.perms },
-    });
-    if (existed) return existed;
+    })
+    if (existed) return existed
     return prisma.sysMenu.create({
       data: {
         menuName: data.menuName,
@@ -355,14 +355,14 @@ async function main() {
         path: '',
         icon: '#',
       },
-    });
-  };
+    })
+  }
 
   const getMenuByPath = async (parentId: bigint, path: string) => {
     return prisma.sysMenu.findFirst({
       where: { parentId, path },
-    });
-  };
+    })
+  }
 
   const systemDir = await ensureMenu({
     menuName: '系统管理',
@@ -375,7 +375,7 @@ async function main() {
     icon: 'settings',
     isFrame: 1,
     parentId: null,
-  });
+  })
   await ensureMenu({
     menuName: '用户管理',
     parentId: systemDir.menuId,
@@ -388,7 +388,7 @@ async function main() {
     perms: 'system:user:list',
     icon: 'user',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '角色管理',
     parentId: systemDir.menuId,
@@ -401,7 +401,7 @@ async function main() {
     perms: 'system:role:list',
     icon: 'users',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '菜单管理',
     parentId: systemDir.menuId,
@@ -414,7 +414,7 @@ async function main() {
     perms: 'system:menu:list',
     icon: 'menu',
     isFrame: 1,
-  });
+  })
 
   // system: 其余模块补充
   await ensureMenu({
@@ -429,7 +429,7 @@ async function main() {
     perms: 'system:dept:list',
     icon: 'building-2',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '岗位管理',
     parentId: systemDir.menuId,
@@ -442,7 +442,7 @@ async function main() {
     perms: 'system:post:list',
     icon: 'badge-check',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '字典管理',
     parentId: systemDir.menuId,
@@ -455,7 +455,7 @@ async function main() {
     perms: 'system:dict:list',
     icon: 'book-a',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '参数设置',
     parentId: systemDir.menuId,
@@ -468,7 +468,7 @@ async function main() {
     perms: 'system:config:list',
     icon: 'settings-2',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '系统设置',
     parentId: systemDir.menuId,
@@ -481,7 +481,7 @@ async function main() {
     perms: 'system:setting:view',
     icon: 'sliders-vertical',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '通知公告',
     parentId: systemDir.menuId,
@@ -494,7 +494,7 @@ async function main() {
     perms: 'system:notice:list',
     icon: 'megaphone',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '更新日志',
     parentId: systemDir.menuId,
@@ -507,7 +507,7 @@ async function main() {
     perms: null,
     icon: 'scroll-text',
     isFrame: 1,
-  });
+  })
 
   const monitorDir = await ensureMenu({
     menuName: '系统监控',
@@ -520,7 +520,7 @@ async function main() {
     icon: 'monitor',
     isFrame: 1,
     parentId: null,
-  });
+  })
   await ensureMenu({
     menuName: '在线用户',
     parentId: monitorDir.menuId,
@@ -533,7 +533,7 @@ async function main() {
     perms: 'monitor:online:list',
     icon: 'user-check',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '操作日志',
     parentId: monitorDir.menuId,
@@ -546,7 +546,7 @@ async function main() {
     perms: 'monitor:operlog:list',
     icon: 'list',
     isFrame: 1,
-  });
+  })
 
   // monitor: 其余模块补充
   await ensureMenu({
@@ -561,7 +561,7 @@ async function main() {
     perms: 'monitor:logininfor:list',
     icon: 'log-in',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '定时任务',
     parentId: monitorDir.menuId,
@@ -574,7 +574,7 @@ async function main() {
     perms: 'monitor:job:list',
     icon: 'alarm-clock',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '服务监控',
     parentId: monitorDir.menuId,
@@ -587,7 +587,7 @@ async function main() {
     perms: 'monitor:server:list',
     icon: 'server',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '缓存监控',
     parentId: monitorDir.menuId,
@@ -600,7 +600,7 @@ async function main() {
     perms: 'monitor:cache:view',
     icon: 'database-backup',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '数据监控',
     parentId: monitorDir.menuId,
@@ -613,7 +613,7 @@ async function main() {
     perms: 'monitor:druid:view',
     icon: 'database',
     isFrame: 1,
-  });
+  })
 
   const toolDir = await ensureMenu({
     menuName: '系统工具',
@@ -626,7 +626,7 @@ async function main() {
     icon: 'wrench',
     isFrame: 1,
     parentId: null,
-  });
+  })
   await ensureMenu({
     menuName: '接口文档',
     parentId: toolDir.menuId,
@@ -639,7 +639,7 @@ async function main() {
     perms: 'tool:swagger:view',
     icon: 'file-text',
     isFrame: 1,
-  });
+  })
 
   // tool: 其余模块补充
   await ensureMenu({
@@ -654,389 +654,389 @@ async function main() {
     perms: 'tool:build:view',
     icon: 'factory',
     isFrame: 1,
-  });
+  })
 
   // 按钮权限补充（F）
-  const userMenu = await getMenuByPath(systemDir.menuId, 'user');
+  const userMenu = await getMenuByPath(systemDir.menuId, 'user')
   if (userMenu) {
     await ensureButton({
       menuName: '用户查询',
       parentId: userMenu.menuId,
       perms: 'system:user:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '用户新增',
       parentId: userMenu.menuId,
       perms: 'system:user:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '用户修改',
       parentId: userMenu.menuId,
       perms: 'system:user:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '用户删除',
       parentId: userMenu.menuId,
       perms: 'system:user:remove',
       orderNum: 4,
-    });
+    })
     await ensureButton({
       menuName: '重置密码',
       parentId: userMenu.menuId,
       perms: 'system:user:resetPwd',
       orderNum: 5,
-    });
+    })
     await ensureButton({
       menuName: '用户导出',
       parentId: userMenu.menuId,
       perms: 'system:user:export',
       orderNum: 6,
-    });
+    })
     await ensureButton({
       menuName: '用户导入',
       parentId: userMenu.menuId,
       perms: 'system:user:import',
       orderNum: 7,
-    });
+    })
   }
-  const roleMenu = await getMenuByPath(systemDir.menuId, 'role');
+  const roleMenu = await getMenuByPath(systemDir.menuId, 'role')
   if (roleMenu) {
     await ensureButton({
       menuName: '角色查询',
       parentId: roleMenu.menuId,
       perms: 'system:role:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '角色新增',
       parentId: roleMenu.menuId,
       perms: 'system:role:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '角色修改',
       parentId: roleMenu.menuId,
       perms: 'system:role:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '角色删除',
       parentId: roleMenu.menuId,
       perms: 'system:role:remove',
       orderNum: 4,
-    });
+    })
   }
-  const menuMenu = await getMenuByPath(systemDir.menuId, 'menu');
+  const menuMenu = await getMenuByPath(systemDir.menuId, 'menu')
   if (menuMenu) {
     await ensureButton({
       menuName: '菜单查询',
       parentId: menuMenu.menuId,
       perms: 'system:menu:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '菜单新增',
       parentId: menuMenu.menuId,
       perms: 'system:menu:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '菜单修改',
       parentId: menuMenu.menuId,
       perms: 'system:menu:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '菜单删除',
       parentId: menuMenu.menuId,
       perms: 'system:menu:remove',
       orderNum: 4,
-    });
+    })
   }
-  const deptMenu = await getMenuByPath(systemDir.menuId, 'dept');
+  const deptMenu = await getMenuByPath(systemDir.menuId, 'dept')
   if (deptMenu) {
     await ensureButton({
       menuName: '部门查询',
       parentId: deptMenu.menuId,
       perms: 'system:dept:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '部门新增',
       parentId: deptMenu.menuId,
       perms: 'system:dept:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '部门修改',
       parentId: deptMenu.menuId,
       perms: 'system:dept:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '部门删除',
       parentId: deptMenu.menuId,
       perms: 'system:dept:remove',
       orderNum: 4,
-    });
+    })
   }
-  const postMenu = await getMenuByPath(systemDir.menuId, 'post');
+  const postMenu = await getMenuByPath(systemDir.menuId, 'post')
   if (postMenu) {
     await ensureButton({
       menuName: '岗位查询',
       parentId: postMenu.menuId,
       perms: 'system:post:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '岗位新增',
       parentId: postMenu.menuId,
       perms: 'system:post:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '岗位修改',
       parentId: postMenu.menuId,
       perms: 'system:post:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '岗位删除',
       parentId: postMenu.menuId,
       perms: 'system:post:remove',
       orderNum: 4,
-    });
+    })
   }
-  const dictMenu = await getMenuByPath(systemDir.menuId, 'dict');
+  const dictMenu = await getMenuByPath(systemDir.menuId, 'dict')
   if (dictMenu) {
     await ensureButton({
       menuName: '字典查询',
       parentId: dictMenu.menuId,
       perms: 'system:dict:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '字典新增',
       parentId: dictMenu.menuId,
       perms: 'system:dict:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '字典修改',
       parentId: dictMenu.menuId,
       perms: 'system:dict:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '字典删除',
       parentId: dictMenu.menuId,
       perms: 'system:dict:remove',
       orderNum: 4,
-    });
+    })
   }
-  const configMenu = await getMenuByPath(systemDir.menuId, 'config');
+  const configMenu = await getMenuByPath(systemDir.menuId, 'config')
   if (configMenu) {
     await ensureButton({
       menuName: '参数查询',
       parentId: configMenu.menuId,
       perms: 'system:config:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '参数新增',
       parentId: configMenu.menuId,
       perms: 'system:config:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '参数修改',
       parentId: configMenu.menuId,
       perms: 'system:config:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '参数删除',
       parentId: configMenu.menuId,
       perms: 'system:config:remove',
       orderNum: 4,
-    });
+    })
   }
-  const noticeMenu = await getMenuByPath(systemDir.menuId, 'notice');
+  const noticeMenu = await getMenuByPath(systemDir.menuId, 'notice')
   if (noticeMenu) {
     await ensureButton({
       menuName: '公告查询',
       parentId: noticeMenu.menuId,
       perms: 'system:notice:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '公告新增',
       parentId: noticeMenu.menuId,
       perms: 'system:notice:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '公告修改',
       parentId: noticeMenu.menuId,
       perms: 'system:notice:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '公告删除',
       parentId: noticeMenu.menuId,
       perms: 'system:notice:remove',
       orderNum: 4,
-    });
+    })
   }
 
   // 系统设置按钮
-  const settingMenu = await getMenuByPath(systemDir.menuId, 'setting');
+  const settingMenu = await getMenuByPath(systemDir.menuId, 'setting')
   if (settingMenu) {
     await ensureButton({
       menuName: '设置修改',
       parentId: settingMenu.menuId,
       perms: 'system:setting:edit',
       orderNum: 1,
-    });
+    })
   }
 
-  const jobMenu = await getMenuByPath(monitorDir.menuId, 'job');
+  const jobMenu = await getMenuByPath(monitorDir.menuId, 'job')
   if (jobMenu) {
     await ensureButton({
       menuName: '任务查询',
       parentId: jobMenu.menuId,
       perms: 'monitor:job:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '任务新增',
       parentId: jobMenu.menuId,
       perms: 'monitor:job:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '任务修改',
       parentId: jobMenu.menuId,
       perms: 'monitor:job:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '任务删除',
       parentId: jobMenu.menuId,
       perms: 'monitor:job:remove',
       orderNum: 4,
-    });
+    })
     await ensureButton({
       menuName: '状态变更',
       parentId: jobMenu.menuId,
       perms: 'monitor:job:changeStatus',
       orderNum: 5,
-    });
+    })
     await ensureButton({
       menuName: '立即执行',
       parentId: jobMenu.menuId,
       perms: 'monitor:job:run',
       orderNum: 6,
-    });
+    })
     await ensureButton({
       menuName: '查看日志',
       parentId: jobMenu.menuId,
       perms: 'monitor:job:log',
       orderNum: 7,
-    });
+    })
   }
-  const cacheMenu = await getMenuByPath(monitorDir.menuId, 'cache');
+  const cacheMenu = await getMenuByPath(monitorDir.menuId, 'cache')
   if (cacheMenu) {
     await ensureButton({
       menuName: '清理指定',
       parentId: cacheMenu.menuId,
       perms: 'monitor:cache:clearName',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '清理全部',
       parentId: cacheMenu.menuId,
       perms: 'monitor:cache:clearAll',
       orderNum: 2,
-    });
+    })
   }
-  const onlineMenu = await getMenuByPath(monitorDir.menuId, 'online');
+  const onlineMenu = await getMenuByPath(monitorDir.menuId, 'online')
   if (onlineMenu) {
     await ensureButton({
       menuName: '用户查询',
       parentId: onlineMenu.menuId,
       perms: 'monitor:online:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '强退用户',
       parentId: onlineMenu.menuId,
       perms: 'monitor:online:forceLogout',
       orderNum: 2,
-    });
+    })
   }
-  const operlogMenu = await getMenuByPath(monitorDir.menuId, 'operlog');
+  const operlogMenu = await getMenuByPath(monitorDir.menuId, 'operlog')
   if (operlogMenu) {
     await ensureButton({
       menuName: '日志查询',
       parentId: operlogMenu.menuId,
       perms: 'monitor:operlog:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '日志删除',
       parentId: operlogMenu.menuId,
       perms: 'monitor:operlog:remove',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '日志导出',
       parentId: operlogMenu.menuId,
       perms: 'monitor:operlog:export',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '日志清空',
       parentId: operlogMenu.menuId,
       perms: 'monitor:operlog:clear',
       orderNum: 4,
-    });
+    })
   }
-  const logininforMenu = await getMenuByPath(monitorDir.menuId, 'logininfor');
+  const logininforMenu = await getMenuByPath(monitorDir.menuId, 'logininfor')
   if (logininforMenu) {
     await ensureButton({
       menuName: '日志查询',
       parentId: logininforMenu.menuId,
       perms: 'monitor:logininfor:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '日志删除',
       parentId: logininforMenu.menuId,
       perms: 'monitor:logininfor:remove',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '日志导出',
       parentId: logininforMenu.menuId,
       perms: 'monitor:logininfor:export',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '日志清空',
       parentId: logininforMenu.menuId,
       perms: 'monitor:logininfor:clear',
       orderNum: 4,
-    });
+    })
     await ensureButton({
       menuName: '账户解锁',
       parentId: logininforMenu.menuId,
       perms: 'monitor:logininfor:unlock',
       orderNum: 5,
-    });
+    })
   }
 
   // ============ 寻印管理菜单 ============
@@ -1051,7 +1051,7 @@ async function main() {
     icon: 'map-pin',
     isFrame: 1,
     parentId: null,
-  });
+  })
 
   // 寻印子菜单
   await ensureMenu({
@@ -1066,7 +1066,7 @@ async function main() {
     perms: 'xunyin:city:list',
     icon: 'building',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '文化之旅管理',
     parentId: xunyinDir.menuId,
@@ -1079,7 +1079,7 @@ async function main() {
     perms: 'xunyin:journey:list',
     icon: 'route',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '探索点管理',
     parentId: xunyinDir.menuId,
@@ -1092,7 +1092,7 @@ async function main() {
     perms: 'xunyin:point:list',
     icon: 'map-pin-check',
     isFrame: 1,
-  });
+  })
 
   // 背景音乐管理
   await ensureMenu({
@@ -1107,7 +1107,7 @@ async function main() {
     perms: 'xunyin:bgm:list',
     icon: 'music',
     isFrame: 1,
-  });
+  })
 
   await ensureMenu({
     menuName: '印记管理',
@@ -1121,7 +1121,7 @@ async function main() {
     perms: 'xunyin:seal:list',
     icon: 'stamp',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: 'App用户管理',
     parentId: xunyinDir.menuId,
@@ -1134,7 +1134,7 @@ async function main() {
     perms: 'xunyin:appuser:list',
     icon: 'smartphone',
     isFrame: 1,
-  });
+  })
   // 用户进度管理
   await ensureMenu({
     menuName: '用户进度',
@@ -1148,7 +1148,7 @@ async function main() {
     perms: 'xunyin:progress:list',
     icon: 'list-checks',
     isFrame: 1,
-  });
+  })
 
   // 用户印记管理
   await ensureMenu({
@@ -1163,7 +1163,7 @@ async function main() {
     perms: 'xunyin:userseal:list',
     icon: 'award',
     isFrame: 1,
-  });
+  })
 
   // 用户相册管理
   await ensureMenu({
@@ -1178,7 +1178,7 @@ async function main() {
     perms: 'xunyin:photo:list',
     icon: 'image',
     isFrame: 1,
-  });
+  })
 
   await ensureMenu({
     menuName: '数据统计',
@@ -1192,223 +1192,223 @@ async function main() {
     perms: 'xunyin:stats:view',
     icon: 'chart-bar',
     isFrame: 1,
-  });
+  })
 
   // 寻印按钮权限
-  const cityMenu = await getMenuByPath(xunyinDir.menuId, 'city');
+  const cityMenu = await getMenuByPath(xunyinDir.menuId, 'city')
   if (cityMenu) {
     await ensureButton({
       menuName: '城市查询',
       parentId: cityMenu.menuId,
       perms: 'xunyin:city:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '城市新增',
       parentId: cityMenu.menuId,
       perms: 'xunyin:city:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '城市修改',
       parentId: cityMenu.menuId,
       perms: 'xunyin:city:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '城市删除',
       parentId: cityMenu.menuId,
       perms: 'xunyin:city:remove',
       orderNum: 4,
-    });
+    })
   }
-  const journeyMenu = await getMenuByPath(xunyinDir.menuId, 'journey');
+  const journeyMenu = await getMenuByPath(xunyinDir.menuId, 'journey')
   if (journeyMenu) {
     await ensureButton({
       menuName: '文化之旅查询',
       parentId: journeyMenu.menuId,
       perms: 'xunyin:journey:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '文化之旅新增',
       parentId: journeyMenu.menuId,
       perms: 'xunyin:journey:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '文化之旅修改',
       parentId: journeyMenu.menuId,
       perms: 'xunyin:journey:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '文化之旅删除',
       parentId: journeyMenu.menuId,
       perms: 'xunyin:journey:remove',
       orderNum: 4,
-    });
+    })
   }
-  const pointMenu = await getMenuByPath(xunyinDir.menuId, 'point');
+  const pointMenu = await getMenuByPath(xunyinDir.menuId, 'point')
   if (pointMenu) {
     await ensureButton({
       menuName: '探索点查询',
       parentId: pointMenu.menuId,
       perms: 'xunyin:point:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '探索点新增',
       parentId: pointMenu.menuId,
       perms: 'xunyin:point:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '探索点修改',
       parentId: pointMenu.menuId,
       perms: 'xunyin:point:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '探索点删除',
       parentId: pointMenu.menuId,
       perms: 'xunyin:point:remove',
       orderNum: 4,
-    });
+    })
   }
-  const sealMenu = await getMenuByPath(xunyinDir.menuId, 'seal');
+  const sealMenu = await getMenuByPath(xunyinDir.menuId, 'seal')
   if (sealMenu) {
     await ensureButton({
       menuName: '印记查询',
       parentId: sealMenu.menuId,
       perms: 'xunyin:seal:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '印记新增',
       parentId: sealMenu.menuId,
       perms: 'xunyin:seal:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '印记修改',
       parentId: sealMenu.menuId,
       perms: 'xunyin:seal:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '印记删除',
       parentId: sealMenu.menuId,
       perms: 'xunyin:seal:remove',
       orderNum: 4,
-    });
+    })
   }
-  const appuserMenu = await getMenuByPath(xunyinDir.menuId, 'appuser');
+  const appuserMenu = await getMenuByPath(xunyinDir.menuId, 'appuser')
   if (appuserMenu) {
     await ensureButton({
       menuName: 'App用户查询',
       parentId: appuserMenu.menuId,
       perms: 'xunyin:appuser:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: 'App用户修改',
       parentId: appuserMenu.menuId,
       perms: 'xunyin:appuser:edit',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: 'App用户禁用',
       parentId: appuserMenu.menuId,
       perms: 'xunyin:appuser:disable',
       orderNum: 3,
-    });
+    })
   }
-  const statsMenu = await getMenuByPath(xunyinDir.menuId, 'stats');
+  const statsMenu = await getMenuByPath(xunyinDir.menuId, 'stats')
   if (statsMenu) {
     await ensureButton({
       menuName: '数据统计查看',
       parentId: statsMenu.menuId,
       perms: 'xunyin:stats:view',
       orderNum: 1,
-    });
+    })
   }
 
   // 用户进度按钮权限
-  const progressMenu = await getMenuByPath(xunyinDir.menuId, 'progress');
+  const progressMenu = await getMenuByPath(xunyinDir.menuId, 'progress')
   if (progressMenu) {
     await ensureButton({
       menuName: '用户进度查询',
       parentId: progressMenu.menuId,
       perms: 'xunyin:progress:query',
       orderNum: 1,
-    });
+    })
   }
 
   // 用户印记按钮权限
-  const userSealMenu = await getMenuByPath(xunyinDir.menuId, 'user-seal');
+  const userSealMenu = await getMenuByPath(xunyinDir.menuId, 'user-seal')
   if (userSealMenu) {
     await ensureButton({
       menuName: '用户印记查询',
       parentId: userSealMenu.menuId,
       perms: 'xunyin:userseal:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '手动上链',
       parentId: userSealMenu.menuId,
       perms: 'xunyin:userseal:chain',
       orderNum: 2,
-    });
+    })
   }
 
   // 背景音乐按钮权限
-  const bgmMenu = await getMenuByPath(xunyinDir.menuId, 'bgm');
+  const bgmMenu = await getMenuByPath(xunyinDir.menuId, 'bgm')
   if (bgmMenu) {
     await ensureButton({
       menuName: '背景音乐查询',
       parentId: bgmMenu.menuId,
       perms: 'xunyin:bgm:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '背景音乐新增',
       parentId: bgmMenu.menuId,
       perms: 'xunyin:bgm:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '背景音乐修改',
       parentId: bgmMenu.menuId,
       perms: 'xunyin:bgm:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '背景音乐删除',
       parentId: bgmMenu.menuId,
       perms: 'xunyin:bgm:remove',
       orderNum: 4,
-    });
+    })
   }
 
   // 用户相册按钮权限
-  const photoMenu = await getMenuByPath(xunyinDir.menuId, 'photo');
+  const photoMenu = await getMenuByPath(xunyinDir.menuId, 'photo')
   if (photoMenu) {
     await ensureButton({
       menuName: '用户相册查询',
       parentId: photoMenu.menuId,
       perms: 'xunyin:photo:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '用户相册删除',
       parentId: photoMenu.menuId,
       perms: 'xunyin:photo:remove',
       orderNum: 2,
-    });
+    })
   }
 
-  console.log('Initialized xunyin menus');
+  console.log('Initialized xunyin menus')
 
   // ============ APP配置管理菜单 ============
   const appConfigDir = await ensureMenu({
@@ -1422,7 +1422,7 @@ async function main() {
     icon: 'smartphone',
     isFrame: 1,
     parentId: null,
-  });
+  })
 
   // APP配置子菜单
   await ensureMenu({
@@ -1437,7 +1437,7 @@ async function main() {
     perms: 'app:splash:list',
     icon: 'image',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '登录页配置',
     parentId: appConfigDir.menuId,
@@ -1450,7 +1450,7 @@ async function main() {
     perms: 'app:login:list',
     icon: 'log-in',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '内容管理',
     parentId: appConfigDir.menuId,
@@ -1463,7 +1463,7 @@ async function main() {
     perms: 'app:agreement:list',
     icon: 'file-text',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '下载页配置',
     parentId: appConfigDir.menuId,
@@ -1476,7 +1476,7 @@ async function main() {
     perms: 'app:download:list',
     icon: 'download',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '版本管理',
     parentId: appConfigDir.menuId,
@@ -1489,7 +1489,7 @@ async function main() {
     perms: 'app:version:list',
     icon: 'package',
     isFrame: 1,
-  });
+  })
   await ensureMenu({
     menuName: '推广统计',
     parentId: appConfigDir.menuId,
@@ -1502,150 +1502,147 @@ async function main() {
     perms: 'app:promotion:list',
     icon: 'trending-up',
     isFrame: 1,
-  });
+  })
 
   // APP配置按钮权限
-  const splashMenu = await getMenuByPath(appConfigDir.menuId, 'splash');
+  const splashMenu = await getMenuByPath(appConfigDir.menuId, 'splash')
   if (splashMenu) {
     await ensureButton({
       menuName: '启动页查询',
       parentId: splashMenu.menuId,
       perms: 'app:splash:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '启动页新增',
       parentId: splashMenu.menuId,
       perms: 'app:splash:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '启动页修改',
       parentId: splashMenu.menuId,
       perms: 'app:splash:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '启动页删除',
       parentId: splashMenu.menuId,
       perms: 'app:splash:remove',
       orderNum: 4,
-    });
+    })
   }
 
-  const loginConfigMenu = await getMenuByPath(appConfigDir.menuId, 'login');
+  const loginConfigMenu = await getMenuByPath(appConfigDir.menuId, 'login')
   if (loginConfigMenu) {
     await ensureButton({
       menuName: '登录页查询',
       parentId: loginConfigMenu.menuId,
       perms: 'app:login:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '登录页修改',
       parentId: loginConfigMenu.menuId,
       perms: 'app:login:edit',
       orderNum: 2,
-    });
+    })
   }
 
-  const downloadConfigMenu = await getMenuByPath(
-    appConfigDir.menuId,
-    'download',
-  );
+  const downloadConfigMenu = await getMenuByPath(appConfigDir.menuId, 'download')
   if (downloadConfigMenu) {
     await ensureButton({
       menuName: '下载页查询',
       parentId: downloadConfigMenu.menuId,
       perms: 'app:download:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '下载页修改',
       parentId: downloadConfigMenu.menuId,
       perms: 'app:download:edit',
       orderNum: 2,
-    });
+    })
   }
 
-  const promotionMenu = await getMenuByPath(appConfigDir.menuId, 'promotion');
+  const promotionMenu = await getMenuByPath(appConfigDir.menuId, 'promotion')
   if (promotionMenu) {
     await ensureButton({
       menuName: '推广渠道查询',
       parentId: promotionMenu.menuId,
       perms: 'app:promotion:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '推广渠道新增',
       parentId: promotionMenu.menuId,
       perms: 'app:promotion:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '推广渠道修改',
       parentId: promotionMenu.menuId,
       perms: 'app:promotion:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '推广渠道删除',
       parentId: promotionMenu.menuId,
       perms: 'app:promotion:remove',
       orderNum: 4,
-    });
+    })
   }
 
-  const versionMenu = await getMenuByPath(appConfigDir.menuId, 'version');
+  const versionMenu = await getMenuByPath(appConfigDir.menuId, 'version')
   if (versionMenu) {
     await ensureButton({
       menuName: '版本查询',
       parentId: versionMenu.menuId,
       perms: 'app:version:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '版本新增',
       parentId: versionMenu.menuId,
       perms: 'app:version:add',
       orderNum: 2,
-    });
+    })
     await ensureButton({
       menuName: '版本修改',
       parentId: versionMenu.menuId,
       perms: 'app:version:edit',
       orderNum: 3,
-    });
+    })
     await ensureButton({
       menuName: '版本删除',
       parentId: versionMenu.menuId,
       perms: 'app:version:remove',
       orderNum: 4,
-    });
+    })
   }
 
-  const agreementMenu = await getMenuByPath(appConfigDir.menuId, 'agreement');
+  const agreementMenu = await getMenuByPath(appConfigDir.menuId, 'agreement')
   if (agreementMenu) {
     await ensureButton({
       menuName: '内容查询',
       parentId: agreementMenu.menuId,
       perms: 'app:agreement:query',
       orderNum: 1,
-    });
+    })
     await ensureButton({
       menuName: '内容修改',
       parentId: agreementMenu.menuId,
       perms: 'app:agreement:edit',
       orderNum: 2,
-    });
+    })
   }
 
-  console.log('Initialized app-config menus');
+  console.log('Initialized app-config menus')
 
   // 6. 为不同角色分配菜单权限
   const allMenus = await prisma.sysMenu.findMany({
     select: { menuId: true, path: true, menuType: true, parentId: true },
-  });
+  })
 
   if (allMenus.length > 0) {
     // 6.1 超级管理员 - 拥有所有权限
@@ -1655,11 +1652,11 @@ async function main() {
         menuId: m.menuId,
       })),
       skipDuplicates: true,
-    });
-    console.log(`Linked role(admin) with ${allMenus.length} menus`);
+    })
+    console.log(`Linked role(admin) with ${allMenus.length} menus`)
 
     // 6.2 系统管理员 - 拥有系统管理模块的所有权限
-    const systemMenu = allMenus.find((m) => m.path === 'system' && !m.parentId);
+    const systemMenu = allMenus.find((m) => m.path === 'system' && !m.parentId)
     if (systemMenu) {
       const systemMenuIds = allMenus
         .filter(
@@ -1667,12 +1664,10 @@ async function main() {
             m.menuId === systemMenu.menuId ||
             m.parentId === systemMenu.menuId ||
             allMenus.some(
-              (parent) =>
-                parent.menuId === m.parentId &&
-                parent.parentId === systemMenu.menuId,
+              (parent) => parent.menuId === m.parentId && parent.parentId === systemMenu.menuId,
             ),
         )
-        .map((m) => m.menuId);
+        .map((m) => m.menuId)
 
       await prisma.sysRoleMenu.createMany({
         data: systemMenuIds.map((menuId) => ({
@@ -1680,18 +1675,14 @@ async function main() {
           menuId,
         })),
         skipDuplicates: true,
-      });
-      console.log(
-        `Linked role(system_admin) with ${systemMenuIds.length} menus`,
-      );
+      })
+      console.log(`Linked role(system_admin) with ${systemMenuIds.length} menus`)
     }
 
     // 6.3 监控管理员 - 拥有系统监控模块的所有权限
-    const monitorMenu = allMenus.find(
-      (m) => m.path === 'monitor' && !m.parentId,
-    );
-    const toolMenu = allMenus.find((m) => m.path === 'tool' && !m.parentId);
-    const swaggerMenu = allMenus.find((m) => m.path === 'swagger');
+    const monitorMenu = allMenus.find((m) => m.path === 'monitor' && !m.parentId)
+    const toolMenu = allMenus.find((m) => m.path === 'tool' && !m.parentId)
+    const swaggerMenu = allMenus.find((m) => m.path === 'swagger')
 
     if (monitorMenu) {
       const monitorMenuIds = allMenus
@@ -1700,16 +1691,14 @@ async function main() {
             m.menuId === monitorMenu.menuId ||
             m.parentId === monitorMenu.menuId ||
             allMenus.some(
-              (parent) =>
-                parent.menuId === m.parentId &&
-                parent.parentId === monitorMenu.menuId,
+              (parent) => parent.menuId === m.parentId && parent.parentId === monitorMenu.menuId,
             ),
         )
-        .map((m) => m.menuId);
+        .map((m) => m.menuId)
 
       // 添加工具菜单和接口文档
-      if (toolMenu) monitorMenuIds.push(toolMenu.menuId);
-      if (swaggerMenu) monitorMenuIds.push(swaggerMenu.menuId);
+      if (toolMenu) monitorMenuIds.push(toolMenu.menuId)
+      if (swaggerMenu) monitorMenuIds.push(swaggerMenu.menuId)
 
       await prisma.sysRoleMenu.createMany({
         data: monitorMenuIds.map((menuId) => ({
@@ -1717,34 +1706,28 @@ async function main() {
           menuId,
         })),
         skipDuplicates: true,
-      });
-      console.log(
-        `Linked role(monitor_admin) with ${monitorMenuIds.length} menus`,
-      );
+      })
+      console.log(`Linked role(monitor_admin) with ${monitorMenuIds.length} menus`)
     }
 
     // 6.4 普通用户 - 只有查看权限,无增删改权限(只分配C类型菜单,不分配F类型按钮)
-    const systemMenu2 = allMenus.find(
-      (m) => m.path === 'system' && !m.parentId,
-    );
-    const monitorMenu2 = allMenus.find(
-      (m) => m.path === 'monitor' && !m.parentId,
-    );
+    const systemMenu2 = allMenus.find((m) => m.path === 'system' && !m.parentId)
+    const monitorMenu2 = allMenus.find((m) => m.path === 'monitor' && !m.parentId)
 
-    const commonUserMenuIds: bigint[] = [];
+    const commonUserMenuIds: bigint[] = []
     if (systemMenu2) {
-      commonUserMenuIds.push(systemMenu2.menuId);
+      commonUserMenuIds.push(systemMenu2.menuId)
       // 只添加系统管理下的C类型菜单
       allMenus
         .filter((m) => m.parentId === systemMenu2.menuId && m.menuType === 'C')
-        .forEach((m) => commonUserMenuIds.push(m.menuId));
+        .forEach((m) => commonUserMenuIds.push(m.menuId))
     }
     if (monitorMenu2) {
-      commonUserMenuIds.push(monitorMenu2.menuId);
+      commonUserMenuIds.push(monitorMenu2.menuId)
       // 只添加系统监控下的C类型菜单
       allMenus
         .filter((m) => m.parentId === monitorMenu2.menuId && m.menuType === 'C')
-        .forEach((m) => commonUserMenuIds.push(m.menuId));
+        .forEach((m) => commonUserMenuIds.push(m.menuId))
     }
 
     await prisma.sysRoleMenu.createMany({
@@ -1753,12 +1736,10 @@ async function main() {
         menuId,
       })),
       skipDuplicates: true,
-    });
-    console.log(
-      `Linked role(common_user) with ${commonUserMenuIds.length} menus (read-only)`,
-    );
+    })
+    console.log(`Linked role(common_user) with ${commonUserMenuIds.length} menus (read-only)`)
   } else {
-    console.log('No menus found to link with roles');
+    console.log('No menus found to link with roles')
   }
 
   // 7. 初始化常用字典与配置（若不存在则创建）
@@ -1784,16 +1765,16 @@ async function main() {
     { dictName: '性别', dictType: 'xunyin_gender' },
     { dictName: '照片滤镜', dictType: 'xunyin_photo_filter' },
     { dictName: '区块链', dictType: 'xunyin_chain_name' },
-  ];
+  ]
   for (const dt of dictTypesToSeed) {
     const exists = await prisma.sysDictType.findFirst({
       where: { dictType: dt.dictType },
-    });
+    })
     if (!exists) {
       await prisma.sysDictType.create({
         data: { dictName: dt.dictName, dictType: dt.dictType, status: '0' },
-      });
-      console.log(`Created dictType: ${dt.dictType}`);
+      })
+      console.log(`Created dictType: ${dt.dictType}`)
     }
   }
 
@@ -2310,11 +2291,11 @@ async function main() {
       dictSort: 6,
       isDefault: 'N',
     },
-  ];
+  ]
   for (const dd of dictDataToSeed) {
     const exists = await prisma.sysDictData.findFirst({
       where: { dictType: dd.dictType, dictValue: dd.dictValue },
-    });
+    })
     if (!exists) {
       await prisma.sysDictData.create({
         data: {
@@ -2325,8 +2306,8 @@ async function main() {
           isDefault: dd.isDefault,
           status: '0',
         },
-      });
-      console.log(`Created dictData: ${dd.dictType}/${dd.dictValue}`);
+      })
+      console.log(`Created dictData: ${dd.dictType}/${dd.dictValue}`)
     }
   }
 
@@ -2969,11 +2950,11 @@ async function main() {
       configValue: '',
       configType: 'Y',
     },
-  ];
+  ]
   for (const cfg of configsToSeed) {
     const exists = await prisma.sysConfig.findFirst({
       where: { configKey: cfg.configKey },
-    });
+    })
     if (!exists) {
       await prisma.sysConfig.create({
         data: {
@@ -2982,8 +2963,8 @@ async function main() {
           configValue: cfg.configValue,
           configType: cfg.configType,
         },
-      });
-      console.log(`Created config: ${cfg.configKey}`);
+      })
+      console.log(`Created config: ${cfg.configKey}`)
     }
   }
 
@@ -2991,23 +2972,23 @@ async function main() {
   const posts = [
     { postCode: 'dev', postName: '开发', postSort: 1, status: '0' },
     { postCode: 'pm', postName: '产品经理', postSort: 2, status: '0' },
-  ];
+  ]
   for (const p of posts) {
     const exist = await prisma.sysPost.findFirst({
       where: { postCode: p.postCode },
-    });
+    })
     if (!exist) {
-      await prisma.sysPost.create({ data: p });
+      await prisma.sysPost.create({ data: p })
     }
   }
 
   // 9.1 绑定用户岗位（示例）：admin -> dev，user -> pm
   const devPost = await prisma.sysPost.findFirst({
     where: { postCode: 'dev' },
-  });
+  })
   const pmPost = await prisma.sysPost.findFirst({
     where: { postCode: 'pm' },
-  });
+  })
   if (devPost && pmPost) {
     await prisma.sysUserPost.createMany({
       data: [
@@ -3017,13 +2998,13 @@ async function main() {
         { userId: commonUser.userId, postId: pmPost.postId },
       ],
       skipDuplicates: true,
-    });
+    })
   }
 
   // 10. 公告样例
   const noticeExist = await prisma.sysNotice.findFirst({
     where: { noticeTitle: '系统维护' },
-  });
+  })
   if (!noticeExist) {
     await prisma.sysNotice.create({
       data: {
@@ -3032,13 +3013,13 @@ async function main() {
         noticeContent: '本周日凌晨进行系统维护。',
         status: '0',
       },
-    });
+    })
   }
 
   // 11. 任务样例
   const jobExist = await prisma.sysJob.findFirst({
     where: { jobName: '示例任务' },
-  });
+  })
   if (!jobExist) {
     await prisma.sysJob.create({
       data: {
@@ -3050,11 +3031,11 @@ async function main() {
         concurrent: '1',
         status: '0',
       },
-    });
+    })
   }
 
   // 11.1 任务日志样例
-  const sampleJobLogCount = await prisma.sysJobLog.count();
+  const sampleJobLogCount = await prisma.sysJobLog.count()
   if (sampleJobLogCount === 0) {
     await prisma.sysJobLog.createMany({
       data: [
@@ -3075,11 +3056,11 @@ async function main() {
         },
       ],
       skipDuplicates: true,
-    });
+    })
   }
 
   // 12. 登录日志样例
-  const loginLogExist = await prisma.sysLoginLog.count();
+  const loginLogExist = await prisma.sysLoginLog.count()
   if (loginLogExist === 0) {
     await prisma.sysLoginLog.createMany({
       data: [
@@ -3101,11 +3082,11 @@ async function main() {
         },
       ],
       skipDuplicates: true,
-    });
+    })
   }
 
   // 13. 操作日志样例
-  const operLogCount = await prisma.sysOperLog.count();
+  const operLogCount = await prisma.sysOperLog.count()
   if (operLogCount === 0) {
     await prisma.sysOperLog.createMany({
       data: [
@@ -3139,15 +3120,15 @@ async function main() {
         },
       ],
       skipDuplicates: true,
-    });
+    })
   }
 
   // ==================== 寻印业务初始数据 ====================
 
   // 检查是否已有城市数据
-  const existingCities = await prisma.city.count();
+  const existingCities = await prisma.city.count()
   if (existingCities === 0) {
-    console.log('Seeding xunyin business data...');
+    console.log('Seeding xunyin business data...')
 
     // 创建城市
     const hangzhou = await prisma.city.create({
@@ -3163,8 +3144,8 @@ async function main() {
         orderNum: 1,
         status: '0',
       },
-    });
-    console.log(`Created city: ${hangzhou.name}`);
+    })
+    console.log(`Created city: ${hangzhou.name}`)
 
     const suzhou = await prisma.city.create({
       data: {
@@ -3179,8 +3160,8 @@ async function main() {
         orderNum: 2,
         status: '0',
       },
-    });
-    console.log(`Created city: ${suzhou.name}`);
+    })
+    console.log(`Created city: ${suzhou.name}`)
 
     const nanjing = await prisma.city.create({
       data: {
@@ -3188,15 +3169,14 @@ async function main() {
         province: '江苏省',
         latitude: 32.0603,
         longitude: 118.7969,
-        description:
-          '南京，简称"宁"，是江苏省省会，六朝古都，有着深厚的历史文化底蕴。',
+        description: '南京，简称"宁"，是江苏省省会，六朝古都，有着深厚的历史文化底蕴。',
         coverImage: '',
         explorerCount: 0,
         orderNum: 3,
         status: '0',
       },
-    });
-    console.log(`Created city: ${nanjing.name}`);
+    })
+    console.log(`Created city: ${nanjing.name}`)
 
     // 创建福州
     const fuzhou = await prisma.city.create({
@@ -3212,8 +3192,8 @@ async function main() {
         orderNum: 4,
         status: '0',
       },
-    });
-    console.log(`Created city: ${fuzhou.name}`);
+    })
+    console.log(`Created city: ${fuzhou.name}`)
 
     // 创建杭州的文化之旅
     const westLakeJourney = await prisma.journey.create({
@@ -3232,16 +3212,15 @@ async function main() {
         orderNum: 1,
         status: '0',
       },
-    });
-    console.log(`Created journey: ${westLakeJourney.name}`);
+    })
+    console.log(`Created journey: ${westLakeJourney.name}`)
 
     const lingyinJourney = await prisma.journey.create({
       data: {
         cityId: hangzhou.id,
         name: '灵隐禅踪',
         theme: '佛教文化',
-        description:
-          '探访千年古刹灵隐寺，感受飞来峰石刻艺术，体验禅宗文化的深邃与宁静。',
+        description: '探访千年古刹灵隐寺，感受飞来峰石刻艺术，体验禅宗文化的深邃与宁静。',
         coverImage: '',
         rating: 4,
         estimatedMinutes: 120,
@@ -3251,8 +3230,8 @@ async function main() {
         orderNum: 2,
         status: '0',
       },
-    });
-    console.log(`Created journey: ${lingyinJourney.name}`);
+    })
+    console.log(`Created journey: ${lingyinJourney.name}`)
 
     // 创建苏州的文化之旅
     const gardenJourney = await prisma.journey.create({
@@ -3260,8 +3239,7 @@ async function main() {
         cityId: suzhou.id,
         name: '园林雅韵',
         theme: '古典园林',
-        description:
-          '游览拙政园、留园等世界文化遗产，领略"咫尺之内再造乾坤"的园林艺术。',
+        description: '游览拙政园、留园等世界文化遗产，领略"咫尺之内再造乾坤"的园林艺术。',
         coverImage: '',
         rating: 3,
         estimatedMinutes: 150,
@@ -3271,8 +3249,8 @@ async function main() {
         orderNum: 1,
         status: '0',
       },
-    });
-    console.log(`Created journey: ${gardenJourney.name}`);
+    })
+    console.log(`Created journey: ${gardenJourney.name}`)
 
     // 创建福州的文化之旅 - 三坊七巷
     const sanfangqixiangJourney = await prisma.journey.create({
@@ -3291,8 +3269,8 @@ async function main() {
         orderNum: 1,
         status: '0',
       },
-    });
-    console.log(`Created journey: ${sanfangqixiangJourney.name}`);
+    })
+    console.log(`Created journey: ${sanfangqixiangJourney.name}`)
 
     // 创建福州的文化之旅 - 鼓山
     const gushanJourney = await prisma.journey.create({
@@ -3300,8 +3278,7 @@ async function main() {
         cityId: fuzhou.id,
         name: '鼓山禅意行',
         theme: '佛教文化',
-        description:
-          '登临福州第一名山，参拜千年古刹涌泉寺，欣赏摩崖石刻，俯瞰榕城全景。',
+        description: '登临福州第一名山，参拜千年古刹涌泉寺，欣赏摩崖石刻，俯瞰榕城全景。',
         coverImage: '',
         rating: 4,
         estimatedMinutes: 180,
@@ -3311,8 +3288,8 @@ async function main() {
         orderNum: 2,
         status: '0',
       },
-    });
-    console.log(`Created journey: ${gushanJourney.name}`);
+    })
+    console.log(`Created journey: ${gushanJourney.name}`)
 
     // 创建福州的文化之旅 - 闽江风光
     const minjiangJourney = await prisma.journey.create({
@@ -3331,8 +3308,8 @@ async function main() {
         orderNum: 3,
         status: '0',
       },
-    });
-    console.log(`Created journey: ${minjiangJourney.name}`);
+    })
+    console.log(`Created journey: ${minjiangJourney.name}`)
 
     // 创建西湖十景的探索点
     const westLakePoints = [
@@ -3342,10 +3319,8 @@ async function main() {
         longitude: 120.1423,
         taskType: 'photo',
         taskDescription: '在苏堤上拍摄一张春日美景照片',
-        culturalBackground:
-          '苏堤是北宋诗人苏轼任杭州知州时主持修建的堤坝，全长2.8公里。',
-        culturalKnowledge:
-          '苏堤春晓是西湖十景之首，每到春天，堤上桃红柳绿，景色宜人。',
+        culturalBackground: '苏堤是北宋诗人苏轼任杭州知州时主持修建的堤坝，全长2.8公里。',
+        culturalKnowledge: '苏堤春晓是西湖十景之首，每到春天，堤上桃红柳绿，景色宜人。',
         pointsReward: 100,
         orderNum: 1,
       },
@@ -3356,8 +3331,7 @@ async function main() {
         taskType: 'gesture',
         taskDescription: '在断桥上做出"白娘子"的经典手势',
         targetGesture: 'heart',
-        culturalBackground:
-          '断桥是白娘子与许仙相遇的地方，承载着美丽的爱情传说。',
+        culturalBackground: '断桥是白娘子与许仙相遇的地方，承载着美丽的爱情传说。',
         culturalKnowledge:
           '断桥并非断裂之桥，而是因冬日雪后，桥面阳面雪融，阴面雪残，远望似断非断。',
         pointsReward: 120,
@@ -3370,8 +3344,7 @@ async function main() {
         taskType: 'photo',
         taskDescription: '拍摄雷峰塔的夕阳剪影',
         culturalBackground: '雷峰塔始建于公元977年，因白娘子传说而闻名。',
-        culturalKnowledge:
-          '原塔于1924年倒塌，现塔为2002年重建，塔内保存有原塔遗址。',
+        culturalKnowledge: '原塔于1924年倒塌，现塔为2002年重建，塔内保存有原塔遗址。',
         pointsReward: 100,
         orderNum: 3,
       },
@@ -3381,16 +3354,14 @@ async function main() {
         longitude: 120.1398,
         taskType: 'treasure',
         taskDescription: '找到三潭印月的AR宝藏',
-        culturalBackground:
-          '三潭印月是西湖中最大的岛屿，岛上有"我心相印亭"等景点。',
-        culturalKnowledge:
-          '三座石塔建于明代，每逢中秋，塔中点燃灯烛，与明月倒影相映成趣。',
+        culturalBackground: '三潭印月是西湖中最大的岛屿，岛上有"我心相印亭"等景点。',
+        culturalKnowledge: '三座石塔建于明代，每逢中秋，塔中点燃灯烛，与明月倒影相映成趣。',
         pointsReward: 150,
         orderNum: 4,
       },
-    ];
+    ]
 
-    let prevDistance = 0;
+    let prevDistance = 0
     for (const point of westLakePoints) {
       await prisma.explorationPoint.create({
         data: {
@@ -3408,12 +3379,10 @@ async function main() {
           orderNum: point.orderNum,
           status: '0',
         },
-      });
-      prevDistance = 800 + Math.floor(Math.random() * 500);
+      })
+      prevDistance = 800 + Math.floor(Math.random() * 500)
     }
-    console.log(
-      `Created ${westLakePoints.length} exploration points for ${westLakeJourney.name}`,
-    );
+    console.log(`Created ${westLakePoints.length} exploration points for ${westLakeJourney.name}`)
 
     // 创建灵隐禅踪的探索点
     const lingyinPoints = [
@@ -3423,8 +3392,7 @@ async function main() {
         longitude: 120.0912,
         taskType: 'photo',
         taskDescription: '拍摄飞来峰石刻造像',
-        culturalBackground:
-          '飞来峰有五代至宋元时期的石刻造像470余尊，是中国南方石窟艺术的瑰宝。',
+        culturalBackground: '飞来峰有五代至宋元时期的石刻造像470余尊，是中国南方石窟艺术的瑰宝。',
         culturalKnowledge: '相传此峰是从印度灵鹫山飞来，故名飞来峰。',
         pointsReward: 100,
         orderNum: 1,
@@ -3436,8 +3404,7 @@ async function main() {
         taskType: 'gesture',
         taskDescription: '双手合十，做出礼佛手势',
         targetGesture: 'namaste',
-        culturalBackground:
-          '灵隐寺始建于东晋咸和元年（326年），是中国佛教禅宗十大古刹之一。',
+        culturalBackground: '灵隐寺始建于东晋咸和元年（326年），是中国佛教禅宗十大古刹之一。',
         culturalKnowledge: '寺名取"仙灵所隐"之意，历史上曾多次毁建。',
         pointsReward: 120,
         orderNum: 2,
@@ -3448,15 +3415,14 @@ async function main() {
         longitude: 120.0945,
         taskType: 'photo',
         taskDescription: '拍摄大雄宝殿全景',
-        culturalBackground:
-          '大雄宝殿内供奉释迦牟尼佛像，高24.8米，是中国最大的木雕坐式佛像之一。',
+        culturalBackground: '大雄宝殿内供奉释迦牟尼佛像，高24.8米，是中国最大的木雕坐式佛像之一。',
         culturalKnowledge: '殿内还有十八罗汉像，神态各异，栩栩如生。',
         pointsReward: 100,
         orderNum: 3,
       },
-    ];
+    ]
 
-    prevDistance = 0;
+    prevDistance = 0
     for (const point of lingyinPoints) {
       await prisma.explorationPoint.create({
         data: {
@@ -3474,12 +3440,84 @@ async function main() {
           orderNum: point.orderNum,
           status: '0',
         },
-      });
-      prevDistance = 300 + Math.floor(Math.random() * 200);
+      })
+      prevDistance = 300 + Math.floor(Math.random() * 200)
     }
-    console.log(
-      `Created ${lingyinPoints.length} exploration points for ${lingyinJourney.name}`,
-    );
+    console.log(`Created ${lingyinPoints.length} exploration points for ${lingyinJourney.name}`)
+
+    // 创建园林雅韵的探索点
+    const gardenPoints = [
+      {
+        name: '拙政园',
+        latitude: 31.3256,
+        longitude: 120.6312,
+        taskType: 'photo',
+        taskDescription: '在远香堂前拍摄荷塘美景',
+        culturalBackground: '拙政园始建于明正德年间，是中国四大名园之一，被誉为"中国园林之母"。',
+        culturalKnowledge: '园名取自晋代潘岳《闲居赋》"筑室种树，逍遥自得……此亦拙者之为政也"。',
+        pointsReward: 120,
+        orderNum: 1,
+      },
+      {
+        name: '留园',
+        latitude: 31.3178,
+        longitude: 120.6089,
+        taskType: 'gesture',
+        taskDescription: '在冠云峰前做出"太湖石"造型手势',
+        targetGesture: 'rock',
+        culturalBackground: '留园始建于明万历年间，以建筑空间处理精湛著称，是中国四大名园之一。',
+        culturalKnowledge:
+          '园内冠云峰高6.5米，是江南园林中最高的太湖石峰，有"不出城郭而获山林之趣"之誉。',
+        pointsReward: 100,
+        orderNum: 2,
+      },
+      {
+        name: '狮子林',
+        latitude: 31.3234,
+        longitude: 120.6298,
+        taskType: 'treasure',
+        taskDescription: '在假山迷宫中找到AR宝藏',
+        culturalBackground: '狮子林始建于元代，以假山著称，假山群峰起伏，奇峰怪石，形似狮子。',
+        culturalKnowledge: '乾隆皇帝六次游览狮子林，并在北京圆明园和承德避暑山庄仿建。',
+        pointsReward: 150,
+        orderNum: 3,
+      },
+      {
+        name: '网师园',
+        latitude: 31.3089,
+        longitude: 120.6345,
+        taskType: 'photo',
+        taskDescription: '拍摄殿春簃的精致窗景',
+        culturalBackground: '网师园是苏州园林中以小巧精致著称的典范，被誉为"小园极则"。',
+        culturalKnowledge:
+          '园名取"渔隐"之意，表达园主归隐江湖的志趣。殿春簃被美国大都会博物馆仿建为"明轩"。',
+        pointsReward: 100,
+        orderNum: 4,
+      },
+    ]
+
+    prevDistance = 0
+    for (const point of gardenPoints) {
+      await prisma.explorationPoint.create({
+        data: {
+          journeyId: gardenJourney.id,
+          name: point.name,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          taskType: point.taskType,
+          taskDescription: point.taskDescription,
+          targetGesture: point.targetGesture || null,
+          culturalBackground: point.culturalBackground,
+          culturalKnowledge: point.culturalKnowledge,
+          distanceFromPrev: prevDistance,
+          pointsReward: point.pointsReward,
+          orderNum: point.orderNum,
+          status: '0',
+        },
+      })
+      prevDistance = 1500 + Math.floor(Math.random() * 500)
+    }
+    console.log(`Created ${gardenPoints.length} exploration points for ${gardenJourney.name}`)
 
     // 创建三坊七巷的探索点
     const sanfangqixiangPoints = [
@@ -3489,8 +3527,7 @@ async function main() {
         longitude: 119.2936,
         taskType: 'photo',
         taskDescription: '拍摄南后街的古朴街景',
-        culturalBackground:
-          '南后街是三坊七巷的中轴线，全长约1000米，是福州传统商业街的代表。',
+        culturalBackground: '南后街是三坊七巷的中轴线，全长约1000米，是福州传统商业街的代表。',
         culturalKnowledge:
           '南后街自古以来就是福州的商业中心，有"正阳门外琉璃厂，衣锦坊前南后街"之称。',
         pointsReward: 100,
@@ -3503,10 +3540,8 @@ async function main() {
         taskType: 'gesture',
         taskDescription: '在林则徐塑像前做出敬礼手势',
         targetGesture: 'salute',
-        culturalBackground:
-          '林则徐是中国近代史上著名的民族英雄，虎门销烟的主持者。',
-        culturalKnowledge:
-          '林则徐故居位于文藻山，纪念馆内陈列着他的生平事迹和珍贵文物。',
+        culturalBackground: '林则徐是中国近代史上著名的民族英雄，虎门销烟的主持者。',
+        culturalKnowledge: '林则徐故居位于文藻山，纪念馆内陈列着他的生平事迹和珍贵文物。',
         pointsReward: 120,
         orderNum: 2,
       },
@@ -3516,8 +3551,7 @@ async function main() {
         longitude: 119.2941,
         taskType: 'photo',
         taskDescription: '拍摄严复故居的门楼',
-        culturalBackground:
-          '严复是中国近代著名的启蒙思想家、翻译家，《天演论》的译者。',
+        culturalBackground: '严复是中国近代著名的启蒙思想家、翻译家，《天演论》的译者。',
         culturalKnowledge: '严复故居位于郎官巷，是典型的福州传统民居建筑。',
         pointsReward: 100,
         orderNum: 3,
@@ -3528,8 +3562,7 @@ async function main() {
         longitude: 119.2945,
         taskType: 'photo',
         taskDescription: '在冰心故居前留影',
-        culturalBackground:
-          '冰心是中国现代著名女作家，原名谢婉莹，代表作有《繁星》《春水》等。',
+        culturalBackground: '冰心是中国现代著名女作家，原名谢婉莹，代表作有《繁星》《春水》等。',
         culturalKnowledge: '冰心故居位于杨桥巷，她在这里度过了童年时光。',
         pointsReward: 100,
         orderNum: 4,
@@ -3540,16 +3573,14 @@ async function main() {
         longitude: 119.2932,
         taskType: 'treasure',
         taskDescription: '在水榭戏台找到AR宝藏',
-        culturalBackground:
-          '水榭戏台是三坊七巷内保存最完好的古戏台，建于清代。',
-        culturalKnowledge:
-          '戏台临水而建，观众可在对岸观看演出，是福州独特的戏曲文化载体。',
+        culturalBackground: '水榭戏台是三坊七巷内保存最完好的古戏台，建于清代。',
+        culturalKnowledge: '戏台临水而建，观众可在对岸观看演出，是福州独特的戏曲文化载体。',
         pointsReward: 150,
         orderNum: 5,
       },
-    ];
+    ]
 
-    prevDistance = 0;
+    prevDistance = 0
     for (const point of sanfangqixiangPoints) {
       await prisma.explorationPoint.create({
         data: {
@@ -3567,12 +3598,12 @@ async function main() {
           orderNum: point.orderNum,
           status: '0',
         },
-      });
-      prevDistance = 200 + Math.floor(Math.random() * 150);
+      })
+      prevDistance = 200 + Math.floor(Math.random() * 150)
     }
     console.log(
       `Created ${sanfangqixiangPoints.length} exploration points for ${sanfangqixiangJourney.name}`,
-    );
+    )
 
     // 创建鼓山的探索点
     const gushanPoints = [
@@ -3582,8 +3613,7 @@ async function main() {
         longitude: 119.3856,
         taskType: 'photo',
         taskDescription: '拍摄古道石阶',
-        culturalBackground:
-          '鼓山登山古道始建于宋代，全长约3.5公里，共有2145级石阶。',
+        culturalBackground: '鼓山登山古道始建于宋代，全长约3.5公里，共有2145级石阶。',
         culturalKnowledge: '古道沿途有众多摩崖石刻，是福州重要的文化遗产。',
         pointsReward: 100,
         orderNum: 1,
@@ -3595,8 +3625,7 @@ async function main() {
         taskType: 'gesture',
         taskDescription: '双手合十，做出礼佛手势',
         targetGesture: 'namaste',
-        culturalBackground:
-          '涌泉寺始建于唐建中四年（783年），是福建省著名的佛教古刹。',
+        culturalBackground: '涌泉寺始建于唐建中四年（783年），是福建省著名的佛教古刹。',
         culturalKnowledge: '寺内有千年铁树、血经等珍贵文物，被誉为"闽刹之冠"。',
         pointsReward: 120,
         orderNum: 2,
@@ -3607,10 +3636,8 @@ async function main() {
         longitude: 119.3923,
         taskType: 'photo',
         taskDescription: '拍摄喝水岩摩崖石刻',
-        culturalBackground:
-          '喝水岩是鼓山最著名的摩崖石刻群，有宋代以来的题刻200多处。',
-        culturalKnowledge:
-          '相传神僧喝退泉水，故名喝水岩。这里的石刻书法艺术价值极高。',
+        culturalBackground: '喝水岩是鼓山最著名的摩崖石刻群，有宋代以来的题刻200多处。',
+        culturalKnowledge: '相传神僧喝退泉水，故名喝水岩。这里的石刻书法艺术价值极高。',
         pointsReward: 100,
         orderNum: 3,
       },
@@ -3620,16 +3647,14 @@ async function main() {
         longitude: 119.3945,
         taskType: 'photo',
         taskDescription: '在山顶拍摄福州全景',
-        culturalBackground:
-          '鼓山海拔969米，是福州市区最高峰，登顶可俯瞰整个榕城。',
-        culturalKnowledge:
-          '鼓山因山顶有一巨石如鼓，每当风雨大作，便有隆隆鼓声，故名鼓山。',
+        culturalBackground: '鼓山海拔969米，是福州市区最高峰，登顶可俯瞰整个榕城。',
+        culturalKnowledge: '鼓山因山顶有一巨石如鼓，每当风雨大作，便有隆隆鼓声，故名鼓山。',
         pointsReward: 150,
         orderNum: 4,
       },
-    ];
+    ]
 
-    prevDistance = 0;
+    prevDistance = 0
     for (const point of gushanPoints) {
       await prisma.explorationPoint.create({
         data: {
@@ -3647,12 +3672,10 @@ async function main() {
           orderNum: point.orderNum,
           status: '0',
         },
-      });
-      prevDistance = 500 + Math.floor(Math.random() * 300);
+      })
+      prevDistance = 500 + Math.floor(Math.random() * 300)
     }
-    console.log(
-      `Created ${gushanPoints.length} exploration points for ${gushanJourney.name}`,
-    );
+    console.log(`Created ${gushanPoints.length} exploration points for ${gushanJourney.name}`)
 
     // 创建闽江两岸的探索点
     const minjiangPoints = [
@@ -3662,10 +3685,8 @@ async function main() {
         longitude: 119.3012,
         taskType: 'photo',
         taskDescription: '拍摄中洲岛欧式建筑',
-        culturalBackground:
-          '中洲岛位于闽江中央，岛上建有欧式风格建筑群，是福州的地标之一。',
-        culturalKnowledge:
-          '中洲岛原为闽江中的沙洲，后经人工改造成为休闲观光岛。',
+        culturalBackground: '中洲岛位于闽江中央，岛上建有欧式风格建筑群，是福州的地标之一。',
+        culturalKnowledge: '中洲岛原为闽江中的沙洲，后经人工改造成为休闲观光岛。',
         pointsReward: 100,
         orderNum: 1,
       },
@@ -3675,10 +3696,8 @@ async function main() {
         longitude: 119.3089,
         taskType: 'photo',
         taskDescription: '拍摄烟台山历史建筑',
-        culturalBackground:
-          '烟台山是福州近代史的见证，曾是各国领事馆和洋行的聚集地。',
-        culturalKnowledge:
-          '山上保存有大量近代西式建筑，是福州开埠历史的重要遗存。',
+        culturalBackground: '烟台山是福州近代史的见证，曾是各国领事馆和洋行的聚集地。',
+        culturalKnowledge: '山上保存有大量近代西式建筑，是福州开埠历史的重要遗存。',
         pointsReward: 100,
         orderNum: 2,
       },
@@ -3689,8 +3708,7 @@ async function main() {
         taskType: 'gesture',
         taskDescription: '在桥上做出胜利手势',
         targetGesture: 'victory',
-        culturalBackground:
-          '解放大桥原名万寿桥，始建于元代，是福州最古老的跨江大桥。',
+        culturalBackground: '解放大桥原名万寿桥，始建于元代，是福州最古老的跨江大桥。',
         culturalKnowledge: '现桥为1996年重建，保留了原桥的部分石构件。',
         pointsReward: 120,
         orderNum: 3,
@@ -3706,9 +3724,9 @@ async function main() {
         pointsReward: 150,
         orderNum: 4,
       },
-    ];
+    ]
 
-    prevDistance = 0;
+    prevDistance = 0
     for (const point of minjiangPoints) {
       await prisma.explorationPoint.create({
         data: {
@@ -3726,12 +3744,10 @@ async function main() {
           orderNum: point.orderNum,
           status: '0',
         },
-      });
-      prevDistance = 400 + Math.floor(Math.random() * 200);
+      })
+      prevDistance = 400 + Math.floor(Math.random() * 200)
     }
-    console.log(
-      `Created ${minjiangPoints.length} exploration points for ${minjiangJourney.name}`,
-    );
+    console.log(`Created ${minjiangPoints.length} exploration points for ${minjiangJourney.name}`)
 
     // 创建印记
     const seals = [
@@ -3843,7 +3859,7 @@ async function main() {
         cityId: null,
         orderNum: 21,
       },
-    ];
+    ]
 
     for (const seal of seals) {
       await prisma.seal.create({
@@ -3858,9 +3874,9 @@ async function main() {
           orderNum: seal.orderNum,
           status: '0',
         },
-      });
+      })
     }
-    console.log(`Created ${seals.length} seals`);
+    console.log(`Created ${seals.length} seals`)
 
     // 创建示例 App 用户
     const demoUser = await prisma.appUser.create({
@@ -3872,8 +3888,8 @@ async function main() {
         totalPoints: 520,
         status: '0',
       },
-    });
-    console.log(`Created demo app user: ${demoUser.nickname}`);
+    })
+    console.log(`Created demo app user: ${demoUser.nickname}`)
 
     // 创建第二个示例用户
     const demoUser2 = await prisma.appUser.create({
@@ -3885,8 +3901,8 @@ async function main() {
         totalPoints: 320,
         status: '0',
       },
-    });
-    console.log(`Created demo app user: ${demoUser2.nickname}`);
+    })
+    console.log(`Created demo app user: ${demoUser2.nickname}`)
 
     // 创建第三个示例用户
     const demoUser3 = await prisma.appUser.create({
@@ -3898,14 +3914,28 @@ async function main() {
         totalPoints: 850,
         status: '0',
       },
-    });
-    console.log(`Created demo app user: ${demoUser3.nickname}`);
+    })
+    console.log(`Created demo app user: ${demoUser3.nickname}`)
+
+    // 创建第四个示例用户（新手，未进行任何文化之旅）
+    const demoUser4 = await prisma.appUser.create({
+      data: {
+        phone: '13600136000',
+        nickname: '新手旅人',
+        avatar: '',
+        loginType: 'email',
+        totalPoints: 0,
+        level: 1,
+        status: '0',
+      },
+    })
+    console.log(`Created demo app user: ${demoUser4.nickname}`)
 
     // 获取已创建的印记
-    const allSeals = await prisma.seal.findMany();
-    const westLakeSeal = allSeals.find((s) => s.name === '西湖探秘者');
-    const lingyinSeal = allSeals.find((s) => s.name === '禅心悟道');
-    const hangzhouCitySeal = allSeals.find((s) => s.name === '杭州印记');
+    const allSeals = await prisma.seal.findMany()
+    const westLakeSeal = allSeals.find((s) => s.name === '西湖探秘者')
+    const lingyinSeal = allSeals.find((s) => s.name === '禅心悟道')
+    const hangzhouCitySeal = allSeals.find((s) => s.name === '杭州印记')
 
     // 创建用户进度数据
     // 用户1: 西湖十景探秘 - 已完成
@@ -3918,7 +3948,7 @@ async function main() {
         completeTime: new Date('2025-01-10T15:30:00Z'),
         timeSpentMinutes: 390,
       },
-    });
+    })
 
     // 用户1: 灵隐禅踪 - 进行中
     const progress2 = await prisma.journeyProgress.create({
@@ -3928,7 +3958,7 @@ async function main() {
         status: 'in_progress',
         startTime: new Date('2025-01-15T10:00:00Z'),
       },
-    });
+    })
 
     // 用户2: 三坊七巷寻古 - 进行中
     const progress3 = await prisma.journeyProgress.create({
@@ -3938,7 +3968,7 @@ async function main() {
         status: 'in_progress',
         startTime: new Date('2025-01-12T14:00:00Z'),
       },
-    });
+    })
 
     // 用户3: 西湖十景探秘 - 已完成
     const progress4 = await prisma.journeyProgress.create({
@@ -3950,7 +3980,7 @@ async function main() {
         completeTime: new Date('2025-01-05T14:00:00Z'),
         timeSpentMinutes: 360,
       },
-    });
+    })
 
     // 用户3: 灵隐禅踪 - 已完成
     const progress5 = await prisma.journeyProgress.create({
@@ -3962,7 +3992,7 @@ async function main() {
         completeTime: new Date('2025-01-06T12:00:00Z'),
         timeSpentMinutes: 180,
       },
-    });
+    })
 
     // 用户3: 三坊七巷寻古 - 进行中
     const progress6 = await prisma.journeyProgress.create({
@@ -3972,23 +4002,23 @@ async function main() {
         status: 'in_progress',
         startTime: new Date('2025-01-20T10:00:00Z'),
       },
-    });
+    })
 
-    console.log('Created journey progress data');
+    console.log('Created journey progress data')
 
     // 获取探索点数据，用于创建完成记录
     const westLakePointsDb = await prisma.explorationPoint.findMany({
       where: { journeyId: westLakeJourney.id },
       orderBy: { orderNum: 'asc' },
-    });
+    })
     const lingyinPointsDb = await prisma.explorationPoint.findMany({
       where: { journeyId: lingyinJourney.id },
       orderBy: { orderNum: 'asc' },
-    });
+    })
     const sanfangPointsDb = await prisma.explorationPoint.findMany({
       where: { journeyId: sanfangqixiangJourney.id },
       orderBy: { orderNum: 'asc' },
-    });
+    })
 
     // 创建探索点完成记录
     // 用户1: 西湖十景探秘 - 已完成全部4个探索点
@@ -3998,12 +4028,11 @@ async function main() {
           progressId: progress1.id,
           pointId: westLakePointsDb[i].id,
           completeTime: new Date(
-            new Date('2025-01-10T09:00:00Z').getTime() +
-            (i + 1) * 90 * 60 * 1000,
+            new Date('2025-01-10T09:00:00Z').getTime() + (i + 1) * 90 * 60 * 1000,
           ), // 每90分钟完成一个
           pointsEarned: westLakePointsDb[i].pointsReward,
         },
-      });
+      })
     }
 
     // 用户1: 灵隐禅踪 - 进行中，完成1个探索点
@@ -4014,7 +4043,7 @@ async function main() {
         completeTime: new Date('2025-01-15T10:30:00Z'),
         pointsEarned: lingyinPointsDb[0].pointsReward,
       },
-    });
+    })
 
     // 用户2: 三坊七巷寻古 - 进行中，完成3个探索点
     for (let i = 0; i < 3; i++) {
@@ -4023,12 +4052,11 @@ async function main() {
           progressId: progress3.id,
           pointId: sanfangPointsDb[i].id,
           completeTime: new Date(
-            new Date('2025-01-12T14:00:00Z').getTime() +
-            (i + 1) * 45 * 60 * 1000,
+            new Date('2025-01-12T14:00:00Z').getTime() + (i + 1) * 45 * 60 * 1000,
           ), // 每45分钟完成一个
           pointsEarned: sanfangPointsDb[i].pointsReward,
         },
-      });
+      })
     }
 
     // 用户3: 西湖十景探秘 - 已完成全部4个探索点
@@ -4038,12 +4066,11 @@ async function main() {
           progressId: progress4.id,
           pointId: westLakePointsDb[i].id,
           completeTime: new Date(
-            new Date('2025-01-05T08:00:00Z').getTime() +
-            (i + 1) * 90 * 60 * 1000,
+            new Date('2025-01-05T08:00:00Z').getTime() + (i + 1) * 90 * 60 * 1000,
           ),
           pointsEarned: westLakePointsDb[i].pointsReward,
         },
-      });
+      })
     }
 
     // 用户3: 灵隐禅踪 - 已完成全部3个探索点
@@ -4053,12 +4080,11 @@ async function main() {
           progressId: progress5.id,
           pointId: lingyinPointsDb[i].id,
           completeTime: new Date(
-            new Date('2025-01-06T09:00:00Z').getTime() +
-            (i + 1) * 60 * 60 * 1000,
+            new Date('2025-01-06T09:00:00Z').getTime() + (i + 1) * 60 * 60 * 1000,
           ), // 每60分钟完成一个
           pointsEarned: lingyinPointsDb[i].pointsReward,
         },
-      });
+      })
     }
 
     // 用户3: 三坊七巷寻古 - 进行中，完成2个探索点
@@ -4068,15 +4094,14 @@ async function main() {
           progressId: progress6.id,
           pointId: sanfangPointsDb[i].id,
           completeTime: new Date(
-            new Date('2025-01-20T10:00:00Z').getTime() +
-            (i + 1) * 45 * 60 * 1000,
+            new Date('2025-01-20T10:00:00Z').getTime() + (i + 1) * 45 * 60 * 1000,
           ),
           pointsEarned: sanfangPointsDb[i].pointsReward,
         },
-      });
+      })
     }
 
-    console.log('Created point completion data');
+    console.log('Created point completion data')
 
     // 创建用户印记数据
     // 用户1: 西湖探秘者印记 - 已上链
@@ -4092,7 +4117,7 @@ async function main() {
           blockHeight: BigInt(10234567),
           chainTime: new Date('2025-01-10T16:00:00Z'),
         },
-      });
+      })
     }
 
     // 用户3: 西湖探秘者印记 - 已上链
@@ -4108,7 +4133,7 @@ async function main() {
           blockHeight: BigInt(10234123),
           chainTime: new Date('2025-01-05T14:30:00Z'),
         },
-      });
+      })
     }
 
     // 用户3: 禅心悟道印记 - 未上链
@@ -4120,7 +4145,7 @@ async function main() {
           earnedTime: new Date('2025-01-06T12:00:00Z'),
           isChained: false,
         },
-      });
+      })
     }
 
     // 用户3: 杭州城市印记 - 已上链
@@ -4136,10 +4161,10 @@ async function main() {
           blockHeight: BigInt(10235000),
           chainTime: new Date('2025-01-06T13:00:00Z'),
         },
-      });
+      })
     }
 
-    console.log('Created user seal data');
+    console.log('Created user seal data')
 
     // 创建背景音乐数据
     // 注意：URL 为占位符，实际部署时需替换为真实音频文件地址
@@ -4242,7 +4267,7 @@ async function main() {
         duration: 250,
         orderNum: 1,
       },
-    ];
+    ]
 
     for (const bgm of bgmData) {
       await prisma.backgroundMusic.create({
@@ -4255,9 +4280,9 @@ async function main() {
           orderNum: bgm.orderNum,
           status: '0',
         },
-      });
+      })
     }
-    console.log(`Created ${bgmData.length} background music records`);
+    console.log(`Created ${bgmData.length} background music records`)
 
     // 创建探索照片测试数据
     const photoData = [
@@ -4443,7 +4468,7 @@ async function main() {
         longitude: 119.2989,
         takenTime: new Date('2025-01-20T11:15:00Z'),
       },
-    ];
+    ]
 
     for (const photo of photoData) {
       await prisma.explorationPhoto.create({
@@ -4458,9 +4483,9 @@ async function main() {
           longitude: photo.longitude,
           takenTime: photo.takenTime,
         },
-      });
+      })
     }
-    console.log(`Created ${photoData.length} exploration photos`);
+    console.log(`Created ${photoData.length} exploration photos`)
 
     // 创建用户实名认证数据（三种状态示例）
     // 用户1: 已通过认证
@@ -4474,13 +4499,13 @@ async function main() {
         status: 'approved',
         verifiedAt: new Date('2025-01-08T10:00:00Z'),
       },
-    });
+    })
     // 同步更新用户的 isVerified 状态
     await prisma.appUser.update({
       where: { id: demoUser.id },
       data: { isVerified: true },
-    });
-    console.log(`Created verification for ${demoUser.nickname}: approved`);
+    })
+    console.log(`Created verification for ${demoUser.nickname}: approved`)
 
     // 用户2: 待审核
     await prisma.userVerification.create({
@@ -4492,8 +4517,8 @@ async function main() {
         idCardBack: '/uploads/idcard/back-demo2.jpg',
         status: 'pending',
       },
-    });
-    console.log(`Created verification for ${demoUser2.nickname}: pending`);
+    })
+    console.log(`Created verification for ${demoUser2.nickname}: pending`)
 
     // 用户3: 已拒绝（照片模糊）
     await prisma.userVerification.create({
@@ -4506,16 +4531,16 @@ async function main() {
         status: 'rejected',
         rejectReason: '身份证照片模糊，请重新上传清晰照片',
       },
-    });
-    console.log(`Created verification for ${demoUser3.nickname}: rejected`);
+    })
+    console.log(`Created verification for ${demoUser3.nickname}: rejected`)
 
-    console.log('Xunyin business data seeding completed.');
+    console.log('Xunyin business data seeding completed.')
   }
 
   // ==================== APP 协议初始数据 ====================
-  const existingAgreements = await prisma.appAgreement.count();
+  const existingAgreements = await prisma.appAgreement.count()
   if (existingAgreements === 0) {
-    console.log('Seeding app agreements...');
+    console.log('Seeding app agreements...')
 
     // 用户协议
     await prisma.appAgreement.create({
@@ -4635,8 +4660,8 @@ async function main() {
         status: '0',
         createBy: 'system',
       },
-    });
-    console.log('Created agreement: user_agreement');
+    })
+    console.log('Created agreement: user_agreement')
 
     // 隐私政策
     await prisma.appAgreement.create({
@@ -4823,8 +4848,8 @@ async function main() {
         status: '0',
         createBy: 'system',
       },
-    });
-    console.log('Created agreement: privacy_policy');
+    })
+    console.log('Created agreement: privacy_policy')
 
     // 关于我们
     await prisma.appAgreement.create({
@@ -4885,67 +4910,61 @@ async function main() {
         status: '0',
         createBy: 'system',
       },
-    });
-    console.log('Created agreement: about_us');
+    })
+    console.log('Created agreement: about_us')
 
-    console.log('App agreements seeding completed.');
+    console.log('App agreements seeding completed.')
   }
 
   // 清除 Redis 用户状态缓存，避免重新初始化数据后无法登录
-  await clearUserStatusCache();
+  await clearUserStatusCache()
 
-  console.log('Seeding finished.');
+  console.log('Seeding finished.')
 }
 
 /**
  * 清除 Redis 中的用户状态缓存
  */
 async function clearUserStatusCache() {
-  const redisEnabled = process.env.REDIS_ENABLED?.toLowerCase() === 'true';
+  const redisEnabled = process.env.REDIS_ENABLED?.toLowerCase() === 'true'
   if (!redisEnabled) {
-    console.log('Redis 未启用，跳过缓存清除');
-    return;
+    console.log('Redis 未启用，跳过缓存清除')
+    return
   }
 
-  const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
-  const redis = new Redis(redisUrl);
+  const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379'
+  const redis = new Redis(redisUrl)
 
   try {
-    const pattern = 'user:status:*';
-    const keys: string[] = [];
+    const pattern = 'user:status:*'
+    const keys: string[] = []
 
     // 使用 scan 遍历匹配的 key
-    let cursor = '0';
+    let cursor = '0'
     do {
-      const [nextCursor, matchedKeys] = await redis.scan(
-        cursor,
-        'MATCH',
-        pattern,
-        'COUNT',
-        100,
-      );
-      cursor = nextCursor;
-      keys.push(...matchedKeys);
-    } while (cursor !== '0');
+      const [nextCursor, matchedKeys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100)
+      cursor = nextCursor
+      keys.push(...matchedKeys)
+    } while (cursor !== '0')
 
     if (keys.length > 0) {
-      await redis.del(...keys);
-      console.log(`已清除 ${keys.length} 个用户状态缓存`);
+      await redis.del(...keys)
+      console.log(`已清除 ${keys.length} 个用户状态缓存`)
     } else {
-      console.log('没有需要清除的用户状态缓存');
+      console.log('没有需要清除的用户状态缓存')
     }
   } catch (error) {
-    console.warn('清除 Redis 缓存失败:', (error as Error).message);
+    console.warn('清除 Redis 缓存失败:', (error as Error).message)
   } finally {
-    redis.disconnect();
+    redis.disconnect()
   }
 }
 
 main()
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    console.error(e)
+    process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })

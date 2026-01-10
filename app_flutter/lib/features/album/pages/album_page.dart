@@ -31,30 +31,27 @@ class AlbumPage extends ConsumerWidget {
               children: [
                 _buildAppBar(context, hasPhotos),
                 Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      statsAsync.when(
-                        data: (stats) => _buildStatsCard(
-                          context,
-                          stats.totalPhotos,
-                          stats.journeyCount,
-                        ),
-                        loading: () => const AppLoadingCard(height: 80),
-                        error: (e, _) => _buildStatsCard(context, 0, 0),
-                      ),
-                      const SizedBox(height: 24),
-                      // 优化2: 只有在有照片时才显示分类标题
-                      if (hasPhotos) ...[
-                        const SectionTitle(
-                          title: '按文化之旅分类',
-                        ),
-                        const SizedBox(height: 14),
-                      ],
-                      journeyPhotosAsync.when(
-                        data: (journeyPhotos) => journeyPhotos.isEmpty
-                            ? _buildEmptyState(context, null)
-                            : Column(
+                  child: hasPhotos
+                      ? ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          children: [
+                            statsAsync.when(
+                              data: (stats) => _buildStatsCard(
+                                context,
+                                ref,
+                                stats.totalPhotos,
+                                stats.journeyCount,
+                              ),
+                              loading: () => const AppLoadingCard(height: 80),
+                              error: (e, _) => _buildStatsCard(context, ref, 0, 0),
+                            ),
+                            const SizedBox(height: 24),
+                            const SectionTitle(
+                              title: '按文化之旅分类',
+                            ),
+                            const SizedBox(height: 14),
+                            journeyPhotosAsync.when(
+                              data: (journeyPhotos) => Column(
                                 children: journeyPhotos
                                     .map(
                                       (jp) => _JourneyPhotoCard(
@@ -63,8 +60,7 @@ class AlbumPage extends ConsumerWidget {
                                         photos: jp.photos
                                             .take(3)
                                             .map(
-                                              (p) =>
-                                                  p.thumbnailUrl ?? p.imageUrl,
+                                              (p) => p.thumbnailUrl ?? p.imageUrl,
                                             )
                                             .toList(),
                                         onTap: () {},
@@ -72,12 +68,17 @@ class AlbumPage extends ConsumerWidget {
                                     )
                                     .toList(),
                               ),
-                        loading: () => const AppLoading(message: '加载中...'),
-                        error: (e, _) => _buildEmptyState(context, e.toString()),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
+                              loading: () => const AppLoading(message: '加载中...'),
+                              error: (e, _) => _buildEmptyState(context, e.toString()),
+                            ),
+                            const SizedBox(height: 32),
+                          ],
+                        )
+                      : journeyPhotosAsync.when(
+                          data: (_) => _buildEmptyState(context, null),
+                          loading: () => const AppLoading(message: '加载中...'),
+                          error: (e, _) => _buildEmptyState(context, e.toString()),
+                        ),
                 ),
               ],
             ),
@@ -102,190 +103,208 @@ class AlbumPage extends ConsumerWidget {
     );
   }
 
-  // 优化5&6: 改进统计卡片文案和信息展示
-  Widget _buildStatsCard(BuildContext context, int totalPhotos, int journeyCount) {
+  // 优化: 统计卡片可点击跳转到我的旅程
+  Widget _buildStatsCard(
+    BuildContext context,
+    WidgetRef ref,
+    int totalPhotos,
+    int journeyCount,
+  ) {
     final isDark = context.isDarkMode;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.darkSurface.withValues(alpha: 0.9)
-            : Colors.white.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
+    return GestureDetector(
+      onTap: () => context.push('/my-journeys'),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
           color: isDark
-              ? AppColors.darkBorder.withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
+              ? AppColors.darkSurface.withValues(alpha: 0.9)
+              : Colors.white.withValues(alpha: 0.88),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
             color: isDark
-                ? Colors.black.withValues(alpha: 0.3)
-                : AppColors.primary.withValues(alpha: 0.08),
-            blurRadius: 20,
+                ? AppColors.darkBorder.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.5),
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.15),
-                  AppColors.accent.withValues(alpha: isDark ? 0.2 : 0.1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : AppColors.primary.withValues(alpha: 0.08),
+              blurRadius: 20,
             ),
-            child: const Icon(
-              Icons.photo_library_rounded,
-              color: AppColors.primary,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '$totalPhotos',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimaryAdaptive(context),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '张照片',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondaryAdaptive(context),
-                      ),
-                    ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // 优化: 图标改用品牌红色
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.accent.withValues(alpha: isDark ? 0.25 : 0.15),
+                    AppColors.accentLight.withValues(alpha: isDark ? 0.2 : 0.1),
                   ],
                 ),
-                const SizedBox(height: 4),
-                // 优化5: 改进文案表述
-                Text(
-                  '已参与 $journeyCount 条文化之旅',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textHintAdaptive(context),
-                  ),
-                ),
-              ],
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.photo_library_rounded,
+                color: AppColors.accent,
+                size: 28,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        '$totalPhotos',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimaryAdaptive(context),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '张照片',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondaryAdaptive(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        '来自 $journeyCount 条文化之旅',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textHintAdaptive(context),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                        color: AppColors.textHintAdaptive(context),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // 优化1&4&7: 改进空状态设计，使用品牌插画
+  // 空状态设计
   Widget _buildEmptyState(BuildContext context, String? error) {
     final needLogin =
         error != null && (error.contains('请先登录') || error.contains('20001'));
     final isDark = context.isDarkMode;
 
     return GestureDetector(
-      // 优化4: 空状态区域可点击，跳转到文化之旅列表
       onTap: needLogin ? null : () => context.push('/journeys'),
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.9)
-                : Colors.white.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 优化7: 使用品牌插画替代图标
-              if (needLogin)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.textHintAdaptive(context).withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.lock_outline_rounded,
-                    size: 48,
-                    color: AppColors.textHintAdaptive(context),
-                  ),
-                )
-              else
-                SvgPicture.asset(
-                  'assets/illustrations/empty_album.svg',
-                  width: 180,
-                  height: 135,
-                ),
-              const SizedBox(height: 20),
-              // 优化1: 添加引导性文案
-              Text(
-                needLogin ? '请先登录' : '还没有照片',
-                style: TextStyle(
-                  color: needLogin
-                      ? AppColors.textHintAdaptive(context)
-                      : AppColors.textPrimaryAdaptive(context),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              if (!needLogin) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '去完成文化之旅，收集你的第一张照片吧',
-                  style: TextStyle(
-                    color: AppColors.textHintAdaptive(context),
-                    fontSize: 13,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                // 优化1: 添加行动按钮
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.accent, AppColors.accentDark],
+      child: Align(
+        alignment: const Alignment(0, -0.3),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            margin: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurface.withValues(alpha: 0.88)
+                  : Colors.white.withValues(alpha: 0.88),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (needLogin)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.textHintAdaptive(context).withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
                     ),
-                    borderRadius: BorderRadius.circular(20),
+                    child: Icon(
+                      Icons.lock_outline_rounded,
+                      size: 48,
+                      color: AppColors.textHintAdaptive(context),
+                    ),
+                  )
+                else
+                  SvgPicture.asset(
+                    'assets/illustrations/empty_album.svg',
+                    width: 220,
+                    height: 165,
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '探索文化之旅',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ],
+                const SizedBox(height: 24),
+                Text(
+                  needLogin ? '请先登录' : '还没有照片',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: needLogin
+                        ? AppColors.textHintAdaptive(context)
+                        : AppColors.textPrimaryAdaptive(context),
                   ),
                 ),
+                if (!needLogin) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    '去完成文化之旅，收集你的第一张照片吧',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textHintAdaptive(context),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.accent, AppColors.accentDark],
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '探索文化之旅',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

@@ -1,3 +1,10 @@
+/// 用户旅程状态
+enum JourneyUserStatus {
+  notStarted, // 未开始
+  inProgress, // 进行中
+  completed, // 已完成
+}
+
 /// 文化之旅简要信息
 class JourneyBrief {
   final String id;
@@ -11,6 +18,12 @@ class JourneyBrief {
   final bool isLocked;
   final String? unlockCondition;
 
+  // 用户进度相关字段
+  final JourneyUserStatus userStatus;
+  final double userProgress; // 0.0 ~ 1.0
+  final int completedPoints;
+  final int totalPoints;
+
   JourneyBrief({
     required this.id,
     required this.name,
@@ -22,6 +35,10 @@ class JourneyBrief {
     this.completedCount = 0,
     this.isLocked = false,
     this.unlockCondition,
+    this.userStatus = JourneyUserStatus.notStarted,
+    this.userProgress = 0.0,
+    this.completedPoints = 0,
+    this.totalPoints = 0,
   });
 
   factory JourneyBrief.fromJson(Map<String, dynamic> json) {
@@ -37,6 +54,31 @@ class JourneyBrief {
       completedCount: json['completedCount'] as int? ?? 0,
       isLocked: json['isLocked'] as bool? ?? false,
       unlockCondition: json['unlockCondition'] as String?,
+    );
+  }
+
+  /// 创建带用户进度的副本
+  JourneyBrief withUserProgress({
+    required JourneyUserStatus status,
+    required double progress,
+    required int completedPoints,
+    required int totalPoints,
+  }) {
+    return JourneyBrief(
+      id: id,
+      name: name,
+      theme: theme,
+      coverImage: coverImage,
+      rating: rating,
+      estimatedMinutes: estimatedMinutes,
+      totalDistance: totalDistance,
+      completedCount: completedCount,
+      isLocked: isLocked,
+      unlockCondition: unlockCondition,
+      userStatus: status,
+      userProgress: progress,
+      completedPoints: completedPoints,
+      totalPoints: totalPoints,
     );
   }
 }

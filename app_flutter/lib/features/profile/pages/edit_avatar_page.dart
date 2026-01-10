@@ -8,6 +8,7 @@ import '../../../services/upload_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../providers/service_providers.dart';
 import '../../../providers/user_providers.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 /// 修改头像页面 - Aurora UI + Glassmorphism
 class EditAvatarPage extends ConsumerStatefulWidget {
@@ -40,12 +41,7 @@ class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
     } catch (e) {
       debugPrint('📷 选择图片异常: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('选择图片失败: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppSnackBar.error(context, '选择图片失败: $e');
       }
     }
   }
@@ -65,19 +61,12 @@ class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
       ref.invalidate(currentUserProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('头像修改成功'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AppSnackBar.success(context, '头像修改成功');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('修改失败: $e'), backgroundColor: AppColors.error),
-        );
+        AppSnackBar.error(context, '修改失败: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -10,6 +10,7 @@ import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_page_header.dart';
 import '../../../shared/widgets/app_loading.dart';
 import '../../../shared/widgets/app_buttons.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 /// 印记详情页 - Aurora UI + Glassmorphism + 3D翻转效果
 class SealDetailPage extends ConsumerStatefulWidget {
@@ -676,21 +677,11 @@ class _SealDetailPageState extends ConsumerState<SealDetailPage>
                 await ref.read(sealServiceProvider).chainSeal(widget.sealId);
                 ref.invalidate(sealDetailProvider(widget.sealId));
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('上链成功'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
+                  AppSnackBar.success(context, '上链成功');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('上链失败: $e'),
-                      backgroundColor: AppColors.error,
-                    ),
-                  );
+                  AppSnackBar.error(context, '上链失败: $e');
                 }
               }
             },

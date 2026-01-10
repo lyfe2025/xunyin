@@ -8,6 +8,7 @@ import '../../../providers/service_providers.dart';
 import '../../../providers/user_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_back_button.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 /// 修改昵称页面 - Aurora UI + Glassmorphism
 class EditNicknamePage extends ConsumerStatefulWidget {
@@ -70,19 +71,12 @@ class _EditNicknamePageState extends ConsumerState<EditNicknamePage> {
       ref.invalidate(profileHomeProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('昵称修改成功'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AppSnackBar.success(context, '昵称修改成功');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('修改失败: $e'), backgroundColor: AppColors.error),
-        );
+        AppSnackBar.error(context, '修改失败: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

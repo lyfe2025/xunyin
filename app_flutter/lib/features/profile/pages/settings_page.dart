@@ -8,7 +8,8 @@ import '../../../providers/audio_providers.dart';
 import '../../../providers/user_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/service_providers.dart';
-import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/app_dialog.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_page_header.dart';
 import '../../../shared/widgets/section_title.dart';
@@ -113,34 +114,29 @@ class _SettingsContent extends ConsumerWidget {
   }
 
   Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
-    final confirmed = await ConfirmDialog.show(
+    final confirmed = await AppConfirmDialog.show(
       context: context,
       title: '清除缓存',
       content: '确定要清除所有缓存数据吗？',
       confirmText: '清除',
-      confirmColor: AppColors.warning,
+      icon: Icons.cleaning_services_rounded,
     );
 
     if (confirmed == true) {
       await ref.read(settingsProvider.notifier).clearCache();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('缓存已清除'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AppSnackBar.success(context, '缓存已清除');
       }
     }
   }
 
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
-    final confirmed = await ConfirmDialog.show(
+    final confirmed = await AppConfirmDialog.show(
       context: context,
       title: '退出登录',
       content: '确定要退出登录吗？',
       confirmText: '退出',
-      confirmColor: AppColors.error,
+      isDanger: true,
     );
 
     if (confirmed == true && context.mounted) {
@@ -159,12 +155,13 @@ class _SettingsContent extends ConsumerWidget {
   }
 
   Future<void> _handleDeleteAccount(BuildContext context, WidgetRef ref) async {
-    final confirmed = await ConfirmDialog.show(
+    final confirmed = await AppConfirmDialog.show(
       context: context,
       title: '注销账户',
       content: '注销后，您的账户数据将被永久删除，包括收集的印记、旅程进度等。此操作不可恢复，确定要继续吗？',
       confirmText: '确认注销',
-      confirmColor: AppColors.error,
+      isDanger: true,
+      icon: Icons.delete_forever_rounded,
     );
 
     if (confirmed == true && context.mounted) {
@@ -179,22 +176,12 @@ class _SettingsContent extends ConsumerWidget {
         ref.invalidate(currentUserProvider);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('账户已注销'),
-              backgroundColor: AppColors.success,
-            ),
-          );
+          AppSnackBar.success(context, '账户已注销');
           context.go('/login');
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('注销失败: $e'),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          AppSnackBar.error(context, '注销失败: $e');
         }
       }
     }

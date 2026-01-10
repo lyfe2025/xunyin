@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../shared/widgets/app_buttons.dart';
+import '../../../shared/widgets/app_snackbar.dart';
+import '../../../shared/widgets/app_dialog.dart';
 import '../../../shared/widgets/simple_share_sheet.dart';
 import '../../../services/share_service.dart';
 
@@ -399,60 +401,21 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+    AppSnackBar.success(context, message);
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
+  Future<void> _showDeleteDialog(BuildContext context) async {
+    final confirmed = await AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.card),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.delete_outline_rounded, color: AppColors.error),
-            SizedBox(width: 8),
-            Text('删除照片'),
-          ],
-        ),
-        content: const Text('确定要删除这张照片吗？此操作无法撤销。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('照片已删除'),
-                  backgroundColor: AppColors.textSecondary,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
-            },
-            child: const Text(
-              '删除',
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+      title: '删除照片',
+      content: '确定要删除这张照片吗？此操作无法撤销。',
+      confirmText: '删除',
+      isDanger: true,
+      icon: Icons.delete_outline_rounded,
     );
+    if (confirmed == true && context.mounted) {
+      context.pop();
+      AppSnackBar.show(context, '照片已删除');
+    }
   }
 }

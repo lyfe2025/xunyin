@@ -31,7 +31,7 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final journeysAsync = ref.watch(cityJourneysProvider(widget.city.id));
+    final journeysAsync = ref.watch(cityJourneysWithProgressProvider(widget.city.id));
     final isDark = context.isDarkMode;
 
     return DraggableScrollableSheet(
@@ -327,8 +327,25 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
       );
     }
 
+    // 按状态排序：进行中 > 已完成 > 未开始 > 锁定
+    final sortedJourneys = List<JourneyBrief>.from(journeys)
+      ..sort((a, b) {
+        int getPriority(JourneyBrief j) {
+          if (j.isLocked) return 4;
+          switch (j.userStatus) {
+            case JourneyUserStatus.inProgress:
+              return 1;
+            case JourneyUserStatus.completed:
+              return 2;
+            case JourneyUserStatus.notStarted:
+              return 3;
+          }
+        }
+        return getPriority(a).compareTo(getPriority(b));
+      });
+
     return Column(
-      children: journeys
+      children: sortedJourneys
           .map((journey) => _JourneyCard(journey: journey))
           .toList(),
     );
@@ -379,6 +396,8 @@ class _JourneyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLocked = journey.isLocked;
     final isDark = context.isDarkMode;
+    final isCompleted = journey.userStatus == JourneyUserStatus.completed;
+    final isInProgress = journey.userStatus == JourneyUserStatus.inProgress;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -395,9 +414,14 @@ class _JourneyCard extends StatelessWidget {
                   : AppColors.cardBackground(context),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isLocked
-                    ? AppColors.borderAdaptive(context).withValues(alpha: 0.3)
-                    : AppColors.borderAdaptive(context).withValues(alpha: 0.5),
+                color: isCompleted
+                    ? AppColors.sealGold.withValues(alpha: 0.4)
+                    : isInProgress
+                        ? AppColors.accent.withValues(alpha: 0.3)
+                        : isLocked
+                            ? AppColors.borderAdaptive(context).withValues(alpha: 0.3)
+                            : AppColors.borderAdaptive(context).withValues(alpha: 0.5),
+                width: isCompleted || isInProgress ? 1.5 : 1,
               ),
               boxShadow: isLocked
                   ? []
@@ -413,7 +437,7 @@ class _JourneyCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // 封面图
+                // 封面图（带状态徽章）
                 _buildCoverImage(context),
                 const SizedBox(width: 14),
                 // 信息
@@ -433,22 +457,75 @@ class _JourneyCard extends StatelessWidget {
   }
 
   Widget _buildCoverImage(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariantAdaptive(context),
+    final isCompleted = journey.userStatus == JourneyUserStatus.completed;
+    final isInProgress = journey.userStatus == JourneyUserStatus.inProgress;
+
+    return Stack(
+      children: [
+        ClipRRect(
           borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariantAdaptive(context),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: journey.coverImage != null
+                ? Image.network(
+                    UrlUtils.getFullImageUrl(journey.coverImage),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _buildPlaceholder(context),
+                  )
+                : _buildPlaceholder(context),
+          ),
         ),
-        child: journey.coverImage != null
-            ? Image.network(
-                UrlUtils.getFullImageUrl(journey.coverImage),
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildPlaceholder(context),
-              )
-            : _buildPlaceholder(context),
+        // 状态徽章
+        if (isCompleted || isInProgress)
+          Positioned(
+            top: 4,
+            left: 4,
+            child: _buildStatusBadge(context),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(BuildContext context) {
+    final isCompleted = journey.userStatus == JourneyUserStatus.completed;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: isCompleted ? AppColors.sealGold : AppColors.accent,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: (isCompleted ? AppColors.sealGold : AppColors.accent)
+                .withValues(alpha: 0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isCompleted ? Icons.check_circle_rounded : Icons.play_circle_rounded,
+            size: 10,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            isCompleted ? '已完成' : '进行中',
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -464,6 +541,10 @@ class _JourneyCard extends StatelessWidget {
   }
 
   Widget _buildInfo(BuildContext context) {
+    final isCompleted = journey.userStatus == JourneyUserStatus.completed;
+    final isInProgress = journey.userStatus == JourneyUserStatus.inProgress;
+    final hasProgress = isCompleted || isInProgress;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -503,6 +584,11 @@ class _JourneyCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
+        // 进度条（已完成或进行中时显示）
+        if (hasProgress) ...[
+          _buildProgressBar(context),
+          const SizedBox(height: 8),
+        ],
         Row(
           children: [
             // 星级
@@ -537,6 +623,48 @@ class _JourneyCard extends StatelessWidget {
             ),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildProgressBar(BuildContext context) {
+    final isCompleted = journey.userStatus == JourneyUserStatus.completed;
+    final progress = journey.userProgress;
+    final progressColor = isCompleted ? AppColors.sealGold : AppColors.accent;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${journey.completedPoints}/${journey.totalPoints} 探索点',
+              style: TextStyle(
+                fontSize: 11,
+                color: AppColors.textSecondaryAdaptive(context),
+              ),
+            ),
+            Text(
+              '${(progress * 100).toInt()}%',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: progressColor,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 5,
+            backgroundColor: AppColors.surfaceVariantAdaptive(context),
+            valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+          ),
+        ),
       ],
     );
   }
@@ -707,6 +835,11 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                       ),
                       itemBuilder: (context, index) {
                         final journey = _filteredJourneys[index];
+                        final isCompleted =
+                            journey.userStatus == JourneyUserStatus.completed;
+                        final isInProgress =
+                            journey.userStatus == JourneyUserStatus.inProgress;
+
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 4,
@@ -760,7 +893,19 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                                     alpha: 0.5,
                                   ),
                                 )
-                              : null,
+                              : isCompleted
+                                  ? _buildSearchStatusBadge(
+                                      context,
+                                      '已完成',
+                                      AppColors.sealGold,
+                                    )
+                                  : isInProgress
+                                      ? _buildSearchStatusBadge(
+                                          context,
+                                          '进行中',
+                                          AppColors.accent,
+                                        )
+                                      : null,
                           onTap: () {
                             Navigator.of(context).pop();
                             if (!journey.isLocked) {
@@ -772,6 +917,24 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchStatusBadge(BuildContext context, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: color,
         ),
       ),
     );

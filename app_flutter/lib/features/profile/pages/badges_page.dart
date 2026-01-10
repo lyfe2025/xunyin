@@ -10,6 +10,8 @@ import '../../../providers/service_providers.dart';
 import '../../../providers/user_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_back_button.dart';
+import '../../../shared/widgets/app_snackbar.dart';
+import '../../../shared/widgets/app_loading.dart';
 
 /// 我的称号页面
 class BadgesPage extends ConsumerWidget {
@@ -30,9 +32,7 @@ class BadgesPage extends ConsumerWidget {
                 Expanded(
                   child: badgesAsync.when(
                     data: (badges) => _buildContent(context, ref, badges),
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(color: AppColors.accent),
-                    ),
+                    loading: () => const AppLoading(message: '加载中...'),
                     error: (e, _) => _buildErrorState(context, ref),
                   ),
                 ),
@@ -264,26 +264,14 @@ class _BadgeCardState extends ConsumerState<_BadgeCard> {
       ref.invalidate(profileHomeProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.badge.isActive ? '已取消展示称号' : '已设置为展示称号',
-            ),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
+        AppSnackBar.success(
+          context,
+          widget.badge.isActive ? '已取消展示称号' : '已设置为展示称号',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('操作失败: $e'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackBar.error(context, '操作失败: $e');
       }
     } finally {
       if (mounted) {
@@ -483,7 +471,8 @@ class _BadgeCardState extends ConsumerState<_BadgeCard> {
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(
+                        child: AppLoadingSimple(
+                          size: 24,
                           strokeWidth: 2,
                           color: AppColors.accent,
                         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../shared/widgets/app_snackbar.dart';
 
 /// 全局错误处理器
 class ErrorHandler {
@@ -85,14 +86,7 @@ class ErrorHandler {
   /// 显示用户友好的错误提示
   static void showErrorSnackBar(BuildContext context, Object error) {
     final message = _getUserFriendlyMessage(error);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red.shade700,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    AppSnackBar.error(context, message);
   }
 
   /// 转换为用户友好的错误信息

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/api/api_client.dart';
 import '../../../services/auth_service.dart';
 import '../../../shared/widgets/aurora_background.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 /// 登录页 - Aurora UI + Glassmorphism 风格
 class LoginPage extends ConsumerStatefulWidget {
@@ -37,8 +39,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
       CurvedAnimation(parent: _logoController, curve: Curves.easeInOut),
     );
 
-    // 开发测试：默认填写测试账号
-    _phoneController.text = '13800138000';
+    // 开发测试：默认填写测试账号（新手旅人，无文化之旅进度）
+    _phoneController.text = '13600136000';
     _autoSendCode();
   }
 
@@ -117,9 +119,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), margin: const EdgeInsets.all(16)),
-    );
+    AppSnackBar.show(context, message);
   }
 
   @override
@@ -453,23 +453,21 @@ class _LoginPageState extends ConsumerState<LoginPage>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildSocialButton(
-              icon: Icons.wechat,
-              color: const Color(0xFF07C160),
+            _buildSocialButtonWithSvg(
+              svgPath: 'assets/icons/wechat_logo.svg',
               label: '微信',
               onTap: () => _showSnackBar('微信登录开发中'),
             ),
             const SizedBox(width: 24),
-            _buildSocialButton(
-              icon: Icons.apple,
-              color: context.isDarkMode ? Colors.white : Colors.black87,
+            _buildSocialButtonWithSvg(
+              svgPath: 'assets/icons/apple_logo.svg',
               label: 'Apple',
               onTap: () => _showSnackBar('Apple 登录开发中'),
+              useThemeColor: true,
             ),
             const SizedBox(width: 24),
-            _buildSocialButton(
-              icon: Icons.g_mobiledata_rounded,
-              color: const Color(0xFF4285F4),
+            _buildSocialButtonWithSvg(
+              svgPath: 'assets/icons/google_logo.svg',
               label: 'Google',
               onTap: () => _showSnackBar('Google 登录开发中'),
             ),
@@ -479,14 +477,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  /// 社交登录按钮
-  Widget _buildSocialButton({
-    required IconData icon,
-    required Color color,
+  /// 社交登录按钮（SVG 图标版本）
+  Widget _buildSocialButtonWithSvg({
+    required String svgPath,
     required String label,
     required VoidCallback onTap,
+    bool useThemeColor = false,
   }) {
     final isDark = context.isDarkMode;
+    final themeColor = isDark ? Colors.white : Colors.black87;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -498,13 +498,30 @@ class _LoginPageState extends ConsumerState<LoginPage>
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: isDark ? 0.15 : 0.1),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: color.withValues(alpha: isDark ? 0.3 : 0.2),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.grey.withValues(alpha: 0.15),
                 ),
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Center(
+                child: useThemeColor
+                    ? SvgPicture.asset(
+                        svgPath,
+                        width: 24,
+                        height: 24,
+                        colorFilter: ColorFilter.mode(themeColor, BlendMode.srcIn),
+                      )
+                    : SvgPicture.asset(
+                        svgPath,
+                        width: 24,
+                        height: 24,
+                      ),
+              ),
             ),
             const SizedBox(height: 6),
             Text(

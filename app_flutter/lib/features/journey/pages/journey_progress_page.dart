@@ -7,6 +7,7 @@ import '../../../models/journey.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_buttons.dart';
+import '../../../shared/widgets/app_dialog.dart';
 
 /// 文化之旅进行中页面 - Aurora UI + Glassmorphism
 class JourneyProgressPage extends ConsumerStatefulWidget {
@@ -183,30 +184,17 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
     );
   }
 
-  void _showExitDialog(BuildContext context) {
-    showDialog(
+  Future<void> _showExitDialog(BuildContext context) async {
+    final confirmed = await AppConfirmDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.card),
-        ),
-        title: const Text('退出文化之旅？'),
-        content: const Text('当前进度将被保存，你可以稍后继续。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/');
-            },
-            child: const Text('退出', style: TextStyle(color: AppColors.accent)),
-          ),
-        ],
-      ),
+      title: '退出文化之旅？',
+      content: '当前进度将被保存，你可以稍后继续。',
+      confirmText: '退出',
+      cancelText: '取消',
     );
+    if (confirmed == true && context.mounted) {
+      context.go('/');
+    }
   }
 }
 

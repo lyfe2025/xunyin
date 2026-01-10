@@ -156,3 +156,94 @@ AppColors.borderAdaptive(context)
 
 配色定义：`app_flutter/lib/core/theme/app_colors.dart`
 主题配置：`app_flutter/lib/core/theme/app_theme.dart`
+
+## 交互反馈组件规范
+
+### 加载组件
+
+| 组件 | 用途 | 特点 |
+|------|------|------|
+| `AppLoading` | 通用加载 | 带品牌呼吸光晕动画 |
+| `AppLoadingSimple` | 小空间加载 | 简单指示器，无动画 |
+| `AppLoadingCard` | 卡片内加载 | 带容器背景 |
+| `AppLoadingOverlay` | 全屏遮罩加载 | 阻止用户操作 |
+| `AppPageLoading` | 页面级加载 | 居中显示 |
+
+```dart
+// ✅ 推荐：使用统一加载组件
+const AppLoading(message: '加载中...')
+
+// ✅ 全屏加载遮罩
+await AppLoadingOverlay.show(
+  context: context,
+  task: () => someAsyncTask(),
+  message: '处理中...',
+);
+```
+
+### 对话框组件
+
+| 组件 | 用途 | 特点 |
+|------|------|------|
+| `AppDialog` | 基础对话框 | Glassmorphism 风格 |
+| `AppConfirmDialog` | 确认对话框 | 带图标、品牌渐变按钮 |
+| `AppSuccessDialog` | 成功提示 | 绿色图标 |
+| `AppErrorDialog` | 错误提示 | 红色图标 |
+
+```dart
+// ✅ 确认对话框
+final confirmed = await AppConfirmDialog.show(
+  context: context,
+  title: '退出登录',
+  content: '确定要退出吗？',
+  confirmText: '退出',
+  isDanger: true,  // 图标显示警告样式
+);
+
+// ✅ 成功提示
+await AppSuccessDialog.show(
+  context: context,
+  title: '操作成功',
+  content: '数据已保存',
+);
+```
+
+**注意**：所有对话框的确认按钮统一使用品牌红渐变，`isDanger` 参数只影响图标颜色（警告图标 + 红色）。
+
+### 通知组件 (SnackBar)
+
+| 方法 | 用途 | 颜色 |
+|------|------|------|
+| `AppSnackBar.success()` | 成功提示 | 绿色 + ✓ 图标 |
+| `AppSnackBar.error()` | 错误提示 | 红色 + ✗ 图标 |
+| `AppSnackBar.warning()` | 警告提示 | 黄色 + ⚠ 图标 |
+| `AppSnackBar.info()` | 信息提示 | 蓝色 + ℹ 图标 |
+| `AppSnackBar.show()` | 普通提示 | 深色背景 |
+| `AppSnackBar.loading()` | 加载提示 | 品牌色 + 转圈 |
+| `AppSnackBar.withAction()` | 带操作按钮 | 深色 + 按钮 |
+
+```dart
+// ✅ 推荐：使用统一 SnackBar
+AppSnackBar.success(context, '保存成功');
+AppSnackBar.error(context, '操作失败');
+
+// ✅ 带操作按钮
+AppSnackBar.withAction(
+  context,
+  message: '已删除',
+  actionLabel: '撤销',
+  onAction: () => undoDelete(),
+);
+
+// ❌ 不推荐：直接使用 ScaffoldMessenger
+ScaffoldMessenger.of(context).showSnackBar(...);
+```
+
+### Toast 轻量提示
+
+```dart
+// 居中显示，自动消失
+AppToast.show(context, '已复制');
+AppToast.success(context, '操作成功');
+AppToast.error(context, '操作失败');
+```

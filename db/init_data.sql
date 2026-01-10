@@ -1272,6 +1272,42 @@ SELECT j.id, '大雄宝殿', 30.2425, 120.0945, 'photo', '拍摄大雄宝殿全�
 FROM journey j WHERE j.name = '灵隐禅踪'
 ON CONFLICT DO NOTHING;
 
+-- 22.8 园林雅韵 - 拙政园
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '拙政园', 31.3256, 120.6312, 'photo', '在远香堂前拍摄荷塘美景', NULL, 
+  '拙政园始建于明正德年间，是中国四大名园之一，被誉为"中国园林之母"。', 
+  '园名取自晋代潘岳《闲居赋》"筑室种树，逍遥自得……此亦拙者之为政也"。', 
+  0, 120, 1, '0', NOW()
+FROM journey j WHERE j.name = '园林雅韵'
+ON CONFLICT DO NOTHING;
+
+-- 22.9 园林雅韵 - 留园
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '留园', 31.3178, 120.6089, 'gesture', '在冠云峰前做出"太湖石"造型手势', 'rock', 
+  '留园始建于明万历年间，以建筑空间处理精湛著称，是中国四大名园之一。', 
+  '园内冠云峰高6.5米，是江南园林中最高的太湖石峰，有"不出城郭而获山林之趣"之誉。', 
+  2500, 100, 2, '0', NOW()
+FROM journey j WHERE j.name = '园林雅韵'
+ON CONFLICT DO NOTHING;
+
+-- 22.10 园林雅韵 - 狮子林
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '狮子林', 31.3234, 120.6298, 'treasure', '在假山迷宫中找到AR宝藏', NULL, 
+  '狮子林始建于元代，以假山著称，假山群峰起伏，奇峰怪石，形似狮子。', 
+  '乾隆皇帝六次游览狮子林，并在北京圆明园和承德避暑山庄仿建。', 
+  1800, 150, 3, '0', NOW()
+FROM journey j WHERE j.name = '园林雅韵'
+ON CONFLICT DO NOTHING;
+
+-- 22.11 园林雅韵 - 网师园
+INSERT INTO exploration_point (journey_id, name, latitude, longitude, task_type, task_description, target_gesture, cultural_background, cultural_knowledge, distance_from_prev, points_reward, order_num, status, create_time)
+SELECT j.id, '网师园', 31.3089, 120.6345, 'photo', '拍摄殿春簃的精致窗景', NULL, 
+  '网师园是苏州园林中以小巧精致著称的典范，被誉为"小园极则"。', 
+  '园名取"渔隐"之意，表达园主归隐江湖的志趣。殿春簃被美国大都会博物馆仿建为"明轩"。', 
+  1200, 100, 4, '0', NOW()
+FROM journey j WHERE j.name = '园林雅韵'
+ON CONFLICT DO NOTHING;
+
 
 -- 23. 印记数据
 -- 23.1 路线印记
@@ -1323,6 +1359,11 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO app_user (phone, nickname, avatar, login_type, total_points, status, create_time)
 VALUES ('13700137000', '印记收藏家', '', 'wechat', 850, '0', NOW())
+ON CONFLICT DO NOTHING;
+
+-- 新用户：未进行任何文化之旅
+INSERT INTO app_user (phone, nickname, avatar, login_type, total_points, level, status, create_time)
+VALUES ('13600136000', '新手旅人', '', 'email', 0, 1, '0', NOW())
 ON CONFLICT DO NOTHING;
 
 

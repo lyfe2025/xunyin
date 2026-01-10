@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/journey.dart';
+import '../../../shared/widgets/app_dialog.dart';
 
 /// 旅程卡片组件 - 精致质感设计
 class JourneyCard extends StatefulWidget {
@@ -119,27 +120,15 @@ class _JourneyCardState extends State<JourneyCard>
   }
 
   Future<bool> _confirmDismiss(BuildContext context) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('归档旅程'),
-            content: Text('确定要归档「${widget.journey.journeyName}」吗？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text(
-                  '归档',
-                  style: TextStyle(color: AppColors.error),
-                ),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+    final confirmed = await AppConfirmDialog.show(
+      context: context,
+      title: '归档旅程',
+      content: '确定要归档「${widget.journey.journeyName}」吗？',
+      confirmText: '归档',
+      cancelText: '取消',
+      isDanger: true,
+    );
+    return confirmed == true;
   }
 
   Widget _buildCard(BuildContext context) {

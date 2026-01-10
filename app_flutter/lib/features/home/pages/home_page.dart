@@ -9,6 +9,7 @@ import '../../../providers/audio_providers.dart';
 import '../../../shared/widgets/china_map.dart';
 import '../../../shared/widgets/floating_controls.dart';
 import '../../../shared/widgets/city_bottom_sheet.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 /// 首页 - 全屏沉浸式地图
 class HomePage extends ConsumerStatefulWidget {
@@ -138,26 +139,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _handleLocationTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(width: 12),
-            Text('正在获取位置...'),
-          ],
-        ),
-        duration: const Duration(seconds: 2),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    AppSnackBar.loading(context, '正在获取位置...');
   }
 
   Widget _buildErrorView(Object error, WidgetRef ref) {

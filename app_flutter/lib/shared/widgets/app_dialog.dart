@@ -228,13 +228,13 @@ class _AppConfirmDialogState extends State<AppConfirmDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDarkMode;
-    final effectiveColor = widget.confirmColor ??
-        (widget.isDanger ? AppColors.error : AppColors.accent);
+    // 危险操作也使用品牌色，保持一致性
+    final effectiveColor = widget.confirmColor ?? AppColors.accent;
 
     return AppDialog(
       icon: widget.icon ??
           (widget.isDanger ? Icons.warning_rounded : Icons.help_outline_rounded),
-      iconColor: effectiveColor,
+      iconColor: widget.isDanger ? AppColors.error : effectiveColor,
       title: widget.title,
       content: widget.content,
       actions: [
@@ -245,6 +245,7 @@ class _AppConfirmDialogState extends State<AppConfirmDialog> {
             onPressed: _isLoading ? null : () => Navigator.pop(context, false),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.textSecondaryAdaptive(context),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               side: BorderSide(
                 color: isDark
                     ? AppColors.darkBorder
@@ -254,10 +255,16 @@ class _AppConfirmDialogState extends State<AppConfirmDialog> {
                 borderRadius: BorderRadius.circular(AppRadius.button),
               ),
             ),
-            child: Text(widget.cancelText),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                widget.cancelText,
+                maxLines: 1,
+              ),
+            ),
           ),
         ),
-        // 确认按钮
+        // 确认按钮 - 统一使用品牌色渐变
         SizedBox(
           height: 44,
           child: Material(
@@ -266,20 +273,19 @@ class _AppConfirmDialogState extends State<AppConfirmDialog> {
               onTap: _isLoading ? null : _handleConfirm,
               borderRadius: BorderRadius.circular(AppRadius.button),
               child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: _isLoading
                         ? [AppColors.textHint, AppColors.textHint]
-                        : widget.isDanger
-                            ? [AppColors.error, AppColors.error.withValues(alpha: 0.85)]
-                            : [AppColors.accent, AppColors.accentDark],
+                        : [AppColors.accent, AppColors.accentDark],
                   ),
                   borderRadius: BorderRadius.circular(AppRadius.button),
                   boxShadow: _isLoading
                       ? []
                       : [
                           BoxShadow(
-                            color: effectiveColor.withValues(alpha: 0.3),
+                            color: AppColors.accent.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -295,11 +301,15 @@ class _AppConfirmDialogState extends State<AppConfirmDialog> {
                             color: Colors.white,
                           ),
                         )
-                      : Text(
-                          widget.confirmText,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                      : FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            widget.confirmText,
+                            maxLines: 1,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                 ),
@@ -360,25 +370,30 @@ class AppSuccessDialog extends StatelessWidget {
               onTap: onPressed ?? () => Navigator.pop(context),
               borderRadius: BorderRadius.circular(AppRadius.button),
               child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [AppColors.success, Color(0xFF3DAA15)],
+                    colors: [AppColors.accent, AppColors.accentDark],
                   ),
                   borderRadius: BorderRadius.circular(AppRadius.button),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.success.withValues(alpha: 0.3),
+                      color: AppColors.accent.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: Center(
-                  child: Text(
-                    buttonText,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      buttonText,
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -439,25 +454,30 @@ class AppErrorDialog extends StatelessWidget {
               onTap: onPressed ?? () => Navigator.pop(context),
               borderRadius: BorderRadius.circular(AppRadius.button),
               child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.error, AppColors.error.withValues(alpha: 0.85)],
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accent, AppColors.accentDark],
                   ),
                   borderRadius: BorderRadius.circular(AppRadius.button),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.error.withValues(alpha: 0.3),
+                      color: AppColors.accent.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: Center(
-                  child: Text(
-                    buttonText,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      buttonText,
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),

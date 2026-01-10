@@ -8,6 +8,7 @@ import '../../../providers/service_providers.dart';
 import '../../../services/sms_service.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_buttons.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 /// 绑定手机页面 - Aurora UI + Glassmorphism
 class BindPhonePage extends ConsumerStatefulWidget {
@@ -58,22 +59,12 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
   Future<void> _sendCode() async {
     final phone = _phoneController.text.trim();
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('请输入手机号'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      AppSnackBar.error(context, '请输入手机号');
       return;
     }
 
     if (!RegExp(r'^1[3-9]\d{9}$').hasMatch(phone)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('请输入正确的手机号'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      AppSnackBar.error(context, '请输入正确的手机号');
       return;
     }
 
@@ -83,18 +74,11 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
       final message = await _smsService.sendCode(phone);
       _startCountdown();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: AppColors.success),
-        );
+        AppSnackBar.success(context, message);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppSnackBar.error(context, e.toString());
       }
     } finally {
       if (mounted) setState(() => _isSending = false);
@@ -113,22 +97,12 @@ class _BindPhonePageState extends ConsumerState<BindPhonePage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('绑定成功'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AppSnackBar.success(context, '绑定成功');
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppSnackBar.error(context, e.toString());
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

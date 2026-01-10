@@ -48,52 +48,55 @@ class MyJourneysPage extends ConsumerWidget {
     final isDark = context.isDarkMode;
     return GestureDetector(
       onTap: () => context.go('/'),
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.88)
-                : Colors.white.withValues(alpha: 0.88),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                'assets/illustrations/empty_journey.svg',
-                width: 180,
-                height: 135,
-              ),
-              const SizedBox(height: 20),
+      child: Align(
+        alignment: const Alignment(0, -0.3),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            margin: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurface.withValues(alpha: 0.88)
+                  : Colors.white.withValues(alpha: 0.88),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(
+                  'assets/illustrations/empty_journey.svg',
+                  width: 220,
+                  height: 165,
+                ),
+                const SizedBox(height: 24),
               Text(
                 '还没有开始任何旅程',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textPrimaryAdaptive(context),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
                 '去探索城市，开启你的文化之旅吧',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: AppColors.textHintAdaptive(context),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 10,
+                  horizontal: 28,
+                  vertical: 12,
                 ),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.accent, AppColors.accentDark],
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
@@ -102,7 +105,7 @@ class MyJourneysPage extends ConsumerWidget {
                       '发现城市',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -117,6 +120,7 @@ class MyJourneysPage extends ConsumerWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
