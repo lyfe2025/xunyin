@@ -26,6 +26,7 @@ export interface DownloadConfig {
     iosStoreUrl?: string
     androidStoreUrl?: string
     androidApkUrl?: string
+    footerText?: string
 }
 
 // 获取下载页配置（公开接口）

@@ -2530,13 +2530,13 @@ async function main() {
     {
       configName: '网站Logo',
       configKey: 'sys.app.logo',
-      configValue: '',
+      configValue: '/uploads/images/img-1768392967804-584091284.png',
       configType: 'Y',
     },
     {
       configName: '网站图标',
       configKey: 'sys.app.favicon',
-      configValue: '',
+      configValue: '/uploads/images/img-1768395562434-950284937.png',
       configType: 'Y',
     },
 
@@ -4930,6 +4930,7 @@ async function main() {
         gradientEnd: '#F5F0EB', // Aurora warm 浅色结束
         gradientDirection: 'to bottom', // 从上到下
         // Logo配置
+        logoImage: '/uploads/images/img-1768392967804-584091284.png',
         logoSize: 'normal',
         // 标语配置
         slogan: '探索城市文化，收集专属印记',
@@ -4974,6 +4975,7 @@ async function main() {
         // 页面信息
         pageTitle: '寻印 - 城市文化探索',
         pageDescription: '发现城市文化之旅，收集专属数字印记，用区块链永久珍藏你的探索足迹',
+        favicon: '/uploads/images/img-1768395562434-950284937.png',
         // 背景配置 - 深红到黑色渐变
         backgroundType: 'gradient',
         gradientStart: '#873636', // 深红褐色
@@ -4981,6 +4983,7 @@ async function main() {
         gradientDirection: '45deg', // 左下到右上
         // APP信息
         appName: '寻印',
+        appIcon: '/uploads/images/img-1768392967804-584091284.png',
         appSlogan: '探索城市文化，收集专属印记',
         sloganColor: 'rgba(255,255,255,0.7)', // 白色70%透明度
         logoAnimationEnabled: true, // 开启Logo浮动动画
@@ -5021,7 +5024,7 @@ async function main() {
         title: '寻印品牌启动页',
         type: 'image',
         // 使用品牌色渐变背景图（实际使用时替换为真实图片URL）
-        mediaUrl: '/uploads/splash/default-splash.png',
+        mediaUrl: '/uploads/images/img-1768392967804-584091284.png',
         linkType: 'none',
         duration: 3,
         skipDelay: 1,

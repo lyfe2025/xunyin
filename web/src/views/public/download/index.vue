@@ -156,7 +156,7 @@ onMounted(async () => {
     <div class="text-white">加载中...</div>
   </div>
 
-  <div v-else class="min-h-screen flex flex-col" :style="backgroundStyle">
+  <div v-else class="min-h-screen flex flex-col relative" :style="backgroundStyle">
     <!-- 移动端布局：垂直居中 -->
     <div class="flex-1 flex flex-col items-center justify-center px-6 lg:hidden">
       <!-- Logo + 名称 + 标语整体（带浮动动画） -->
@@ -343,6 +343,14 @@ onMounted(async () => {
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div
+      v-if="config.footerText"
+      class="w-full py-4 lg:py-6 text-center text-xs lg:text-sm text-white/40 lg:absolute lg:bottom-0 lg:left-0"
+    >
+      {{ config.footerText }}
     </div>
   </div>
 </template>

@@ -398,6 +398,11 @@ onMounted(() => {
                   {{ form.androidButtonText || 'Android 下载' }}
                 </button>
               </div>
+
+              <!-- 页脚 -->
+              <div v-if="form.footerText" class="w-full pb-6 text-center text-[10px] text-white/40">
+                {{ form.footerText }}
+              </div>
             </div>
           </template>
         </PhonePreview>
@@ -705,6 +710,20 @@ onMounted(() => {
                 placeholder="留空则自动使用版本管理中的最新 APK"
               />
               <p class="text-xs text-muted-foreground">手动填写将覆盖版本管理的链接，建议留空</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- 页脚配置 -->
+        <Card>
+          <CardHeader class="py-3">
+            <CardTitle class="text-sm">页脚配置</CardTitle>
+            <CardDescription class="text-xs">配置页面底部的版权或备案信息</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div class="space-y-1">
+              <Label class="text-xs">页脚文字</Label>
+              <Input v-model="form.footerText" placeholder="© 2025 寻印 · 让每一次探索都值得珍藏" />
             </div>
           </CardContent>
         </Card>

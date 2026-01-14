@@ -22,6 +22,7 @@ export class PublicConfigService {
         gradientDirection: '135deg',
         buttonRadius: 'full',
         buttonPrimaryColor: '#C53D43',
+        footerText: '© 2025 寻印 · 让每一次探索都值得珍藏',
       }
     }
 

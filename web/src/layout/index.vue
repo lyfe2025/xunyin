@@ -231,9 +231,13 @@ const handleOpenEditDialog = (userId: string) => {
     >
       <nav class="flex flex-col gap-4 px-2 sm:py-5">
         <div :class="cn('flex items-center px-2', isCollapsed ? 'justify-center' : 'gap-2')">
-          <router-link to="/" class="flex items-center gap-2">
+          <router-link to="/" class="flex items-center gap-3 px-1">
             <template v-if="siteLogo">
-              <img :src="siteLogo" :alt="siteName" class="h-8 max-w-[160px] object-contain" />
+              <img
+                :src="siteLogo"
+                :alt="siteName"
+                class="h-9 w-9 rounded-lg object-contain shadow-sm transition-transform hover:scale-105"
+              />
             </template>
             <template v-else>
               <div
@@ -484,9 +488,13 @@ const handleOpenEditDialog = (userId: string) => {
             <nav class="flex flex-col h-full">
               <!-- Logo -->
               <div class="flex items-center gap-2 px-4 py-4 border-b">
-                <router-link to="/" class="flex items-center gap-2">
+                <router-link to="/" class="flex items-center gap-3">
                   <template v-if="siteLogo">
-                    <img :src="siteLogo" :alt="siteName" class="h-8 max-w-[160px] object-contain" />
+                    <img
+                      :src="siteLogo"
+                      :alt="siteName"
+                      class="h-9 w-9 rounded-lg object-contain shadow-sm transition-transform hover:scale-105"
+                    />
                   </template>
                   <template v-else>
                     <div
@@ -626,9 +634,13 @@ const handleOpenEditDialog = (userId: string) => {
 
         <!-- Top 模式：Logo -->
         <div v-if="isTopMode" class="hidden sm:flex items-center gap-2 shrink-0">
-          <router-link to="/" class="flex items-center gap-2">
+          <router-link to="/" class="flex items-center gap-3">
             <template v-if="siteLogo">
-              <img :src="siteLogo" :alt="siteName" class="h-8 max-w-[160px] object-contain" />
+              <img
+                :src="siteLogo"
+                :alt="siteName"
+                class="h-9 w-9 rounded-lg object-contain shadow-sm transition-transform hover:scale-105"
+              />
             </template>
             <template v-else>
               <div
