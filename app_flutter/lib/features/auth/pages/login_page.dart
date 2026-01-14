@@ -125,6 +125,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(loginConfigProvider);
+    // 根据 Logo 尺寸动态调整间距
+    final isLargeLogo = config.logoSize == 'large';
+    final topSpacing = isLargeLogo ? 40.0 : 60.0;
+    final logoBottomSpacing = isLargeLogo ? 32.0 : 48.0;
+    final sectionSpacing = isLargeLogo ? 24.0 : 32.0;
 
     return Scaffold(
       body: Stack(
@@ -135,22 +140,37 @@ class _LoginPageState extends ConsumerState<LoginPage>
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Column(
-                children: [
-                  const SizedBox(height: 60),
-                  _buildLogo(config),
-                  const SizedBox(height: 48),
-                  if (config.phoneLoginEnabled) ...[
-                    _buildLoginForm(config),
-                    const SizedBox(height: 32),
-                    _buildLoginButton(config),
-                    const SizedBox(height: 40),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 上半部分：Logo + 表单 + 按钮
+                    Column(
+                      children: [
+                        SizedBox(height: topSpacing),
+                        _buildLogo(config),
+                        SizedBox(height: logoBottomSpacing),
+                        if (config.phoneLoginEnabled) ...[
+                          _buildLoginForm(config),
+                          SizedBox(height: sectionSpacing),
+                          _buildLoginButton(config),
+                          SizedBox(height: sectionSpacing),
+                        ],
+                        _buildOtherLogin(config),
+                      ],
+                    ),
+                    // 下半部分：协议（始终在底部）
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24, bottom: 24),
+                      child: _buildAgreement(config),
+                    ),
                   ],
-                  _buildOtherLogin(config),
-                  const SizedBox(height: 40),
-                  _buildAgreement(config),
-                  const SizedBox(height: 24),
-                ],
+                ),
               ),
             ),
           ),
@@ -545,11 +565,76 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  /// 登录按钮（使用配置的颜色和圆角）
+  /// 登录按钮（使用配置的颜色、圆角和样式）
   Widget _buildLoginButton(LoginConfig config) {
     final primaryColor = _getButtonPrimaryColor(config);
     final gradientEndColor = _getButtonGradientEndColor(config);
     final radius = _getButtonRadius(config);
+    final buttonStyle = config.buttonStyle ?? 'filled';
+
+    // 根据 buttonStyle 构建不同的装饰
+    BoxDecoration decoration;
+    Color textColor;
+
+    if (_isLoading) {
+      // 加载中状态
+      decoration = BoxDecoration(
+        color: AppColors.textHint,
+        borderRadius: BorderRadius.circular(radius),
+      );
+      textColor = Colors.white;
+    } else {
+      switch (buttonStyle) {
+        case 'outlined':
+          // 描边样式
+          decoration = BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(color: primaryColor, width: 2),
+          );
+          textColor = primaryColor;
+          break;
+        case 'glass':
+          // 玻璃态样式
+          decoration = BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.3),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          );
+          textColor = primaryColor;
+          break;
+        case 'filled':
+        default:
+          // 填充渐变样式（默认）
+          decoration = BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [primaryColor, gradientEndColor],
+            ),
+            borderRadius: BorderRadius.circular(radius),
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withValues(alpha: 0.35),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          );
+          textColor = Colors.white;
+          break;
+      }
+    }
 
     return Material(
       color: Colors.transparent,
@@ -559,38 +644,23 @@ class _LoginPageState extends ConsumerState<LoginPage>
         child: Container(
           width: double.infinity,
           height: 52,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: _isLoading
-                  ? [AppColors.textHint, AppColors.textHint]
-                  : [primaryColor, gradientEndColor],
-            ),
-            borderRadius: BorderRadius.circular(radius),
-            boxShadow: _isLoading
-                ? []
-                : [
-                    BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.35),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-          ),
+          decoration: decoration,
           child: Center(
             child: _isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 22,
                     height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: textColor,
+                    ),
                   )
-                : const Text(
+                : Text(
                     '登录',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: textColor,
                       letterSpacing: 2,
                     ),
                   ),
@@ -709,10 +779,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  /// 用户协议（链接使用配置的主色）
+  /// 用户协议（链接使用配置的主色，支持点击跳转）
   Widget _buildAgreement(LoginConfig config) {
     final primaryColor = _getButtonPrimaryColor(config);
-    
+
     return Text.rich(
       TextSpan(
         text: '登录即表示同意',
@@ -721,18 +791,51 @@ class _LoginPageState extends ConsumerState<LoginPage>
           fontSize: 12,
         ),
         children: [
-          TextSpan(
-            text: '《用户协议》',
-            style: TextStyle(color: primaryColor.withValues(alpha: 0.9)),
+          WidgetSpan(
+            child: GestureDetector(
+              onTap: () => _openAgreement(config, 'user_agreement'),
+              child: Text(
+                '《用户协议》',
+                style: TextStyle(
+                  color: primaryColor.withValues(alpha: 0.9),
+                  fontSize: 12,
+                ),
+              ),
+            ),
           ),
           const TextSpan(text: '和'),
-          TextSpan(
-            text: '《隐私政策》',
-            style: TextStyle(color: primaryColor.withValues(alpha: 0.9)),
+          WidgetSpan(
+            child: GestureDetector(
+              onTap: () => _openAgreement(config, 'privacy_policy'),
+              child: Text(
+                '《隐私政策》',
+                style: TextStyle(
+                  color: primaryColor.withValues(alpha: 0.9),
+                  fontSize: 12,
+                ),
+              ),
+            ),
           ),
         ],
       ),
       textAlign: TextAlign.center,
     );
+  }
+
+  /// 打开协议页面
+  void _openAgreement(LoginConfig config, String type) {
+    if (config.agreementSource == 'external') {
+      // 外部链接
+      final url = type == 'user_agreement'
+          ? config.userAgreementUrl
+          : config.privacyPolicyUrl;
+      if (url != null && url.isNotEmpty) {
+        // TODO: 使用 url_launcher 打开外部链接
+        _showSnackBar('即将打开外部链接');
+        return;
+      }
+    }
+    // 内置协议 - 跳转到协议页面
+    context.push('/agreement/$type');
   }
 }

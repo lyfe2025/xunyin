@@ -2530,13 +2530,13 @@ async function main() {
     {
       configName: '网站Logo',
       configKey: 'sys.app.logo',
-      configValue: '/uploads/images/img-1768392967804-584091284.png',
+      configValue: '/uploads/images/logo.png',
       configType: 'Y',
     },
     {
       configName: '网站图标',
       configKey: 'sys.app.favicon',
-      configValue: '/uploads/images/img-1768395562434-950284937.png',
+      configValue: '/uploads/images/favicon.png',
       configType: 'Y',
     },
 
@@ -4930,7 +4930,7 @@ async function main() {
         gradientEnd: '#F5F0EB', // Aurora warm 浅色结束
         gradientDirection: 'to bottom', // 从上到下
         // Logo配置
-        logoImage: '/uploads/images/img-1768392967804-584091284.png',
+        logoImage: '/uploads/images/logo.png',
         logoSize: 'normal',
         // 标语配置
         slogan: '探索城市文化，收集专属印记',
@@ -4968,7 +4968,7 @@ async function main() {
         // 页面信息
         pageTitle: '寻印 - 城市文化探索',
         pageDescription: '发现城市文化之旅，收集专属数字印记，用区块链永久珍藏你的探索足迹',
-        favicon: '/uploads/images/img-1768395562434-950284937.png',
+        favicon: '/uploads/images/favicon.png',
         // 背景配置 - 深红到黑色渐变
         backgroundType: 'gradient',
         gradientStart: '#873636', // 深红褐色
@@ -4976,7 +4976,7 @@ async function main() {
         gradientDirection: '45deg', // 左下到右上
         // APP信息
         appName: '寻印',
-        appIcon: '/uploads/images/img-1768392967804-584091284.png',
+        appIcon: '/uploads/images/logo.png',
         appSlogan: '探索城市文化，收集专属印记',
         sloganColor: 'rgba(255,255,255,0.7)', // 白色70%透明度
         logoAnimationEnabled: true, // 开启Logo浮动动画
@@ -5011,23 +5011,29 @@ async function main() {
   if (existingSplashConfig === 0) {
     console.log('Seeding app splash config...')
 
-    // 启动页配置 - 默认品牌启动页
+    // 品牌启动页 - 与 Flutter 硬编码一致
     await prisma.appSplashConfig.create({
       data: {
         title: '寻印品牌启动页',
+        mode: 'brand',
         type: 'image',
-        // 使用品牌色渐变背景图（实际使用时替换为真实图片URL）
-        mediaUrl: '/uploads/images/img-1768392967804-584091284.png',
-        linkType: 'none',
-        duration: 3,
-        skipDelay: 1,
+        // 品牌模式字段
+        logoImage: '/uploads/images/logo.png',
+        logoText: '印',
+        appName: '寻印',
+        slogan: '探索城市文化，收集专属印记',
+        backgroundColor: '#F8F5F0',
+        textColor: '#2D2D2D',
+        logoColor: '#C41E3A',
+        // 通用字段
+        duration: 2,
         platform: 'all',
-        orderNum: 1,
+        orderNum: 0,
         status: '0',
         createBy: 'system',
       },
     })
-    console.log('Created app splash config')
+    console.log('Created brand splash config')
 
     console.log('App splash config seeding completed.')
   }

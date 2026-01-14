@@ -2890,10 +2890,12 @@ INSERT INTO app_download_config (
   id,
   page_title,
   page_description,
+  favicon,
   background_type,
   gradient_start,
   gradient_end,
   gradient_direction,
+  app_icon,
   app_name,
   app_slogan,
   slogan_color,
@@ -2914,10 +2916,12 @@ INSERT INTO app_download_config (
   'default_download_config',
   '寻印 - 城市文化探索',
   '发现城市文化之旅，收集专属数字印记，用区块链永久珍藏你的探索足迹',
+  '/uploads/images/favicon.png',      -- favicon
   'gradient',
   '#873636',                          -- 深红褐色
   '#1A1A1A',                          -- 近黑
   '45deg',                            -- 左下到右上
+  '/uploads/images/logo.png',         -- app_icon
   '寻印',
   '探索城市文化，收集专属印记',
   'rgba(255,255,255,0.7)',            -- 白色70%透明度
@@ -2931,6 +2935,49 @@ INSERT INTO app_download_config (
   '[{"icon": "compass", "title": "发现城市文化之旅"}, {"icon": "stamp", "title": "收集专属数字印记"}, {"icon": "shield-check", "title": "区块链永久存证"}]',
   '© 2025 寻印 · 让每一次探索都值得珍藏',
   '0',
+  'system',
+  NOW(),
+  NOW()
+) ON CONFLICT (id) DO NOTHING;
+
+-- =============================================
+-- APP 启动页配置初始数据
+-- =============================================
+INSERT INTO app_splash_config (
+  id,
+  title,
+  mode,
+  type,
+  logo_image,
+  logo_text,
+  app_name,
+  slogan,
+  background_color,
+  text_color,
+  logo_color,
+  duration,
+  platform,
+  order_num,
+  status,
+  create_by,
+  create_time,
+  update_time
+) VALUES (
+  'default_brand_splash',
+  '寻印品牌启动页',
+  'brand',                            -- 品牌模式
+  'image',
+  '/uploads/images/logo.png',         -- Logo图片
+  '印',                               -- Logo文字（无图片时显示）
+  '寻印',                             -- 应用名称
+  '探索城市文化，收集专属印记',       -- 标语
+  '#F8F5F0',                          -- 背景色（与 Flutter 硬编码一致）
+  '#2D2D2D',                          -- 文字颜色
+  '#C41E3A',                          -- Logo背景色（品牌红）
+  2,                                  -- 展示时长（秒）
+  'all',                              -- 全平台
+  0,                                  -- 排序号（优先显示）
+  '0',                                -- 启用
   'system',
   NOW(),
   NOW()

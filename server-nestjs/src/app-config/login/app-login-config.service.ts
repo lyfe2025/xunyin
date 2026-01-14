@@ -74,6 +74,10 @@ export class AppLoginConfigService {
       appleLoginEnabled: config.appleLoginEnabled,
       googleLoginEnabled: config.googleLoginEnabled,
       phoneLoginEnabled: config.phoneLoginEnabled,
+      // 协议配置
+      agreementSource: config.agreementSource,
+      userAgreementUrl: config.userAgreementUrl,
+      privacyPolicyUrl: config.privacyPolicyUrl,
     }
   }
 }

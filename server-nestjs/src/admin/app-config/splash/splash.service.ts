@@ -9,10 +9,11 @@ export class SplashService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(query: QuerySplashDto) {
-    const { title, platform, status, pageNum = 1, pageSize = 10 } = query
+    const { title, mode, platform, status, pageNum = 1, pageSize = 10 } = query
 
     const where = {
       ...(title && { title: { contains: title } }),
+      ...(mode && { mode }),
       ...(platform && { platform }),
       ...(status && { status }),
     }

@@ -41,6 +41,7 @@ import {
   Image as ImageIcon,
   Video,
   SkipForward,
+  Stamp,
 } from 'lucide-vue-next'
 import {
   listSplash,
@@ -67,6 +68,7 @@ const submitLoading = ref(false)
 // 查询参数
 const queryParams = reactive({
   title: '',
+  mode: '__all__',
   platform: '__all__',
   status: '__all__',
   pageNum: 1,
@@ -76,12 +78,23 @@ const queryParams = reactive({
 // 表单数据
 const form = reactive<CreateSplashParams>({
   title: '',
+  mode: 'brand',
+  // 广告模式字段
   type: 'image',
   mediaUrl: '',
   linkType: 'none',
   linkUrl: '',
-  duration: 3,
   skipDelay: 0,
+  // 品牌模式字段
+  logoImage: '',
+  logoText: '印',
+  appName: '寻印',
+  slogan: '探索城市文化，收集专属印记',
+  backgroundColor: '#F8F5F0',
+  textColor: '#2D2D2D',
+  logoColor: '#C41E3A',
+  // 通用字段
+  duration: 3,
   platform: 'all',
   startTime: '',
   endTime: '',
@@ -90,23 +103,53 @@ const form = reactive<CreateSplashParams>({
 })
 
 const editingId = ref<string | null>(null)
-
-// 当前选中预览的项
 const previewItem = ref<SplashConfig | null>(null)
 
 // 预览数据
 const previewData = computed(() => {
   if (dialogVisible.value) {
-    return { type: form.type, mediaUrl: form.mediaUrl, duration: form.duration }
+    return {
+      mode: form.mode,
+      type: form.type,
+      mediaUrl: form.mediaUrl,
+      duration: form.duration,
+      logoImage: form.logoImage,
+      logoText: form.logoText,
+      appName: form.appName,
+      slogan: form.slogan,
+      backgroundColor: form.backgroundColor,
+      textColor: form.textColor,
+      logoColor: form.logoColor,
+    }
   }
   if (previewItem.value) {
     return {
+      mode: previewItem.value.mode,
       type: previewItem.value.type,
       mediaUrl: previewItem.value.mediaUrl,
       duration: previewItem.value.duration,
+      logoImage: previewItem.value.logoImage,
+      logoText: previewItem.value.logoText,
+      appName: previewItem.value.appName,
+      slogan: previewItem.value.slogan,
+      backgroundColor: previewItem.value.backgroundColor,
+      textColor: previewItem.value.textColor,
+      logoColor: previewItem.value.logoColor,
     }
   }
-  return { type: 'image', mediaUrl: '', duration: 3 }
+  return {
+    mode: 'brand',
+    type: 'image',
+    mediaUrl: '',
+    duration: 3,
+    logoImage: '',
+    logoText: '印',
+    appName: '寻印',
+    slogan: '探索城市文化，收集专属印记',
+    backgroundColor: '#F8F5F0',
+    textColor: '#2D2D2D',
+    logoColor: '#C41E3A',
+  }
 })
 
 // 获取列表
@@ -115,15 +158,14 @@ async function getList() {
   try {
     const params = {
       ...queryParams,
+      mode: queryParams.mode === '__all__' ? '' : queryParams.mode,
       platform: queryParams.platform === '__all__' ? '' : queryParams.platform,
       status: queryParams.status === '__all__' ? '' : queryParams.status,
     }
     const res = (await listSplash(params)) as any
-    // 兼容 res.data.list 或 res.list 两种格式
     const data = res.data || res
     list.value = data.list || []
     total.value = data.total || 0
-    // 默认选中第一个
     if (list.value.length > 0 && !previewItem.value) {
       previewItem.value = list.value[0] ?? null
     }
@@ -132,16 +174,15 @@ async function getList() {
   }
 }
 
-// 搜索
 function handleSearch() {
   queryParams.pageNum = 1
   previewItem.value = null
   getList()
 }
 
-// 重置
 function handleReset() {
   queryParams.title = ''
+  queryParams.mode = '__all__'
   queryParams.platform = '__all__'
   queryParams.status = '__all__'
   queryParams.pageNum = 1
@@ -149,7 +190,6 @@ function handleReset() {
   getList()
 }
 
-// 新增
 function handleAdd() {
   editingId.value = null
   dialogTitle.value = '新增启动页'
@@ -157,18 +197,25 @@ function handleAdd() {
   dialogVisible.value = true
 }
 
-// 编辑
 function handleEdit(row: SplashConfig) {
   editingId.value = row.id
   dialogTitle.value = '编辑启动页'
   Object.assign(form, {
     title: row.title || '',
-    type: row.type,
-    mediaUrl: row.mediaUrl,
+    mode: row.mode || 'ad',
+    type: row.type || 'image',
+    mediaUrl: row.mediaUrl || '',
     linkType: row.linkType || 'none',
     linkUrl: row.linkUrl || '',
+    skipDelay: row.skipDelay || 0,
+    logoImage: row.logoImage || '',
+    logoText: row.logoText || '印',
+    appName: row.appName || '寻印',
+    slogan: row.slogan || '',
+    backgroundColor: row.backgroundColor || '#F8F5F0',
+    textColor: row.textColor || '#2D2D2D',
+    logoColor: row.logoColor || '#C41E3A',
     duration: row.duration,
-    skipDelay: row.skipDelay,
     platform: row.platform,
     startTime: row.startTime ? row.startTime.slice(0, 16) : '',
     endTime: row.endTime ? row.endTime.slice(0, 16) : '',
@@ -178,21 +225,27 @@ function handleEdit(row: SplashConfig) {
   dialogVisible.value = true
 }
 
-// 预览某一项
 function handlePreview(row: SplashConfig) {
   previewItem.value = row
 }
 
-// 重置表单
 function resetForm() {
   Object.assign(form, {
     title: '',
+    mode: 'brand',
     type: 'image',
     mediaUrl: '',
     linkType: 'none',
     linkUrl: '',
-    duration: 3,
     skipDelay: 0,
+    logoImage: '',
+    logoText: '印',
+    appName: '寻印',
+    slogan: '探索城市文化，收集专属印记',
+    backgroundColor: '#F8F5F0',
+    textColor: '#2D2D2D',
+    logoColor: '#C41E3A',
+    duration: 3,
     platform: 'all',
     startTime: '',
     endTime: '',
@@ -201,9 +254,9 @@ function resetForm() {
   })
 }
 
-// 提交
 async function handleSubmit() {
-  if (!form.mediaUrl) {
+  // 广告模式需要媒体资源
+  if (form.mode === 'ad' && !form.mediaUrl) {
     toast({ title: '请上传媒体资源', variant: 'destructive' })
     return
   }
@@ -226,7 +279,6 @@ async function handleSubmit() {
   }
 }
 
-// 删除
 async function handleDelete(row: SplashConfig) {
   if (!window.confirm('确定要删除该启动页配置吗？')) return
   await deleteSplash(row.id)
@@ -235,7 +287,6 @@ async function handleDelete(row: SplashConfig) {
   getList()
 }
 
-// 批量删除
 async function handleBatchDelete() {
   if (selectedIds.value.length === 0) {
     toast({ title: '请选择要删除的数据', variant: 'destructive' })
@@ -251,7 +302,6 @@ async function handleBatchDelete() {
   getList()
 }
 
-// 状态切换
 async function handleStatusChange(row: SplashConfig) {
   const newStatus = row.status === '0' ? '1' : '0'
   await updateSplashStatus(row.id, newStatus)
@@ -259,7 +309,6 @@ async function handleStatusChange(row: SplashConfig) {
   toast({ title: '状态更新成功' })
 }
 
-// 选择
 function handleSelectionChange(id: string, checked: boolean) {
   if (checked) {
     selectedIds.value.push(id)
@@ -268,7 +317,6 @@ function handleSelectionChange(id: string, checked: boolean) {
   }
 }
 
-// 全选
 function handleSelectAll(checked: boolean) {
   selectedIds.value = checked ? list.value.map((item) => item.id) : []
 }
@@ -288,7 +336,7 @@ onMounted(() => {
     <div class="flex items-center justify-between mb-4">
       <div>
         <h2 class="text-xl font-bold">启动页配置</h2>
-        <p class="text-sm text-muted-foreground">管理 APP 启动时展示的开屏广告</p>
+        <p class="text-sm text-muted-foreground">管理 APP 启动时展示的品牌页或开屏广告</p>
       </div>
       <div class="flex gap-2">
         <Button size="sm" @click="handleAdd"><Plus class="h-4 w-4 mr-1" />新增</Button>
@@ -299,10 +347,49 @@ onMounted(() => {
     <div class="flex gap-8 h-[calc(100vh-140px)]">
       <!-- 左侧：手机预览 -->
       <div class="shrink-0">
-        <PhonePreview :scale="0.85" :show-device-switch="true" status-bar-color="white">
+        <PhonePreview
+          :scale="0.85"
+          :show-device-switch="true"
+          :status-bar-color="previewData.mode === 'brand' ? 'black' : 'white'"
+        >
           <template #default>
-            <div class="w-full h-full bg-black relative flex flex-col">
-              <!-- 媒体内容 -->
+            <!-- 品牌模式预览 -->
+            <div
+              v-if="previewData.mode === 'brand'"
+              class="w-full h-full flex flex-col items-center justify-center"
+              :style="{ backgroundColor: previewData.backgroundColor || '#F8F5F0' }"
+            >
+              <!-- Logo -->
+              <div
+                v-if="previewData.logoImage"
+                class="w-24 h-24 rounded-[20px] overflow-hidden shadow-lg"
+              >
+                <img :src="previewData.logoImage" class="w-full h-full object-cover" alt="Logo" />
+              </div>
+              <div
+                v-else
+                class="w-24 h-24 rounded-[20px] flex items-center justify-center shadow-lg"
+                :style="{ backgroundColor: previewData.logoColor || '#C41E3A' }"
+              >
+                <span class="text-5xl font-bold text-white">
+                  {{ previewData.logoText || '印' }}
+                </span>
+              </div>
+              <!-- 应用名称 -->
+              <h1
+                class="mt-6 text-3xl font-bold"
+                :style="{ color: previewData.textColor || '#2D2D2D' }"
+              >
+                {{ previewData.appName || '寻印' }}
+              </h1>
+              <!-- 标语 -->
+              <p class="mt-2 text-sm opacity-70" :style="{ color: previewData.textColor }">
+                {{ previewData.slogan || '探索城市文化，收集专属印记' }}
+              </p>
+            </div>
+
+            <!-- 广告模式预览 -->
+            <div v-else class="w-full h-full bg-black relative flex flex-col">
               <div class="flex-1 relative">
                 <img
                   v-if="previewData.mediaUrl && previewData.type === 'image'"
@@ -324,7 +411,6 @@ onMounted(() => {
                 >
                   {{ list.length === 0 ? '暂无启动页' : '点击列表预览' }}
                 </div>
-
                 <!-- 跳过按钮 -->
                 <div
                   v-if="previewData.mediaUrl"
@@ -366,6 +452,19 @@ onMounted(() => {
               <div class="space-y-1">
                 <Label class="text-xs">标题</Label>
                 <Input v-model="queryParams.title" placeholder="标题" class="w-36 h-8" />
+              </div>
+              <div class="space-y-1">
+                <Label class="text-xs">模式</Label>
+                <Select v-model="queryParams.mode">
+                  <SelectTrigger class="w-24 h-8">
+                    <SelectValue placeholder="全部" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">全部</SelectItem>
+                    <SelectItem value="brand">品牌</SelectItem>
+                    <SelectItem value="ad">广告</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div class="space-y-1">
                 <Label class="text-xs">平台</Label>
@@ -419,7 +518,7 @@ onMounted(() => {
                   <Checkbox :checked="isAllSelected" @update:checked="handleSelectAll" />
                 </TableHead>
                 <TableHead>标题</TableHead>
-                <TableHead>类型</TableHead>
+                <TableHead>模式</TableHead>
                 <TableHead>平台</TableHead>
                 <TableHead>时长</TableHead>
                 <TableHead>状态</TableHead>
@@ -443,9 +542,10 @@ onMounted(() => {
                 <TableCell class="font-medium">{{ row.title || '-' }}</TableCell>
                 <TableCell>
                   <Badge variant="outline" class="text-xs">
-                    <ImageIcon v-if="row.type === 'image'" class="h-3 w-3 mr-1" />
+                    <Stamp v-if="row.mode === 'brand'" class="h-3 w-3 mr-1" />
+                    <ImageIcon v-else-if="row.type === 'image'" class="h-3 w-3 mr-1" />
                     <Video v-else class="h-3 w-3 mr-1" />
-                    {{ row.type === 'image' ? '图片' : '视频' }}
+                    {{ row.mode === 'brand' ? '品牌' : row.type === 'image' ? '图片' : '视频' }}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -481,7 +581,7 @@ onMounted(() => {
 
     <!-- 新增/编辑弹窗 -->
     <Dialog v-model:open="dialogVisible">
-      <DialogContent class="max-w-lg">
+      <DialogContent class="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{{ dialogTitle }}</DialogTitle>
         </DialogHeader>
@@ -494,12 +594,12 @@ onMounted(() => {
 
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1">
-              <Label class="text-xs">类型</Label>
-              <Select v-model="form.type">
+              <Label class="text-xs">模式</Label>
+              <Select v-model="form.mode">
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="image">图片</SelectItem>
-                  <SelectItem value="video">视频</SelectItem>
+                  <SelectItem value="brand">品牌启动页</SelectItem>
+                  <SelectItem value="ad">广告启动页</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -516,40 +616,105 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="space-y-1">
-            <Label class="text-xs">媒体资源</Label>
-            <ImageUpload
-              v-model="form.mediaUrl"
-              :accept="form.type === 'image' ? 'image/*' : 'video/*'"
-              :placeholder="form.type === 'image' ? '上传图片' : '上传视频'"
-            />
-            <p class="text-xs text-muted-foreground mt-1">
-              建议尺寸：1080x1920 (9:16) 或更高分辨率，关键内容居中以适应不同机型
-            </p>
-          </div>
+          <!-- 品牌模式配置 -->
+          <template v-if="form.mode === 'brand'">
+            <div class="space-y-1">
+              <Label class="text-xs">Logo 图片（可选）</Label>
+              <ImageUpload v-model="form.logoImage" placeholder="上传 Logo" />
+              <p class="text-xs text-muted-foreground">建议尺寸：200x200，圆角会自动处理</p>
+            </div>
 
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <Label class="text-xs">Logo 文字（无图片时显示）</Label>
+                <Input v-model="form.logoText" placeholder="印" maxlength="2" />
+              </div>
+              <div class="space-y-1">
+                <Label class="text-xs">应用名称</Label>
+                <Input v-model="form.appName" placeholder="寻印" />
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <Label class="text-xs">标语</Label>
+              <Input v-model="form.slogan" placeholder="探索城市文化，收集专属印记" />
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+              <div class="space-y-1">
+                <Label class="text-xs">背景色</Label>
+                <Input v-model="form.backgroundColor" type="color" class="h-10 p-1" />
+              </div>
+              <div class="space-y-1">
+                <Label class="text-xs">文字颜色</Label>
+                <Input v-model="form.textColor" type="color" class="h-10 p-1" />
+              </div>
+              <div class="space-y-1">
+                <Label class="text-xs">Logo 背景色</Label>
+                <Input v-model="form.logoColor" type="color" class="h-10 p-1" />
+              </div>
+            </div>
+          </template>
+
+          <!-- 广告模式配置 -->
+          <template v-else>
+            <div class="space-y-1">
+              <Label class="text-xs">媒体类型</Label>
+              <Select v-model="form.type">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="image">图片</SelectItem>
+                  <SelectItem value="video">视频</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div class="space-y-1">
+              <Label class="text-xs">媒体资源</Label>
+              <ImageUpload
+                v-model="form.mediaUrl"
+                :accept="form.type === 'image' ? 'image/*' : 'video/*'"
+                :placeholder="form.type === 'image' ? '上传图片' : '上传视频'"
+              />
+              <p class="text-xs text-muted-foreground">建议尺寸：1080x1920 (9:16) 或更高分辨率</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <Label class="text-xs">跳过延迟（秒）</Label>
+                <Input v-model.number="form.skipDelay" type="number" min="0" max="10" />
+              </div>
+              <div class="space-y-1">
+                <Label class="text-xs">跳转类型</Label>
+                <Select v-model="form.linkType">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">不跳转</SelectItem>
+                    <SelectItem value="internal">内部页面</SelectItem>
+                    <SelectItem value="external">外部链接</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div v-if="form.linkType !== 'none'" class="space-y-1">
+              <Label class="text-xs">
+                {{ form.linkType === 'external' ? '跳转链接' : '页面路径' }}
+              </Label>
+              <Input
+                v-model="form.linkUrl"
+                :placeholder="
+                  form.linkType === 'external' ? 'https://example.com' : '/pages/home/index'
+                "
+              />
+            </div>
+          </template>
+
+          <!-- 通用配置 -->
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1">
               <Label class="text-xs">展示时长（秒）</Label>
               <Input v-model.number="form.duration" type="number" min="1" max="30" />
-            </div>
-            <div class="space-y-1">
-              <Label class="text-xs">跳过延迟（秒）</Label>
-              <Input v-model.number="form.skipDelay" type="number" min="0" max="10" />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1">
-              <Label class="text-xs">跳转类型</Label>
-              <Select v-model="form.linkType">
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">不跳转</SelectItem>
-                  <SelectItem value="internal">内部页面</SelectItem>
-                  <SelectItem value="external">外部链接</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div class="space-y-1">
               <Label class="text-xs">状态</Label>
@@ -561,26 +726,6 @@ onMounted(() => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <!-- 跳转链接 -->
-          <div v-if="form.linkType !== 'none'" class="space-y-1">
-            <Label class="text-xs">
-              {{ form.linkType === 'external' ? '跳转链接' : '页面路径' }}
-            </Label>
-            <Input
-              v-model="form.linkUrl"
-              :placeholder="
-                form.linkType === 'external' ? 'https://example.com' : '/pages/home/index'
-              "
-            />
-            <p class="text-xs text-muted-foreground">
-              {{
-                form.linkType === 'external'
-                  ? '点击启动页后跳转的外部网址'
-                  : '点击启动页后跳转的 APP 内部页面路径'
-              }}
-            </p>
           </div>
         </div>
 
@@ -596,5 +741,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 启动页无需额外样式，状态栏已由 PhonePreview 组件处理 */
+/* 启动页无需额外样式 */
 </style>

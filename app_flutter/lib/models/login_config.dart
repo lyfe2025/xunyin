@@ -39,6 +39,11 @@ class LoginConfig {
   final bool googleLoginEnabled;
   final bool phoneLoginEnabled;
 
+  // 协议配置
+  final String agreementSource; // builtin: 内置协议, external: 外部链接
+  final String? userAgreementUrl;
+  final String? privacyPolicyUrl;
+
   const LoginConfig({
     this.backgroundType = 'gradient',
     this.backgroundImage,
@@ -65,6 +70,9 @@ class LoginConfig {
     this.appleLoginEnabled = true,
     this.googleLoginEnabled = true,
     this.phoneLoginEnabled = true,
+    this.agreementSource = 'builtin',
+    this.userAgreementUrl,
+    this.privacyPolicyUrl,
   });
 
   /// 默认配置（硬编码，确保离线可用）
@@ -97,6 +105,9 @@ class LoginConfig {
       appleLoginEnabled: json['appleLoginEnabled'] as bool? ?? true,
       googleLoginEnabled: json['googleLoginEnabled'] as bool? ?? true,
       phoneLoginEnabled: json['phoneLoginEnabled'] as bool? ?? true,
+      agreementSource: json['agreementSource'] as String? ?? 'builtin',
+      userAgreementUrl: json['userAgreementUrl'] as String?,
+      privacyPolicyUrl: json['privacyPolicyUrl'] as String?,
     );
   }
 
@@ -127,6 +138,9 @@ class LoginConfig {
       'appleLoginEnabled': appleLoginEnabled,
       'googleLoginEnabled': googleLoginEnabled,
       'phoneLoginEnabled': phoneLoginEnabled,
+      'agreementSource': agreementSource,
+      'userAgreementUrl': userAgreementUrl,
+      'privacyPolicyUrl': privacyPolicyUrl,
     };
   }
 }

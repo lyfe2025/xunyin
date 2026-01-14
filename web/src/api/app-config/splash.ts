@@ -3,12 +3,23 @@ import request from '@/utils/request'
 export interface SplashConfig {
   id: string
   title?: string
+  mode: string // brand-品牌启动页 ad-广告启动页
+  // 广告模式字段
   type: string
-  mediaUrl: string
+  mediaUrl?: string
   linkType?: string
   linkUrl?: string
-  duration: number
   skipDelay: number
+  // 品牌模式字段
+  logoImage?: string
+  logoText?: string
+  appName?: string
+  slogan?: string
+  backgroundColor?: string
+  textColor?: string
+  logoColor?: string
+  // 通用字段
+  duration: number
   platform: string
   startTime?: string
   endTime?: string
@@ -20,6 +31,7 @@ export interface SplashConfig {
 
 export interface QuerySplashParams {
   title?: string
+  mode?: string
   platform?: string
   status?: string
   pageNum?: number
@@ -28,12 +40,23 @@ export interface QuerySplashParams {
 
 export interface CreateSplashParams {
   title?: string
+  mode: string
+  // 广告模式字段
   type?: string
-  mediaUrl: string
+  mediaUrl?: string
   linkType?: string
   linkUrl?: string
-  duration?: number
   skipDelay?: number
+  // 品牌模式字段
+  logoImage?: string
+  logoText?: string
+  appName?: string
+  slogan?: string
+  backgroundColor?: string
+  textColor?: string
+  logoColor?: string
+  // 通用字段
+  duration?: number
   platform?: string
   startTime?: string
   endTime?: string

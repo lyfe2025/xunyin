@@ -1029,12 +1029,20 @@ CREATE INDEX IF NOT EXISTS idx_background_music_status ON background_music(statu
 CREATE TABLE IF NOT EXISTS app_splash_config (
   id VARCHAR(30) PRIMARY KEY,
   title VARCHAR(100),
+  mode VARCHAR(20) NOT NULL DEFAULT 'ad',
   type VARCHAR(20) NOT NULL DEFAULT 'image',
-  media_url VARCHAR(500) NOT NULL,
+  media_url VARCHAR(500),
   link_type VARCHAR(20),
   link_url VARCHAR(500),
-  duration INT DEFAULT 3,
   skip_delay INT DEFAULT 0,
+  logo_image VARCHAR(500),
+  logo_text VARCHAR(10),
+  app_name VARCHAR(50),
+  slogan VARCHAR(200),
+  background_color VARCHAR(20),
+  text_color VARCHAR(20),
+  logo_color VARCHAR(20),
+  duration INT DEFAULT 3,
   platform VARCHAR(20) DEFAULT 'all',
   start_time TIMESTAMP,
   end_time TIMESTAMP,
@@ -1048,12 +1056,20 @@ CREATE TABLE IF NOT EXISTS app_splash_config (
 COMMENT ON TABLE app_splash_config IS 'APP启动页配置表';
 COMMENT ON COLUMN app_splash_config.id IS '配置ID';
 COMMENT ON COLUMN app_splash_config.title IS '标题';
-COMMENT ON COLUMN app_splash_config.type IS '类型：image-图片 video-视频';
-COMMENT ON COLUMN app_splash_config.media_url IS '媒体资源URL';
+COMMENT ON COLUMN app_splash_config.mode IS '模式：brand-品牌启动页 ad-广告启动页';
+COMMENT ON COLUMN app_splash_config.type IS '类型：image-图片 video-视频（广告模式）';
+COMMENT ON COLUMN app_splash_config.media_url IS '媒体资源URL（广告模式）';
 COMMENT ON COLUMN app_splash_config.link_type IS '跳转类型：none-不跳转 internal-内部页面 external-外部链接';
 COMMENT ON COLUMN app_splash_config.link_url IS '跳转链接';
-COMMENT ON COLUMN app_splash_config.duration IS '展示时长（秒）';
 COMMENT ON COLUMN app_splash_config.skip_delay IS '跳过按钮延迟显示（秒）';
+COMMENT ON COLUMN app_splash_config.logo_image IS 'Logo图片URL（品牌模式）';
+COMMENT ON COLUMN app_splash_config.logo_text IS 'Logo文字（无图片时显示）';
+COMMENT ON COLUMN app_splash_config.app_name IS '应用名称（品牌模式）';
+COMMENT ON COLUMN app_splash_config.slogan IS '标语（品牌模式）';
+COMMENT ON COLUMN app_splash_config.background_color IS '背景色（品牌模式）';
+COMMENT ON COLUMN app_splash_config.text_color IS '文字颜色（品牌模式）';
+COMMENT ON COLUMN app_splash_config.logo_color IS 'Logo背景色（品牌模式，无图片时）';
+COMMENT ON COLUMN app_splash_config.duration IS '展示时长（秒）';
 COMMENT ON COLUMN app_splash_config.platform IS '平台：all-全部 ios-仅iOS android-仅Android';
 COMMENT ON COLUMN app_splash_config.start_time IS '生效开始时间';
 COMMENT ON COLUMN app_splash_config.end_time IS '生效结束时间';
