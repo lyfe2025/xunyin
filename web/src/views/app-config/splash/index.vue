@@ -523,6 +523,9 @@ onMounted(() => {
               :accept="form.type === 'image' ? 'image/*' : 'video/*'"
               :placeholder="form.type === 'image' ? '上传图片' : '上传视频'"
             />
+            <p class="text-xs text-muted-foreground mt-1">
+              建议尺寸：1080x1920 (9:16) 或更高分辨率，关键内容居中以适应不同机型
+            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
