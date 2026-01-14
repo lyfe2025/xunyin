@@ -63,18 +63,11 @@ const form = reactive<UpdateLoginConfigParams>({
   buttonGradientEndColor: '#9A1830', // Flutter AppColors.accentDark
   buttonSecondaryColor: 'rgba(196,30,58,0.08)', // accent with 0.08 opacity
   buttonRadius: 'lg', // Flutter 用 14px 圆角，对应 lg
-  // 按钮文本
-  wechatButtonText: '',
-  phoneButtonText: '',
-  emailButtonText: '',
-  guestButtonText: '',
   // 登录方式
   wechatLoginEnabled: true,
   appleLoginEnabled: true,
   googleLoginEnabled: true,
   phoneLoginEnabled: true,
-  emailLoginEnabled: false,
-  guestModeEnabled: false,
   // 协议配置
   agreementSource: 'builtin',
   userAgreementUrl: '',
@@ -127,8 +120,6 @@ const previewData = computed(() => ({
   appleLoginEnabled: form.appleLoginEnabled,
   googleLoginEnabled: form.googleLoginEnabled,
   phoneLoginEnabled: form.phoneLoginEnabled,
-  emailLoginEnabled: form.emailLoginEnabled,
-  guestModeEnabled: form.guestModeEnabled,
 }))
 
 // Aurora 光晕配置（根据预设返回不同配置）
@@ -235,6 +226,28 @@ const loginButtonStyle = computed(() => {
   }
 })
 
+// Logo 尺寸样式（根据 logoSize 配置）
+const logoSizeClass = computed(() => {
+  const size = form.logoSize || 'normal'
+  const sizeMap: Record<string, string> = {
+    small: 'w-16 h-16',
+    normal: 'w-20 h-20',
+    large: 'w-24 h-24',
+  }
+  return sizeMap[size] || 'w-20 h-20'
+})
+
+// Logo 文字大小（根据 logoSize 配置）
+const logoTextClass = computed(() => {
+  const size = form.logoSize || 'normal'
+  const sizeMap: Record<string, string> = {
+    small: 'text-3xl',
+    normal: 'text-4xl',
+    large: 'text-5xl',
+  }
+  return sizeMap[size] || 'text-4xl'
+})
+
 // 从 rgba 或 hex 颜色中提取 hex 颜色值
 function extractHexColor(color: string | undefined): string {
   if (!color) return '#ffffff'
@@ -304,18 +317,11 @@ async function getLoginData() {
       buttonGradientEndColor: data.buttonGradientEndColor || '#9A1830',
       buttonSecondaryColor: data.buttonSecondaryColor || 'rgba(196,30,58,0.08)',
       buttonRadius: data.buttonRadius || 'lg',
-      // 按钮文本
-      wechatButtonText: data.wechatButtonText || '',
-      phoneButtonText: data.phoneButtonText || '',
-      emailButtonText: data.emailButtonText || '',
-      guestButtonText: data.guestButtonText || '',
       // 登录方式
       wechatLoginEnabled: data.wechatLoginEnabled,
       appleLoginEnabled: data.appleLoginEnabled,
       googleLoginEnabled: data.googleLoginEnabled,
       phoneLoginEnabled: data.phoneLoginEnabled,
-      emailLoginEnabled: data.emailLoginEnabled,
-      guestModeEnabled: data.guestModeEnabled,
       // 协议配置
       agreementSource: data.agreementSource || 'builtin',
       userAgreementUrl: data.userAgreementUrl || '',
@@ -502,10 +508,11 @@ onMounted(() => {
                   class="flex flex-col items-center"
                   :class="{ 'logo-float': previewData.logoAnimationEnabled }"
                 >
-                  <!-- 印章 Logo: 88x88px, 圆角 22px -->
+                  <!-- 印章 Logo: 根据 logoSize 动态调整尺寸 -->
                   <div
                     v-if="previewData.logoImage"
-                    class="w-20 h-20 rounded-[18px] overflow-hidden"
+                    class="rounded-[18px] overflow-hidden"
+                    :class="logoSizeClass"
                     :style="{
                       boxShadow: `0 8px 20px ${previewData.buttonPrimaryColor || '#C41E3A'}40`,
                     }"
@@ -518,13 +525,14 @@ onMounted(() => {
                   </div>
                   <div
                     v-else
-                    class="w-20 h-20 rounded-[18px] flex items-center justify-center"
+                    class="rounded-[18px] flex items-center justify-center"
+                    :class="logoSizeClass"
                     :style="{
                       background: `linear-gradient(135deg, ${previewData.buttonPrimaryColor || '#C41E3A'} 0%, ${previewData.buttonPrimaryColor || '#C41E3A'}cc 100%)`,
                       boxShadow: `0 8px 20px ${previewData.buttonPrimaryColor || '#C41E3A'}40`,
                     }"
                   >
-                    <span class="text-4xl font-bold text-white leading-none">印</span>
+                    <span :class="logoTextClass" class="font-bold text-white leading-none">印</span>
                   </div>
                   <!-- 间距 -->
                   <div class="h-4" />
@@ -1031,36 +1039,6 @@ onMounted(() => {
               </CardContent>
             </Card>
 
-            <!-- 按钮文本配置 -->
-            <Card>
-              <CardHeader class="py-3">
-                <CardTitle class="text-sm">按钮文本</CardTitle>
-                <CardDescription class="text-xs">自定义各登录按钮的显示文本</CardDescription>
-              </CardHeader>
-              <CardContent class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="space-y-2">
-                    <Label>微信登录</Label>
-                    <Input v-model="form.wechatButtonText" placeholder="微信登录" />
-                  </div>
-                  <div class="space-y-2">
-                    <Label>手机号登录</Label>
-                    <Input v-model="form.phoneButtonText" placeholder="手机号登录" />
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="space-y-2">
-                    <Label>邮箱登录</Label>
-                    <Input v-model="form.emailButtonText" placeholder="邮箱登录" />
-                  </div>
-                  <div class="space-y-2">
-                    <Label>游客模式</Label>
-                    <Input v-model="form.guestButtonText" placeholder="游客体验" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             <!-- 协议配置 -->
             <Card>
               <CardHeader class="py-3">
@@ -1149,26 +1127,12 @@ onMounted(() => {
                   </div>
                   <Switch v-model:checked="form.googleLoginEnabled" />
                 </div>
-                <div class="flex items-center justify-between py-2 border-b">
+                <div class="flex items-center justify-between py-2">
                   <div>
                     <p class="text-sm font-medium">手机号登录</p>
                     <p class="text-xs text-muted-foreground">使用手机号 + 验证码登录</p>
                   </div>
                   <Switch v-model:checked="form.phoneLoginEnabled" />
-                </div>
-                <div class="flex items-center justify-between py-2 border-b">
-                  <div>
-                    <p class="text-sm font-medium">邮箱登录</p>
-                    <p class="text-xs text-muted-foreground">使用邮箱 + 密码登录</p>
-                  </div>
-                  <Switch v-model:checked="form.emailLoginEnabled" />
-                </div>
-                <div class="flex items-center justify-between py-2">
-                  <div>
-                    <p class="text-sm font-medium">游客模式</p>
-                    <p class="text-xs text-muted-foreground">允许用户跳过登录体验 APP</p>
-                  </div>
-                  <Switch v-model:checked="form.guestModeEnabled" />
                 </div>
               </CardContent>
             </Card>

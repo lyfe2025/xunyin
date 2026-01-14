@@ -202,11 +202,15 @@ const backToLogin = () => {
       <div>
         <div class="flex items-center gap-3 mb-2">
           <template v-if="siteLogo">
-            <img :src="siteLogo" :alt="siteName" class="h-10 max-w-[200px] object-contain" />
+            <img
+              :src="siteLogo"
+              :alt="siteName"
+              class="h-10 w-10 rounded-lg object-contain shadow-sm ring-1 ring-primary-foreground/20 transition-transform hover:scale-105"
+            />
           </template>
           <template v-else>
             <div
-              class="w-10 h-10 rounded-lg bg-primary-foreground/20 flex items-center justify-center"
+              class="w-10 h-10 rounded-lg bg-primary-foreground/20 flex items-center justify-center shadow-sm ring-1 ring-primary-foreground/20 transition-transform hover:scale-105"
             >
               <Shield class="w-6 h-6" />
             </div>
@@ -259,11 +263,15 @@ const backToLogin = () => {
         <div class="lg:hidden text-center mb-8">
           <div class="inline-flex items-center gap-2 mb-2">
             <template v-if="siteLogo">
-              <img :src="siteLogo" :alt="siteName" class="h-10 max-w-[200px] object-contain" />
+              <img
+                :src="siteLogo"
+                :alt="siteName"
+                class="h-10 w-10 rounded-lg object-contain shadow-sm ring-1 ring-border transition-transform hover:scale-105"
+              />
             </template>
             <template v-else>
               <div
-                class="w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center"
+                class="w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm ring-1 ring-border transition-transform hover:scale-105"
               >
                 <Shield class="w-6 h-6" />
               </div>

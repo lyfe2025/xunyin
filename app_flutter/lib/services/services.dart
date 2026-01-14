@@ -11,3 +11,4 @@ export 'map_config_service.dart';
 export 'profile_service.dart';
 export 'agreement_service.dart';
 export 'upload_service.dart';
+export 'login_config_service.dart';

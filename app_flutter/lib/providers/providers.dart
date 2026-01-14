@@ -7,3 +7,4 @@ export 'user_providers.dart';
 export 'photo_providers.dart';
 export 'audio_providers.dart';
 export 'map_providers.dart';
+export 'login_config_providers.dart';

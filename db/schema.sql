@@ -1100,18 +1100,11 @@ CREATE TABLE IF NOT EXISTS app_login_config (
   button_gradient_end_color VARCHAR(20) DEFAULT '#9A1830',
   button_secondary_color VARCHAR(30) DEFAULT 'rgba(196,30,58,0.08)',
   button_radius VARCHAR(20) DEFAULT 'lg',
-  -- 按钮文本
-  wechat_button_text VARCHAR(50),
-  phone_button_text VARCHAR(50),
-  email_button_text VARCHAR(50),
-  guest_button_text VARCHAR(50),
   -- 登录方式开关
   wechat_login_enabled BOOLEAN DEFAULT TRUE,
   apple_login_enabled BOOLEAN DEFAULT TRUE,
   google_login_enabled BOOLEAN DEFAULT TRUE,
   phone_login_enabled BOOLEAN DEFAULT TRUE,
-  email_login_enabled BOOLEAN DEFAULT FALSE,
-  guest_mode_enabled BOOLEAN DEFAULT FALSE,
   -- 协议配置
   agreement_source VARCHAR(20) DEFAULT 'builtin',
   user_agreement_url VARCHAR(500),
@@ -1146,16 +1139,10 @@ COMMENT ON COLUMN app_login_config.button_primary_color IS '主按钮颜色（�
 COMMENT ON COLUMN app_login_config.button_gradient_end_color IS '按钮渐变结束色（品牌红暗色）';
 COMMENT ON COLUMN app_login_config.button_secondary_color IS '次按钮颜色';
 COMMENT ON COLUMN app_login_config.button_radius IS '按钮圆角: none-无, sm-小, md-中, lg-大, full-全圆角';
-COMMENT ON COLUMN app_login_config.wechat_button_text IS '微信登录按钮文本';
-COMMENT ON COLUMN app_login_config.phone_button_text IS '手机号登录按钮文本';
-COMMENT ON COLUMN app_login_config.email_button_text IS '邮箱登录按钮文本';
-COMMENT ON COLUMN app_login_config.guest_button_text IS '游客模式按钮文本';
 COMMENT ON COLUMN app_login_config.wechat_login_enabled IS '微信登录是否启用';
 COMMENT ON COLUMN app_login_config.apple_login_enabled IS 'Apple登录是否启用';
 COMMENT ON COLUMN app_login_config.google_login_enabled IS 'Google登录是否启用';
 COMMENT ON COLUMN app_login_config.phone_login_enabled IS '手机号登录是否启用';
-COMMENT ON COLUMN app_login_config.email_login_enabled IS '邮箱登录是否启用';
-COMMENT ON COLUMN app_login_config.guest_mode_enabled IS '游客模式是否启用';
 COMMENT ON COLUMN app_login_config.agreement_source IS '协议来源: builtin-内置协议, external-外部链接';
 COMMENT ON COLUMN app_login_config.user_agreement_url IS '用户协议外部链接';
 COMMENT ON COLUMN app_login_config.privacy_policy_url IS '隐私政策外部链接';

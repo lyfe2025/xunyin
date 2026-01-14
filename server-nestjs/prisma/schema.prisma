@@ -829,12 +829,23 @@ model BackgroundMusic {
 model AppSplashConfig {
   id          String    @id @default(cuid())
   title       String?   @db.VarChar(100)                           // 标题
-  type        String    @default("image") @db.VarChar(20)          // 类型：image/video
-  mediaUrl    String    @map("media_url") @db.VarChar(500)         // 媒体资源URL
+  mode        String    @default("ad") @db.VarChar(20)             // 模式：brand-品牌启动页 ad-广告启动页
+  // 广告模式字段
+  type        String    @default("image") @db.VarChar(20)          // 类型：image/video（广告模式）
+  mediaUrl    String?   @map("media_url") @db.VarChar(500)         // 媒体资源URL（广告模式）
   linkType    String?   @map("link_type") @db.VarChar(20)          // 跳转类型：none/internal/external
   linkUrl     String?   @map("link_url") @db.VarChar(500)          // 跳转链接
-  duration    Int       @default(3)                                 // 展示时长（秒）
   skipDelay   Int       @default(0) @map("skip_delay")             // 跳过按钮延迟显示（秒）
+  // 品牌模式字段
+  logoImage       String?  @map("logo_image") @db.VarChar(500)     // Logo图片URL（品牌模式）
+  logoText        String?  @map("logo_text") @db.VarChar(10)       // Logo文字（无图片时显示，如"印"）
+  appName         String?  @map("app_name") @db.VarChar(50)        // 应用名称（如"寻印"）
+  slogan          String?  @db.VarChar(200)                        // 标语
+  backgroundColor String?  @map("background_color") @db.VarChar(20) // 背景色（品牌模式）
+  textColor       String?  @map("text_color") @db.VarChar(20)      // 文字颜色
+  logoColor       String?  @map("logo_color") @db.VarChar(20)      // Logo背景色（无图片时）
+  // 通用字段
+  duration    Int       @default(3)                                 // 展示时长（秒）
   platform    String    @default("all") @db.VarChar(20)            // 平台：all/ios/android
   startTime   DateTime? @map("start_time")                         // 生效开始时间
   endTime     DateTime? @map("end_time")                           // 生效结束时间
@@ -847,6 +858,7 @@ model AppSplashConfig {
 
   @@index([status])
   @@index([platform])
+  @@index([mode])
   @@index([startTime, endTime])
   @@map("app_splash_config")
 }
@@ -881,18 +893,11 @@ model AppLoginConfig {
   buttonGradientEndColor String? @default("#9A1830") @map("button_gradient_end_color") @db.VarChar(20) // 渐变结束色 accentDark
   buttonSecondaryColor String? @default("rgba(196,30,58,0.08)") @map("button_secondary_color") @db.VarChar(30) // 次要按钮颜色
   buttonRadius        String?  @default("lg") @map("button_radius") @db.VarChar(20) // none/sm/md/lg/full
-  // 按钮文本配置
-  wechatButtonText    String?  @map("wechat_button_text") @db.VarChar(50)   // 微信登录按钮文本
-  phoneButtonText     String?  @map("phone_button_text") @db.VarChar(50)    // 手机号登录按钮文本
-  emailButtonText     String?  @map("email_button_text") @db.VarChar(50)    // 邮箱登录按钮文本
-  guestButtonText     String?  @map("guest_button_text") @db.VarChar(50)    // 游客模式按钮文本
   // 登录方式开关
   wechatLoginEnabled  Boolean  @default(true) @map("wechat_login_enabled")
   appleLoginEnabled   Boolean  @default(true) @map("apple_login_enabled")
   googleLoginEnabled  Boolean  @default(true) @map("google_login_enabled")
   phoneLoginEnabled   Boolean  @default(true) @map("phone_login_enabled")
-  emailLoginEnabled   Boolean  @default(false) @map("email_login_enabled")
-  guestModeEnabled    Boolean  @default(false) @map("guest_mode_enabled")
   // 协议配置
   agreementSource     String   @default("builtin") @map("agreement_source") @db.VarChar(20) // builtin: 内置协议, external: 外部链接
   userAgreementUrl    String?  @map("user_agreement_url") @db.VarChar(500)  // 外部链接时使用

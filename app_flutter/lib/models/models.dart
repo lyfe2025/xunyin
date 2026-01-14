@@ -6,3 +6,4 @@ export 'user.dart';
 export 'photo.dart';
 export 'blockchain.dart';
 export 'profile_home.dart';
+export 'login_config.dart';

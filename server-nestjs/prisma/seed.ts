@@ -4940,18 +4940,11 @@ async function main() {
         buttonPrimaryColor: '#C41E3A', // 品牌红 AppColors.accent
         buttonSecondaryColor: 'rgba(196,30,58,0.08)', // 浅红背景
         buttonRadius: 'full', // 全圆角
-        // 按钮文本
-        wechatButtonText: '微信登录',
-        phoneButtonText: '手机号登录',
-        emailButtonText: '邮箱登录',
-        guestButtonText: '游客体验',
         // 登录方式 - 匹配 App 当前配置
         wechatLoginEnabled: true,
         appleLoginEnabled: true,
         googleLoginEnabled: true,
         phoneLoginEnabled: true,
-        emailLoginEnabled: false,
-        guestModeEnabled: false,
         // 协议配置
         agreementSource: 'builtin',
         // 系统字段

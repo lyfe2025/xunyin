@@ -143,37 +143,6 @@ export class UpdateLoginConfigDto {
   @IsIn(['none', 'sm', 'md', 'lg', 'full'])
   buttonRadius?: string
 
-  // ========== 按钮文本配置 ==========
-  @ApiPropertyOptional({ description: '微信登录按钮文本', example: '微信登录' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  wechatButtonText?: string
-
-  @ApiPropertyOptional({ description: 'Apple登录按钮文本', example: 'Apple登录' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  appleButtonText?: string
-
-  @ApiPropertyOptional({ description: '手机号登录按钮文本', example: '手机号登录' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  phoneButtonText?: string
-
-  @ApiPropertyOptional({ description: '邮箱登录按钮文本', example: '邮箱登录' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  emailButtonText?: string
-
-  @ApiPropertyOptional({ description: '游客模式按钮文本', example: '游客体验' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  guestButtonText?: string
-
   // ========== 登录方式开关 ==========
   @ApiPropertyOptional({ description: '微信登录开关' })
   @IsOptional()
@@ -194,16 +163,6 @@ export class UpdateLoginConfigDto {
   @IsOptional()
   @IsBoolean()
   phoneLoginEnabled?: boolean
-
-  @ApiPropertyOptional({ description: '邮箱登录开关' })
-  @IsOptional()
-  @IsBoolean()
-  emailLoginEnabled?: boolean
-
-  @ApiPropertyOptional({ description: '游客模式开关' })
-  @IsOptional()
-  @IsBoolean()
-  guestModeEnabled?: boolean
 
   // ========== 协议配置 ==========
   @ApiPropertyOptional({ description: '协议来源', enum: ['builtin', 'external'] })

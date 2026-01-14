@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/config/app_config.dart';
 import '../../../services/auth_service.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_snackbar.dart';
+import '../../../providers/login_config_providers.dart';
+import '../../../models/login_config.dart';
 
 /// 登录页 - Aurora UI + Glassmorphism 风格
+/// 支持从后台动态获取配置（背景、Logo、颜色、登录方式等）
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
@@ -30,7 +35,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
   @override
   void initState() {
     super.initState();
-    // Logo 动画
     _logoController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -39,7 +43,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       CurvedAnimation(parent: _logoController, curve: Curves.easeInOut),
     );
 
-    // 开发测试：默认填写测试账号（新手旅人，无文化之旅进度）
+    // 开发测试：默认填写测试账号
     _phoneController.text = '13600136000';
     _autoSendCode();
   }
@@ -73,13 +77,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
       await _authService.sendSmsCode(_phoneController.text);
       setState(() => _countdown = 60);
       _startCountdown();
-      if (mounted) {
-        _showSnackBar('验证码已发送');
-      }
+      if (mounted) _showSnackBar('验证码已发送');
     } catch (e) {
-      if (mounted) {
-        _showSnackBar('发送失败: $e');
-      }
+      if (mounted) _showSnackBar('发送失败: $e');
     }
   }
 
@@ -124,11 +124,13 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
+    final config = ref.watch(loginConfigProvider);
+
     return Scaffold(
       body: Stack(
         children: [
-          // Aurora 渐变背景
-          const AuroraBackground(variant: AuroraVariant.warm),
+          // 背景（根据配置选择类型）
+          _buildBackground(config),
           // 主内容
           SafeArea(
             child: SingleChildScrollView(
@@ -136,15 +138,17 @@ class _LoginPageState extends ConsumerState<LoginPage>
               child: Column(
                 children: [
                   const SizedBox(height: 60),
-                  _buildLogo(),
+                  _buildLogo(config),
                   const SizedBox(height: 48),
-                  _buildLoginForm(),
-                  const SizedBox(height: 32),
-                  _buildLoginButton(),
+                  if (config.phoneLoginEnabled) ...[
+                    _buildLoginForm(config),
+                    const SizedBox(height: 32),
+                    _buildLoginButton(config),
+                    const SizedBox(height: 40),
+                  ],
+                  _buildOtherLogin(config),
                   const SizedBox(height: 40),
-                  _buildOtherLogin(),
-                  const SizedBox(height: 40),
-                  _buildAgreement(),
+                  _buildAgreement(config),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -155,75 +159,253 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
+  /// 构建背景（支持 Aurora/图片/纯色/渐变）
+  Widget _buildBackground(LoginConfig config) {
+    final isDark = context.isDarkMode;
+
+    // 如果禁用 Aurora 或使用图片背景
+    if (!config.auroraEnabled || config.backgroundType == 'image') {
+      if (config.backgroundType == 'image' && config.backgroundImage != null) {
+        // 图片背景
+        final baseUrl = AppConfig.baseUrl.replaceAll('/api/app', '');
+        return Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: CachedNetworkImageProvider('$baseUrl${config.backgroundImage}'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      } else if (config.backgroundType == 'color' && config.backgroundColor != null) {
+        // 纯色背景
+        return Container(color: _parseColor(config.backgroundColor!, isDark));
+      } else if (config.backgroundType == 'gradient') {
+        // 自定义渐变背景（无 Aurora 光晕）
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: isDark
+                  ? [const Color(0xFF1A1518), const Color(0xFF161216)]
+                  : [
+                      _parseColor(config.gradientStart ?? '#FDF8F5', isDark),
+                      if (config.gradientMiddle != null)
+                        _parseColor(config.gradientMiddle!, isDark),
+                      _parseColor(config.gradientEnd ?? '#F5F0EB', isDark),
+                    ],
+            ),
+          ),
+        );
+      }
+    }
+
+    // 默认使用 Aurora 背景
+    return AuroraBackground(variant: _getAuroraVariant(config));
+  }
+
+  /// 解析颜色字符串
+  Color _parseColor(String colorStr, bool isDark) {
+    // 深色模式下返回深色
+    if (isDark) return const Color(0xFF1A1518);
+    
+    try {
+      if (colorStr.startsWith('#')) {
+        final hex = colorStr.replaceFirst('#', '');
+        if (hex.length == 6) {
+          return Color(int.parse('FF$hex', radix: 16));
+        } else if (hex.length == 8) {
+          return Color(int.parse(hex, radix: 16));
+        }
+      } else if (colorStr.startsWith('rgba')) {
+        // 解析 rgba(r, g, b, a) 格式
+        final match = RegExp(r'rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)').firstMatch(colorStr);
+        if (match != null) {
+          final r = int.parse(match.group(1)!);
+          final g = int.parse(match.group(2)!);
+          final b = int.parse(match.group(3)!);
+          final a = match.group(4) != null ? double.parse(match.group(4)!) : 1.0;
+          return Color.fromRGBO(r, g, b, a);
+        }
+      }
+    } catch (_) {}
+    return const Color(0xFFFDF8F5); // 默认色
+  }
+
+  /// 根据配置获取 Aurora 变体
+  AuroraVariant _getAuroraVariant(LoginConfig config) {
+    switch (config.auroraPreset) {
+      case 'standard':
+        return AuroraVariant.standard;
+      case 'golden':
+        return AuroraVariant.golden;
+      case 'warm':
+      default:
+        return AuroraVariant.warm;
+    }
+  }
+
   /// Logo 区域
-  Widget _buildLogo() {
+  Widget _buildLogo(LoginConfig config) {
+    final showAnimation = config.logoAnimationEnabled;
+    
+    Widget content = Column(
+      children: [
+        _buildLogoImage(config),
+        const SizedBox(height: 20),
+        // 应用名称（使用配置的颜色）
+        Text(
+          config.appName ?? '寻印',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: _parseColor(
+              config.appNameColor ?? '#2D2D2D',
+              context.isDarkMode,
+            ),
+            letterSpacing: 4,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // 标语（使用配置的颜色）
+        Text(
+          config.slogan ?? '探索城市文化，收集专属印记',
+          style: TextStyle(
+            fontSize: 14,
+            color: _parseColor(
+              config.sloganColor ?? '#666666',
+              context.isDarkMode,
+            ).withValues(alpha: 0.8),
+            letterSpacing: 1,
+          ),
+        ),
+      ],
+    );
+
+    if (!showAnimation) return content;
+
     return AnimatedBuilder(
       animation: _logoAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _logoAnimation.value),
-          child: child,
-        );
-      },
-      child: Column(
-        children: [
-          // 印章 Logo
-          Container(
-            width: 88,
-            height: 88,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.accent, AppColors.accentDark],
-              ),
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accent.withValues(alpha: 0.35),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, _logoAnimation.value),
+        child: child,
+      ),
+      child: content,
+    );
+  }
+
+  /// 构建 Logo 图片（支持配置尺寸）
+  Widget _buildLogoImage(LoginConfig config) {
+    // 根据 logoSize 配置确定尺寸
+    final double size = switch (config.logoSize) {
+      'small' => 68,
+      'large' => 108,
+      _ => 88, // normal
+    };
+    final double borderRadius = size * 0.25;
+
+    final logoImage = config.logoImage;
+    
+    if (logoImage != null && logoImage.isNotEmpty) {
+      final baseUrl = AppConfig.baseUrl.replaceAll('/api/app', '');
+      final fullUrl = '$baseUrl$logoImage';
+      
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: _getButtonPrimaryColor(config).withValues(alpha: 0.35),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
             ),
-            child: const Center(
-              child: Text(
-                '印',
-                style: TextStyle(
-                  fontSize: 44,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1,
-                ),
-              ),
-            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: CachedNetworkImage(
+            imageUrl: fullUrl,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => _buildDefaultLogo(config, size, borderRadius),
+            errorWidget: (context, url, error) => _buildDefaultLogo(config, size, borderRadius),
           ),
-          const SizedBox(height: 20),
-          Text(
-            '寻印',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimaryAdaptive(context),
-              letterSpacing: 4,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '探索城市文化，收集专属印记',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondaryAdaptive(context).withValues(alpha: 0.8),
-              letterSpacing: 1,
-            ),
+        ),
+      );
+    }
+    
+    return _buildDefaultLogo(config, size, borderRadius);
+  }
+
+  /// 默认印章 Logo（使用配置的按钮颜色）
+  Widget _buildDefaultLogo(LoginConfig config, double size, double borderRadius) {
+    final primaryColor = _getButtonPrimaryColor(config);
+    final gradientEndColor = _getButtonGradientEndColor(config);
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [primaryColor, gradientEndColor],
+        ),
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
+      ),
+      child: Center(
+        child: Text(
+          '印',
+          style: TextStyle(
+            fontSize: size * 0.5,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            height: 1,
+          ),
+        ),
       ),
     );
   }
 
+  /// 获取按钮主色
+  Color _getButtonPrimaryColor(LoginConfig config) {
+    if (config.buttonPrimaryColor != null) {
+      return _parseColor(config.buttonPrimaryColor!, false);
+    }
+    return AppColors.accent;
+  }
+
+  /// 获取按钮渐变结束色
+  Color _getButtonGradientEndColor(LoginConfig config) {
+    if (config.buttonGradientEndColor != null) {
+      return _parseColor(config.buttonGradientEndColor!, false);
+    }
+    return AppColors.accentDark;
+  }
+
+  /// 获取按钮圆角
+  double _getButtonRadius(LoginConfig config) {
+    return switch (config.buttonRadius) {
+      'none' => 0,
+      'sm' => 6,
+      'md' => 10,
+      'full' => 26,
+      _ => 14, // lg (default)
+    };
+  }
+
   /// 登录表单
-  Widget _buildLoginForm() {
+  Widget _buildLoginForm(LoginConfig config) {
     final isDark = context.isDarkMode;
     return Container(
       padding: const EdgeInsets.all(24),
@@ -250,8 +432,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
       ),
       child: Column(
         children: [
-          // 手机号输入
           _buildInputField(
+            config: config,
             controller: _phoneController,
             hintText: '请输入手机号',
             keyboardType: TextInputType.phone,
@@ -259,11 +441,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
             prefixIcon: Icons.smartphone_rounded,
           ),
           const SizedBox(height: 16),
-          // 验证码输入
           Row(
             children: [
               Expanded(
                 child: _buildInputField(
+                  config: config,
                   controller: _codeController,
                   hintText: '请输入验证码',
                   keyboardType: TextInputType.number,
@@ -272,7 +454,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 ),
               ),
               const SizedBox(width: 12),
-              _buildCodeButton(),
+              _buildCodeButton(config),
             ],
           ),
         ],
@@ -282,12 +464,15 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   /// 输入框
   Widget _buildInputField({
+    required LoginConfig config,
     required TextEditingController controller,
     required String hintText,
     required TextInputType keyboardType,
     required int maxLength,
     required IconData prefixIcon,
   }) {
+    final primaryColor = _getButtonPrimaryColor(config);
+    
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
@@ -302,11 +487,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         counterText: '',
         filled: true,
         fillColor: AppColors.surfaceVariantAdaptive(context).withValues(alpha: 0.5),
-        prefixIcon: Icon(
-          prefixIcon,
-          size: 20,
-          color: AppColors.textHintAdaptive(context),
-        ),
+        prefixIcon: Icon(prefixIcon, size: 20, color: AppColors.textHintAdaptive(context)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -317,20 +498,19 @@ class _LoginPageState extends ConsumerState<LoginPage>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+          borderSide: BorderSide(color: primaryColor, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
 
   /// 获取验证码按钮
-  Widget _buildCodeButton() {
+  Widget _buildCodeButton(LoginConfig config) {
     final isDisabled = _countdown > 0;
     final isDark = context.isDarkMode;
+    final primaryColor = _getButtonPrimaryColor(config);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -342,12 +522,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
           decoration: BoxDecoration(
             color: isDisabled
                 ? AppColors.surfaceVariantAdaptive(context)
-                : AppColors.accent.withValues(alpha: isDark ? 0.15 : 0.08),
+                : primaryColor.withValues(alpha: isDark ? 0.15 : 0.08),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDisabled
                   ? AppColors.borderAdaptive(context)
-                  : AppColors.accent.withValues(alpha: 0.3),
+                  : primaryColor.withValues(alpha: 0.3),
             ),
           ),
           child: Center(
@@ -356,9 +536,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: isDisabled
-                    ? AppColors.textHintAdaptive(context)
-                    : AppColors.accent,
+                color: isDisabled ? AppColors.textHintAdaptive(context) : primaryColor,
               ),
             ),
           ),
@@ -367,13 +545,17 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  /// 登录按钮
-  Widget _buildLoginButton() {
+  /// 登录按钮（使用配置的颜色和圆角）
+  Widget _buildLoginButton(LoginConfig config) {
+    final primaryColor = _getButtonPrimaryColor(config);
+    final gradientEndColor = _getButtonGradientEndColor(config);
+    final radius = _getButtonRadius(config);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: _isLoading ? null : _login,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(radius),
         child: Container(
           width: double.infinity,
           height: 52,
@@ -383,14 +565,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
               end: Alignment.bottomRight,
               colors: _isLoading
                   ? [AppColors.textHint, AppColors.textHint]
-                  : [AppColors.accent, AppColors.accentDark],
+                  : [primaryColor, gradientEndColor],
             ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(radius),
             boxShadow: _isLoading
                 ? []
                 : [
                     BoxShadow(
-                      color: AppColors.accent.withValues(alpha: 0.35),
+                      color: primaryColor.withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -401,10 +583,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 ? const SizedBox(
                     width: 22,
                     height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                   )
                 : const Text(
                     '登录',
@@ -422,16 +601,43 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   /// 其他登录方式
-  Widget _buildOtherLogin() {
+  Widget _buildOtherLogin(LoginConfig config) {
+    final socialButtons = <Widget>[];
+    
+    if (config.wechatLoginEnabled) {
+      socialButtons.add(_buildSocialButton(
+        svgPath: 'assets/icons/wechat_logo.svg',
+        label: '微信',
+        onTap: () => _showSnackBar('微信登录开发中'),
+      ));
+    }
+    
+    if (config.appleLoginEnabled) {
+      if (socialButtons.isNotEmpty) socialButtons.add(const SizedBox(width: 24));
+      socialButtons.add(_buildSocialButton(
+        svgPath: 'assets/icons/apple_logo.svg',
+        label: 'Apple',
+        onTap: () => _showSnackBar('Apple 登录开发中'),
+        useThemeColor: true,
+      ));
+    }
+    
+    if (config.googleLoginEnabled) {
+      if (socialButtons.isNotEmpty) socialButtons.add(const SizedBox(width: 24));
+      socialButtons.add(_buildSocialButton(
+        svgPath: 'assets/icons/google_logo.svg',
+        label: 'Google',
+        onTap: () => _showSnackBar('Google 登录开发中'),
+      ));
+    }
+
+    if (socialButtons.isEmpty) return const SizedBox.shrink();
+
     return Column(
       children: [
         Row(
           children: [
-            Expanded(
-              child: Divider(
-                color: AppColors.borderAdaptive(context).withValues(alpha: 0.6),
-              ),
-            ),
+            Expanded(child: Divider(color: AppColors.borderAdaptive(context).withValues(alpha: 0.6))),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
@@ -442,43 +648,17 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 ),
               ),
             ),
-            Expanded(
-              child: Divider(
-                color: AppColors.borderAdaptive(context).withValues(alpha: 0.6),
-              ),
-            ),
+            Expanded(child: Divider(color: AppColors.borderAdaptive(context).withValues(alpha: 0.6))),
           ],
         ),
         const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildSocialButtonWithSvg(
-              svgPath: 'assets/icons/wechat_logo.svg',
-              label: '微信',
-              onTap: () => _showSnackBar('微信登录开发中'),
-            ),
-            const SizedBox(width: 24),
-            _buildSocialButtonWithSvg(
-              svgPath: 'assets/icons/apple_logo.svg',
-              label: 'Apple',
-              onTap: () => _showSnackBar('Apple 登录开发中'),
-              useThemeColor: true,
-            ),
-            const SizedBox(width: 24),
-            _buildSocialButtonWithSvg(
-              svgPath: 'assets/icons/google_logo.svg',
-              label: 'Google',
-              onTap: () => _showSnackBar('Google 登录开发中'),
-            ),
-          ],
-        ),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: socialButtons),
       ],
     );
   }
 
-  /// 社交登录按钮（SVG 图标版本）
-  Widget _buildSocialButtonWithSvg({
+  /// 社交登录按钮
+  Widget _buildSocialButton({
     required String svgPath,
     required String label,
     required VoidCallback onTap,
@@ -510,17 +690,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
               ),
               child: Center(
                 child: useThemeColor
-                    ? SvgPicture.asset(
-                        svgPath,
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(themeColor, BlendMode.srcIn),
-                      )
-                    : SvgPicture.asset(
-                        svgPath,
-                        width: 24,
-                        height: 24,
-                      ),
+                    ? SvgPicture.asset(svgPath, width: 24, height: 24,
+                        colorFilter: ColorFilter.mode(themeColor, BlendMode.srcIn))
+                    : SvgPicture.asset(svgPath, width: 24, height: 24),
               ),
             ),
             const SizedBox(height: 6),
@@ -537,8 +709,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  /// 用户协议
-  Widget _buildAgreement() {
+  /// 用户协议（链接使用配置的主色）
+  Widget _buildAgreement(LoginConfig config) {
+    final primaryColor = _getButtonPrimaryColor(config);
+    
     return Text.rich(
       TextSpan(
         text: '登录即表示同意',
@@ -549,12 +723,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
         children: [
           TextSpan(
             text: '《用户协议》',
-            style: TextStyle(color: AppColors.accent.withValues(alpha: 0.9)),
+            style: TextStyle(color: primaryColor.withValues(alpha: 0.9)),
           ),
           const TextSpan(text: '和'),
           TextSpan(
             text: '《隐私政策》',
-            style: TextStyle(color: AppColors.accent.withValues(alpha: 0.9)),
+            style: TextStyle(color: primaryColor.withValues(alpha: 0.9)),
           ),
         ],
       ),

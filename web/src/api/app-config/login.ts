@@ -29,18 +29,11 @@ export interface LoginConfig {
   buttonGradientEndColor?: string // 渐变结束色
   buttonSecondaryColor?: string
   buttonRadius?: string // none/sm/md/lg/full
-  // 按钮文本配置
-  wechatButtonText?: string
-  phoneButtonText?: string
-  emailButtonText?: string
-  guestButtonText?: string
   // 登录方式开关
   wechatLoginEnabled: boolean
   appleLoginEnabled: boolean
   googleLoginEnabled: boolean
   phoneLoginEnabled: boolean
-  emailLoginEnabled: boolean
-  guestModeEnabled: boolean
   // 协议配置
   agreementSource?: string // builtin: 内置协议, external: 外部链接
   userAgreementUrl?: string
@@ -79,18 +72,11 @@ export interface UpdateLoginConfigParams {
   buttonGradientEndColor?: string // 渐变结束色
   buttonSecondaryColor?: string
   buttonRadius?: string
-  // 按钮文本配置
-  wechatButtonText?: string
-  phoneButtonText?: string
-  emailButtonText?: string
-  guestButtonText?: string
   // 登录方式开关
   wechatLoginEnabled?: boolean
   appleLoginEnabled?: boolean
   googleLoginEnabled?: boolean
   phoneLoginEnabled?: boolean
-  emailLoginEnabled?: boolean
-  guestModeEnabled?: boolean
   // 协议配置
   agreementSource?: string
   userAgreementUrl?: string
