@@ -23,6 +23,7 @@ export interface DownloadConfig {
   appName?: string
   appSlogan?: string
   sloganColor?: string
+  logoAnimationEnabled?: boolean
   // 按钮样式
   buttonStyle?: string
   buttonPrimaryColor?: string
@@ -58,6 +59,7 @@ export interface UpdateDownloadConfigParams {
   appName?: string
   appSlogan?: string
   sloganColor?: string
+  logoAnimationEnabled?: boolean
   // 按钮样式
   buttonStyle?: string
   buttonPrimaryColor?: string

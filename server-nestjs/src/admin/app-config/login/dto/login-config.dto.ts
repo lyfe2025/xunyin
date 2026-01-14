@@ -17,20 +17,26 @@ export class UpdateLoginConfigDto {
 
   @ApiPropertyOptional({
     description: '纯色背景（backgroundType=color时使用）',
-    example: '#1a1a2e',
+    example: '#FDF8F5',
   })
   @IsOptional()
   @IsString()
   @MaxLength(20)
   backgroundColor?: string
 
-  @ApiPropertyOptional({ description: '渐变起始色', example: '#667eea' })
+  @ApiPropertyOptional({ description: '渐变起始色', example: '#FDF8F5' })
   @IsOptional()
   @IsString()
   @MaxLength(20)
   gradientStart?: string
 
-  @ApiPropertyOptional({ description: '渐变结束色', example: '#764ba2' })
+  @ApiPropertyOptional({ description: '渐变中间色（可选，3色渐变）', example: '#F8F5F0' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  gradientMiddle?: string
+
+  @ApiPropertyOptional({ description: '渐变结束色', example: '#F5F0EB' })
   @IsOptional()
   @IsString()
   @MaxLength(20)
@@ -46,6 +52,22 @@ export class UpdateLoginConfigDto {
   @MaxLength(30)
   gradientDirection?: string
 
+  // ========== Aurora 底纹配置 ==========
+  @ApiPropertyOptional({ description: '是否启用 Aurora 光晕效果', default: true })
+  @IsOptional()
+  @IsBoolean()
+  auroraEnabled?: boolean
+
+  @ApiPropertyOptional({
+    description: 'Aurora 预设样式',
+    enum: ['warm', 'standard', 'golden', 'custom'],
+    default: 'warm',
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['warm', 'standard', 'golden', 'custom'])
+  auroraPreset?: string
+
   // ========== Logo配置 ==========
   @ApiPropertyOptional({ description: 'Logo图片' })
   @IsOptional()
@@ -59,6 +81,24 @@ export class UpdateLoginConfigDto {
   @IsIn(['small', 'normal', 'large'])
   logoSize?: string
 
+  @ApiPropertyOptional({ description: '是否启用 Logo 浮动动画', default: true })
+  @IsOptional()
+  @IsBoolean()
+  logoAnimationEnabled?: boolean
+
+  // ========== 应用名称配置 ==========
+  @ApiPropertyOptional({ description: '应用名称（Logo下方）', example: '寻印' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  appName?: string
+
+  @ApiPropertyOptional({ description: '应用名称颜色', example: '#1a1a1a' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  appNameColor?: string
+
   // ========== 标语配置 ==========
   @ApiPropertyOptional({ description: '标语' })
   @IsOptional()
@@ -66,7 +106,7 @@ export class UpdateLoginConfigDto {
   @MaxLength(200)
   slogan?: string
 
-  @ApiPropertyOptional({ description: '标语颜色', example: '#ffffff' })
+  @ApiPropertyOptional({ description: '标语颜色', example: '#666666' })
   @IsOptional()
   @IsString()
   @MaxLength(20)
@@ -79,13 +119,19 @@ export class UpdateLoginConfigDto {
   @IsIn(['filled', 'outlined', 'glass'])
   buttonStyle?: string
 
-  @ApiPropertyOptional({ description: '主按钮颜色', example: '#C53D43' })
+  @ApiPropertyOptional({ description: '主按钮颜色（渐变起始色）', example: '#C41E3A' })
   @IsOptional()
   @IsString()
   @MaxLength(20)
   buttonPrimaryColor?: string
 
-  @ApiPropertyOptional({ description: '次要按钮颜色', example: 'rgba(255,255,255,0.2)' })
+  @ApiPropertyOptional({ description: '按钮渐变结束色', example: '#9A1830' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  buttonGradientEndColor?: string
+
+  @ApiPropertyOptional({ description: '次要按钮颜色', example: 'rgba(196,30,58,0.08)' })
   @IsOptional()
   @IsString()
   @MaxLength(30)

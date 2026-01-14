@@ -1073,28 +1073,42 @@ CREATE INDEX IF NOT EXISTS idx_app_splash_time ON app_splash_config(start_time, 
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS app_login_config (
   id VARCHAR(30) PRIMARY KEY,
-  -- 背景配置
+  -- 背景配置（Aurora warm 3色渐变）
   background_type VARCHAR(20) DEFAULT 'gradient',
   background_image VARCHAR(500),
   background_color VARCHAR(20),
-  gradient_start VARCHAR(20) DEFAULT '#8B4513',
-  gradient_end VARCHAR(20) DEFAULT '#2C2C2C',
-  gradient_direction VARCHAR(30) DEFAULT '135deg',
+  gradient_start VARCHAR(20) DEFAULT '#FDF8F5',
+  gradient_middle VARCHAR(20) DEFAULT '#F8F5F0',
+  gradient_end VARCHAR(20) DEFAULT '#F5F0EB',
+  gradient_direction VARCHAR(30) DEFAULT 'to bottom',
+  -- Aurora 底纹配置
+  aurora_enabled BOOLEAN DEFAULT TRUE,
+  aurora_preset VARCHAR(20) DEFAULT 'warm',
   -- Logo配置
   logo_image VARCHAR(500),
   logo_size VARCHAR(20) DEFAULT 'normal',
+  logo_animation_enabled BOOLEAN DEFAULT TRUE,
+  -- 应用名称配置
+  app_name VARCHAR(50) DEFAULT '寻印',
+  app_name_color VARCHAR(20) DEFAULT '#1a1a1a',
   -- 标语配置
-  slogan VARCHAR(200),
-  slogan_color VARCHAR(20) DEFAULT '#F5F5DC',
+  slogan VARCHAR(200) DEFAULT '探索城市文化，收集专属印记',
+  slogan_color VARCHAR(20) DEFAULT '#666666',
   -- 按钮样式
   button_style VARCHAR(20) DEFAULT 'filled',
-  button_primary_color VARCHAR(20) DEFAULT '#C53D43',
-  button_secondary_color VARCHAR(30) DEFAULT 'rgba(255,255,255,0.2)',
-  button_radius VARCHAR(20) DEFAULT 'full',
+  button_primary_color VARCHAR(20) DEFAULT '#C41E3A',
+  button_gradient_end_color VARCHAR(20) DEFAULT '#9A1830',
+  button_secondary_color VARCHAR(30) DEFAULT 'rgba(196,30,58,0.08)',
+  button_radius VARCHAR(20) DEFAULT 'lg',
+  -- 按钮文本
+  wechat_button_text VARCHAR(50),
+  phone_button_text VARCHAR(50),
+  email_button_text VARCHAR(50),
+  guest_button_text VARCHAR(50),
   -- 登录方式开关
   wechat_login_enabled BOOLEAN DEFAULT TRUE,
   apple_login_enabled BOOLEAN DEFAULT TRUE,
-  google_login_enabled BOOLEAN DEFAULT FALSE,
+  google_login_enabled BOOLEAN DEFAULT TRUE,
   phone_login_enabled BOOLEAN DEFAULT TRUE,
   email_login_enabled BOOLEAN DEFAULT FALSE,
   guest_mode_enabled BOOLEAN DEFAULT FALSE,
@@ -1114,17 +1128,28 @@ COMMENT ON COLUMN app_login_config.id IS '配置ID';
 COMMENT ON COLUMN app_login_config.background_type IS '背景类型: image-图片, color-纯色, gradient-渐变';
 COMMENT ON COLUMN app_login_config.background_image IS '背景图（backgroundType=image时使用）';
 COMMENT ON COLUMN app_login_config.background_color IS '纯色背景（backgroundType=color时使用）';
-COMMENT ON COLUMN app_login_config.gradient_start IS '渐变起始色（默认赭石色）';
-COMMENT ON COLUMN app_login_config.gradient_end IS '渐变结束色（默认墨色）';
+COMMENT ON COLUMN app_login_config.gradient_start IS '渐变起始色（Aurora warm）';
+COMMENT ON COLUMN app_login_config.gradient_middle IS '渐变中间色（Aurora warm）';
+COMMENT ON COLUMN app_login_config.gradient_end IS '渐变结束色（Aurora warm）';
 COMMENT ON COLUMN app_login_config.gradient_direction IS '渐变方向: to bottom, to top, to right, to left, 45deg, 135deg';
+COMMENT ON COLUMN app_login_config.aurora_enabled IS 'Aurora底纹是否启用';
+COMMENT ON COLUMN app_login_config.aurora_preset IS 'Aurora预设: warm-暖色, standard-标准, golden-金色, celebration-庆祝';
 COMMENT ON COLUMN app_login_config.logo_image IS 'Logo图片';
 COMMENT ON COLUMN app_login_config.logo_size IS 'Logo尺寸: small-小, normal-正常, large-大';
+COMMENT ON COLUMN app_login_config.logo_animation_enabled IS 'Logo浮动动画是否启用';
+COMMENT ON COLUMN app_login_config.app_name IS '应用名称';
+COMMENT ON COLUMN app_login_config.app_name_color IS '应用名称颜色';
 COMMENT ON COLUMN app_login_config.slogan IS '标语';
-COMMENT ON COLUMN app_login_config.slogan_color IS '标语颜色（默认米白色）';
-COMMENT ON COLUMN app_login_config.button_style IS '按钮风格: filled-填充, outlined-描边, rounded-圆角';
-COMMENT ON COLUMN app_login_config.button_primary_color IS '主按钮颜色（默认朱砂红）';
-COMMENT ON COLUMN app_login_config.button_secondary_color IS '次按钮颜色（默认半透明白色）';
+COMMENT ON COLUMN app_login_config.slogan_color IS '标语颜色';
+COMMENT ON COLUMN app_login_config.button_style IS '按钮风格: filled-填充, outlined-描边, glass-毛玻璃';
+COMMENT ON COLUMN app_login_config.button_primary_color IS '主按钮颜色（品牌红）';
+COMMENT ON COLUMN app_login_config.button_gradient_end_color IS '按钮渐变结束色（品牌红暗色）';
+COMMENT ON COLUMN app_login_config.button_secondary_color IS '次按钮颜色';
 COMMENT ON COLUMN app_login_config.button_radius IS '按钮圆角: none-无, sm-小, md-中, lg-大, full-全圆角';
+COMMENT ON COLUMN app_login_config.wechat_button_text IS '微信登录按钮文本';
+COMMENT ON COLUMN app_login_config.phone_button_text IS '手机号登录按钮文本';
+COMMENT ON COLUMN app_login_config.email_button_text IS '邮箱登录按钮文本';
+COMMENT ON COLUMN app_login_config.guest_button_text IS '游客模式按钮文本';
 COMMENT ON COLUMN app_login_config.wechat_login_enabled IS '微信登录是否启用';
 COMMENT ON COLUMN app_login_config.apple_login_enabled IS 'Apple登录是否启用';
 COMMENT ON COLUMN app_login_config.google_login_enabled IS 'Google登录是否启用';
@@ -1147,23 +1172,28 @@ CREATE TABLE IF NOT EXISTS app_download_config (
   id VARCHAR(30) PRIMARY KEY,
   page_title VARCHAR(100),
   page_description TEXT,
+  favicon VARCHAR(500),
   -- 背景配置
   background_type VARCHAR(20) NOT NULL DEFAULT 'gradient',
   background_image VARCHAR(500),
   background_color VARCHAR(20),
-  gradient_start VARCHAR(20) DEFAULT '#8B4513',
-  gradient_end VARCHAR(20) DEFAULT '#2C2C2C',
-  gradient_direction VARCHAR(30) DEFAULT '135deg',
+  gradient_start VARCHAR(20) DEFAULT '#FDF8F5',
+  gradient_end VARCHAR(20) DEFAULT '#F5F0EB',
+  gradient_direction VARCHAR(30) DEFAULT 'to bottom',
   -- APP信息
   app_icon VARCHAR(500),
   app_name VARCHAR(100),
   app_slogan VARCHAR(200),
-  slogan_color VARCHAR(20) DEFAULT '#F5F5DC',
+  slogan_color VARCHAR(30) DEFAULT '#666666',
+  logo_animation_enabled BOOLEAN DEFAULT true,
   -- 按钮样式
   button_style VARCHAR(20) DEFAULT 'filled',
-  button_primary_color VARCHAR(20) DEFAULT '#C53D43',
-  button_secondary_color VARCHAR(30) DEFAULT 'rgba(255,255,255,0.2)',
-  button_radius VARCHAR(20) DEFAULT 'full',
+  button_primary_color VARCHAR(20) DEFAULT '#C41E3A',
+  button_secondary_color VARCHAR(30) DEFAULT 'rgba(196,30,58,0.08)',
+  button_radius VARCHAR(20) DEFAULT 'lg',
+  -- 按钮文本配置
+  ios_button_text VARCHAR(50),
+  android_button_text VARCHAR(50),
   feature_list JSONB,
   ios_store_url VARCHAR(500),
   android_store_url VARCHAR(500),
@@ -1180,20 +1210,24 @@ COMMENT ON TABLE app_download_config IS 'APP下载页配置表';
 COMMENT ON COLUMN app_download_config.id IS '配置ID';
 COMMENT ON COLUMN app_download_config.page_title IS '页面标题';
 COMMENT ON COLUMN app_download_config.page_description IS '页面描述';
+COMMENT ON COLUMN app_download_config.favicon IS '页面favicon';
 COMMENT ON COLUMN app_download_config.background_type IS '背景类型: image-图片, color-纯色, gradient-渐变';
 COMMENT ON COLUMN app_download_config.background_image IS '背景图（backgroundType=image时使用）';
 COMMENT ON COLUMN app_download_config.background_color IS '纯色背景（backgroundType=color时使用）';
-COMMENT ON COLUMN app_download_config.gradient_start IS '渐变起始色（默认赭石色）';
-COMMENT ON COLUMN app_download_config.gradient_end IS '渐变结束色（默认墨色）';
+COMMENT ON COLUMN app_download_config.gradient_start IS '渐变起始色（Aurora warm）';
+COMMENT ON COLUMN app_download_config.gradient_end IS '渐变结束色（Aurora warm）';
 COMMENT ON COLUMN app_download_config.gradient_direction IS '渐变方向';
 COMMENT ON COLUMN app_download_config.app_icon IS 'APP图标';
 COMMENT ON COLUMN app_download_config.app_name IS 'APP名称';
 COMMENT ON COLUMN app_download_config.app_slogan IS 'APP标语';
-COMMENT ON COLUMN app_download_config.slogan_color IS '标语颜色（默认米白色）';
-COMMENT ON COLUMN app_download_config.button_style IS '按钮风格: filled-填充, outlined-描边, rounded-圆角';
-COMMENT ON COLUMN app_download_config.button_primary_color IS '主按钮颜色（默认朱砂红）';
-COMMENT ON COLUMN app_download_config.button_secondary_color IS '次按钮颜色（默认半透明白色）';
+COMMENT ON COLUMN app_download_config.slogan_color IS '标语颜色';
+COMMENT ON COLUMN app_download_config.logo_animation_enabled IS 'Logo浮动动画开关';
+COMMENT ON COLUMN app_download_config.button_style IS '按钮风格: filled-填充, outlined-描边, glass-毛玻璃';
+COMMENT ON COLUMN app_download_config.button_primary_color IS '主按钮颜色（品牌红）';
+COMMENT ON COLUMN app_download_config.button_secondary_color IS '次按钮颜色';
 COMMENT ON COLUMN app_download_config.button_radius IS '按钮圆角: none-无, sm-小, md-中, lg-大, full-全圆角';
+COMMENT ON COLUMN app_download_config.ios_button_text IS 'iOS下载按钮文本';
+COMMENT ON COLUMN app_download_config.android_button_text IS 'Android下载按钮文本';
 COMMENT ON COLUMN app_download_config.feature_list IS '功能特点JSON数组';
 COMMENT ON COLUMN app_download_config.ios_store_url IS 'iOS商店链接';
 COMMENT ON COLUMN app_download_config.android_store_url IS 'Android商店链接';

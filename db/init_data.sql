@@ -2817,3 +2817,133 @@ VALUES (
   NOW(),
   NOW()
 ) ON CONFLICT (type) DO NOTHING;
+
+
+-- =============================================
+-- 14. APP 登录页配置初始数据
+-- 参数与 Flutter App 登录页完全对齐
+-- =============================================
+INSERT INTO app_login_config (
+  id,
+  background_type,
+  gradient_start,
+  gradient_middle,
+  gradient_end,
+  gradient_direction,
+  aurora_enabled,
+  aurora_preset,
+  logo_size,
+  logo_animation_enabled,
+  app_name,
+  app_name_color,
+  slogan,
+  slogan_color,
+  button_style,
+  button_primary_color,
+  button_gradient_end_color,
+  button_secondary_color,
+  button_radius,
+  wechat_button_text,
+  phone_button_text,
+  email_button_text,
+  guest_button_text,
+  wechat_login_enabled,
+  apple_login_enabled,
+  google_login_enabled,
+  phone_login_enabled,
+  email_login_enabled,
+  guest_mode_enabled,
+  agreement_source,
+  status,
+  create_by,
+  create_time,
+  update_time
+) VALUES (
+  'default_login_config',
+  'gradient',
+  '#FDF8F5',                          -- Aurora warm 起始色
+  '#F8F5F0',                          -- Aurora warm 中间色
+  '#F5F0EB',                          -- Aurora warm 结束色
+  'to bottom',
+  true,
+  'warm',
+  'normal',                           -- Flutter: 88x88px
+  true,                               -- 启用浮动动画
+  '寻印',
+  '#2D2D2D',                          -- Flutter AppColors.textPrimary
+  '探索城市文化，收集专属印记',
+  '#666666',                          -- Flutter AppColors.textSecondary
+  'filled',
+  '#C41E3A',                          -- Flutter AppColors.accent
+  '#9A1830',                          -- Flutter AppColors.accentDark
+  'rgba(196,30,58,0.08)',             -- accent with 0.08 opacity
+  'lg',                               -- Flutter 用 14px 圆角
+  '微信登录',
+  '手机号登录',
+  '邮箱登录',
+  '游客体验',
+  true,
+  true,
+  true,
+  true,
+  false,
+  false,
+  'builtin',
+  '0',
+  'system',
+  NOW(),
+  NOW()
+) ON CONFLICT (id) DO NOTHING;
+
+-- =============================================
+-- APP 下载页配置初始数据
+-- =============================================
+INSERT INTO app_download_config (
+  id,
+  page_title,
+  page_description,
+  background_type,
+  gradient_start,
+  gradient_end,
+  gradient_direction,
+  app_name,
+  app_slogan,
+  slogan_color,
+  logo_animation_enabled,
+  button_style,
+  button_primary_color,
+  button_secondary_color,
+  button_radius,
+  ios_button_text,
+  android_button_text,
+  feature_list,
+  footer_text,
+  status,
+  create_by,
+  create_time,
+  update_time
+) VALUES (
+  'default_download_config',
+  '寻印 - 城市文化探索',
+  '发现城市文化之旅，收集专属数字印记，用区块链永久珍藏你的探索足迹',
+  'gradient',
+  '#873636',                          -- 深红褐色
+  '#1A1A1A',                          -- 近黑
+  '45deg',                            -- 左下到右上
+  '寻印',
+  '探索城市文化，收集专属印记',
+  'rgba(255,255,255,0.7)',            -- 白色70%透明度
+  true,                               -- 开启Logo浮动动画
+  'filled',
+  '#C41E3A',                          -- 品牌红
+  'rgba(255,255,255,0.2)',            -- 半透明白色
+  'full',                             -- 全圆角
+  'App Store',
+  'Android 下载',
+  '[{"icon": "compass", "title": "发现城市文化之旅"}, {"icon": "stamp", "title": "收集专属数字印记"}, {"icon": "shield-check", "title": "区块链永久存证"}]',
+  '© 2025 寻印 · 让每一次探索都值得珍藏',
+  '0',
+  'system',
+  NOW(),
+  NOW()
+) ON CONFLICT (id) DO NOTHING;

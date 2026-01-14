@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "app_login_config" ADD COLUMN     "app_name" VARCHAR(50) DEFAULT '寻印',
+ADD COLUMN     "app_name_color" VARCHAR(20) DEFAULT '#1a1a1a',
+ADD COLUMN     "aurora_enabled" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "aurora_preset" VARCHAR(20) DEFAULT 'warm',
+ADD COLUMN     "gradient_middle" VARCHAR(20),
+ADD COLUMN     "logo_animation_enabled" BOOLEAN NOT NULL DEFAULT true,
+ALTER COLUMN "gradient_start" SET DEFAULT '#FDF8F5',
+ALTER COLUMN "gradient_end" SET DEFAULT '#F5F0EB',
+ALTER COLUMN "gradient_direction" SET DEFAULT 'to bottom',
+ALTER COLUMN "slogan" SET DEFAULT '探索城市文化，收集专属印记',
+ALTER COLUMN "slogan_color" SET DEFAULT '#666666',
+ALTER COLUMN "button_primary_color" SET DEFAULT '#C41E3A',
+ALTER COLUMN "button_secondary_color" SET DEFAULT 'rgba(196,30,58,0.08)',
+ALTER COLUMN "google_login_enabled" SET DEFAULT true;

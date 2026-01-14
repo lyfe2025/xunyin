@@ -2,19 +2,27 @@ import request from '@/utils/request'
 
 export interface DownloadConfig {
     id?: string
+    pageTitle?: string
+    pageDescription?: string
+    favicon?: string
     appIcon?: string
     appName?: string
     appSlogan?: string
+    sloganColor?: string
+    logoAnimationEnabled?: boolean
     backgroundType?: string
     backgroundImage?: string
     backgroundColor?: string
     gradientStart?: string
     gradientEnd?: string
     gradientDirection?: string
+    buttonStyle?: string
     buttonRadius?: string
     buttonPrimaryColor?: string
     buttonSecondaryColor?: string
-    featureList?: string[]
+    iosButtonText?: string
+    androidButtonText?: string
+    featureList?: Array<{ icon?: string; title: string }>
     iosStoreUrl?: string
     androidStoreUrl?: string
     androidApkUrl?: string

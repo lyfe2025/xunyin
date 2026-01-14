@@ -8,11 +8,13 @@ withDefaults(
     showDeviceSwitch?: boolean
     scale?: number
     hint?: string
+    statusBarColor?: string
   }>(),
   {
     showDeviceSwitch: true,
     scale: 0.65,
     hint: '',
+    statusBarColor: 'white',
   },
 )
 
@@ -43,7 +45,7 @@ const currentDevice = ref<DeviceType>('iphone')
 
     <!-- 手机 -->
     <div class="phone-container">
-      <PhoneFrame :device="currentDevice" :scale="scale">
+      <PhoneFrame :device="currentDevice" :scale="scale" :status-bar-color="statusBarColor">
         <slot :device="currentDevice" />
       </PhoneFrame>
     </div>

@@ -84,11 +84,15 @@ export class UpdateDownloadConfigDto {
   @MaxLength(200)
   appSlogan?: string
 
-  @ApiPropertyOptional({ description: '标语颜色', example: '#F5F5DC' })
+  @ApiPropertyOptional({ description: '标语颜色', example: 'rgba(255,255,255,0.7)' })
   @IsOptional()
   @IsString()
-  @MaxLength(20)
+  @MaxLength(30)
   sloganColor?: string
+
+  @ApiPropertyOptional({ description: 'Logo浮动动画开关', example: true })
+  @IsOptional()
+  logoAnimationEnabled?: boolean
 
   // ========== 按钮样式 ==========
   @ApiPropertyOptional({ description: '按钮风格', enum: ['filled', 'outlined', 'glass'] })

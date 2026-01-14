@@ -858,20 +858,29 @@ model AppLoginConfig {
   backgroundType      String   @default("gradient") @map("background_type") @db.VarChar(20) // image/color/gradient
   backgroundImage     String?  @map("background_image") @db.VarChar(500)  // 背景图（backgroundType=image时使用）
   backgroundColor     String?  @map("background_color") @db.VarChar(20)   // 纯色背景（backgroundType=color时使用）
-  gradientStart       String?  @default("#8B4513") @map("gradient_start") @db.VarChar(20) // 渐变起始色（赭石色）
-  gradientEnd         String?  @default("#2C2C2C") @map("gradient_end") @db.VarChar(20)   // 渐变结束色（墨色）
-  gradientDirection   String?  @default("135deg") @map("gradient_direction") @db.VarChar(30) // 渐变方向
+  gradientStart       String?  @default("#FDF8F5") @map("gradient_start") @db.VarChar(20) // Aurora warm 起始色
+  gradientMiddle      String?  @map("gradient_middle") @db.VarChar(20)    // 渐变中间色（可选，3色渐变）
+  gradientEnd         String?  @default("#F5F0EB") @map("gradient_end") @db.VarChar(20)   // Aurora warm 结束色
+  gradientDirection   String?  @default("to bottom") @map("gradient_direction") @db.VarChar(30) // 渐变方向
+  // Aurora 底纹配置
+  auroraEnabled       Boolean  @default(true) @map("aurora_enabled")      // 是否启用 Aurora 光晕效果
+  auroraPreset        String?  @default("warm") @map("aurora_preset") @db.VarChar(20) // warm/standard/golden/custom
   // Logo配置
   logoImage           String?  @map("logo_image") @db.VarChar(500)        // Logo图片
   logoSize            String?  @default("normal") @map("logo_size") @db.VarChar(20) // small/normal/large
+  logoAnimationEnabled Boolean @default(true) @map("logo_animation_enabled") // 是否启用 Logo 浮动动画
+  // 应用名称配置
+  appName             String?  @default("寻印") @map("app_name") @db.VarChar(50) // Logo 下方的应用名称
+  appNameColor        String?  @default("#2D2D2D") @map("app_name_color") @db.VarChar(20) // 应用名称颜色 (Flutter textPrimary)
   // 标语配置
-  slogan              String?  @db.VarChar(200)                           // 标语
-  sloganColor         String?  @default("#F5F5DC") @map("slogan_color") @db.VarChar(20) // 标语颜色（米白色）
+  slogan              String?  @default("探索城市文化，收集专属印记") @db.VarChar(200) // 标语
+  sloganColor         String?  @default("#666666") @map("slogan_color") @db.VarChar(20) // 标语颜色
   // 按钮样式
-  buttonStyle         String?  @default("filled") @map("button_style") @db.VarChar(20) // filled/outlined/rounded
-  buttonPrimaryColor  String?  @default("#C53D43") @map("button_primary_color") @db.VarChar(20) // 主按钮颜色（朱砂红）
-  buttonSecondaryColor String? @default("rgba(255,255,255,0.2)") @map("button_secondary_color") @db.VarChar(30) // 次要按钮颜色
-  buttonRadius        String?  @default("full") @map("button_radius") @db.VarChar(20) // none/sm/md/lg/full
+  buttonStyle         String?  @default("filled") @map("button_style") @db.VarChar(20) // filled/outlined/glass
+  buttonPrimaryColor  String?  @default("#C41E3A") @map("button_primary_color") @db.VarChar(20) // 品牌红 accent
+  buttonGradientEndColor String? @default("#9A1830") @map("button_gradient_end_color") @db.VarChar(20) // 渐变结束色 accentDark
+  buttonSecondaryColor String? @default("rgba(196,30,58,0.08)") @map("button_secondary_color") @db.VarChar(30) // 次要按钮颜色
+  buttonRadius        String?  @default("lg") @map("button_radius") @db.VarChar(20) // none/sm/md/lg/full
   // 按钮文本配置
   wechatButtonText    String?  @map("wechat_button_text") @db.VarChar(50)   // 微信登录按钮文本
   phoneButtonText     String?  @map("phone_button_text") @db.VarChar(50)    // 手机号登录按钮文本
@@ -880,7 +889,7 @@ model AppLoginConfig {
   // 登录方式开关
   wechatLoginEnabled  Boolean  @default(true) @map("wechat_login_enabled")
   appleLoginEnabled   Boolean  @default(true) @map("apple_login_enabled")
-  googleLoginEnabled  Boolean  @default(false) @map("google_login_enabled")
+  googleLoginEnabled  Boolean  @default(true) @map("google_login_enabled")
   phoneLoginEnabled   Boolean  @default(true) @map("phone_login_enabled")
   emailLoginEnabled   Boolean  @default(false) @map("email_login_enabled")
   guestModeEnabled    Boolean  @default(false) @map("guest_mode_enabled")
@@ -908,19 +917,20 @@ model AppDownloadConfig {
   backgroundType      String   @default("gradient") @map("background_type") @db.VarChar(20) // image/color/gradient
   backgroundImage     String?  @map("background_image") @db.VarChar(500)
   backgroundColor     String?  @map("background_color") @db.VarChar(20)
-  gradientStart       String?  @default("#8B4513") @map("gradient_start") @db.VarChar(20) // 赭石色
-  gradientEnd         String?  @default("#2C2C2C") @map("gradient_end") @db.VarChar(20)   // 墨色
-  gradientDirection   String?  @default("135deg") @map("gradient_direction") @db.VarChar(30)
+  gradientStart       String?  @default("#FDF8F5") @map("gradient_start") @db.VarChar(20) // Aurora warm 起始色
+  gradientEnd         String?  @default("#F5F0EB") @map("gradient_end") @db.VarChar(20)   // Aurora warm 结束色
+  gradientDirection   String?  @default("to bottom") @map("gradient_direction") @db.VarChar(30)
   // APP信息
   appIcon         String?  @map("app_icon") @db.VarChar(500)
   appName         String?  @map("app_name") @db.VarChar(100)
   appSlogan       String?  @map("app_slogan") @db.VarChar(200)
-  sloganColor     String?  @default("#F5F5DC") @map("slogan_color") @db.VarChar(20) // 米白色
+  sloganColor     String?  @default("#666666") @map("slogan_color") @db.VarChar(30) // 支持 rgba 格式
+  logoAnimationEnabled Boolean? @default(true) @map("logo_animation_enabled") // Logo浮动动画开关
   // 按钮样式
   buttonStyle         String?  @default("filled") @map("button_style") @db.VarChar(20) // filled/outlined/rounded
-  buttonPrimaryColor  String?  @default("#C53D43") @map("button_primary_color") @db.VarChar(20) // 朱砂红
-  buttonSecondaryColor String? @default("rgba(255,255,255,0.2)") @map("button_secondary_color") @db.VarChar(30) // 次要按钮颜色
-  buttonRadius        String?  @default("full") @map("button_radius") @db.VarChar(20) // none/sm/md/lg/full
+  buttonPrimaryColor  String?  @default("#C41E3A") @map("button_primary_color") @db.VarChar(20) // 品牌红 accent
+  buttonSecondaryColor String? @default("rgba(196,30,58,0.08)") @map("button_secondary_color") @db.VarChar(30) // 与登录页一致
+  buttonRadius        String?  @default("lg") @map("button_radius") @db.VarChar(20) // none/sm/md/lg/full
   // 按钮文本配置
   iosButtonText       String?  @map("ios_button_text") @db.VarChar(50)     // iOS下载按钮文本
   androidButtonText   String?  @map("android_button_text") @db.VarChar(50) // Android下载按钮文本

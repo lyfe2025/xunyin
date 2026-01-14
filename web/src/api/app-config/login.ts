@@ -7,17 +7,26 @@ export interface LoginConfig {
   backgroundImage?: string
   backgroundColor?: string
   gradientStart?: string
+  gradientMiddle?: string // 渐变中间色（3色渐变）
   gradientEnd?: string
   gradientDirection?: string
+  // Aurora 底纹配置
+  auroraEnabled: boolean // 是否启用 Aurora 光晕
+  auroraPreset?: string // warm/standard/golden/custom
   // Logo配置
   logoImage?: string
   logoSize?: string // small/normal/large
+  logoAnimationEnabled: boolean // 是否启用 Logo 浮动动画
+  // 应用名称配置
+  appName?: string // Logo 下方的应用名称
+  appNameColor?: string // 应用名称颜色
   // 标语配置
   slogan?: string
   sloganColor?: string
   // 按钮样式
-  buttonStyle?: string // filled/outlined/rounded
-  buttonPrimaryColor?: string
+  buttonStyle?: string // filled/outlined/glass
+  buttonPrimaryColor?: string // 渐变起始色
+  buttonGradientEndColor?: string // 渐变结束色
   buttonSecondaryColor?: string
   buttonRadius?: string // none/sm/md/lg/full
   // 按钮文本配置
@@ -48,17 +57,26 @@ export interface UpdateLoginConfigParams {
   backgroundImage?: string
   backgroundColor?: string
   gradientStart?: string
+  gradientMiddle?: string
   gradientEnd?: string
   gradientDirection?: string
+  // Aurora 底纹配置
+  auroraEnabled?: boolean
+  auroraPreset?: string
   // Logo配置
   logoImage?: string
   logoSize?: string
+  logoAnimationEnabled?: boolean
+  // 应用名称配置
+  appName?: string
+  appNameColor?: string
   // 标语配置
   slogan?: string
   sloganColor?: string
   // 按钮样式
   buttonStyle?: string
-  buttonPrimaryColor?: string
+  buttonPrimaryColor?: string // 渐变起始色
+  buttonGradientEndColor?: string // 渐变结束色
   buttonSecondaryColor?: string
   buttonRadius?: string
   // 按钮文本配置

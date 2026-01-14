@@ -4916,6 +4916,126 @@ async function main() {
     console.log('App agreements seeding completed.')
   }
 
+  // ==================== APP 登录页配置初始数据 ====================
+  const existingLoginConfig = await prisma.appLoginConfig.count()
+  if (existingLoginConfig === 0) {
+    console.log('Seeding app login config...')
+
+    // 登录页配置 - 匹配当前 Flutter App 的 Aurora UI 设计
+    await prisma.appLoginConfig.create({
+      data: {
+        // 背景配置 - Aurora warm 变体
+        backgroundType: 'gradient',
+        gradientStart: '#FDF8F5', // Aurora warm 浅色起始
+        gradientEnd: '#F5F0EB', // Aurora warm 浅色结束
+        gradientDirection: 'to bottom', // 从上到下
+        // Logo配置
+        logoSize: 'normal',
+        // 标语配置
+        slogan: '探索城市文化，收集专属印记',
+        sloganColor: '#666666', // 灰色文字
+        // 按钮样式 - 品牌红渐变
+        buttonStyle: 'filled',
+        buttonPrimaryColor: '#C41E3A', // 品牌红 AppColors.accent
+        buttonSecondaryColor: 'rgba(196,30,58,0.08)', // 浅红背景
+        buttonRadius: 'full', // 全圆角
+        // 按钮文本
+        wechatButtonText: '微信登录',
+        phoneButtonText: '手机号登录',
+        emailButtonText: '邮箱登录',
+        guestButtonText: '游客体验',
+        // 登录方式 - 匹配 App 当前配置
+        wechatLoginEnabled: true,
+        appleLoginEnabled: true,
+        googleLoginEnabled: true,
+        phoneLoginEnabled: true,
+        emailLoginEnabled: false,
+        guestModeEnabled: false,
+        // 协议配置
+        agreementSource: 'builtin',
+        // 系统字段
+        status: '0',
+        createBy: 'system',
+      },
+    })
+    console.log('Created app login config')
+
+    console.log('App login config seeding completed.')
+  }
+
+  // ==================== APP 下载页配置初始数据 ====================
+  const existingDownloadConfig = await prisma.appDownloadConfig.count()
+  if (existingDownloadConfig === 0) {
+    console.log('Seeding app download config...')
+
+    // 下载页配置 - 深色渐变背景
+    await prisma.appDownloadConfig.create({
+      data: {
+        // 页面信息
+        pageTitle: '寻印 - 城市文化探索',
+        pageDescription: '发现城市文化之旅，收集专属数字印记，用区块链永久珍藏你的探索足迹',
+        // 背景配置 - 深红到黑色渐变
+        backgroundType: 'gradient',
+        gradientStart: '#873636', // 深红褐色
+        gradientEnd: '#1A1A1A', // 近黑
+        gradientDirection: '45deg', // 左下到右上
+        // APP信息
+        appName: '寻印',
+        appSlogan: '探索城市文化，收集专属印记',
+        sloganColor: 'rgba(255,255,255,0.7)', // 白色70%透明度
+        logoAnimationEnabled: true, // 开启Logo浮动动画
+        // 按钮样式
+        buttonStyle: 'filled',
+        buttonPrimaryColor: '#C41E3A', // 品牌红
+        buttonSecondaryColor: 'rgba(255,255,255,0.2)', // 半透明白色
+        buttonRadius: 'full', // 全圆角
+        // 按钮文本
+        iosButtonText: 'App Store',
+        androidButtonText: 'Android 下载',
+        // 功能特点
+        featureList: [
+          { icon: 'compass', title: '发现城市文化之旅' },
+          { icon: 'stamp', title: '收集专属数字印记' },
+          { icon: 'shield-check', title: '区块链永久存证' },
+        ],
+        // 页脚
+        footerText: '© 2025 寻印 · 让每一次探索都值得珍藏',
+        // 系统字段
+        status: '0',
+        createBy: 'system',
+      },
+    })
+    console.log('Created app download config')
+
+    console.log('App download config seeding completed.')
+  }
+
+  // ==================== APP 启动页配置初始数据 ====================
+  const existingSplashConfig = await prisma.appSplashConfig.count()
+  if (existingSplashConfig === 0) {
+    console.log('Seeding app splash config...')
+
+    // 启动页配置 - 默认品牌启动页
+    await prisma.appSplashConfig.create({
+      data: {
+        title: '寻印品牌启动页',
+        type: 'image',
+        // 使用品牌色渐变背景图（实际使用时替换为真实图片URL）
+        mediaUrl: '/uploads/splash/default-splash.png',
+        linkType: 'none',
+        duration: 3,
+        skipDelay: 1,
+        platform: 'all',
+        orderNum: 1,
+        status: '0',
+        createBy: 'system',
+      },
+    })
+    console.log('Created app splash config')
+
+    console.log('App splash config seeding completed.')
+  }
+
   // 清除 Redis 用户状态缓存，避免重新初始化数据后无法登录
   await clearUserStatusCache()
 

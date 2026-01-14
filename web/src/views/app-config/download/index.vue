@@ -3,6 +3,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import {
@@ -42,28 +43,29 @@ function copyUrl() {
   })
 }
 
-// 寻印主题色默认值
+// 与 Flutter App 登录页风格一致的默认值（Aurora warm 暖色调）
 const form = reactive<UpdateDownloadConfigParams>({
   pageTitle: '',
   pageDescription: '',
   favicon: '',
-  // 背景配置
+  // 背景配置 - Aurora warm 浅色（与登录页一致）
   backgroundType: 'gradient',
   backgroundImage: '',
-  backgroundColor: '#2C2C2C',
-  gradientStart: '#8B4513',
-  gradientEnd: '#2C2C2C',
-  gradientDirection: '135deg',
+  backgroundColor: '#FDF8F5',
+  gradientStart: '#FDF8F5',
+  gradientEnd: '#F5F0EB',
+  gradientDirection: 'to bottom',
   // APP信息
   appIcon: '',
   appName: '',
   appSlogan: '',
-  sloganColor: '#F5F5DC',
-  // 按钮样式
+  sloganColor: '#666666',
+  logoAnimationEnabled: true,
+  // 按钮样式 - 与登录页一致的品牌色
   buttonStyle: 'filled',
-  buttonPrimaryColor: '#C53D43',
-  buttonSecondaryColor: 'rgba(255,255,255,0.2)',
-  buttonRadius: 'full',
+  buttonPrimaryColor: '#C41E3A',
+  buttonSecondaryColor: 'rgba(196,30,58,0.08)',
+  buttonRadius: 'lg',
   // 按钮文本
   iosButtonText: '',
   androidButtonText: '',
@@ -84,11 +86,11 @@ const backgroundStyle = computed(() => {
       backgroundPosition: 'center',
     }
   } else if (form.backgroundType === 'color') {
-    return { backgroundColor: form.backgroundColor || '#2C2C2C' }
+    return { backgroundColor: form.backgroundColor || '#FDF8F5' }
   } else {
-    const dir = form.gradientDirection || '135deg'
-    const start = form.gradientStart || '#8B4513'
-    const end = form.gradientEnd || '#2C2C2C'
+    const dir = form.gradientDirection || 'to bottom'
+    const start = form.gradientStart || '#FDF8F5'
+    const end = form.gradientEnd || '#F5F0EB'
     return { backgroundImage: `linear-gradient(${dir}, ${start} 0%, ${end} 100%)` }
   }
 })
@@ -97,13 +99,14 @@ const backgroundStyle = computed(() => {
 const previewData = computed(() => ({
   appIcon: form.appIcon,
   appName: form.appName || '寻印',
-  appSlogan: form.appSlogan || '城市文化探索与数字印记收藏',
-  sloganColor: form.sloganColor || '#F5F5DC',
+  appSlogan: form.appSlogan || '探索城市文化，收集专属印记',
+  sloganColor: form.sloganColor || '#666666',
+  logoAnimationEnabled: form.logoAnimationEnabled ?? true,
   buttonStyle: form.buttonStyle || 'filled',
-  buttonPrimaryColor: form.buttonPrimaryColor || '#C53D43',
-  buttonSecondaryColor: form.buttonSecondaryColor || 'rgba(255,255,255,0.2)',
-  buttonRadius: form.buttonRadius || 'full',
-  featureList: form.featureList || [],
+  buttonPrimaryColor: form.buttonPrimaryColor || '#C41E3A',
+  buttonSecondaryColor: form.buttonSecondaryColor || 'rgba(196,30,58,0.08)',
+  buttonRadius: form.buttonRadius || 'lg',
+  featureList: (form.featureList || []).filter((f) => f.title?.trim()),
 }))
 
 // 按钮圆角映射
@@ -126,15 +129,15 @@ const primaryButtonStyle = computed(() => {
   if (style === 'outlined') {
     return {
       backgroundColor: 'transparent',
-      border: `2px solid #ffffff`,
-      color: '#ffffff',
+      border: `2px solid ${color}`,
+      color: color,
     }
   } else if (style === 'glass') {
     return {
       backgroundColor: 'rgba(255,255,255,0.15)',
       backdropFilter: 'blur(10px)',
-      border: `1px solid rgba(255,255,255,0.3)`,
-      color: '#ffffff',
+      border: `1px solid ${color}`,
+      color: color,
     }
   }
   // filled (default) - 白底彩字
@@ -215,23 +218,24 @@ async function getData() {
       pageTitle: res.data.pageTitle || '',
       pageDescription: res.data.pageDescription || '',
       favicon: res.data.favicon || '',
-      // 背景配置
+      // 背景配置 - Aurora warm 深色变体
       backgroundType: res.data.backgroundType || 'gradient',
       backgroundImage: res.data.backgroundImage || '',
-      backgroundColor: res.data.backgroundColor || '#2C2C2C',
-      gradientStart: res.data.gradientStart || '#8B4513',
-      gradientEnd: res.data.gradientEnd || '#2C2C2C',
-      gradientDirection: res.data.gradientDirection || '135deg',
+      backgroundColor: res.data.backgroundColor || '#FDF8F5',
+      gradientStart: res.data.gradientStart || '#FDF8F5',
+      gradientEnd: res.data.gradientEnd || '#F5F0EB',
+      gradientDirection: res.data.gradientDirection || 'to bottom',
       // APP信息
       appIcon: res.data.appIcon || '',
       appName: res.data.appName || '',
       appSlogan: res.data.appSlogan || '',
-      sloganColor: res.data.sloganColor || '#F5F5DC',
-      // 按钮样式
+      sloganColor: res.data.sloganColor || '#666666',
+      logoAnimationEnabled: res.data.logoAnimationEnabled ?? true,
+      // 按钮样式 - 与登录页一致的品牌色
       buttonStyle: res.data.buttonStyle || 'filled',
-      buttonPrimaryColor: res.data.buttonPrimaryColor || '#C53D43',
-      buttonSecondaryColor: res.data.buttonSecondaryColor || 'rgba(255,255,255,0.2)',
-      buttonRadius: res.data.buttonRadius || 'full',
+      buttonPrimaryColor: res.data.buttonPrimaryColor || '#C41E3A',
+      buttonSecondaryColor: res.data.buttonSecondaryColor || 'rgba(196,30,58,0.08)',
+      buttonRadius: res.data.buttonRadius || 'lg',
       // 按钮文本
       iosButtonText: res.data.iosButtonText || '',
       androidButtonText: res.data.androidButtonText || '',
@@ -314,27 +318,36 @@ onMounted(() => {
     <div class="flex gap-8 h-[calc(100vh-140px)]">
       <!-- 左侧：手机预览 -->
       <div class="shrink-0">
-        <PhonePreview :scale="0.62" :show-device-switch="true">
+        <PhonePreview :scale="0.85" :show-device-switch="true" status-bar-color="black">
           <template #default>
             <div class="w-full h-full flex flex-col" :style="backgroundStyle">
               <!-- App 信息 -->
-              <div class="flex flex-col items-center pt-12 pb-6 px-5">
-                <img
-                  v-if="previewData.appIcon"
-                  :src="previewData.appIcon"
-                  class="w-16 h-16 rounded-2xl mb-3 shadow-lg"
-                  alt="App Icon"
-                />
+              <div class="flex flex-col items-center pt-16 pb-6 px-5">
+                <!-- Logo + 名称 + 标语整体（带浮动动画） -->
                 <div
-                  v-else
-                  class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur mb-3 flex items-center justify-center text-white text-lg font-bold shadow-lg"
+                  class="flex flex-col items-center"
+                  :class="{ 'logo-float': previewData.logoAnimationEnabled }"
                 >
-                  寻印
+                  <img
+                    v-if="previewData.appIcon"
+                    :src="previewData.appIcon"
+                    class="w-16 h-16 rounded-2xl mb-3 shadow-lg"
+                    alt="App Icon"
+                  />
+                  <div
+                    v-else
+                    class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur mb-3 flex items-center justify-center text-white text-lg font-bold shadow-lg"
+                  >
+                    寻印
+                  </div>
+                  <h1 class="text-white text-base font-bold mb-1">{{ previewData.appName }}</h1>
+                  <p
+                    class="text-xs text-center"
+                    :style="{ color: previewData.sloganColor || 'rgba(255,255,255,0.7)' }"
+                  >
+                    {{ previewData.appSlogan }}
+                  </p>
                 </div>
-                <h1 class="text-white text-base font-bold">{{ previewData.appName }}</h1>
-                <p class="text-xs mt-1 text-center" :style="{ color: previewData.sloganColor }">
-                  {{ previewData.appSlogan }}
-                </p>
               </div>
 
               <!-- 功能特点 -->
@@ -349,10 +362,14 @@ onMounted(() => {
                   >
                     {{ index + 1 }}
                   </div>
-                  <p class="text-white text-xs font-medium flex-1 truncate">{{ feature.title }}</p>
+                  <p class="text-white text-xs font-medium flex-1 truncate">
+                    {{ typeof feature === 'object' ? feature.title : feature }}
+                  </p>
                 </div>
               </div>
-              <div v-else class="flex-1" />
+              <div v-else class="flex-1 flex items-center justify-center px-4">
+                <p class="text-white/40 text-xs text-center">暂无功能特点</p>
+              </div>
 
               <!-- 下载按钮 -->
               <div class="px-5 pb-10 space-y-3">
@@ -492,7 +509,14 @@ onMounted(() => {
               <div class="space-y-3">
                 <div class="space-y-1">
                   <Label class="text-xs">页面 Favicon</Label>
-                  <ImageUpload v-model="form.favicon" />
+                  <ImageUpload
+                    v-model="form.favicon"
+                    accept=".ico,.png,image/png,image/x-icon"
+                    :max-size="1"
+                  />
+                  <p class="text-xs text-muted-foreground">
+                    浏览器标签页图标，建议 32x32px 或 16x16px，支持 ICO/PNG
+                  </p>
                 </div>
               </div>
             </div>
@@ -522,6 +546,13 @@ onMounted(() => {
                   <Input v-model="form.sloganColor" class="flex-1" />
                 </div>
               </div>
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-center justify-between">
+                <Label class="text-xs">Logo 浮动动画</Label>
+                <Switch v-model:checked="form.logoAnimationEnabled" />
+              </div>
+              <p class="text-xs text-muted-foreground">开启后 Logo 会有轻微的上下浮动效果</p>
             </div>
           </CardContent>
         </Card>
@@ -574,6 +605,9 @@ onMounted(() => {
                   />
                   <Input v-model="form.buttonPrimaryColor" class="flex-1" />
                 </div>
+                <p class="text-xs text-muted-foreground">
+                  填充：文字颜色 | 描边/毛玻璃：边框和文字颜色
+                </p>
               </div>
               <div class="space-y-1">
                 <Label class="text-xs">次要按钮颜色</Label>
@@ -590,6 +624,7 @@ onMounted(() => {
                     placeholder="rgba(255,255,255,0.2)"
                   />
                 </div>
+                <p class="text-xs text-muted-foreground">填充：背景颜色（支持 rgba 透明度）</p>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -608,7 +643,10 @@ onMounted(() => {
         <!-- 功能特点 -->
         <Card>
           <CardHeader class="py-3 flex flex-row items-center justify-between">
-            <CardTitle class="text-sm">功能特点</CardTitle>
+            <div>
+              <CardTitle class="text-sm">功能特点</CardTitle>
+              <CardDescription class="text-xs">预览仅显示前 3 个，实际页面显示全部</CardDescription>
+            </div>
             <Button variant="outline" size="sm" @click="addFeature">
               <Plus class="h-3 w-3 mr-1" />添加
             </Button>
@@ -676,5 +714,18 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 下载页无需额外样式，状态栏已由 PhonePreview 组件处理 */
+/* Logo 浮动动画 */
+@keyframes logo-float {
+  0%,
+  100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+.logo-float {
+  animation: logo-float 2s ease-in-out infinite;
+}
 </style>

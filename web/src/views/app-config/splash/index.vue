@@ -299,7 +299,7 @@ onMounted(() => {
     <div class="flex gap-8 h-[calc(100vh-140px)]">
       <!-- 左侧：手机预览 -->
       <div class="shrink-0">
-        <PhonePreview :scale="0.62" :show-device-switch="true">
+        <PhonePreview :scale="0.85" :show-device-switch="true" status-bar-color="white">
           <template #default>
             <div class="w-full h-full bg-black relative flex flex-col">
               <!-- 媒体内容 -->
@@ -328,7 +328,7 @@ onMounted(() => {
                 <!-- 跳过按钮 -->
                 <div
                   v-if="previewData.mediaUrl"
-                  class="absolute top-3 right-3 bg-black/50 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1"
+                  class="absolute top-12 right-3 bg-black/50 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1"
                 >
                   <SkipForward class="h-3 w-3" />
                   跳过 {{ previewData.duration }}s

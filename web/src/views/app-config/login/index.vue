@@ -33,26 +33,36 @@ const loading = ref(false)
 const submitLoading = ref(false)
 const activeTab = ref('appearance')
 
-// 登录页配置表单 - 寻印主题色
+// 登录页配置表单 - 寻印主题色（Aurora 暖色调）
+// 参数与 Flutter App 登录页完全对齐
 const form = reactive<UpdateLoginConfigParams>({
-  // 背景配置
+  // 背景配置 - Aurora warm variant（3色渐变）
   backgroundType: 'gradient',
   backgroundImage: '',
-  backgroundColor: '#2C2C2C',
-  gradientStart: '#8B4513', // 赭石色
-  gradientEnd: '#2C2C2C', // 墨色
-  gradientDirection: '135deg',
-  // Logo配置
+  backgroundColor: '#FDF8F5',
+  gradientStart: '#FDF8F5', // Aurora warm 起始色
+  gradientMiddle: '#F8F5F0', // Aurora warm 中间色
+  gradientEnd: '#F5F0EB', // Aurora warm 结束色
+  gradientDirection: 'to bottom',
+  // Aurora 底纹配置
+  auroraEnabled: true,
+  auroraPreset: 'warm',
+  // Logo配置 - Flutter: 88x88px, 圆角22px
   logoImage: '',
   logoSize: 'normal',
-  // 标语配置
-  slogan: '',
-  sloganColor: '#F5F5DC', // 米白色
-  // 按钮样式
+  logoAnimationEnabled: true,
+  // 应用名称配置 - Flutter: fontSize 32, letterSpacing 4
+  appName: '寻印',
+  appNameColor: '#2D2D2D', // Flutter textPrimary
+  // 标语配置 - Flutter: fontSize 14, letterSpacing 1, opacity 0.8
+  slogan: '探索城市文化，收集专属印记',
+  sloganColor: '#666666', // Flutter textSecondary
+  // 按钮样式 - Flutter: accent gradient, 圆角14px
   buttonStyle: 'filled',
-  buttonPrimaryColor: '#C53D43', // 朱砂红
-  buttonSecondaryColor: 'rgba(255,255,255,0.2)',
-  buttonRadius: 'full',
+  buttonPrimaryColor: '#C41E3A', // Flutter AppColors.accent
+  buttonGradientEndColor: '#9A1830', // Flutter AppColors.accentDark
+  buttonSecondaryColor: 'rgba(196,30,58,0.08)', // accent with 0.08 opacity
+  buttonRadius: 'lg', // Flutter 用 14px 圆角，对应 lg
   // 按钮文本
   wechatButtonText: '',
   phoneButtonText: '',
@@ -61,7 +71,7 @@ const form = reactive<UpdateLoginConfigParams>({
   // 登录方式
   wechatLoginEnabled: true,
   appleLoginEnabled: true,
-  googleLoginEnabled: false,
+  googleLoginEnabled: true,
   phoneLoginEnabled: true,
   emailLoginEnabled: false,
   guestModeEnabled: false,
@@ -96,14 +106,21 @@ const previewData = computed(() => ({
   backgroundImage: form.backgroundImage,
   backgroundColor: form.backgroundColor,
   gradientStart: form.gradientStart,
+  gradientMiddle: form.gradientMiddle,
   gradientEnd: form.gradientEnd,
   gradientDirection: form.gradientDirection,
+  auroraEnabled: form.auroraEnabled,
+  auroraPreset: form.auroraPreset,
   logoImage: form.logoImage,
   logoSize: form.logoSize,
+  logoAnimationEnabled: form.logoAnimationEnabled,
+  appName: form.appName,
+  appNameColor: form.appNameColor,
   slogan: form.slogan,
   sloganColor: form.sloganColor,
   buttonStyle: form.buttonStyle,
   buttonPrimaryColor: form.buttonPrimaryColor,
+  buttonGradientEndColor: form.buttonGradientEndColor,
   buttonSecondaryColor: form.buttonSecondaryColor,
   buttonRadius: form.buttonRadius,
   wechatLoginEnabled: form.wechatLoginEnabled,
@@ -114,102 +131,107 @@ const previewData = computed(() => ({
   guestModeEnabled: form.guestModeEnabled,
 }))
 
-// 计算是否有第三方登录图标（Apple/Google）
-const hasThirdPartyIcons = computed(() => {
-  return previewData.value.appleLoginEnabled || previewData.value.googleLoginEnabled
-})
+// Aurora 光晕配置（根据预设返回不同配置）
+// 尺寸使用像素值，基于手机预览宽度约 375px 计算
+type AuroraCircleConfig = { x: string; y: string; size: string; color: string; opacity: number }
+const auroraCircles = computed(() => {
+  const preset = form.auroraPreset || 'warm'
+  const accent = form.buttonPrimaryColor || '#C41E3A'
 
-// 计算背景样式
-const backgroundStyle = computed(() => {
-  const data = previewData.value
-  if (data.backgroundType === 'image' && data.backgroundImage) {
-    return {
-      backgroundImage: `url(${data.backgroundImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-    }
-  } else if (data.backgroundType === 'color') {
-    return { backgroundColor: data.backgroundColor || '#1a1a2e' }
-  } else {
-    // gradient
-    const dir = data.gradientDirection || 'to bottom'
-    const start = data.gradientStart || '#667eea'
-    const end = data.gradientEnd || '#764ba2'
-    return { backgroundImage: `linear-gradient(${dir}, ${start} 0%, ${end} 100%)` }
+  // 颜色定义（与 Flutter AppColors 对应）
+  const colors = {
+    accent, // 品牌红 #C41E3A
+    primary: '#425066', // 黛青
+    tertiary: '#7BA08C', // 竹青
+    sealGold: '#E6B422', // 金色
   }
-})
 
-// Logo 尺寸映射
-const logoSizeClass = computed(() => {
-  const sizeMap: Record<string, string> = {
-    small: 'w-16 h-16',
-    normal: 'w-20 h-20',
-    large: 'w-24 h-24',
+  // 不同预设的光晕配置（完全匹配 Flutter AuroraVariant.circles）
+  // Flutter radiusFactor 是半径占屏幕宽度的比例，这里转换为直径像素值
+  // 预览宽度约 375px，radiusFactor 0.5 = 直径 375px，0.35 = 直径 262px
+  const presets: Record<string, AuroraCircleConfig[]> = {
+    warm: [
+      // Flutter: AuroraCircle(0.85, 0.1, 0.5, AppColors.accent, 0.04)
+      { x: '85%', y: '10%', size: '375px', color: colors.accent, opacity: 0.04 },
+      // Flutter: AuroraCircle(0.15, 0.85, 0.45, AppColors.tertiary, 0.05)
+      { x: '15%', y: '85%', size: '337px', color: colors.tertiary, opacity: 0.05 },
+      // Flutter: AuroraCircle(0.5, 0.4, 0.35, AppColors.sealGold, 0.02)
+      { x: '50%', y: '40%', size: '262px', color: colors.sealGold, opacity: 0.02 },
+    ],
+    standard: [
+      // Flutter: AuroraCircle(0.2, 0.1, 0.35, AppColors.primary, 0.08)
+      { x: '20%', y: '10%', size: '262px', color: colors.primary, opacity: 0.08 },
+      // Flutter: AuroraCircle(0.85, 0.35, 0.3, AppColors.accent, 0.06)
+      { x: '85%', y: '35%', size: '225px', color: colors.accent, opacity: 0.06 },
+      // Flutter: AuroraCircle(0.4, 0.85, 0.4, AppColors.tertiary, 0.05)
+      { x: '40%', y: '85%', size: '300px', color: colors.tertiary, opacity: 0.05 },
+    ],
+    golden: [
+      // Flutter: AuroraCircle(0.5, 0.12, 0.4, AppColors.sealGold, 0.08)
+      { x: '50%', y: '12%', size: '300px', color: colors.sealGold, opacity: 0.08 },
+      // Flutter: AuroraCircle(0.1, 0.5, 0.35, AppColors.primary, 0.06)
+      { x: '10%', y: '50%', size: '262px', color: colors.primary, opacity: 0.06 },
+      // Flutter: AuroraCircle(0.85, 0.75, 0.3, AppColors.accent, 0.05)
+      { x: '85%', y: '75%', size: '225px', color: colors.accent, opacity: 0.05 },
+    ],
+    celebration: [
+      // Flutter: AuroraCircle(0.5, 0.15, 0.5, AppColors.sealGold, 0.12)
+      { x: '50%', y: '15%', size: '375px', color: colors.sealGold, opacity: 0.12 },
+      // Flutter: AuroraCircle(0.1, 0.5, 0.35, AppColors.primary, 0.06)
+      { x: '10%', y: '50%', size: '262px', color: colors.primary, opacity: 0.06 },
+      // Flutter: AuroraCircle(0.9, 0.7, 0.3, AppColors.accent, 0.05)
+      { x: '90%', y: '70%', size: '225px', color: colors.accent, opacity: 0.05 },
+    ],
   }
-  return sizeMap[previewData.value.logoSize || 'normal'] || 'w-20 h-20'
+
+  return presets[preset] || presets.warm
 })
 
-// 按钮圆角映射
-const buttonRadiusClass = computed(() => {
+// 登录按钮样式（根据 buttonStyle 配置）
+const loginButtonStyle = computed(() => {
+  const style = form.buttonStyle || 'filled'
+  const primaryColor = form.buttonPrimaryColor || '#C41E3A'
+  const gradientEndColor = form.buttonGradientEndColor || '#9A1830'
+  const radius = form.buttonRadius || 'lg'
+
+  // 圆角映射
   const radiusMap: Record<string, string> = {
-    none: 'rounded-none',
-    sm: 'rounded',
-    md: 'rounded-lg',
-    lg: 'rounded-xl',
-    full: 'rounded-full',
+    none: '0',
+    sm: '8px',
+    md: '12px',
+    lg: '14px',
+    full: '9999px',
   }
-  return radiusMap[previewData.value.buttonRadius || 'full'] || 'rounded-full'
-})
+  const borderRadius = radiusMap[radius] || '14px'
 
-// 主按钮样式（根据 buttonStyle 计算）
-const primaryButtonStyle = computed(() => {
-  const style = previewData.value.buttonStyle || 'filled'
-  const color = previewData.value.buttonPrimaryColor || '#C53D43'
-
-  if (style === 'outlined') {
-    return {
-      backgroundColor: 'transparent',
-      border: `2px solid ${color}`,
-      color: color,
-    }
-  } else if (style === 'glass') {
-    return {
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      backdropFilter: 'blur(10px)',
-      border: `1px solid rgba(255,255,255,0.3)`,
-      color: '#ffffff',
-    }
-  }
-  // filled (default)
-  return {
-    backgroundColor: color,
-    color: '#ffffff',
-  }
-})
-
-// 次按钮样式（根据 buttonStyle 计算）
-const secondaryButtonStyle = computed(() => {
-  const style = previewData.value.buttonStyle || 'filled'
-  const color = previewData.value.buttonSecondaryColor || 'rgba(255,255,255,0.2)'
-
-  if (style === 'outlined') {
-    return {
-      backgroundColor: 'transparent',
-      border: `2px solid rgba(255,255,255,0.5)`,
-      color: '#ffffff',
-    }
-  } else if (style === 'glass') {
-    return {
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      backdropFilter: 'blur(10px)',
-      border: `1px solid rgba(255,255,255,0.2)`,
-      color: '#ffffff',
-    }
-  }
-  // filled (default)
-  return {
-    backgroundColor: color,
-    color: '#ffffff',
+  // 根据风格返回不同样式
+  switch (style) {
+    case 'outlined':
+      return {
+        background: 'transparent',
+        border: `2px solid ${primaryColor}`,
+        color: primaryColor,
+        boxShadow: 'none',
+        borderRadius,
+      }
+    case 'glass':
+      return {
+        background: 'rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        color: primaryColor,
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        borderRadius,
+      }
+    case 'filled':
+    default:
+      return {
+        background: `linear-gradient(135deg, ${primaryColor} 0%, ${gradientEndColor} 100%)`,
+        border: 'none',
+        color: '#ffffff',
+        boxShadow: `0 4px 12px ${primaryColor}40`,
+        borderRadius,
+      }
   }
 })
 
@@ -255,24 +277,33 @@ async function getLoginData() {
     const res = (await getLoginConfig()) as any
     const data = res.data || res
     Object.assign(form, {
-      // 背景配置
+      // 背景配置 - Aurora warm variant（3色渐变）
       backgroundType: data.backgroundType || 'gradient',
       backgroundImage: data.backgroundImage || '',
-      backgroundColor: data.backgroundColor || '#2C2C2C',
-      gradientStart: data.gradientStart || '#8B4513',
-      gradientEnd: data.gradientEnd || '#2C2C2C',
-      gradientDirection: data.gradientDirection || '135deg',
+      backgroundColor: data.backgroundColor || '#FDF8F5',
+      gradientStart: data.gradientStart || '#FDF8F5',
+      gradientMiddle: data.gradientMiddle || '#F8F5F0',
+      gradientEnd: data.gradientEnd || '#F5F0EB',
+      gradientDirection: data.gradientDirection || 'to bottom',
+      // Aurora 底纹配置
+      auroraEnabled: data.auroraEnabled ?? true,
+      auroraPreset: data.auroraPreset || 'warm',
       // Logo配置
       logoImage: data.logoImage || '',
       logoSize: data.logoSize || 'normal',
+      logoAnimationEnabled: data.logoAnimationEnabled ?? true,
+      // 应用名称配置
+      appName: data.appName || '寻印',
+      appNameColor: data.appNameColor || '#1a1a1a',
       // 标语配置
       slogan: data.slogan || '',
-      sloganColor: data.sloganColor || '#F5F5DC',
+      sloganColor: data.sloganColor || '#666666',
       // 按钮样式
       buttonStyle: data.buttonStyle || 'filled',
-      buttonPrimaryColor: data.buttonPrimaryColor || '#C53D43',
-      buttonSecondaryColor: data.buttonSecondaryColor || 'rgba(255,255,255,0.2)',
-      buttonRadius: data.buttonRadius || 'full',
+      buttonPrimaryColor: data.buttonPrimaryColor || '#C41E3A',
+      buttonGradientEndColor: data.buttonGradientEndColor || '#9A1830',
+      buttonSecondaryColor: data.buttonSecondaryColor || 'rgba(196,30,58,0.08)',
+      buttonRadius: data.buttonRadius || 'lg',
       // 按钮文本
       wechatButtonText: data.wechatButtonText || '',
       phoneButtonText: data.phoneButtonText || '',
@@ -419,162 +450,288 @@ onMounted(() => {
     </div>
 
     <!-- 主内容 -->
-    <div class="flex gap-8 h-[calc(100vh-140px)]">
+    <div class="flex gap-6 h-[calc(100vh-140px)]">
       <!-- 左侧：手机预览 -->
       <div class="shrink-0">
-        <PhonePreview :scale="0.62" :show-device-switch="true">
+        <PhonePreview
+          :scale="0.85"
+          :show-device-switch="true"
+          hint="预览效果（85% 缩放）"
+          status-bar-color="black"
+        >
           <template #default>
-            <div class="w-full h-full flex flex-col" :style="backgroundStyle">
-              <!-- Logo 和标语 -->
-              <div class="flex-1 flex flex-col items-center justify-center px-5">
-                <img
-                  v-if="previewData.logoImage"
-                  :src="previewData.logoImage"
-                  :class="[logoSizeClass, 'rounded-2xl mb-4 shadow-lg object-cover']"
-                  alt="Logo"
-                />
+            <!-- Aurora 暖色渐变背景 -->
+            <div
+              class="w-full h-full flex flex-col relative overflow-hidden"
+              :style="{
+                background:
+                  previewData.backgroundType === 'gradient'
+                    ? `linear-gradient(${previewData.gradientDirection || 'to bottom'}, ${previewData.gradientStart || '#FDF8F5'} 0%, ${previewData.gradientMiddle || '#F8F5F0'} 50%, ${previewData.gradientEnd || '#F5F0EB'} 100%)`
+                    : previewData.backgroundType === 'image' && previewData.backgroundImage
+                      ? `url(${previewData.backgroundImage})`
+                      : previewData.backgroundColor || '#FDF8F5',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }"
+            >
+              <!-- Aurora 底纹光晕（根据预设动态渲染） -->
+              <template v-if="previewData.auroraEnabled">
                 <div
-                  v-else
-                  :class="[
-                    logoSizeClass,
-                    'rounded-2xl bg-white/20 backdrop-blur mb-4 flex items-center justify-center text-white text-xl font-bold shadow-lg',
-                  ]"
-                >
-                  寻印
-                </div>
-                <p
-                  class="text-sm text-center font-medium"
-                  :style="{ color: previewData.sloganColor || '#ffffff' }"
-                >
-                  {{ previewData.slogan || '城市文化探索与数字印记收藏' }}
-                </p>
-              </div>
+                  v-for="(circle, index) in auroraCircles"
+                  :key="index"
+                  class="absolute rounded-full pointer-events-none"
+                  :style="{
+                    width: circle.size,
+                    height: circle.size,
+                    top: circle.y,
+                    left: circle.x,
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: circle.color,
+                    opacity: circle.opacity,
+                  }"
+                />
+              </template>
 
-              <!-- 登录按钮 -->
-              <div class="px-5 pb-4 space-y-3">
-                <!-- 主要登录按钮：微信 -->
-                <button
-                  v-if="previewData.wechatLoginEnabled"
-                  :class="[
-                    'w-full h-11 text-sm font-medium flex items-center justify-center gap-2 shadow-lg transition-all',
-                    buttonRadiusClass,
-                  ]"
-                  :style="primaryButtonStyle"
-                >
-                  <!-- 微信图标 -->
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      d="M9.5 4C5.36 4 2 6.69 2 10c0 1.89 1.08 3.56 2.78 4.66l-.7 2.1 2.45-1.23c.89.26 1.85.47 2.97.47.34 0 .68-.02 1-.05-.19-.57-.3-1.17-.3-1.8 0-2.96 2.82-5.35 6.3-5.35.39 0 .77.03 1.14.08C16.83 5.96 13.53 4 9.5 4zm-2.25 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4.5 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM16.5 10c-3.04 0-5.5 1.97-5.5 4.4s2.46 4.4 5.5 4.4c.68 0 1.34-.1 1.96-.28l1.79.9-.5-1.49c1.12-.87 1.75-2.05 1.75-3.53 0-2.43-2.46-4.4-5.5-4.4zm-2 2.75c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75zm4 0c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75z"
-                    />
-                  </svg>
-                  {{ form.wechatButtonText || '微信登录' }}
-                </button>
+              <!-- 主内容区域 -->
+              <div class="flex-1 flex flex-col relative z-10 px-6">
+                <!-- 顶部间距 - 增加以让内容整体下移 -->
+                <div class="h-20 shrink-0" />
 
-                <!-- 次要登录按钮：手机号 -->
-                <button
-                  v-if="previewData.phoneLoginEnabled"
-                  :class="[
-                    'w-full h-11 text-sm font-medium flex items-center justify-center gap-2 transition-all',
-                    buttonRadiusClass,
-                  ]"
-                  :style="secondaryButtonStyle"
+                <!-- Logo 区域（带浮动动画） -->
+                <div
+                  class="flex flex-col items-center"
+                  :class="{ 'logo-float': previewData.logoAnimationEnabled }"
                 >
-                  <!-- 手机图标 -->
-                  <svg
-                    class="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
+                  <!-- 印章 Logo: 88x88px, 圆角 22px -->
+                  <div
+                    v-if="previewData.logoImage"
+                    class="w-20 h-20 rounded-[18px] overflow-hidden"
+                    :style="{
+                      boxShadow: `0 8px 20px ${previewData.buttonPrimaryColor || '#C41E3A'}40`,
+                    }"
                   >
-                    <rect x="6" y="2" width="12" height="20" rx="2" />
-                    <circle cx="12" cy="18" r="1" fill="currentColor" />
-                  </svg>
-                  {{ form.phoneButtonText || '手机号登录' }}
+                    <img
+                      :src="previewData.logoImage"
+                      class="w-full h-full object-cover"
+                      alt="Logo"
+                    />
+                  </div>
+                  <div
+                    v-else
+                    class="w-20 h-20 rounded-[18px] flex items-center justify-center"
+                    :style="{
+                      background: `linear-gradient(135deg, ${previewData.buttonPrimaryColor || '#C41E3A'} 0%, ${previewData.buttonPrimaryColor || '#C41E3A'}cc 100%)`,
+                      boxShadow: `0 8px 20px ${previewData.buttonPrimaryColor || '#C41E3A'}40`,
+                    }"
+                  >
+                    <span class="text-4xl font-bold text-white leading-none">印</span>
+                  </div>
+                  <!-- 间距 -->
+                  <div class="h-4" />
+                  <!-- 应用名称 -->
+                  <h1
+                    class="text-2xl font-bold"
+                    :style="{
+                      color: previewData.appNameColor || '#1a1a1a',
+                      letterSpacing: '3px',
+                    }"
+                  >
+                    {{ previewData.appName || '寻印' }}
+                  </h1>
+                  <!-- 间距 -->
+                  <div class="h-1.5" />
+                  <!-- 标语 -->
+                  <p
+                    class="text-xs"
+                    :style="{
+                      color: previewData.sloganColor || '#666666',
+                      opacity: 0.8,
+                      letterSpacing: '0.5px',
+                    }"
+                  >
+                    {{ previewData.slogan || '探索城市文化，收集专属印记' }}
+                  </p>
+                </div>
+
+                <!-- 间距 -->
+                <div class="h-8 shrink-0" />
+
+                <!-- 登录表单卡片 -->
+                <div
+                  class="rounded-2xl p-5"
+                  :style="{
+                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                    border: '1px solid rgba(255, 255, 255, 0.9)',
+                    boxShadow: '0 8px 24px rgba(66, 80, 102, 0.06)',
+                  }"
+                >
+                  <!-- 手机号输入框 -->
+                  <div
+                    class="flex items-center gap-3 rounded-xl px-4 py-3"
+                    style="background-color: rgba(0, 0, 0, 0.04)"
+                  >
+                    <svg
+                      class="w-5 h-5 text-gray-400 shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <rect x="6" y="2" width="12" height="20" rx="2" />
+                      <circle cx="12" cy="18" r="1" fill="currentColor" />
+                    </svg>
+                    <span class="text-gray-400 text-sm">请输入手机号</span>
+                  </div>
+                  <!-- 间距 -->
+                  <div class="h-4" />
+                  <!-- 验证码输入框 + 按钮 -->
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="flex-1 flex items-center gap-3 rounded-xl px-4 py-3 min-w-0"
+                      style="background-color: rgba(0, 0, 0, 0.04)"
+                    >
+                      <svg
+                        class="w-5 h-5 text-gray-400 shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      >
+                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      <span class="text-gray-400 text-sm">验证码</span>
+                    </div>
+                    <!-- 验证码按钮 -->
+                    <button
+                      class="shrink-0 px-3 py-3 rounded-xl text-xs font-medium whitespace-nowrap"
+                      :style="{
+                        backgroundColor: `${previewData.buttonPrimaryColor || '#C41E3A'}14`,
+                        color: previewData.buttonPrimaryColor || '#C41E3A',
+                        border: `1px solid ${previewData.buttonPrimaryColor || '#C41E3A'}4d`,
+                      }"
+                    >
+                      获取验证码
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 间距 -->
+                <div class="h-6 shrink-0" />
+
+                <!-- 登录按钮 -->
+                <button
+                  class="w-full h-12 text-base font-semibold"
+                  :style="{
+                    ...loginButtonStyle,
+                    letterSpacing: '2px',
+                  }"
+                >
+                  登录
                 </button>
+
+                <!-- 间距 -->
+                <div class="h-8 shrink-0" />
 
                 <!-- 其他登录方式 -->
-                <div v-if="hasThirdPartyIcons" class="flex items-center justify-center pt-2">
-                  <div class="flex items-center gap-2 text-white/50 text-xs">
-                    <div class="w-8 h-px bg-white/30" />
-                    <span>其他方式</span>
-                    <div class="w-8 h-px bg-white/30" />
+                <div>
+                  <div class="flex items-center gap-3 mb-5">
+                    <div class="flex-1 h-px" style="background-color: rgba(0, 0, 0, 0.1)" />
+                    <span class="text-xs" style="color: rgba(0, 0, 0, 0.35)">其他登录方式</span>
+                    <div class="flex-1 h-px" style="background-color: rgba(0, 0, 0, 0.1)" />
+                  </div>
+                  <!-- 社交登录图标 -->
+                  <div class="flex justify-center gap-5">
+                    <!-- 微信 -->
+                    <div
+                      v-if="previewData.wechatLoginEnabled"
+                      class="flex flex-col items-center gap-1"
+                    >
+                      <div
+                        class="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style="
+                          background-color: rgba(0, 0, 0, 0.04);
+                          border: 1px solid rgba(0, 0, 0, 0.08);
+                        "
+                      >
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="#07C160">
+                          <path
+                            d="M9.5 4C5.36 4 2 6.69 2 10c0 1.89 1.08 3.56 2.78 4.66l-.7 2.1 2.45-1.23c.89.26 1.85.47 2.97.47.34 0 .68-.02 1-.05-.19-.57-.3-1.17-.3-1.8 0-2.96 2.82-5.35 6.3-5.35.39 0 .77.03 1.14.08C16.83 5.96 13.53 4 9.5 4zm-2.25 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4.5 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM16.5 10c-3.04 0-5.5 1.97-5.5 4.4s2.46 4.4 5.5 4.4c.68 0 1.34-.1 1.96-.28l1.79.9-.5-1.49c1.12-.87 1.75-2.05 1.75-3.53 0-2.43-2.46-4.4-5.5-4.4zm-2 2.75c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75zm4 0c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75z"
+                          />
+                        </svg>
+                      </div>
+                      <span class="text-[10px]" style="color: rgba(0, 0, 0, 0.5)">微信</span>
+                    </div>
+                    <!-- Apple -->
+                    <div
+                      v-if="previewData.appleLoginEnabled"
+                      class="flex flex-col items-center gap-1"
+                    >
+                      <div
+                        class="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style="
+                          background-color: rgba(0, 0, 0, 0.04);
+                          border: 1px solid rgba(0, 0, 0, 0.08);
+                        "
+                      >
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="#000000">
+                          <path
+                            d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+                          />
+                        </svg>
+                      </div>
+                      <span class="text-[10px]" style="color: rgba(0, 0, 0, 0.5)">Apple</span>
+                    </div>
+                    <!-- Google -->
+                    <div
+                      v-if="previewData.googleLoginEnabled"
+                      class="flex flex-col items-center gap-1"
+                    >
+                      <div
+                        class="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style="
+                          background-color: rgba(0, 0, 0, 0.04);
+                          border: 1px solid rgba(0, 0, 0, 0.08);
+                        "
+                      >
+                        <svg class="w-6 h-6" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          />
+                        </svg>
+                      </div>
+                      <span class="text-[10px]" style="color: rgba(0, 0, 0, 0.5)">Google</span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- 第三方登录图标 -->
-                <div v-if="hasThirdPartyIcons" class="flex justify-center gap-3">
-                  <!-- Apple -->
-                  <div
-                    v-if="previewData.appleLoginEnabled"
-                    class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
-                  >
-                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path
-                        d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
-                      />
-                    </svg>
-                  </div>
-                  <!-- Google -->
-                  <div
-                    v-if="previewData.googleLoginEnabled"
-                    class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
-                  >
-                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      />
-                      <path
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                <!-- 弹性空间 - 把协议推到底部 -->
+                <div class="flex-1" />
 
-                <!-- 次要入口：邮箱登录 / 游客体验 -->
-                <div
-                  v-if="previewData.emailLoginEnabled || previewData.guestModeEnabled"
-                  class="flex items-center justify-center gap-3 pt-1"
-                >
-                  <span
-                    v-if="previewData.emailLoginEnabled"
-                    class="text-white/60 text-xs cursor-pointer hover:text-white/80"
-                  >
-                    {{ form.emailButtonText || '邮箱登录' }}
-                  </span>
-                  <span
-                    v-if="previewData.emailLoginEnabled && previewData.guestModeEnabled"
-                    class="text-white/40 text-xs"
-                  >
-                    |
-                  </span>
-                  <span
-                    v-if="previewData.guestModeEnabled"
-                    class="text-white/60 text-xs cursor-pointer hover:text-white/80"
-                  >
-                    {{ form.guestButtonText || '游客体验' }}
-                  </span>
+                <!-- 协议 - 固定在底部 -->
+                <div class="text-center pb-6 shrink-0">
+                  <p class="text-[11px]" style="color: rgba(0, 0, 0, 0.35)">
+                    登录即表示同意<span
+                      :style="{ color: `${previewData.buttonPrimaryColor || '#C41E3A'}e6` }"
+                      >《用户协议》</span
+                    >和<span :style="{ color: `${previewData.buttonPrimaryColor || '#C41E3A'}e6` }"
+                      >《隐私政策》</span
+                    >
+                  </p>
                 </div>
-              </div>
-
-              <!-- 协议 -->
-              <div class="px-5 pb-8 text-center">
-                <p class="text-white/50 text-[10px] whitespace-nowrap">
-                  登录即表示同意
-                  <span class="text-white/70 underline">{{
-                    userAgreement?.title || '用户协议'
-                  }}</span>
-                  和
-                  <span class="text-white/70 underline">{{
-                    privacyPolicy?.title || '隐私政策'
-                  }}</span>
-                </p>
               </div>
             </div>
           </template>
@@ -628,6 +785,17 @@ onMounted(() => {
                       </div>
                     </div>
                     <div class="space-y-2">
+                      <Label>中间色</Label>
+                      <div class="flex gap-2">
+                        <input
+                          type="color"
+                          v-model="form.gradientMiddle"
+                          class="w-10 h-10 rounded border cursor-pointer"
+                        />
+                        <Input v-model="form.gradientMiddle" class="flex-1" />
+                      </div>
+                    </div>
+                    <div class="space-y-2">
                       <Label>结束色</Label>
                       <div class="flex gap-2">
                         <input
@@ -638,22 +806,22 @@ onMounted(() => {
                         <Input v-model="form.gradientEnd" class="flex-1" />
                       </div>
                     </div>
-                    <div class="space-y-2">
-                      <Label>渐变方向</Label>
-                      <Select v-model="form.gradientDirection">
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="to bottom">从上到下</SelectItem>
-                          <SelectItem value="to top">从下到上</SelectItem>
-                          <SelectItem value="to right">从左到右</SelectItem>
-                          <SelectItem value="to left">从右到左</SelectItem>
-                          <SelectItem value="135deg">左上到右下</SelectItem>
-                          <SelectItem value="45deg">左下到右上</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <Label>渐变方向</Label>
+                    <Select v-model="form.gradientDirection">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="to bottom">从上到下</SelectItem>
+                        <SelectItem value="to top">从下到上</SelectItem>
+                        <SelectItem value="to right">从左到右</SelectItem>
+                        <SelectItem value="to left">从右到左</SelectItem>
+                        <SelectItem value="135deg">左上到右下</SelectItem>
+                        <SelectItem value="45deg">左下到右上</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </template>
 
@@ -682,10 +850,41 @@ onMounted(() => {
               </CardContent>
             </Card>
 
+            <!-- Aurora 底纹配置 -->
             <Card>
               <CardHeader class="py-3">
-                <CardTitle class="text-sm">Logo 与标语</CardTitle>
-                <CardDescription class="text-xs">配置登录页的 Logo 和标语</CardDescription>
+                <CardTitle class="text-sm">Aurora 底纹</CardTitle>
+                <CardDescription class="text-xs">配置背景光晕效果，增加视觉层次</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium">启用 Aurora 底纹</p>
+                    <p class="text-xs text-muted-foreground">在背景上叠加柔和的光晕效果</p>
+                  </div>
+                  <Switch v-model:checked="form.auroraEnabled" />
+                </div>
+                <div v-if="form.auroraEnabled" class="space-y-2">
+                  <Label>预设风格</Label>
+                  <Select v-model="form.auroraPreset">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="warm">暖色调（登录页推荐）</SelectItem>
+                      <SelectItem value="standard">标准</SelectItem>
+                      <SelectItem value="golden">金色调</SelectItem>
+                      <SelectItem value="celebration">庆祝风格</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader class="py-3">
+                <CardTitle class="text-sm">Logo 与应用名称</CardTitle>
+                <CardDescription class="text-xs">配置登录页的 Logo、应用名称和标语</CardDescription>
               </CardHeader>
               <CardContent class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -707,22 +906,48 @@ onMounted(() => {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div class="space-y-2">
-                      <Label>标语颜色</Label>
-                      <div class="flex gap-2">
-                        <input
-                          type="color"
-                          v-model="form.sloganColor"
-                          class="w-10 h-10 rounded border cursor-pointer"
-                        />
-                        <Input v-model="form.sloganColor" class="flex-1" />
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-sm font-medium">Logo 浮动动画</p>
+                        <p class="text-xs text-muted-foreground">上下浮动效果</p>
                       </div>
+                      <Switch v-model:checked="form.logoAnimationEnabled" />
                     </div>
                   </div>
                 </div>
-                <div class="space-y-2">
-                  <Label>标语</Label>
-                  <Input v-model="form.slogan" placeholder="城市文化探索与数字印记收藏" />
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label>应用名称</Label>
+                    <Input v-model="form.appName" placeholder="寻印" />
+                  </div>
+                  <div class="space-y-2">
+                    <Label>名称颜色</Label>
+                    <div class="flex gap-2">
+                      <input
+                        type="color"
+                        v-model="form.appNameColor"
+                        class="w-10 h-10 rounded border cursor-pointer"
+                      />
+                      <Input v-model="form.appNameColor" class="flex-1" />
+                    </div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label>标语</Label>
+                    <Input v-model="form.slogan" placeholder="探索城市文化，收集专属印记" />
+                  </div>
+                  <div class="space-y-2">
+                    <Label>标语颜色</Label>
+                    <div class="flex gap-2">
+                      <input
+                        type="color"
+                        v-model="form.sloganColor"
+                        class="w-10 h-10 rounded border cursor-pointer"
+                      />
+                      <Input v-model="form.sloganColor" class="flex-1" />
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -765,7 +990,7 @@ onMounted(() => {
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-2">
-                    <Label>主按钮颜色</Label>
+                    <Label>渐变起始色</Label>
                     <div class="flex gap-2">
                       <input
                         type="color"
@@ -776,20 +1001,31 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="space-y-2">
-                    <Label>次要按钮颜色</Label>
+                    <Label>渐变结束色</Label>
                     <div class="flex gap-2">
                       <input
                         type="color"
-                        :value="extractHexColor(form.buttonSecondaryColor)"
-                        @input="updateSecondaryColor($event)"
+                        v-model="form.buttonGradientEndColor"
                         class="w-10 h-10 rounded border cursor-pointer"
                       />
-                      <Input
-                        v-model="form.buttonSecondaryColor"
-                        class="flex-1"
-                        placeholder="rgba(255,255,255,0.2)"
-                      />
+                      <Input v-model="form.buttonGradientEndColor" class="flex-1" />
                     </div>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <Label>次要按钮颜色</Label>
+                  <div class="flex gap-2">
+                    <input
+                      type="color"
+                      :value="extractHexColor(form.buttonSecondaryColor)"
+                      @input="updateSecondaryColor($event)"
+                      class="w-10 h-10 rounded border cursor-pointer"
+                    />
+                    <Input
+                      v-model="form.buttonSecondaryColor"
+                      class="flex-1"
+                      placeholder="rgba(255,255,255,0.2)"
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -1061,5 +1297,18 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 登录页无需额外样式，状态栏已由 PhonePreview 组件处理 */
+/* Logo 浮动动画 */
+@keyframes logo-float {
+  0%,
+  100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+.logo-float {
+  animation: logo-float 2s ease-in-out infinite;
+}
 </style>
