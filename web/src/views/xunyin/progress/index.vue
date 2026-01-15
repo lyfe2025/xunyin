@@ -119,10 +119,13 @@ const statusOptions = [
   { value: 'in_progress', label: '进行中', variant: 'default' as const, icon: Loader },
   { value: 'completed', label: '已完成', variant: 'secondary' as const, icon: CheckCircle },
   { value: 'abandoned', label: '已放弃', variant: 'destructive' as const, icon: XCircle },
-]
+] as const
 
-function getStatusInfo(status: string) {
-  return statusOptions.find((o) => o.value === status) || statusOptions[0]
+type StatusInfo = (typeof statusOptions)[number]
+
+function getStatusInfo(status?: string): StatusInfo {
+  const found = statusOptions.find((o) => o.value === status)
+  return found ?? statusOptions[0]!
 }
 
 // 详情弹窗
@@ -182,8 +185,8 @@ function resetQuery() {
   handleQuery()
 }
 
-function handleTabChange(tab: string) {
-  activeTab.value = tab
+function handleTabChange(tab: string | number) {
+  activeTab.value = String(tab)
   queryParams.pageNum = 1
   // 切换 tab 时清除状态筛选，因为 tab 本身就是状态筛选
   queryParams.status = undefined
@@ -439,11 +442,11 @@ onMounted(() => {
               <AvatarFallback>{{ currentProgress.nickname?.charAt(0) }}</AvatarFallback>
             </Avatar>
             <div>
-              <div class="font-medium">{{ currentProgress.nickname }}</div>
-              <div class="text-sm text-muted-foreground">{{ currentProgress.journeyName }}</div>
+              <div class="font-medium">{{ currentProgress?.nickname }}</div>
+              <div class="text-sm text-muted-foreground">{{ currentProgress?.journeyName }}</div>
             </div>
-            <Badge :variant="getStatusInfo(currentProgress.status).variant" class="ml-auto">
-              {{ getStatusInfo(currentProgress.status).label }}
+            <Badge :variant="getStatusInfo(currentProgress?.status).variant" class="ml-auto">
+              {{ getStatusInfo(currentProgress?.status).label }}
             </Badge>
           </div>
 
@@ -452,8 +455,11 @@ onMounted(() => {
             <div class="flex justify-between text-sm">
               <span class="text-muted-foreground">完成进度</span>
               <span class="font-medium">
-                {{ currentProgress.completedPoints }}/{{ currentProgress.totalPoints }} ({{
-                  getProgressPercent(currentProgress.completedPoints, currentProgress.totalPoints)
+                {{ currentProgress?.completedPoints }}/{{ currentProgress?.totalPoints }} ({{
+                  getProgressPercent(
+                    currentProgress?.completedPoints,
+                    currentProgress?.totalPoints,
+                  )
                 }}%)
               </span>
             </div>

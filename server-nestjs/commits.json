@@ -1,5 +1,41 @@
 [
   {
+    "sha": "acd9dcc75e6f1f97498c937b50e13e43e3708af6",
+    "shortSha": "acd9dcc",
+    "message": "feat(resources): 添加初始数据资源和完善全局配置系统",
+    "type": "feat",
+    "date": "2026-01-16T03:05:22+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(resources): 添加初始数据资源和完善全局配置系统\n\n- 添加 Docker 环境变量配置文件 (.env.docker.example)\n- 补充背景音乐全局开关存储和管理功能\n- 优化 URL 工具类支持 file:// 协议处理\n- 修复头像页面和个人资料页面图片 URL 完整性处理\n- 完善音频和设置 Provider 配置\n- 添加图片资源管理文档和下载脚本\n- 导入完整的初始化资源文件（头像、身份证、城市、景点、印章、照片等）\n- 更新数据库种子数据配置\n- 优化 Web 端用户管理界面\n- 为项目提供完整的初始数据支撑和资源管理指南"
+  },
+  {
+    "sha": "68e61a9087b59f4dd242223204ad88e380392bcd",
+    "shortSha": "68e61a9",
+    "message": "refactor(config): 简化应用配置系统并改进进程管理",
+    "type": "refactor",
+    "date": "2026-01-16T01:43:08+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "refactor(config): 简化应用配置系统并改进进程管理\n\n- 将 AppConfig.baseUrl 重命名为 apiBaseUrl，使配置意图更清晰\n- 移除环境变量切换逻辑，改用直接配置方式便于本地开发和生产部署\n- 删除 devHost 配置，简化开发环境设置流程\n- 更新所有引用 baseUrl 的代码位置（api_client、router、url_utils、login_page）\n- 改进 db.sh 中数据库重置流程，自动检测并停止运行中的后端服务\n- 增强 monorepo.sh 中进程杀死逻辑，先尝试优雅终止再强制杀掉，确保端口完全释放\n- 添加详细的中文注释说明 API 地址和分享链接的配置方式\n- 优化服务停止流程，增加延迟和重试机制确保进程完全退出"
+  },
+  {
+    "sha": "d535f05b68c4e95445efc12a66db85c1515cf911",
+    "shortSha": "d535f05",
+    "message": "feat(audio): 实现背景音乐系统和多场景音频切换功能",
+    "type": "feat",
+    "date": "2026-01-16T00:51:04+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(audio): 实现背景音乐系统和多场景音频切换功能\n\n- 新增音频提供者系统，支持多场景背景音乐管理（首页、文化之旅、探索点等）\n- 实现音频上下文切换机制，在不同页面自动切换对应的背景音乐\n- 添加11首背景音乐资源（城市和文化之旅主题）到上传目录\n- 完善文化之旅详情页、进度页和导航页的音乐切换逻辑\n- 优化设置页面音乐开关，添加加载状态提示和禁用状态处理\n- 更新浮动控制条组件以支持音频播放控制\n- 修改.gitignore配置，保留音频和图片资源文件\n- 完善数据库初始化和服务配置以支持音频管理\n- 新增下载背景音乐脚本用于资源管理"
+  },
+  {
+    "sha": "78efbd513910060135ca131d469ec3ba983293f2",
+    "shortSha": "78efbd5",
+    "message": "feat(health): 实现健康检查系统和提交日志生成功能",
+    "type": "feat",
+    "date": "2026-01-15T23:48:16+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(health): 实现健康检查系统和提交日志生成功能\n\n- 添加 @nestjs/terminus 依赖用于健康检查端点支持\n- 添加 compression 中间件用于响应压缩优化\n- 更新 Prisma 和 Redis 健康检查模块实现\n- 新增 gen_commits 脚本命令用于生成 commits.json 静态文件\n- 实现 Git 提交日志解析和分类功能，支持按类型分组\n- 优化 monorepo.sh 脚本工具链，增强构建和部署能力\n- 更新依赖版本以支持最新的 NestJS 生态系统"
+  },
+  {
     "sha": "8611f1f1976cd36ecf5f7d3ad9ced9332812895d",
     "shortSha": "8611f1f",
     "message": "feat(ar): 实现AR功能系统和姿态识别能力",

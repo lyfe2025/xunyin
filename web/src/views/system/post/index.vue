@@ -180,7 +180,7 @@ function resetForm() {
 async function handleStatusChange(postId: string, status: string) {
   await changePostStatus(postId, status)
   const post = postList.value.find((p) => p.postId === postId)
-  if (post) post.status = status
+  if (post) post.status = status as '0' | '1'
 }
 
 // 批量选择

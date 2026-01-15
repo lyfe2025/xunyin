@@ -260,7 +260,7 @@ async function confirmDelete() {
 async function handleStatusChange(roleId: string, status: string) {
   await changeRoleStatus(roleId, status)
   const role = roleList.value.find((r) => r.roleId === roleId)
-  if (role) role.status = status
+  if (role) role.status = status as '0' | '1'
 }
 
 // 查看角色权限预览

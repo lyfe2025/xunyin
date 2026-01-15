@@ -369,7 +369,7 @@ onMounted(() => {
                 <TableCell>
                   <Checkbox
                     :checked="selectedIds.includes(row.id)"
-                    @update:checked="(checked) => handleSelectionChange(row.id, checked as boolean)"
+                    @update:checked="(checked: boolean) => handleSelectionChange(row.id, checked)"
                   />
                 </TableCell>
                 <TableCell class="font-mono text-sm">{{ row.channelCode }}</TableCell>

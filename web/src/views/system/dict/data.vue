@@ -193,7 +193,7 @@ function resetForm() {
 async function handleStatusChange(dictCode: string, status: string) {
   await changeDictDataStatus(dictCode, status)
   const data = dataList.value.find((d) => d.dictCode === dictCode)
-  if (data) data.status = status
+  if (data) data.status = status as '0' | '1'
 }
 
 // 批量选择

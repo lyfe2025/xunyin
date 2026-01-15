@@ -261,7 +261,7 @@ async function handleStatusChange(deptId: string, status: string) {
   const updateStatus = (list: SysDept[]) => {
     for (const item of list) {
       if (item.deptId === deptId) {
-        item.status = status
+        item.status = status as '0' | '1'
         return true
       }
       if (item.children && updateStatus(item.children)) return true

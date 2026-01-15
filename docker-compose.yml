@@ -67,9 +67,11 @@ services:
     volumes:
       - xunyin_server_logs:/app/logs
       - ./server-nestjs/uploads:/app/uploads
-    # 开发/测试时暴露端口供移动端访问
-    ports:
-      - "3000:3000"
+    # 端口映射说明：
+    # - 生产环境：注释掉此端口映射，通过前端 Nginx 反向代理访问（/api -> http://server:3000）
+    # - 开发/测试：保留端口映射，方便直接访问 Swagger 文档和移动端调试
+    # ports:
+    #   - "3000:3000"
     networks:
       - xunyin-network
     depends_on:
@@ -94,7 +96,7 @@ services:
     environment:
       TZ: Asia/Shanghai
     ports:
-      - "8080:80"
+      - "8081:80"
     networks:
       - xunyin-network
     depends_on:

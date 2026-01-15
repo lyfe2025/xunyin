@@ -277,7 +277,7 @@ async function handleStatusChange(menuId: string, status: string) {
   const updateStatus = (list: SysMenu[]) => {
     for (const item of list) {
       if (item.menuId === menuId) {
-        item.status = status
+        item.status = status as '0' | '1'
         return true
       }
       if (item.children && updateStatus(item.children)) return true

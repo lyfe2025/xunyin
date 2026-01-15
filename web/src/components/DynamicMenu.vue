@@ -33,6 +33,7 @@ function findActiveMenuIndex(): string {
   const currentPath = route.path
   for (let i = 0; i < menuList.value.length; i++) {
     const menu = menuList.value[i]
+    if (!menu) continue
     // 检查是否匹配父路由
     if (currentPath.startsWith(menu.path)) {
       return `item-${i}`

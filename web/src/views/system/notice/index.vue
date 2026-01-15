@@ -222,7 +222,7 @@ function getNoticeTypeLabel(type: string) {
 async function handleStatusChange(noticeId: string, status: string) {
   await changeNoticeStatus(noticeId, status)
   const notice = noticeList.value.find((n) => n.noticeId === noticeId)
-  if (notice) notice.status = status
+  if (notice) notice.status = status as '0' | '1'
 }
 
 // 批量选择
