@@ -15,8 +15,9 @@ class UrlUtils {
   ///
   /// 如果 [url] 已经是完整 URL（以 http:// 或 https:// 开头），则直接返回
   /// 如果是相对路径（如 /uploads/images/xxx.png），则拼接服务器地址
+  /// 如果 [url] 为空，返回空字符串（由 UI 层处理占位图）
   static String getFullImageUrl(String? url) {
-    if (url == null || url.isEmpty) {
+    if (url == null || url.trim().isEmpty) {
       return '';
     }
 

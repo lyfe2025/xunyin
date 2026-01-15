@@ -36,7 +36,7 @@ class _ShareBottomSheetState extends State<ShareBottomSheet> {
     if (_isSaving) return;
     setState(() => _isSaving = true);
 
-    await ShareService.captureAndSave(_cardKey);
+    await ShareService.captureAndSave(context, _cardKey);
 
     if (mounted) {
       setState(() => _isSaving = false);
@@ -47,7 +47,7 @@ class _ShareBottomSheetState extends State<ShareBottomSheet> {
     // 使用 userSealId 生成分享链接，如果没有则使用 sealId
     final shareId = widget.seal.userSealId ?? widget.seal.id;
     final link = ShareService.generateSealShareLink(shareId);
-    ShareService.copyLink(link);
+    ShareService.copyLink(context, link);
   }
 
   @override

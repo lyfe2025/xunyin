@@ -44,6 +44,13 @@ export class AlbumController {
     return this.albumService.findByJourney(user.userId, journeyId)
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: '获取照片详情' })
+  @ApiResponse({ status: 200, description: '成功', type: PhotoVo })
+  async findOne(@CurrentUser() user: CurrentAppUser, @Param('id') id: string) {
+    return this.albumService.findOne(user.userId, id)
+  }
+
   @Post()
   @ApiOperation({ summary: '上传照片' })
   @ApiBody({ type: CreatePhotoDto })

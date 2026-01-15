@@ -7,12 +7,14 @@ class CompletePointResponse {
   final int totalPoints;
   final bool journeyCompleted;
   final String? sealId;
+  final String? userSealId;
 
   CompletePointResponse({
     required this.pointsEarned,
     required this.totalPoints,
     required this.journeyCompleted,
     this.sealId,
+    this.userSealId,
   });
 
   factory CompletePointResponse.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,7 @@ class CompletePointResponse {
       totalPoints: json['totalPoints'] as int,
       journeyCompleted: json['journeyCompleted'] as bool,
       sealId: json['sealId'] as String?,
+      userSealId: json['userSealId'] as String?,
     );
   }
 }

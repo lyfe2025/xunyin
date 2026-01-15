@@ -299,6 +299,13 @@ export class AppAuthService {
    * 验证短信验证码
    */
   private async verifySmsCode(phone: string, code: string): Promise<boolean> {
+    // 开发环境：支持默认验证码 123456 用于测试
+    const isDev = this.configService.get('NODE_ENV') !== 'production'
+    if (isDev && code === '123456') {
+      this.logger.log(`使用默认验证码登录: ${phone}`)
+      return true
+    }
+
     const key = `${this.SMS_CODE_PREFIX}${phone}`
     const client = this.redisService.getClient()
     const storedCode = await client.get(key)

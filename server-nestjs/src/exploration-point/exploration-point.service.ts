@@ -105,6 +105,7 @@ export class ExplorationPointService {
 
     let journeyCompleted = false
     let sealId: string | undefined
+    let userSealId: string | undefined
 
     if (completedPoints >= totalPoints) {
       // 完成文化之旅
@@ -144,7 +145,7 @@ export class ExplorationPointService {
         })
 
         if (!existingSeal) {
-          await this.prisma.userSeal.create({
+          const newUserSeal = await this.prisma.userSeal.create({
             data: {
               userId,
               sealId: routeSeal.id,
@@ -154,6 +155,7 @@ export class ExplorationPointService {
             },
           })
           sealId = routeSeal.id
+          userSealId = newUserSeal.id
 
           // 记录获得印记动态
           await this.prisma.userActivity.create({
@@ -191,6 +193,7 @@ export class ExplorationPointService {
       totalPoints: updatedUser.totalPoints,
       journeyCompleted,
       sealId,
+      userSealId,
     }
   }
 

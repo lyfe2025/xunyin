@@ -252,6 +252,26 @@ export class RedisService implements OnModuleDestroy {
     return 'PONG'
   }
 
+  /** 获取值 */
+  get(key: string): Promise<string | null> {
+    return this.client.get(key)
+  }
+
+  /** 设置值（带过期时间，单位秒） */
+  setex(key: string, ttl: number, value: string): Promise<string> {
+    return this.client.setex(key, ttl, value)
+  }
+
+  /** 检查 key 是否存在 */
+  exists(key: string): Promise<number> {
+    return this.client.exists(key)
+  }
+
+  /** 删除 key */
+  del(key: string): void {
+    void this.client.del(key)
+  }
+
   onModuleDestroy() {
     if (this.isRealRedis && this.client instanceof Redis) {
       this.client.disconnect()

@@ -8,6 +8,7 @@ import '../../../core/theme/app_dimensions.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_buttons.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/simple_share_sheet.dart';
 import '../../../services/share_service.dart';
 
@@ -361,9 +362,7 @@ class _JourneyCompletePageState extends ConsumerState<JourneyCompletePage>
             width: double.infinity,
             height: AppSize.buttonHeightSmall,
             child: OutlinedButton.icon(
-              onPressed: () => ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('上链功能开发中'))),
+              onPressed: () => AppSnackBar.show(context, '上链功能开发中'),
               icon: const Icon(Icons.rocket_launch_rounded, size: 18),
               label: const Text(
                 '立即上链',

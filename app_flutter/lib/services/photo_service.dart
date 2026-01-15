@@ -1,7 +1,39 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
 import '../core/api/api_client.dart';
 import '../models/photo.dart';
+
+/// 创建照片请求参数
+class CreatePhotoParams {
+  final String journeyId;
+  final String pointId;
+  final String photoUrl;
+  final String? thumbnailUrl;
+  final String? filter;
+  final double? latitude;
+  final double? longitude;
+  final DateTime takenTime;
+
+  CreatePhotoParams({
+    required this.journeyId,
+    required this.pointId,
+    required this.photoUrl,
+    this.thumbnailUrl,
+    this.filter,
+    this.latitude,
+    this.longitude,
+    DateTime? takenTime,
+  }) : takenTime = takenTime ?? DateTime.now();
+
+  Map<String, dynamic> toJson() => {
+    'journeyId': journeyId,
+    'pointId': pointId,
+    'photoUrl': photoUrl,
+    if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+    if (filter != null) 'filter': filter,
+    if (latitude != null) 'latitude': latitude,
+    if (longitude != null) 'longitude': longitude,
+    'takenTime': takenTime.toIso8601String(),
+  };
+}
 
 class PhotoService {
   final ApiClient _api;
@@ -31,21 +63,15 @@ class PhotoService {
     return list.map((e) => JourneyPhotos.fromJson(e)).toList();
   }
 
-  /// 上传照片
-  Future<Photo> uploadPhoto({
-    required File file,
-    required String journeyId,
-    String? pointId,
-    String? filter,
-  }) async {
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(file.path),
-      'journeyId': journeyId,
-      if (pointId != null) 'pointId': pointId,
-      if (filter != null) 'filter': filter,
-    });
+  /// 创建照片记录（照片已上传后调用）
+  Future<Photo> createPhoto(CreatePhotoParams params) async {
+    final response = await _api.post('/photos', data: params.toJson());
+    return Photo.fromJson(response['data']);
+  }
 
-    final response = await _api.post('/photos', data: formData);
+  /// 获取照片详情
+  Future<Photo> getPhotoDetail(String photoId) async {
+    final response = await _api.get('/photos/$photoId');
     return Photo.fromJson(response['data']);
   }
 

@@ -73,6 +73,7 @@ class AppRouter {
                 : null,
             journeyCompleted: queryParams['journeyCompleted'] == 'true',
             sealId: queryParams['sealId'],
+            userSealId: queryParams['userSealId'],
           );
         },
       ),

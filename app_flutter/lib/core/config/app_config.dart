@@ -9,8 +9,7 @@ class AppConfig {
   static bool get isProd => env == 'prod';
 
   // 开发环境 Mac IP 地址（真机调试时需要改成你的局域网 IP）
-  // 运行 `ipconfig getifaddr en0` 获取
-  static const String devHost = '192.168.123.156'; // TODO: 改成你的 Mac IP
+  static const String devHost = '172.20.10.6'; // TODO: 改成你的 Mac IP
 
   // API 配置
   static String get baseUrl {

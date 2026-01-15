@@ -47,12 +47,12 @@ class _SimpleShareSheetState extends State<SimpleShareSheet> {
   Future<void> _saveToAlbum() async {
     if (_isSaving || widget.previewWidget == null) return;
     setState(() => _isSaving = true);
-    await ShareService.captureAndSave(_cardKey);
+    await ShareService.captureAndSave(context, _cardKey);
     if (mounted) setState(() => _isSaving = false);
   }
 
   void _copyLink() {
-    ShareService.copyLink(widget.shareLink);
+    ShareService.copyLink(context, widget.shareLink);
   }
 
   @override

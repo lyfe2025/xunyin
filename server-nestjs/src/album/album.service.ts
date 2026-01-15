@@ -159,6 +159,42 @@ export class AlbumService {
   }
 
   /**
+   * 获取照片详情
+   */
+  async findOne(userId: string, id: string) {
+    const photo = await this.prisma.explorationPhoto.findUnique({
+      where: { id },
+      include: {
+        journey: true,
+        point: true,
+      },
+    })
+
+    if (!photo) {
+      throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '照片不存在')
+    }
+
+    if (photo.userId !== userId) {
+      throw new BusinessException(ErrorCode.FORBIDDEN, '无权查看该照片')
+    }
+
+    return {
+      id: photo.id,
+      journeyId: photo.journeyId,
+      journeyName: photo.journey.name,
+      pointId: photo.pointId,
+      pointName: photo.point.name,
+      photoUrl: photo.photoUrl,
+      thumbnailUrl: photo.thumbnailUrl,
+      filter: photo.filter,
+      latitude: photo.latitude ? Number(photo.latitude) : null,
+      longitude: photo.longitude ? Number(photo.longitude) : null,
+      takenTime: photo.takenTime,
+      createTime: photo.createTime,
+    }
+  }
+
+  /**
    * 上传照片
    */
   async create(userId: string, dto: CreatePhotoDto) {

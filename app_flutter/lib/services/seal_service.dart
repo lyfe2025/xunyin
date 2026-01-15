@@ -59,13 +59,19 @@ class SealService {
 
   /// 上链存证
   Future<ChainRecord> chainSeal(String sealId) async {
-    final response = await _api.post('/seals/$sealId/chain');
+    final response = await _api.post('/blockchain/chain/$sealId');
     return ChainRecord.fromJson(response['data']);
   }
 
   /// 验证链上存证
-  Future<VerifyChainResult> verifyChain(String sealId) async {
-    final response = await _api.get('/seals/$sealId/verify');
+  Future<VerifyChainResult> verifyChain(String txHash) async {
+    final response = await _api.get('/blockchain/verify/$txHash');
     return VerifyChainResult.fromJson(response['data']);
+  }
+
+  /// 查询上链状态
+  Future<ChainStatusResult> getChainStatus(String sealId) async {
+    final response = await _api.get('/blockchain/status/$sealId');
+    return ChainStatusResult.fromJson(response['data']);
   }
 }

@@ -1,13 +1,26 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
+import '../../../core/utils/image_filter_utils.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../providers/service_providers.dart';
+import '../../../services/photo_service.dart';
 import '../../../shared/widgets/app_buttons.dart';
+import '../../../shared/widgets/app_snackbar.dart';
+import '../services/camera_service.dart';
+import '../services/gesture_recognition_service.dart';
+import '../widgets/camera_preview.dart' show AppCameraPreview, CameraControlButton, CameraGridOverlay;
+import '../widgets/gesture_overlay.dart';
+import '../widgets/ar_view_wrapper.dart';
+import '../widgets/photo_filter.dart';
 
-/// AR 任务页面 - Aurora UI + Glassmorphism
+/// AR 任务页面 - 集成相机、手势识别、AR 功能
 class ARTaskPage extends ConsumerStatefulWidget {
   final String pointId;
   const ARTaskPage({super.key, required this.pointId});
@@ -18,51 +31,130 @@ class ARTaskPage extends ConsumerStatefulWidget {
 
 class _ARTaskPageState extends ConsumerState<ARTaskPage>
     with TickerProviderStateMixin {
-  double _progress = 0;
+  // 服务
+  final CameraService _cameraService = CameraService();
+  final GestureRecognitionService _gestureService = GestureRecognitionService();
+
+  // 状态
+  bool _isInitializing = true;
   bool _isCompleted = false;
   bool _isSubmitting = false;
-  String _selectedFilter = '古风';
+  bool _gestureMatched = false;
+  String? _capturedPhotoPath;
+  PhotoFilter _selectedFilter = PhotoFilter.guFeng;
+  GestureResult? _currentGestureResult;
+  double _recognitionProgress = 0;
+  FlashMode _flashMode = FlashMode.off;
 
-  late AnimationController _scanController;
-  late Animation<double> _scanAnimation;
+  // 动画
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // 手势识别计时器
+  Timer? _gestureTimer;
+  int _matchedFrames = 0;
+  static const int _requiredMatchedFrames = 10; // 需要连续匹配的帧数
 
   @override
   void initState() {
     super.initState();
-    // 扫描线动画
-    _scanController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat();
-    _scanAnimation = Tween<double>(begin: 0, end: 1).animate(_scanController);
+    _initAnimations();
+    _initServices();
+  }
 
-    // 脉冲动画
+  void _initAnimations() {
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-
-    _simulateRecognition();
   }
 
-  void _simulateRecognition() {
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(milliseconds: 100));
-      if (!mounted || _isCompleted) return false;
-      setState(() => _progress = (_progress + 0.02).clamp(0, 1));
-      return _progress < 0.8;
+  Future<void> _initServices() async {
+    try {
+      final state = ref.read(currentJourneyProvider);
+      final taskType = state.currentPoint?.taskType ?? 'photo';
+
+      // 初始化相机
+      await _cameraService.initialize();
+
+      // 如果是手势任务，初始化手势识别
+      if (taskType == 'gesture') {
+        await _gestureService.initialize();
+        _startGestureRecognition();
+      }
+
+      if (mounted) {
+        setState(() => _isInitializing = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isInitializing = false);
+        AppSnackBar.error(context, '相机初始化失败: $e');
+      }
+    }
+  }
+
+  void _startGestureRecognition() {
+    if (_cameraService.controller == null) return;
+
+    _cameraService.startImageStream((image) async {
+      if (_gestureMatched || _isCompleted) return;
+
+      final result = await _gestureService.recognizeFromCameraImage(
+        image,
+        _cameraService.controller!.description,
+      );
+
+      if (!mounted) return;
+
+      setState(() => _currentGestureResult = result);
+
+      // 检查是否匹配目标手势
+      final state = ref.read(currentJourneyProvider);
+      final targetGestureKey = state.currentPoint?.targetGesture;
+      // 如果没有指定手势，默认使用"挥手"
+      final targetGesture = (targetGestureKey == null || targetGestureKey.isEmpty)
+          ? GestureType.wave
+          : GestureTypeExtension.fromKey(targetGestureKey);
+
+      if (result.gesture == targetGesture && result.confidence > 0.7) {
+        _matchedFrames++;
+        setState(() {
+          _recognitionProgress = _matchedFrames / _requiredMatchedFrames;
+        });
+
+        if (_matchedFrames >= _requiredMatchedFrames) {
+          _onGestureMatched();
+        }
+      } else {
+        _matchedFrames = 0;
+        setState(() => _recognitionProgress = 0);
+      }
+    });
+  }
+
+  void _onGestureMatched() {
+    HapticFeedback.heavyImpact();
+    setState(() => _gestureMatched = true);
+    _cameraService.stopImageStream();
+
+    // 延迟后自动完成
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted && !_isCompleted) {
+        _completeTask();
+      }
     });
   }
 
   @override
   void dispose() {
-    _scanController.dispose();
     _pulseController.dispose();
+    _gestureTimer?.cancel();
+    _cameraService.dispose();
+    _gestureService.dispose();
     super.dispose();
   }
 
@@ -72,16 +164,17 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
     final point = state.currentPoint;
     final totalPoints = state.points.length;
     final currentIndex = state.currentPointIndex;
+    final taskType = point?.taskType ?? 'photo';
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
       body: SafeArea(
         child: Column(
           children: [
-            _buildAppBar(context, currentIndex, totalPoints, point?.taskType ?? 'photo'),
-            Expanded(child: _buildCameraPreview(point?.taskType ?? 'photo')),
+            _buildAppBar(context, currentIndex, totalPoints, taskType),
+            Expanded(child: _buildMainContent(taskType, point)),
             _buildTaskInfo(point?.name ?? '', point?.taskDescription ?? ''),
-            _buildControls(point?.taskType ?? 'photo'),
+            _buildControls(taskType),
           ],
         ),
       ),
@@ -102,7 +195,10 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: 10,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.iconButton),
@@ -125,206 +221,213 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
     );
   }
 
-  Widget _buildCameraPreview(String taskType) {
+  Widget _buildMainContent(String taskType, dynamic point) {
+    if (_isInitializing) {
+      return _buildLoadingView();
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pageHorizontal),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.black.withValues(alpha: 0.6),
-            Colors.black.withValues(alpha: 0.4),
-          ],
-        ),
         borderRadius: BorderRadius.circular(AppRadius.cardLarge),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          // 网格背景
-          CustomPaint(
-            size: const Size(double.infinity, double.infinity),
-            painter: _CameraGridPainter(),
-          ),
-          // 扫描线动画
-          if (!_isCompleted)
-            AnimatedBuilder(
-              animation: _scanAnimation,
-              builder: (context, _) => Positioned(
-                top: _scanAnimation.value * 300,
-                left: 20,
-                right: 20,
-                child: Container(
-                  height: 2,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        AppColors.accent.withValues(alpha: 0.8),
-                        Colors.transparent,
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.accent.withValues(alpha: 0.5),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          // 中心占位
-          Center(
-            child: AnimatedBuilder(
-              animation: _pulseAnimation,
-              builder: (context, child) => Transform.scale(
-                scale: _pulseAnimation.value,
-                child: child,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.accent.withValues(alpha: 0.3),
-                    width: 2,
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      taskType == 'gesture'
-                          ? Icons.pan_tool_rounded
-                          : taskType == 'treasure'
-                              ? Icons.search_rounded
-                              : Icons.camera_alt_rounded,
-                      size: 48,
-                      color: Colors.white.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      taskType == 'gesture'
-                          ? '对准手势'
-                          : taskType == 'treasure'
-                              ? '寻找目标'
-                              : '对准拍摄',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // 任务特定 UI
-          if (taskType == 'gesture') _buildGestureOverlay(),
-          if (taskType == 'photo') _buildPhotoOverlay(),
+          // 根据任务类型显示不同视图
+          if (taskType == 'treasure')
+            _buildARView(point)
+          else
+            _buildCameraView(taskType, point),
           // 四角标记
           ..._buildCornerMarkers(),
           // 底部提示
-          Positioned(
-            bottom: 16,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.videocam_rounded,
-                      size: 14,
-                      color: Colors.white.withValues(alpha: 0.7),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'AR 相机集成后显示实际画面',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          _buildBottomHint(taskType),
         ],
       ),
     );
   }
 
-  List<Widget> _buildCornerMarkers() {
-    return [
-      Positioned(top: 20, left: 20, child: _CornerMarker(corner: 'tl')),
-      Positioned(top: 20, right: 20, child: _CornerMarker(corner: 'tr')),
-      Positioned(bottom: 50, left: 20, child: _CornerMarker(corner: 'bl')),
-      Positioned(bottom: 50, right: 20, child: _CornerMarker(corner: 'br')),
-    ];
-  }
-
-  Widget _buildGestureOverlay() {
-    return Positioned(
-      top: 60,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.sealGold.withValues(alpha: 0.3),
-                      AppColors.sealGold.withValues(alpha: 0.15),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.sealGold.withValues(alpha: 0.5)),
-                ),
-                child: const Icon(
-                  Icons.nights_stay_rounded,
-                  size: 32,
-                  color: AppColors.sealGold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                '目标手势：赏月手势',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
+  Widget _buildLoadingView() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pageHorizontal),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: AppColors.accent),
+            SizedBox(height: 16),
+            Text(
+              '正在初始化相机...',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPhotoOverlay() {
+  Widget _buildCameraView(String taskType, dynamic point) {
+    if (_cameraService.controller == null || !_cameraService.isInitialized) {
+      return _buildCameraError();
+    }
+
+    final targetGestureKey = point?.targetGesture as String?;
+    // 如果是手势任务但没有指定手势，默认使用"挥手"
+    final targetGesture = taskType == 'gesture' && (targetGestureKey == null || targetGestureKey.isEmpty)
+        ? GestureType.wave
+        : GestureTypeExtension.fromKey(targetGestureKey);
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // 相机预览 + 实时滤镜
+        FilteredCameraPreview(
+          filter: taskType == 'photo' ? _selectedFilter : PhotoFilter.original,
+          child: AppCameraPreview(
+            controller: _cameraService.controller!,
+            borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+          ),
+        ),
+        // 网格叠加
+        const CameraGridOverlay(),
+        // 手势识别叠加层
+        if (taskType == 'gesture')
+          GestureOverlay(
+            targetGesture: targetGesture,
+            currentResult: _currentGestureResult,
+            isMatched: _gestureMatched,
+          ),
+        // 拍照任务的滤镜指示器
+        if (taskType == 'photo') _buildPhotoOverlay(point),
+        // 识别进度
+        if (taskType == 'gesture' && !_gestureMatched)
+          _buildRecognitionProgress(),
+      ],
+    );
+  }
+
+  Widget _buildCameraError() {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.videocam_off_rounded,
+              size: 48,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '相机不可用',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _initServices,
+              child: const Text('重试'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildARView(dynamic point) {
+    return ARViewWrapper(
+      showPlaneIndicator: true,
+      onARViewCreated: (controller) {
+        // AR 视图创建后，放置寻宝物体
+        final assetUrl = point?.arAssetUrl as String?;
+        if (assetUrl != null) {
+          controller.placeObject(assetUrl, scale: 0.5);
+        }
+      },
+      overlay: _buildTreasureOverlay(point),
+    );
+  }
+
+  Widget _buildTreasureOverlay(dynamic point) {
+    return Stack(
+      children: [
+        // 寻宝提示
+        Positioned(
+          top: 20,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                border: Border.all(
+                  color: AppColors.sealGold.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.search_rounded,
+                    color: AppColors.sealGold,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    '移动手机寻找隐藏的宝物',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // 中心准星
+        Center(
+          child: AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) => Transform.scale(
+              scale: _pulseAnimation.value,
+              child: child,
+            ),
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.sealGold.withValues(alpha: 0.6),
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                Icons.center_focus_strong_rounded,
+                color: AppColors.sealGold.withValues(alpha: 0.8),
+                size: 30,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoOverlay(dynamic point) {
     return Positioned(
       top: 50,
       right: 24,
@@ -349,17 +452,121 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.person_rounded,
+                Icons.filter_vintage_rounded,
                 size: 24,
                 color: AppColors.accent,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              '白娘子',
-              style: TextStyle(color: Colors.white, fontSize: 11),
+            Text(
+              PhotoFilters.getConfig(_selectedFilter).name,
+              style: const TextStyle(color: Colors.white, fontSize: 11),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecognitionProgress() {
+    if (_recognitionProgress <= 0) return const SizedBox.shrink();
+
+    return Positioned(
+      left: 20,
+      right: 20,
+      bottom: 60,
+      child: Column(
+        children: [
+          Container(
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: _recognitionProgress,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accent, AppColors.sealGold],
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accent.withValues(alpha: 0.5),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '保持手势 ${(_recognitionProgress * 100).toInt()}%',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildCornerMarkers() {
+    return [
+      Positioned(top: 20, left: 20, child: _CornerMarker(corner: 'tl')),
+      Positioned(top: 20, right: 20, child: _CornerMarker(corner: 'tr')),
+      Positioned(bottom: 50, left: 20, child: _CornerMarker(corner: 'bl')),
+      Positioned(bottom: 50, right: 20, child: _CornerMarker(corner: 'br')),
+    ];
+  }
+
+  Widget _buildBottomHint(String taskType) {
+    String hint;
+    IconData icon;
+
+    switch (taskType) {
+      case 'gesture':
+        hint = '对准目标手势';
+        icon = Icons.pan_tool_rounded;
+        break;
+      case 'treasure':
+        hint = '移动手机寻找宝物';
+        icon = Icons.search_rounded;
+        break;
+      default:
+        hint = '对准目标拍照';
+        icon = Icons.camera_alt_rounded;
+    }
+
+    return Positioned(
+      bottom: 16,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: Colors.white.withValues(alpha: 0.7)),
+              const SizedBox(width: 6),
+              Text(
+                hint,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -400,56 +607,6 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
               fontSize: 14,
             ),
           ),
-          if (_progress > 0 && _progress < 1) ...[
-            const SizedBox(height: 14),
-            // 渐变进度条
-            Container(
-              height: 6,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: _progress,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.accent, AppColors.sealGold],
-                    ),
-                    borderRadius: BorderRadius.circular(3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.accent.withValues(alpha: 0.5),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '识别中...',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  '${(_progress * 100).toInt()}%',
-                  style: const TextStyle(
-                    color: AppColors.accent,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
@@ -467,24 +624,46 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
         children: [
           if (taskType == 'photo') _buildFilterSelector(),
           const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            height: AppSize.buttonHeight,
-            child: AppPrimaryButton(
-              onPressed: _isSubmitting ? null : _completeTask,
-              isLoading: _isSubmitting,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    taskType == 'photo' ? Icons.camera_alt_rounded : Icons.check_rounded,
-                    size: AppSize.appBarIconSize,
+          Row(
+            children: [
+              // 切换摄像头
+              if (taskType != 'treasure')
+                CameraControlButton(
+                  icon: Icons.flip_camera_ios_rounded,
+                  onPressed: _switchCamera,
+                ),
+              const SizedBox(width: AppSpacing.md),
+              // 主按钮
+              Expanded(
+                child: SizedBox(
+                  height: AppSize.buttonHeight,
+                  child: AppPrimaryButton(
+                    onPressed: _isSubmitting || _gestureMatched
+                        ? null
+                        : () => _handleMainAction(taskType),
+                    isLoading: _isSubmitting,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _getActionIcon(taskType),
+                          size: AppSize.appBarIconSize,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(_getActionText(taskType)),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(taskType == 'photo' ? '拍照' : '确认完成'),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(width: AppSpacing.md),
+              // 闪光灯
+              if (taskType == 'photo')
+                CameraControlButton(
+                  icon: _getFlashIcon(),
+                  onPressed: _toggleFlash,
+                ),
+            ],
           ),
         ],
       ),
@@ -494,44 +673,201 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
   Widget _buildFilterSelector() {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (final filter in ['古风', '水墨', '原图'])
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: GestureDetector(
-                onTap: () => setState(() => _selectedFilter = filter),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: _selectedFilter == filter
-                        ? const LinearGradient(colors: [AppColors.accent, Color(0xFFE85A4F)])
-                        : null,
-                    color: _selectedFilter != filter
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : null,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: _selectedFilter == filter
-                          ? Colors.transparent
-                          : Colors.white.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Text(
-                    filter,
-                    style: TextStyle(
-                      color: _selectedFilter == filter ? Colors.white : Colors.white70,
-                      fontWeight: _selectedFilter == filter ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+      child: FilterSelector(
+        selectedFilter: _selectedFilter,
+        onFilterChanged: (filter) => setState(() => _selectedFilter = filter),
       ),
     );
+  }
+
+  IconData _getActionIcon(String taskType) {
+    switch (taskType) {
+      case 'gesture':
+        return Icons.check_rounded;
+      case 'treasure':
+        return Icons.check_circle_rounded;
+      default:
+        return Icons.camera_alt_rounded;
+    }
+  }
+
+  String _getActionText(String taskType) {
+    switch (taskType) {
+      case 'gesture':
+        return '确认完成';
+      case 'treasure':
+        return '找到了！';
+      default:
+        return '拍照';
+    }
+  }
+
+  Future<void> _switchCamera() async {
+    await _cameraService.switchCamera();
+    setState(() {});
+  }
+
+  Future<void> _toggleFlash() async {
+    // 循环切换: off → auto → always → torch → off
+    FlashMode newMode;
+    switch (_flashMode) {
+      case FlashMode.off:
+        newMode = FlashMode.auto;
+        break;
+      case FlashMode.auto:
+        newMode = FlashMode.always;
+        break;
+      case FlashMode.always:
+        newMode = FlashMode.torch;
+        break;
+      case FlashMode.torch:
+        newMode = FlashMode.off;
+        break;
+    }
+
+    try {
+      await _cameraService.setFlashMode(newMode);
+      setState(() => _flashMode = newMode);
+
+      // 显示当前模式提示
+      if (mounted) {
+        final modeText = _getFlashModeText(newMode);
+        AppSnackBar.show(context, '闪光灯: $modeText', icon: _getFlashIcon());
+      }
+    } catch (e) {
+      debugPrint('设置闪光灯失败: $e');
+      if (mounted) {
+        AppSnackBar.error(context, '闪光灯设置失败');
+      }
+    }
+  }
+
+  String _getFlashModeText(FlashMode mode) {
+    switch (mode) {
+      case FlashMode.off:
+        return '关闭';
+      case FlashMode.auto:
+        return '自动';
+      case FlashMode.always:
+        return '开启';
+      case FlashMode.torch:
+        return '常亮';
+    }
+  }
+
+  IconData _getFlashIcon() {
+    switch (_flashMode) {
+      case FlashMode.off:
+        return Icons.flash_off_rounded;
+      case FlashMode.auto:
+        return Icons.flash_auto_rounded;
+      case FlashMode.always:
+        return Icons.flash_on_rounded;
+      case FlashMode.torch:
+        return Icons.flashlight_on_rounded;
+    }
+  }
+
+  void _handleMainAction(String taskType) {
+    switch (taskType) {
+      case 'photo':
+        _takePicture();
+        break;
+      case 'gesture':
+      case 'treasure':
+        _completeTask();
+        break;
+    }
+  }
+
+  Future<void> _takePicture() async {
+    HapticFeedback.mediumImpact();
+    setState(() => _isSubmitting = true);
+
+    try {
+      // 1. 拍照并保存到本地
+      final result = await _cameraService.takePictureAndSaveToGallery(
+        saveToGallery: false, // 先不保存到相册，等应用滤镜后再保存
+        albumName: '寻印',
+      );
+
+      if (result == null) {
+        if (mounted) {
+          AppSnackBar.error(context, '拍照失败，请重试');
+          setState(() => _isSubmitting = false);
+        }
+        return;
+      }
+
+      // 2. 应用滤镜效果到图片
+      String filteredPath = result.localPath;
+      if (_selectedFilter != PhotoFilter.original) {
+        try {
+          filteredPath = await ImageFilterUtils.applyFilterToFile(
+            result.localPath,
+            _selectedFilter,
+          );
+        } catch (e) {
+          debugPrint('滤镜应用失败: $e');
+          // 滤镜失败时使用原图继续
+        }
+      }
+
+      // 3. 保存滤镜后的图片到相册
+      try {
+        await _cameraService.saveToGallery(filteredPath, albumName: '寻印');
+        if (mounted) {
+          AppSnackBar.success(context, '照片已保存到相册');
+        }
+      } catch (e) {
+        debugPrint('保存到相册失败: $e');
+      }
+
+      // 4. 上传照片到服务器
+      String? serverPhotoUrl;
+      final state = ref.read(currentJourneyProvider);
+      final journeyId = state.detail?.id;
+      final pointId = widget.pointId;
+
+      if (journeyId != null) {
+        try {
+          final uploadService = ref.read(uploadServiceProvider);
+          final photoService = ref.read(photoServiceProvider);
+
+          // 上传滤镜后的文件
+          final uploadResult = await uploadService.uploadPhoto(File(filteredPath));
+          serverPhotoUrl = uploadResult.url;
+
+          // 创建照片记录
+          await photoService.createPhoto(CreatePhotoParams(
+            journeyId: journeyId,
+            pointId: pointId,
+            photoUrl: serverPhotoUrl,
+            filter: _selectedFilter.name,
+            takenTime: DateTime.now(),
+          ));
+
+          if (mounted) {
+            AppSnackBar.success(context, '照片已同步到云端');
+          }
+        } catch (e) {
+          // 上传失败但本地保存成功，继续流程
+          debugPrint('照片上传失败: $e');
+          if (mounted) {
+            AppSnackBar.warning(context, '云端同步失败，照片已保存到本地');
+          }
+        }
+      }
+
+      // 使用服务器URL或本地路径
+      _capturedPhotoPath = serverPhotoUrl ?? filteredPath;
+      await _completeTask();
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.error(context, '拍照失败: $e');
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   Future<void> _completeTask() async {
@@ -544,7 +880,7 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
       final journeyService = ref.read(journeyServiceProvider);
       final result = await journeyService.completePoint(
         pointId: widget.pointId,
-        photoUrl: null,
+        photoUrl: _capturedPhotoPath,
       );
 
       if (!mounted) return;
@@ -554,11 +890,13 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
         '?pointsEarned=${result.pointsEarned}'
         '&totalPoints=${result.totalPoints}'
         '&journeyCompleted=${result.journeyCompleted}'
-        '${result.sealId != null ? '&sealId=${result.sealId}' : ''}',
+        '${result.userSealId != null ? '&userSealId=${result.userSealId}' : ''}'
+        '${result.sealId != null ? '&sealId=${result.sealId}' : ''}'
+        '${_capturedPhotoPath != null ? '&photoPath=$_capturedPhotoPath' : ''}',
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _isSubmitting = false);
+      // API 失败时使用模拟数据
       _completeTaskWithMockData();
     }
   }
@@ -572,7 +910,8 @@ class _ARTaskPageState extends ConsumerState<ARTaskPage>
       '/task-complete/${widget.pointId}'
       '?pointsEarned=${point?.pointsReward ?? 50}'
       '&totalPoints=100'
-      '&journeyCompleted=$isLastPoint',
+      '&journeyCompleted=$isLastPoint'
+      '${_capturedPhotoPath != null ? '&photoPath=$_capturedPhotoPath' : ''}',
     );
   }
 }
@@ -641,41 +980,6 @@ class _TaskTypeBadge extends StatelessWidget {
   }
 }
 
-/// 相机网格绘制
-class _CameraGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.08)
-      ..strokeWidth = 0.5;
-
-    // 三分线
-    canvas.drawLine(
-      Offset(size.width / 3, 0),
-      Offset(size.width / 3, size.height),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 2 / 3, 0),
-      Offset(size.width * 2 / 3, size.height),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(0, size.height / 3),
-      Offset(size.width, size.height / 3),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(0, size.height * 2 / 3),
-      Offset(size.width, size.height * 2 / 3),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 /// 角标记
 class _CornerMarker extends StatelessWidget {
   final String corner;
@@ -686,9 +990,7 @@ class _CornerMarker extends StatelessWidget {
     return SizedBox(
       width: 24,
       height: 24,
-      child: CustomPaint(
-        painter: _CornerPainter(corner: corner),
-      ),
+      child: CustomPaint(painter: _CornerPainter(corner: corner)),
     );
   }
 }

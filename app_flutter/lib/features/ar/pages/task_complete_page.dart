@@ -18,6 +18,7 @@ class TaskCompletePage extends ConsumerStatefulWidget {
   final int? totalPoints;
   final bool journeyCompleted;
   final String? sealId;
+  final String? userSealId;
 
   const TaskCompletePage({
     super.key,
@@ -27,6 +28,7 @@ class TaskCompletePage extends ConsumerStatefulWidget {
     this.totalPoints,
     this.journeyCompleted = false,
     this.sealId,
+    this.userSealId,
   });
 
   @override
@@ -379,15 +381,19 @@ class _TaskCompletePageState extends ConsumerState<TaskCompletePage>
   }
 
   Widget _buildButtons(BuildContext context, bool hasNext, String? journeyId) {
+    // 优先使用 userSealId（用户印记ID），如果没有则使用 sealId（印记模板ID）
+    final shareId = widget.userSealId ?? widget.sealId;
     return Row(
       children: [
         Expanded(
           child: AppGlassButton(
-            onPressed: () => SimpleShareSheet.show(
-              context,
-              title: '分享探索成果',
-              shareLink: ShareService.generateSealShareLink(widget.pointId),
-            ),
+            onPressed: shareId != null
+                ? () => SimpleShareSheet.show(
+                    context,
+                    title: '分享探索成果',
+                    shareLink: ShareService.generateSealShareLink(shareId),
+                  )
+                : null,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -40,6 +40,9 @@ dependencies:
   # 图片查看
   photo_view: ^0.15.0
   
+  # 图片处理
+  image: ^4.3.0
+  
   # HTML 渲染
   flutter_widget_from_html: ^0.15.2
   
@@ -77,6 +80,12 @@ dependencies:
   
   # 路径获取
   path_provider: ^2.1.2
+  
+  # 相机
+  camera: ^0.11.0
+  
+  # ML Kit 姿态检测（手势识别）
+  google_mlkit_pose_detection: ^0.12.0
 
 dev_dependencies:
   flutter_test:

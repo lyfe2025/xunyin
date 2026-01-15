@@ -1,30 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
+import '../../../models/photo.dart';
+import '../../../providers/photo_providers.dart';
+import '../../../providers/service_providers.dart';
 import '../../../shared/widgets/app_buttons.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/app_dialog.dart';
+import '../../../shared/widgets/app_loading.dart';
 import '../../../shared/widgets/simple_share_sheet.dart';
 import '../../../services/share_service.dart';
 
 /// 照片详情页 - 沉浸式查看 + 手势缩放
-class PhotoDetailPage extends StatefulWidget {
+class PhotoDetailPage extends ConsumerStatefulWidget {
   final String photoId;
   const PhotoDetailPage({super.key, required this.photoId});
 
   @override
-  State<PhotoDetailPage> createState() => _PhotoDetailPageState();
+  ConsumerState<PhotoDetailPage> createState() => _PhotoDetailPageState();
 }
 
-class _PhotoDetailPageState extends State<PhotoDetailPage>
+class _PhotoDetailPageState extends ConsumerState<PhotoDetailPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _fadeController;
   bool _showControls = true;
   final TransformationController _transformController = TransformationController();
 
-  // 模拟照片数据（实际应从API获取）
-  late Map<String, dynamic> _photoData;
+  Photo? _photo;
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -34,14 +40,27 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
       duration: const Duration(milliseconds: 200),
       value: 1.0,
     );
-    // 模拟数据
-    _photoData = {
-      'url': 'https://picsum.photos/800/1200?random=${widget.photoId}',
-      'journeyName': '西湖十景文化之旅',
-      'pointName': '断桥残雪',
-      'takenAt': '2024-01-15 14:30',
-      'location': '杭州市西湖区',
-    };
+    _loadPhoto();
+  }
+
+  Future<void> _loadPhoto() async {
+    try {
+      final photoService = ref.read(photoServiceProvider);
+      final photo = await photoService.getPhotoDetail(widget.photoId);
+      if (mounted) {
+        setState(() {
+          _photo = photo;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -49,7 +68,6 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
     _fadeController.dispose();
     _transformController.dispose();
     super.dispose();
-
   }
 
   void _toggleControls() {
@@ -67,6 +85,44 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: AppLoading(message: '加载中...')),
+      );
+    }
+
+    if (_error != null || _photo == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '加载失败',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text('返回'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -97,8 +153,16 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
   }
 
   Widget _buildPhotoImage() {
+    final url = _photo!.imageUrl;
+    
+    // 如果 URL 为空，直接显示占位图
+    if (url.isEmpty) {
+      return _buildPlaceholder();
+    }
+
+    // 图片已在拍摄时应用滤镜，直接显示
     return Image.network(
-      _photoData['url'],
+      url,
       fit: BoxFit.contain,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -257,6 +321,9 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
   }
 
   Widget _buildBottomInfo() {
+    final photo = _photo!;
+    final takenAt = '${photo.createdAt.year}-${photo.createdAt.month.toString().padLeft(2, '0')}-${photo.createdAt.day.toString().padLeft(2, '0')} ${photo.createdAt.hour.toString().padLeft(2, '0')}:${photo.createdAt.minute.toString().padLeft(2, '0')}';
+
     return Positioned(
       bottom: 0,
       left: 0,
@@ -321,7 +388,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _photoData['journeyName'],
+                                    photo.journeyName ?? '未知旅程',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
@@ -330,7 +397,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    _photoData['pointName'],
+                                    photo.pointName ?? '未知探索点',
                                     style: TextStyle(
                                       color: Colors.white.withValues(alpha: 0.7),
                                       fontSize: 13,
@@ -342,18 +409,20 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
                           ],
                         ),
                         const SizedBox(height: 12),
-                        // 时间和地点
+                        // 时间和滤镜
                         Row(
                           children: [
                             _buildInfoChip(
                               Icons.access_time_rounded,
-                              _photoData['takenAt'],
+                              takenAt,
                             ),
-                            const SizedBox(width: 12),
-                            _buildInfoChip(
-                              Icons.location_on_rounded,
-                              _photoData['location'],
-                            ),
+                            if (photo.filter != null) ...[
+                              const SizedBox(width: 12),
+                              _buildInfoChip(
+                                Icons.filter_vintage_rounded,
+                                photo.filter!,
+                              ),
+                            ],
                           ],
                         ),
                       ],
@@ -414,8 +483,24 @@ class _PhotoDetailPageState extends State<PhotoDetailPage>
       icon: Icons.delete_outline_rounded,
     );
     if (confirmed == true && context.mounted) {
-      context.pop();
-      AppSnackBar.show(context, '照片已删除');
+      try {
+        final photoService = ref.read(photoServiceProvider);
+        await photoService.deletePhoto(widget.photoId);
+
+        // 刷新相册列表
+        ref.invalidate(photoStatsProvider);
+        ref.invalidate(photosByJourneyProvider);
+        ref.invalidate(photosProvider);
+
+        if (context.mounted) {
+          context.pop();
+          AppSnackBar.success(context, '照片已删除');
+        }
+      } catch (e) {
+        if (context.mounted) {
+          AppSnackBar.error(context, '删除失败: $e');
+        }
+      }
     }
   }
 }

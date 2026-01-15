@@ -102,4 +102,48 @@ export class AppUploadController {
       mimetype: file.mimetype,
     }
   }
+
+  @Post('photo')
+  @ApiOperation({ summary: '上传探索照片' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (_req, file, cb) => {
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+        if (!allowedMimes.includes(file.mimetype)) {
+          cb(new BadRequestException('只支持图片格式 (jpg, png, gif, webp)'), false)
+        } else {
+          cb(null, true)
+        }
+      },
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB（照片可能较大）
+    }),
+  )
+  async uploadPhoto(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('请选择要上传的文件')
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (!validateFileMagic(file.buffer, allowedTypes)) {
+      throw new BadRequestException('文件类型不合法，请上传真实的图片文件')
+    }
+
+    const filename = generateFilename('photo', file.originalname)
+    const result = await this.storageService.upload(file.buffer, filename, file.mimetype, 'photos')
+
+    return {
+      url: result.url,
+      filename: result.filename,
+      size: result.size,
+      mimetype: file.mimetype,
+    }
+  }
 }

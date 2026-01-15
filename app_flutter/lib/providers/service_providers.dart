@@ -37,6 +37,11 @@ final photoServiceProvider = Provider<PhotoService>((ref) {
   return PhotoService(ref.watch(apiClientProvider));
 });
 
+/// 上传服务 Provider
+final uploadServiceProvider = Provider<UploadService>((ref) {
+  return UploadService(ref.watch(apiClientProvider));
+});
+
 /// 音频 API 服务 Provider
 final audioApiServiceProvider = Provider<AudioApiService>((ref) {
   return AudioApiService(ref.watch(apiClientProvider));

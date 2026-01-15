@@ -13,6 +13,7 @@ import { RoleModule } from './system/role/role.module'
 import { DictModule } from './system/dict/dict.module'
 import { SysConfigModule } from './system/config/config.module'
 import { NoticeModule } from './system/notice/notice.module'
+import { ChangelogModule } from './system/changelog/changelog.module'
 import { OperationLogInterceptor } from './common/interceptors/operation-log.interceptor'
 import { PermissionGuard } from './common/guards/permission.guard'
 import { PostModule } from './system/post/post.module'
@@ -71,6 +72,7 @@ import { PublicModule } from './public/public.module'
     DictModule,
     SysConfigModule,
     NoticeModule,
+    ChangelogModule,
     MonitorModule,
     PostModule,
     UploadModule,

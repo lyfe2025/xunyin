@@ -25,22 +25,24 @@ class Photo {
   });
 
   factory Photo.fromJson(Map<String, dynamic> json) {
-    final imageUrl = json['imageUrl'] as String? ?? '';
+    // 后端返回 photoUrl，兼容 imageUrl
+    final imageUrl = (json['photoUrl'] ?? json['imageUrl']) as String? ?? '';
     final thumbnailUrl = json['thumbnailUrl'] as String?;
+    // 后端返回 createTime 或 takenTime，兼容 createdAt
+    final timeStr = (json['createTime'] ?? json['createdAt'] ?? json['takenTime']) as String?;
+
     return Photo(
       id: json['id'] as String,
       journeyId: json['journeyId'] as String?,
       journeyName: json['journeyName'] as String?,
       pointId: json['pointId'] as String?,
       pointName: json['pointName'] as String?,
-      imageUrl: imageUrl.isNotEmpty
-          ? UrlUtils.getFullImageUrl(imageUrl)
-          : 'https://placeholder.com/photo.jpg',
+      imageUrl: UrlUtils.getFullImageUrl(imageUrl),
       thumbnailUrl: thumbnailUrl?.isNotEmpty == true
           ? UrlUtils.getFullImageUrl(thumbnailUrl)
           : null,
       filter: json['filter'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: timeStr != null ? DateTime.parse(timeStr) : DateTime.now(),
     );
   }
 }
