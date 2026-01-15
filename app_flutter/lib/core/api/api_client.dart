@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import '../config/app_config.dart';
 import '../storage/token_storage.dart';
 
@@ -27,15 +29,54 @@ class ApiClient {
     _dio = Dio(
       BaseOptions(
         baseUrl: AppConfig.apiBaseUrl,
-        connectTimeout: AppConfig.connectTimeout,
-        receiveTimeout: AppConfig.receiveTimeout,
-        headers: {'Content-Type': 'application/json'},
+        connectTimeout: const Duration(seconds: 30), // 增加超时时间
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Accept-Language': 'zh-CN,zh;q=0.9',
+          'User-Agent': 'Xunyin-iOS/1.0.0',
+        },
+        followRedirects: true,
+        maxRedirects: 5,
+        validateStatus: (status) => status != null && status < 500,
       ),
     );
 
+    // 配置 HTTP 适配器 - 使用更宽松的配置
+    final adapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        // 临时禁用证书验证（仅用于调试）
+        client.badCertificateCallback = (cert, host, port) => true;
+        // 增加超时时间
+        client.connectionTimeout = const Duration(seconds: 30);
+        client.idleTimeout = const Duration(seconds: 30);
+        // 启用自动解压
+        client.autoUncompress = true;
+        return client;
+      },
+    );
+    
+    // 临时禁用证书验证
+    adapter.validateCertificate = (cert, host, port) => true;
+    _dio.httpClientAdapter = adapter;
+
     _dio.interceptors.add(_AuthInterceptor());
+    _dio.interceptors.add(_ErrorInterceptor());
     _dio.interceptors.add(
-      LogInterceptor(requestBody: true, responseBody: true),
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        error: true,
+        requestHeader: true,
+        responseHeader: true,
+        logPrint: (obj) {
+          // 使用 print 确保日志输出
+          print('[DIO] $obj');
+        },
+      ),
     );
   }
 
@@ -119,6 +160,36 @@ class ApiClient {
     final respData = response.data!;
     _checkResponse(respData);
     return respData;
+  }
+}
+
+/// 错误处理拦截器
+class _ErrorInterceptor extends Interceptor {
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    print('[ERROR] DioException Type: ${err.type}');
+    print('[ERROR] Message: ${err.message}');
+    print('[ERROR] URL: ${err.requestOptions.uri}');
+    print('[ERROR] Error: ${err.error}');
+    
+    // 增强错误信息，帮助调试
+    if (err.type == DioExceptionType.connectionError ||
+        err.type == DioExceptionType.connectionTimeout) {
+      final message = '网络连接失败，请检查网络设置\n'
+          '错误类型: ${err.type}\n'
+          '错误详情: ${err.message}\n'
+          'URL: ${err.requestOptions.uri}\n'
+          '原始错误: ${err.error}';
+      handler.reject(
+        DioException(
+          requestOptions: err.requestOptions,
+          error: message,
+          type: err.type,
+        ),
+      );
+      return;
+    }
+    handler.next(err);
   }
 }
 

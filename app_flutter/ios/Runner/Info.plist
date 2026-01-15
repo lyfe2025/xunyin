@@ -74,5 +74,18 @@
 	<array>
 		<string>_dartVmService._tcp</string>
 	</array>
+	<!-- 网络访问权限 -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- 允许所有 HTTPS 连接 -->
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<!-- 允许本地网络连接 -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<!-- 允许任意 Web 内容加载 -->
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

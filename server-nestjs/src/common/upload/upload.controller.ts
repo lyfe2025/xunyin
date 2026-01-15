@@ -127,7 +127,7 @@ export class UploadController {
   constructor(
     private readonly storageService: StorageService,
     private readonly uploadConfigService: UploadConfigService,
-  ) {}
+  ) { }
 
   /**
    * 上传头像
@@ -386,43 +386,76 @@ export class UploadController {
     }),
   )
   async uploadApk(@UploadedFile() file: Express.Multer.File) {
+    const startTime = Date.now()
+    console.log('[APK Upload] 开始上传 APK 文件')
+
     if (!file) {
+      console.error('[APK Upload] 错误: 未接收到文件')
       throw new BadRequestException('请选择要上传的文件')
     }
 
-    // 从数据库获取配置的最大大小
-    const maxSize = await this.uploadConfigService.getApkMaxSize()
-    if (file.buffer.length > maxSize) {
-      const maxSizeMB = Math.round(maxSize / (1024 * 1024))
-      throw new BadRequestException(`APK 文件不能超过 ${maxSizeMB}MB`)
-    }
-
-    // APK 文件是 ZIP 格式，校验魔数
-    const allowedTypes = ['application/vnd.android.package-archive']
-    const isValidMagic = validateFileMagic(file.buffer, allowedTypes)
-    const hasValidExt = file.originalname.toLowerCase().endsWith('.apk')
-
-    if (!isValidMagic && !hasValidExt) {
-      throw new BadRequestException('文件类型不合法，请上传真实的 APK 文件')
-    }
-
-    const filename = generateFilename('app', file.originalname)
-    const result = await this.storageService.upload(
-      file.buffer,
-      filename,
-      'application/vnd.android.package-archive',
-      'apk',
-    )
-
-    // 格式化文件大小
     const fileSizeMB = (file.buffer.length / (1024 * 1024)).toFixed(2)
+    console.log(`[APK Upload] 文件信息:`, {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: `${fileSizeMB} MB`,
+      bufferLength: file.buffer.length,
+    })
 
-    return {
-      url: result.url,
-      filename: result.filename,
-      size: result.size,
-      fileSize: `${fileSizeMB} MB`,
-      mimetype: 'application/vnd.android.package-archive',
+    try {
+      // 从数据库获取配置的最大大小
+      console.log('[APK Upload] 检查文件大小限制...')
+      const maxSize = await this.uploadConfigService.getApkMaxSize()
+      const maxSizeMB = Math.round(maxSize / (1024 * 1024))
+      console.log(`[APK Upload] 最大允许大小: ${maxSizeMB}MB`)
+
+      if (file.buffer.length > maxSize) {
+        console.error(`[APK Upload] 错误: 文件过大 (${fileSizeMB}MB > ${maxSizeMB}MB)`)
+        throw new BadRequestException(`APK 文件不能超过 ${maxSizeMB}MB`)
+      }
+
+      // APK 文件是 ZIP 格式，校验魔数
+      console.log('[APK Upload] 校验文件类型...')
+      const allowedTypes = ['application/vnd.android.package-archive']
+      const isValidMagic = validateFileMagic(file.buffer, allowedTypes)
+      const hasValidExt = file.originalname.toLowerCase().endsWith('.apk')
+      console.log(`[APK Upload] 文件校验结果: 魔数=${isValidMagic}, 扩展名=${hasValidExt}`)
+
+      if (!isValidMagic && !hasValidExt) {
+        console.error('[APK Upload] 错误: 文件类型不合法')
+        throw new BadRequestException('文件类型不合法，请上传真实的 APK 文件')
+      }
+
+      console.log('[APK Upload] 生成文件名并开始存储...')
+      const filename = generateFilename('app', file.originalname)
+      const result = await this.storageService.upload(
+        file.buffer,
+        filename,
+        'application/vnd.android.package-archive',
+        'apk',
+      )
+
+      const duration = Date.now() - startTime
+      console.log(`[APK Upload] 上传成功! 耗时: ${duration}ms`, {
+        url: result.url,
+        filename: result.filename,
+        size: result.size,
+      })
+
+      return {
+        url: result.url,
+        filename: result.filename,
+        size: result.size,
+        fileSize: `${fileSizeMB} MB`,
+        mimetype: 'application/vnd.android.package-archive',
+      }
+    } catch (error) {
+      const duration = Date.now() - startTime
+      console.error(`[APK Upload] 上传失败! 耗时: ${duration}ms`, {
+        error: error.message,
+        stack: error.stack,
+      })
+      throw error
     }
   }
 }

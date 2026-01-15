@@ -103,10 +103,30 @@ service.interceptors.response.use(
   (error: unknown) => {
     const err = error as {
       message?: string
-      response?: { status: number; data?: { code?: number; msg?: string } }
+      config?: { url?: string; method?: string; timeout?: number; metadata?: { startTime?: number } }
+      response?: { status: number; statusText?: string; data?: { code?: number; msg?: string } }
     }
     let message = err.message || '未知错误'
     let title = '网络错误'
+
+    // 记录详细错误日志
+    console.error('[Request Error]', {
+      message: err.message,
+      config: err.config
+        ? {
+          url: err.config.url,
+          method: err.config.method,
+          timeout: err.config.timeout,
+        }
+        : null,
+      response: err.response
+        ? {
+          status: err.response.status,
+          statusText: err.response.statusText,
+          data: err.response.data,
+        }
+        : null,
+    })
 
     // 尝试从响应中获取后端返回的错误信息
     if (err.response?.data) {
@@ -144,6 +164,9 @@ service.interceptors.response.use(
       } else if (httpStatus === 403) {
         title = '权限不足'
         message = errorMessage || '您没有权限执行此操作'
+      } else if (httpStatus === 413) {
+        title = '文件过大'
+        message = '上传的文件超过服务器限制'
       } else if (httpStatus === 500) {
         title = '系统错误'
         message = errorMessage || '系统内部错误'
@@ -152,8 +175,17 @@ service.interceptors.response.use(
       }
     } else if (message == 'Network Error') {
       message = '后端接口连接异常'
+      console.error('[Network Error] 无法连接到后端服务')
     } else if (message.includes('timeout')) {
-      message = '系统接口请求超时'
+      title = '请求超时'
+      message = '系统接口请求超时，请检查网络或稍后重试'
+      console.error('[Request Timeout]', {
+        url: err.config?.url,
+        timeout: err.config?.timeout,
+        duration: err.config?.metadata?.startTime
+          ? Date.now() - err.config.metadata.startTime
+          : 'unknown',
+      })
     } else if (message.includes('Request failed with status code')) {
       message = '系统接口' + message.substr(message.length - 3) + '异常'
     }

@@ -441,6 +441,103 @@ process.stdin.on("end", () => {
 }
 
 # ============================================================
+# Flutter 移动端打包命令
+# ============================================================
+
+FLUTTER_DIR="$ROOT/app_flutter"
+
+check_flutter() {
+  if ! command -v flutter &> /dev/null; then
+    printf "${FG_RED}✗ Flutter 未安装${RESET}\n"
+    printf "${FG_YELLOW}请访问 https://flutter.dev 安装 Flutter${RESET}\n"
+    return 1
+  fi
+  return 0
+}
+
+flutter_build_android() {
+  check_flutter || return 1
+  printf "${FG_BLUE}正在构建 Android APK...${RESET}\n"
+  (cd "$FLUTTER_DIR" && flutter build apk --release)
+  local apk_path="$FLUTTER_DIR/build/app/outputs/flutter-apk/app-release.apk"
+  if [ -f "$apk_path" ]; then
+    local size=$(du -h "$apk_path" | cut -f1)
+    printf "${FG_GREEN}✓ Android APK 构建成功${RESET}\n"
+    printf "${FG_CYAN}  ➜ 文件路径: ${BOLD}%s${RESET}\n" "$apk_path"
+    printf "${FG_CYAN}  ➜ 文件大小: ${BOLD}%s${RESET}\n" "$size"
+  else
+    printf "${FG_RED}✗ Android APK 构建失败${RESET}\n"
+    return 1
+  fi
+}
+
+flutter_build_ios() {
+  check_flutter || return 1
+  printf "${FG_BLUE}正在构建 iOS IPA (无签名)...${RESET}\n"
+  (cd "$FLUTTER_DIR" && flutter build ios --release --no-codesign)
+  
+  # 创建 IPA 包
+  local payload_dir="$FLUTTER_DIR/build/ios/iphoneos/Payload"
+  local app_path="$FLUTTER_DIR/build/ios/iphoneos/Runner.app"
+  local ipa_path="$FLUTTER_DIR/build/ios/iphoneos/xunyin_unsigned.ipa"
+  
+  if [ -d "$app_path" ]; then
+    printf "${FG_BLUE}正在打包 IPA...${RESET}\n"
+    rm -rf "$payload_dir"
+    mkdir -p "$payload_dir"
+    cp -r "$app_path" "$payload_dir/"
+    (cd "$FLUTTER_DIR/build/ios/iphoneos" && zip -r xunyin_unsigned.ipa Payload > /dev/null 2>&1)
+    
+    if [ -f "$ipa_path" ]; then
+      local size=$(du -h "$ipa_path" | cut -f1)
+      printf "${FG_GREEN}✓ iOS IPA 构建成功 (无签名)${RESET}\n"
+      printf "${FG_CYAN}  ➜ 文件路径: ${BOLD}%s${RESET}\n" "$ipa_path"
+      printf "${FG_CYAN}  ➜ 文件大小: ${BOLD}%s${RESET}\n" "$size"
+      printf "${FG_YELLOW}  ⚠ 注意: 此 IPA 未签名，需要重新签名后才能安装到设备${RESET}\n"
+    else
+      printf "${FG_RED}✗ IPA 打包失败${RESET}\n"
+      return 1
+    fi
+  else
+    printf "${FG_RED}✗ iOS 构建失败${RESET}\n"
+    return 1
+  fi
+}
+
+flutter_build_all() {
+  check_flutter || return 1
+  printf "${FG_BLUE}正在构建 Android 和 iOS 双端...${RESET}\n"
+  hr
+  
+  # 构建 Android
+  flutter_build_android
+  local android_result=$?
+  
+  hr
+  
+  # 构建 iOS
+  flutter_build_ios
+  local ios_result=$?
+  
+  hr
+  
+  # 汇总结果
+  printf "${FG_CYAN}[构建汇总]${RESET}\n"
+  if [ $android_result -eq 0 ]; then
+    printf "${FG_GREEN}✓ Android APK: %s${RESET}\n" "$FLUTTER_DIR/build/app/outputs/flutter-apk/app-release.apk"
+  else
+    printf "${FG_RED}✗ Android APK: 构建失败${RESET}\n"
+  fi
+  
+  if [ $ios_result -eq 0 ]; then
+    printf "${FG_GREEN}✓ iOS IPA: %s${RESET}\n" "$FLUTTER_DIR/build/ios/iphoneos/xunyin_unsigned.ipa"
+  else
+    printf "${FG_RED}✗ iOS IPA: 构建失败${RESET}\n"
+  fi
+  hr
+}
+
+# ============================================================
 # Docker 部署命令
 # ============================================================
 
@@ -603,6 +700,11 @@ print_menu() {
   printf -- "${FG_CYAN}[工具]${RESET}\n"
   printf -- "${FG_CYAN}20${RESET}. 生成更新日志静态文件            ${FG_GRAY}git log -> commits.json${RESET}\n"
   hr
+  printf -- "${FG_CYAN}[移动端打包]${RESET}\n"
+  printf -- "${FG_CYAN}21${RESET}. 构建 Android APK                ${FG_GRAY}flutter build apk --release${RESET}\n"
+  printf -- "${FG_CYAN}22${RESET}. 构建 iOS IPA (无签名)           ${FG_GRAY}flutter build ios --no-codesign${RESET}\n"
+  printf -- "${FG_CYAN}23${RESET}. 构建双端 (Android + iOS)        ${FG_GRAY}flutter build all${RESET}\n"
+  hr
   printf -- "${FG_CYAN}0${RESET}.  退出\n"
 }
 
@@ -628,6 +730,9 @@ run_by_id() {
     18) docker_ps ;;
     19) docker_logs ;;
     20) gen_commits ;;
+    21) flutter_build_android ;;
+    22) flutter_build_ios ;;
+    23) flutter_build_all ;;
     0) exit 0 ;;
     *) echo "无效的选项" ;;
   esac

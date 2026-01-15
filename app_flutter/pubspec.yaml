@@ -65,10 +65,10 @@ dependencies:
   # 地理位置
   geolocator: ^11.0.0
   
-  # 高德地图
-  amap_flutter_map: ^3.0.0
-  amap_flutter_base: ^3.0.0
-  amap_flutter_location: ^3.0.0
+  # 高德地图 - 暂时注释以完成打包（版本兼容性问题）
+  # amap_flutter_map: ^3.0.0
+  # amap_flutter_base: ^3.0.0
+  # amap_flutter_location: ^3.0.0
   image_picker: ^1.2.1
   
   # 音频播放

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../config/app_config.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/auth/pages/login_page.dart';
@@ -303,10 +304,14 @@ class _SplashPageState extends ConsumerState<SplashPage>
         children: [
           // 广告媒体
           if (config.mediaUrl != null && config.mediaUrl!.isNotEmpty)
-            Image.network(
-              '$_serverBaseUrl${config.mediaUrl}',
+            CachedNetworkImage(
+              imageUrl: '$_serverBaseUrl${config.mediaUrl}',
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _buildBrandSplash(config),
+              placeholder: (context, url) => _buildBrandSplash(config),
+              errorWidget: (context, url, error) {
+                debugPrint('[SplashPage] 广告图片加载失败: $url, error: $error');
+                return _buildBrandSplash(config);
+              },
             ),
           // 跳过按钮
           Positioned(
@@ -336,16 +341,21 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   Widget _buildLogo(SplashConfig config, Color logoColor) {
-    // 优先级：远程图片 > 文字 Logo > 本地图片
+    // 优先级：远程图片 > 文字 Logo
     if (config.logoImage != null && config.logoImage!.isNotEmpty) {
+      final fullUrl = '$_serverBaseUrl${config.logoImage}';
       return ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: Image.network(
-          '$_serverBaseUrl${config.logoImage}',
+        child: CachedNetworkImage(
+          imageUrl: fullUrl,
           width: 100,
           height: 100,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildDefaultLogo(config, logoColor),
+          placeholder: (context, url) => _buildDefaultLogo(config, logoColor),
+          errorWidget: (context, url, error) {
+            debugPrint('[SplashPage] Logo 加载失败: $fullUrl, error: $error');
+            return _buildDefaultLogo(config, logoColor);
+          },
         ),
       );
     }

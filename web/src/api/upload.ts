@@ -69,6 +69,7 @@ export function uploadAudio(file: File): Promise<UploadResult> {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    timeout: 60000, // 1分钟超时（音频文件）
   }).then((res: unknown) => (res as { data: UploadResult }).data)
 }
 
@@ -88,6 +89,7 @@ export function uploadApk(
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    timeout: 300000, // 5分钟超时（大文件上传）
     onUploadProgress: (progressEvent) => {
       if (onProgress && progressEvent.total) {
         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)

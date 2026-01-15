@@ -258,8 +258,15 @@ async function handleApkUpload(event: Event) {
   const file = input.files?.[0]
   if (!file) return
 
+  console.log('[APK Upload] 开始上传 APK 文件:', {
+    name: file.name,
+    size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+    type: file.type,
+  })
+
   // 验证文件类型
   if (!file.name.toLowerCase().endsWith('.apk')) {
+    console.error('[APK Upload] 错误: 文件类型不正确')
     toast({ title: '请选择 APK 文件', variant: 'destructive' })
     input.value = ''
     return
@@ -267,6 +274,7 @@ async function handleApkUpload(event: Event) {
 
   // 验证文件大小 (200MB)
   if (file.size > 200 * 1024 * 1024) {
+    console.error('[APK Upload] 错误: 文件过大', `${(file.size / (1024 * 1024)).toFixed(2)} MB`)
     toast({ title: 'APK 文件不能超过 200MB', variant: 'destructive' })
     input.value = ''
     return
@@ -274,16 +282,47 @@ async function handleApkUpload(event: Event) {
 
   uploading.value = true
   uploadProgress.value = 0
+  const startTime = Date.now()
 
   try {
+    console.log('[APK Upload] 调用上传接口...')
     const result = await uploadApk(file, (percent) => {
       uploadProgress.value = percent
+      console.log(`[APK Upload] 上传进度: ${percent}%`)
     })
+
+    const duration = Date.now() - startTime
+    console.log(`[APK Upload] 上传成功! 耗时: ${(duration / 1000).toFixed(2)}s`, result)
+
     form.downloadUrl = result.url
     form.fileSize = result.fileSize || `${(file.size / (1024 * 1024)).toFixed(2)} MB`
     toast({ title: 'APK 上传成功' })
   } catch (error: any) {
-    toast({ title: error.message || '上传失败', variant: 'destructive' })
+    const duration = Date.now() - startTime
+    console.error(`[APK Upload] 上传失败! 耗时: ${(duration / 1000).toFixed(2)}s`, {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      error,
+    })
+
+    // 详细的错误提示
+    let errorMessage = '上传失败'
+    if (error.message?.includes('timeout')) {
+      errorMessage = '上传超时，请检查网络连接或稍后重试'
+    } else if (error.response?.status === 413) {
+      errorMessage = '文件过大，服务器拒绝接收'
+    } else if (error.response?.status === 400) {
+      errorMessage = error.response?.data?.msg || error.response?.data?.message || '文件格式不正确'
+    } else if (error.response?.status === 401) {
+      errorMessage = '登录已过期，请重新登录'
+    } else if (error.response?.status >= 500) {
+      errorMessage = '服务器错误，请稍后重试'
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+
+    toast({ title: errorMessage, variant: 'destructive' })
   } finally {
     uploading.value = false
     uploadProgress.value = 0

@@ -1,15 +1,4 @@
 PODS:
-  - AMap3DMap (10.1.600):
-    - AMapFoundation (>= 1.8.0)
-  - amap_flutter_location (0.0.1):
-    - AMapLocation
-    - Flutter
-  - amap_flutter_map (0.0.1):
-    - AMap3DMap
-    - Flutter
-  - AMapFoundation (1.8.2)
-  - AMapLocation (2.11.0):
-    - AMapFoundation (>= 1.8.0)
   - audio_session (0.0.1):
     - Flutter
   - camera_avfoundation (0.0.1):
@@ -126,8 +115,6 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - amap_flutter_location (from `.symlinks/plugins/amap_flutter_location/ios`)
-  - amap_flutter_map (from `.symlinks/plugins/amap_flutter_map/ios`)
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - Flutter (from `Flutter`)
@@ -151,9 +138,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - AMap3DMap
-    - AMapFoundation
-    - AMapLocation
     - GoogleDataTransport
     - GoogleMLKit
     - GoogleToolboxForMac
@@ -171,10 +155,6 @@ SPEC REPOS:
     - PromisesObjC
 
 EXTERNAL SOURCES:
-  amap_flutter_location:
-    :path: ".symlinks/plugins/amap_flutter_location/ios"
-  amap_flutter_map:
-    :path: ".symlinks/plugins/amap_flutter_map/ios"
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
   camera_avfoundation:
@@ -217,11 +197,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
-  AMap3DMap: e67fc1a66bd83b82b44a06b601864d9fb3db3de0
-  amap_flutter_location: f033c983c2d4319203ff7b523775579534d0d557
-  amap_flutter_map: 6cde084007a3ed06235383d46bc73c6c9a80c1e6
-  AMapFoundation: 9885c48fc3a78fdfb84a0299a2293e56ea3c9fec
-  AMapLocation: 8c46dbe995333ad6cae147d54a7307a577020be0
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
   camera_avfoundation: be3be85408cd4126f250386828e9b1dfa40ab436
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
