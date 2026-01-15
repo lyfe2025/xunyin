@@ -45,7 +45,6 @@ import {
   Loader,
   Play,
   Pause,
-  Square,
   ChevronRight,
   Upload,
   MapPin,
@@ -650,15 +649,31 @@ onUnmounted(() => {
     <!-- 当前播放控制 -->
     <div
       v-if="currentPlayingId"
-      class="flex items-center gap-4 p-3 bg-primary/5 border border-primary/20 rounded-lg"
+      class="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/30 rounded-lg shadow-sm relative group"
     >
-      <Button size="icon" variant="ghost" @click="stopAudio"><Square class="w-4 h-4" /></Button>
-      <div class="flex-1">
-        <div class="text-sm font-medium mb-1">
-          {{ bgmList.find((b) => b.id === currentPlayingId)?.name }}
+      <!-- 播放/暂停按钮 -->
+      <Button
+        size="icon"
+        variant="ghost"
+        class="h-10 w-10 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+        @click="playAudio(bgmList.find((b) => b.id === currentPlayingId)!)"
+      >
+        <Pause v-if="isPlaying" class="w-5 h-5 text-primary" />
+        <Play v-else class="w-5 h-5 text-primary" />
+      </Button>
+
+      <!-- 音乐信息和进度条 -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <Music class="w-4 h-4 text-primary shrink-0" />
+          <div class="text-sm font-medium truncate">
+            {{ bgmList.find((b) => b.id === currentPlayingId)?.name }}
+          </div>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-xs text-muted-foreground w-10">{{ formatTime(audioProgress) }}</span>
+          <span class="text-xs text-muted-foreground w-10 shrink-0">{{
+            formatTime(audioProgress)
+          }}</span>
           <Slider
             :model-value="[audioProgress]"
             :max="audioDuration || 100"
@@ -666,9 +681,35 @@ onUnmounted(() => {
             class="flex-1"
             @update:model-value="seekAudio"
           />
-          <span class="text-xs text-muted-foreground w-10">{{ formatTime(audioDuration) }}</span>
+          <span class="text-xs text-muted-foreground w-10 shrink-0">{{
+            formatTime(audioDuration)
+          }}</span>
         </div>
       </div>
+
+      <!-- 关闭按钮 - 使用 X 图标更直观 -->
+      <Button
+        size="icon"
+        variant="ghost"
+        class="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0"
+        @click="stopAudio"
+        title="关闭播放器"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </Button>
     </div>
 
     <!-- 表格 -->

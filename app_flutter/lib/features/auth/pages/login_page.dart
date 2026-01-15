@@ -187,7 +187,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     if (!config.auroraEnabled || config.backgroundType == 'image') {
       if (config.backgroundType == 'image' && config.backgroundImage != null) {
         // 图片背景
-        final baseUrl = AppConfig.baseUrl.replaceAll('/api/app', '');
+        final baseUrl = AppConfig.apiBaseUrl.replaceAll('/api/app', '');
         return Container(
           decoration: BoxDecoration(
             image: DecorationImage(
@@ -327,7 +327,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     final logoImage = config.logoImage;
     
     if (logoImage != null && logoImage.isNotEmpty) {
-      final baseUrl = AppConfig.baseUrl.replaceAll('/api/app', '');
+      final baseUrl = AppConfig.apiBaseUrl.replaceAll('/api/app', '');
       final fullUrl = '$baseUrl$logoImage';
       
       return Container(

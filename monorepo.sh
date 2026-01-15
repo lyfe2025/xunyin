@@ -222,11 +222,14 @@ kill_by_port() {
   local pids
   pids="$(lsof -ti ":$port" || true)"
   if [ -n "$pids" ]; then
-    echo "$pids" | xargs -r kill -TERM || true
+    # 先尝试优雅终止
+    echo "$pids" | xargs -r kill -TERM 2>/dev/null || true
     sleep 1
+    # 检查是否还有进程存活，如果有则强制杀掉
     pids="$(lsof -ti ":$port" || true)"
     if [ -n "$pids" ]; then
-      echo "$pids" | xargs -r kill -KILL || true
+      echo "$pids" | xargs -r kill -9 2>/dev/null || true
+      sleep 1
     fi
   fi
 }
@@ -282,9 +285,16 @@ stop_server() {
   local pid SERVER_PORT
   SERVER_PORT="$(get_server_port)"
   pid="$(read_pid server-dev.pid)"
-  if is_running "$pid"; then kill -TERM "$pid" || true; sleep 1; kill -KILL "$pid" || true; fi
+  # 先杀掉记录的 PID
+  if is_running "$pid"; then
+    kill -TERM "$pid" 2>/dev/null || true
+    sleep 1
+    kill -9 "$pid" 2>/dev/null || true
+  fi
   remove_pid server-dev.pid
+  # 再确保端口上没有残留进程
   kill_by_port "$SERVER_PORT"
+  sleep 1
   printf "${FG_BLUE}后端已停止${RESET}\n"
 }
 
@@ -372,8 +382,23 @@ reset_db() {
   read -rp "确认重置数据库? (y/N): " confirm
   if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
     printf "${FG_BLUE}正在重置数据库...${RESET}\n"
-    (cd "$SERVER_DIR" && npx prisma migrate reset --force && npx prisma generate && npx prisma db seed)
+    # 显式加载 .env 文件，确保 DATABASE_URL 正确传递给 Prisma
+    (
+      set -a
+      source "$SERVER_DIR/.env"
+      set +a
+      cd "$SERVER_DIR" && npx prisma migrate reset --force && npx prisma generate && npx prisma db seed
+    )
     printf "${FG_GREEN}数据库已重置并重新初始化${RESET}\n"
+    
+    # 检查后端是否在运行，如果是则自动重启以刷新数据库连接池
+    local SERVER_PORT spid
+    SERVER_PORT="$(get_server_port)"
+    spid="$(read_pid server-dev.pid)"
+    if is_running "$spid" || is_port_in_use "$SERVER_PORT"; then
+      printf "${FG_YELLOW}检测到后端正在运行，正在重启以刷新数据库连接...${RESET}\n"
+      restart_server
+    fi
   else
     printf "${FG_BLUE}已取消重置操作${RESET}\n"
   fi

@@ -229,8 +229,10 @@ const handleOpenEditDialog = (userId: string) => {
       "
       :style="sidebarStyle"
     >
-      <nav class="flex flex-col gap-4 px-2 sm:py-5">
-        <div :class="cn('flex items-center px-2', isCollapsed ? 'justify-center' : 'gap-2')">
+      <nav class="flex flex-col gap-4 px-2 sm:py-5 flex-1 overflow-hidden">
+        <div
+          :class="cn('flex items-center px-2 shrink-0', isCollapsed ? 'justify-center' : 'gap-2')"
+        >
           <router-link to="/" class="flex items-center gap-3 px-1">
             <template v-if="siteLogo">
               <img
@@ -250,7 +252,7 @@ const handleOpenEditDialog = (userId: string) => {
           </router-link>
         </div>
 
-        <TooltipProvider>
+        <TooltipProvider class="flex-1 overflow-y-auto">
           <!-- Normal 模式：完整菜单 -->
           <template v-if="isNormalMode">
             <div v-if="!isCollapsed" class="space-y-1">
@@ -388,7 +390,7 @@ const handleOpenEditDialog = (userId: string) => {
       </nav>
 
       <!-- User Profile & Footer -->
-      <div class="mt-auto p-4">
+      <div class="mt-auto shrink-0 p-4">
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button

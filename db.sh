@@ -154,10 +154,41 @@ cmd_migrate_status() {
 cmd_migrate_reset() {
   print_warning "此操作将重置数据库，所有数据将丢失！"
   if confirm "确定要重置数据库吗？"; then
+    # 检查后端服务是否在运行
+    local server_pid_file="$ROOT/.run/server-dev.pid"
+    local server_was_running=false
+    
+    if [ -f "$server_pid_file" ]; then
+      local server_pid
+      server_pid=$(cat "$server_pid_file")
+      if ps -p "$server_pid" > /dev/null 2>&1; then
+        server_was_running=true
+        print_info "检测到后端服务正在运行，先停止服务..."
+        kill "$server_pid" 2>/dev/null || true
+        sleep 2
+        # 确保进程已停止
+        if ps -p "$server_pid" > /dev/null 2>&1; then
+          kill -9 "$server_pid" 2>/dev/null || true
+        fi
+        print_success "后端服务已停止"
+      fi
+    fi
+    
     print_info "执行: cd server-nestjs && pnpm prisma migrate reset"
     cd "$SERVER_DIR"
     pnpm prisma migrate reset
     print_success "数据库已重置"
+    
+    # 如果之前在运行，重新启动
+    if [ "$server_was_running" = true ]; then
+      print_info "正在重新启动后端服务..."
+      cd "$ROOT"
+      nohup pnpm --filter server-nestjs dev > .run/server-dev.log 2>&1 &
+      echo $! > "$server_pid_file"
+      sleep 3
+      print_success "后端服务已重启"
+      print_info "查看日志: tail -f .run/server-dev.log"
+    fi
   else
     print_info "操作已取消"
   fi

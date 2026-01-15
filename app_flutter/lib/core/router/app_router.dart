@@ -229,7 +229,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   /// 获取服务器基础 URL（不含 /api/app）
   String get _serverBaseUrl {
-    final baseUrl = AppConfig.baseUrl;
+    final baseUrl = AppConfig.apiBaseUrl;
     if (baseUrl.endsWith('/api/app')) {
       return baseUrl.substring(0, baseUrl.length - 8);
     }

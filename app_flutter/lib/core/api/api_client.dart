@@ -26,7 +26,7 @@ class ApiClient {
   ApiClient._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: AppConfig.baseUrl,
+        baseUrl: AppConfig.apiBaseUrl,
         connectTimeout: AppConfig.connectTimeout,
         receiveTimeout: AppConfig.receiveTimeout,
         headers: {'Content-Type': 'application/json'},
@@ -156,7 +156,7 @@ class _AuthInterceptor extends Interceptor {
 
     try {
       final response = await Dio().post(
-        '${AppConfig.baseUrl}/auth/refresh',
+        '${AppConfig.apiBaseUrl}/auth/refresh',
         data: {'refreshToken': refreshToken},
       );
       final data = response.data['data'];
