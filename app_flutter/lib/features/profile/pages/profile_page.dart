@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/url_utils.dart';
 import '../../../providers/user_providers.dart';
 import '../../../models/user.dart';
 import '../../../models/journey.dart';
@@ -337,7 +338,7 @@ class _UserCard extends StatelessWidget {
     if (user?.avatarUrl != null) {
       avatar = ClipOval(
         child: Image.network(
-          user!.avatarUrl!,
+          UrlUtils.getFullImageUrl(user!.avatarUrl),
           width: 68,
           height: 68,
           fit: BoxFit.cover,

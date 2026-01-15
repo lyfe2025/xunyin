@@ -189,7 +189,6 @@ class _SettingsContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final audioState = ref.watch(audioStateProvider);
     final settings = ref.watch(settingsProvider);
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.valueOrNull;
@@ -208,12 +207,22 @@ class _SettingsContent extends ConsumerWidget {
           _SwitchTile(
             icon: Icons.music_note_rounded,
             title: '背景音乐',
-            subtitle: audioState.isLoading ? '加载中...' : null,
-            value: audioState.isPlaying || audioState.isLoading,
-            isLoading: audioState.isLoading,
-            onChanged: audioState.isLoading
-                ? null
-                : (_) => ref.read(audioStateProvider.notifier).togglePlay(),
+            subtitle: '关闭后，所有页面的背景音乐都将停止播放',
+            value: settings.bgmEnabled,
+            onChanged: (enabled) async {
+              // 更新设置
+              await ref.read(settingsProvider.notifier).setBgmEnabled(enabled);
+              
+              final audioNotifier = ref.read(audioStateProvider.notifier);
+              
+              if (enabled) {
+                // 如果开启，强制重新加载当前上下文的音乐
+                await audioNotifier.reloadCurrentContext();
+              } else {
+                // 如果关闭，暂停音乐
+                await audioNotifier.pause();
+              }
+            },
           ),
           _SwitchTile(
             icon: Icons.notifications_rounded,
@@ -399,7 +408,6 @@ class _SwitchTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final bool isLoading;
   final ValueChanged<bool>? onChanged;
 
   const _SwitchTile({
@@ -407,7 +415,6 @@ class _SwitchTile extends StatelessWidget {
     required this.title,
     this.subtitle,
     required this.value,
-    this.isLoading = false,
     required this.onChanged,
   });
 
@@ -448,26 +455,16 @@ class _SwitchTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (isLoading)
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
-                    ),
-                  )
-                else
-                  IgnorePointer(
-                    child: Transform.scale(
-                      scale: 0.85,
-                      child: Switch(
-                        value: value,
-                        onChanged: onChanged,
-                        activeColor: AppColors.accent,
-                      ),
+                IgnorePointer(
+                  child: Transform.scale(
+                    scale: 0.85,
+                    child: Switch(
+                      value: value,
+                      onChanged: onChanged,
+                      activeColor: AppColors.accent,
                     ),
                   ),
+                ),
               ],
             ),
           ),

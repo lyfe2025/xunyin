@@ -9,6 +9,7 @@ class SettingsStorage {
   static const _keyNotificationEnabled = 'notification_enabled';
   static const _keyAutoLocationEnabled = 'auto_location_enabled';
   static const _keyThemeMode = 'theme_mode';
+  static const _keyBgmEnabled = 'bgm_enabled';
 
   /// 获取消息通知开关状态
   static Future<bool> getNotificationEnabled() async {
@@ -45,6 +46,18 @@ class SettingsStorage {
   static Future<void> setThemeMode(AppThemeMode mode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyThemeMode, mode.index);
+  }
+
+  /// 获取背景音乐开关状态
+  static Future<bool> getBgmEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyBgmEnabled) ?? true;
+  }
+
+  /// 设置背景音乐开关
+  static Future<void> setBgmEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyBgmEnabled, enabled);
   }
 
   /// 获取缓存大小（字节）

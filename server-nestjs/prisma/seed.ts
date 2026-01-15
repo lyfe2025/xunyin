@@ -3139,7 +3139,7 @@ async function main() {
         longitude: 120.1551,
         description:
           '杭州，简称"杭"，是浙江省省会，素有"人间天堂"的美誉。西湖、灵隐寺、雷峰塔等名胜古迹闻名遐迩。',
-        coverImage: '',
+        coverImage: '/uploads/images/city-hangzhou.jpg',
         bgmUrl: '/uploads/audio/bgm/city-hangzhou.mp3',
         explorerCount: 0,
         orderNum: 1,
@@ -3156,7 +3156,7 @@ async function main() {
         longitude: 120.5853,
         description:
           '苏州，古称姑苏，是江苏省地级市。以园林著称，拙政园、留园等被列入世界文化遗产。',
-        coverImage: '',
+        coverImage: '/uploads/images/city-suzhou.jpg',
         bgmUrl: '/uploads/audio/bgm/city-suzhou.mp3',
         explorerCount: 0,
         orderNum: 2,
@@ -3172,7 +3172,7 @@ async function main() {
         latitude: 32.0603,
         longitude: 118.7969,
         description: '南京，简称"宁"，是江苏省省会，六朝古都，有着深厚的历史文化底蕴。',
-        coverImage: '',
+        coverImage: '/uploads/images/city-nanjing.jpg',
         bgmUrl: '/uploads/audio/bgm/city-nanjing.mp3',
         explorerCount: 0,
         orderNum: 3,
@@ -3190,7 +3190,7 @@ async function main() {
         longitude: 119.2965,
         description:
           '福州，别称榕城，是福建省省会，有着2200多年的建城史。三坊七巷、鼓山、西湖等名胜古迹众多，是中国历史文化名城。',
-        coverImage: '',
+        coverImage: '/uploads/images/city-fuzhou.jpg',
         bgmUrl: '/uploads/audio/bgm/city-fuzhou.mp3',
         explorerCount: 0,
         orderNum: 4,
@@ -3207,7 +3207,7 @@ async function main() {
         theme: '自然风光',
         description:
           '漫步西湖，探寻苏堤春晓、断桥残雪等十大经典景观，感受"欲把西湖比西子"的诗意之美。',
-        coverImage: '',
+        coverImage: '/uploads/images/journey-westlake.jpg',
         bgmUrl: '/uploads/audio/bgm/journey-westlake.mp3',
         rating: 3,
         estimatedMinutes: 180,
@@ -3226,7 +3226,7 @@ async function main() {
         name: '灵隐禅踪',
         theme: '佛教文化',
         description: '探访千年古刹灵隐寺，感受飞来峰石刻艺术，体验禅宗文化的深邃与宁静。',
-        coverImage: '',
+        coverImage: '/uploads/images/journey-lingyin.jpg',
         bgmUrl: '/uploads/audio/bgm/journey-lingyin.mp3',
         rating: 4,
         estimatedMinutes: 120,
@@ -3246,7 +3246,7 @@ async function main() {
         name: '园林雅韵',
         theme: '古典园林',
         description: '游览拙政园、留园等世界文化遗产，领略"咫尺之内再造乾坤"的园林艺术。',
-        coverImage: '',
+        coverImage: '/uploads/images/journey-garden.jpg',
         bgmUrl: '/uploads/audio/bgm/journey-garden.mp3',
         rating: 3,
         estimatedMinutes: 150,
@@ -3267,7 +3267,7 @@ async function main() {
         theme: '历史街区',
         description:
           '漫步中国都市仅存的"里坊制度活化石"，探访林则徐、严复、冰心等名人故居，感受明清古建筑的独特魅力。',
-        coverImage: '',
+        coverImage: '/uploads/images/journey-sanfang.jpg',
         bgmUrl: '/uploads/audio/bgm/journey-sanfang.mp3',
         rating: 4,
         estimatedMinutes: 150,
@@ -3287,7 +3287,7 @@ async function main() {
         name: '鼓山禅意行',
         theme: '佛教文化',
         description: '登临福州第一名山，参拜千年古刹涌泉寺，欣赏摩崖石刻，俯瞰榕城全景。',
-        coverImage: '',
+        coverImage: '/uploads/images/journey-gushan.jpg',
         bgmUrl: '/uploads/audio/bgm/journey-gushan.mp3',
         rating: 4,
         estimatedMinutes: 180,
@@ -3308,7 +3308,7 @@ async function main() {
         theme: '城市风光',
         description:
           '沿闽江漫步，欣赏中洲岛、解放大桥、烟台山等标志性景观，感受福州的现代与历史交融。',
-        coverImage: '',
+        coverImage: '/uploads/images/journey-minjiang.jpg',
         bgmUrl: '/uploads/audio/bgm/journey-minjiang.mp3',
         rating: 3,
         estimatedMinutes: 120,
@@ -3764,6 +3764,7 @@ async function main() {
       {
         type: 'route',
         name: '西湖探秘者',
+        imageAsset: '/uploads/images/seal-westlake.jpg',
         description: '完成西湖十景探秘路线，获得此印记',
         badgeTitle: '西湖探秘者',
         journeyId: westLakeJourney.id,
@@ -3773,6 +3774,7 @@ async function main() {
       {
         type: 'route',
         name: '禅心悟道',
+        imageAsset: '/uploads/images/seal-lingyin.jpg',
         description: '完成灵隐禅踪路线，获得此印记',
         badgeTitle: '禅心悟道',
         journeyId: lingyinJourney.id,
@@ -3782,6 +3784,7 @@ async function main() {
       {
         type: 'route',
         name: '园林雅士',
+        imageAsset: '/uploads/images/seal-garden.jpg',
         description: '完成园林雅韵路线，获得此印记',
         badgeTitle: '园林雅士',
         journeyId: gardenJourney.id,
@@ -3791,6 +3794,7 @@ async function main() {
       {
         type: 'route',
         name: '坊巷寻踪',
+        imageAsset: '/uploads/images/seal-sanfang.jpg',
         description: '完成三坊七巷寻古路线，获得此印记',
         badgeTitle: '坊巷寻踪者',
         journeyId: sanfangqixiangJourney.id,
@@ -3800,6 +3804,7 @@ async function main() {
       {
         type: 'route',
         name: '鼓山禅心',
+        imageAsset: '/uploads/images/seal-gushan.jpg',
         description: '完成鼓山禅意行路线，获得此印记',
         badgeTitle: '鼓山禅心',
         journeyId: gushanJourney.id,
@@ -3809,6 +3814,7 @@ async function main() {
       {
         type: 'route',
         name: '闽江行者',
+        imageAsset: '/uploads/images/seal-minjiang.jpg',
         description: '完成闽江两岸路线，获得此印记',
         badgeTitle: '闽江行者',
         journeyId: minjiangJourney.id,
@@ -3818,6 +3824,7 @@ async function main() {
       {
         type: 'city',
         name: '杭州印记',
+        imageAsset: '/uploads/images/seal-hangzhou.jpg',
         description: '完成杭州所有文化之旅，获得城市印记',
         badgeTitle: '杭州文化使者',
         journeyId: null,
@@ -3827,6 +3834,7 @@ async function main() {
       {
         type: 'city',
         name: '苏州印记',
+        imageAsset: '/uploads/images/seal-suzhou.jpg',
         description: '完成苏州所有文化之旅，获得城市印记',
         badgeTitle: '苏州文化使者',
         journeyId: null,
@@ -3836,6 +3844,7 @@ async function main() {
       {
         type: 'city',
         name: '南京印记',
+        imageAsset: '/uploads/images/seal-nanjing.jpg',
         description: '完成南京所有文化之旅，获得城市印记',
         badgeTitle: '南京文化使者',
         journeyId: null,
@@ -3845,6 +3854,7 @@ async function main() {
       {
         type: 'city',
         name: '福州印记',
+        imageAsset: '/uploads/images/seal-fuzhou.jpg',
         description: '完成福州所有文化之旅，获得城市印记',
         badgeTitle: '榕城文化使者',
         journeyId: null,
@@ -3854,6 +3864,7 @@ async function main() {
       {
         type: 'special',
         name: '江南水乡',
+        imageAsset: '/uploads/images/seal-jiangnan.jpg',
         description: '完成杭州和苏州的所有路线，获得特殊印记',
         badgeTitle: '江南水乡行者',
         journeyId: null,
@@ -3863,6 +3874,7 @@ async function main() {
       {
         type: 'special',
         name: '闽都风华',
+        imageAsset: '/uploads/images/seal-mindu.jpg',
         description: '完成福州所有文化之旅，获得特殊印记',
         badgeTitle: '闽都风华探索者',
         journeyId: null,
@@ -3876,7 +3888,7 @@ async function main() {
         data: {
           type: seal.type,
           name: seal.name,
-          imageAsset: '',
+          imageAsset: seal.imageAsset,
           description: seal.description,
           badgeTitle: seal.badgeTitle,
           journeyId: seal.journeyId,
@@ -3893,7 +3905,7 @@ async function main() {
       data: {
         phone: '13800138000',
         nickname: '探索者小明',
-        avatar: '',
+        avatar: '/uploads/avatars/user1.jpg',
         loginType: 'wechat',
         totalPoints: 520,
         status: '0',
@@ -3906,7 +3918,7 @@ async function main() {
       data: {
         phone: '13900139000',
         nickname: '文化行者',
-        avatar: '',
+        avatar: '/uploads/avatars/user2.jpg',
         loginType: 'email',
         totalPoints: 320,
         status: '0',
@@ -3919,7 +3931,7 @@ async function main() {
       data: {
         phone: '13700137000',
         nickname: '印记收藏家',
-        avatar: '',
+        avatar: '/uploads/avatars/user3.jpg',
         loginType: 'wechat',
         totalPoints: 850,
         status: '0',
@@ -3932,7 +3944,7 @@ async function main() {
       data: {
         phone: '13600136000',
         nickname: '新手旅人',
-        avatar: '',
+        avatar: '/uploads/avatars/user4.jpg',
         loginType: 'email',
         totalPoints: 0,
         level: 1,

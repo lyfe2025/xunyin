@@ -13,6 +13,7 @@ enum AppThemeMode {
 class SettingsState {
   final bool notificationEnabled;
   final bool autoLocationEnabled;
+  final bool bgmEnabled;
   final String cacheSize;
   final bool isLoading;
   final AppThemeMode themeMode;
@@ -20,6 +21,7 @@ class SettingsState {
   const SettingsState({
     this.notificationEnabled = true,
     this.autoLocationEnabled = true,
+    this.bgmEnabled = true,
     this.cacheSize = '计算中...',
     this.isLoading = false,
     this.themeMode = AppThemeMode.system,
@@ -28,6 +30,7 @@ class SettingsState {
   SettingsState copyWith({
     bool? notificationEnabled,
     bool? autoLocationEnabled,
+    bool? bgmEnabled,
     String? cacheSize,
     bool? isLoading,
     AppThemeMode? themeMode,
@@ -35,6 +38,7 @@ class SettingsState {
     return SettingsState(
       notificationEnabled: notificationEnabled ?? this.notificationEnabled,
       autoLocationEnabled: autoLocationEnabled ?? this.autoLocationEnabled,
+      bgmEnabled: bgmEnabled ?? this.bgmEnabled,
       cacheSize: cacheSize ?? this.cacheSize,
       isLoading: isLoading ?? this.isLoading,
       themeMode: themeMode ?? this.themeMode,
@@ -76,11 +80,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(isLoading: true);
     final notification = await SettingsStorage.getNotificationEnabled();
     final location = await SettingsStorage.getAutoLocationEnabled();
+    final bgm = await SettingsStorage.getBgmEnabled();
     final cacheSize = await SettingsStorage.getFormattedCacheSize();
     final themeMode = await SettingsStorage.getThemeMode();
     state = SettingsState(
       notificationEnabled: notification,
       autoLocationEnabled: location,
+      bgmEnabled: bgm,
       cacheSize: cacheSize,
       themeMode: themeMode,
       isLoading: false,
@@ -95,6 +101,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> setAutoLocationEnabled(bool enabled) async {
     state = state.copyWith(autoLocationEnabled: enabled);
     await SettingsStorage.setAutoLocationEnabled(enabled);
+  }
+
+  /// 设置背景音乐开关
+  Future<void> setBgmEnabled(bool enabled) async {
+    state = state.copyWith(bgmEnabled: enabled);
+    await SettingsStorage.setBgmEnabled(enabled);
   }
 
   /// 设置主题模式

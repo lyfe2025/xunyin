@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/url_utils.dart';
 import '../../../services/upload_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../providers/service_providers.dart';
@@ -477,7 +478,7 @@ class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
         ),
         child: ClipOval(
           child: Image.network(
-            avatarUrl,
+            UrlUtils.getFullImageUrl(avatarUrl),
             width: 180,
             height: 180,
             fit: BoxFit.cover,

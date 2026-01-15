@@ -258,7 +258,7 @@ function handleExport(format: 'xlsx' | 'csv' | 'json') {
 }
 
 // 图片预览
-function openImagePreview(images: string[], index: number = 0) {
+function openImagePreview(images: (string | undefined)[], index: number = 0) {
   previewImages.value = images.filter(Boolean).map(getResourceUrl)
   currentImageIndex.value = index
   showImagePreview.value = true
@@ -1150,6 +1150,12 @@ onMounted(() => {
     <!-- 图片预览弹窗 -->
     <Dialog v-model:open="showImagePreview">
       <DialogContent class="sm:max-w-[800px] p-0 bg-black/95">
+        <DialogHeader class="sr-only">
+          <DialogTitle>证件照片预览</DialogTitle>
+          <DialogDescription>
+            查看用户上传的身份证照片，共 {{ previewImages.length }} 张
+          </DialogDescription>
+        </DialogHeader>
         <div class="relative">
           <Button
             variant="ghost"

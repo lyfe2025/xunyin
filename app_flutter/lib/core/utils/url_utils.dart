@@ -21,9 +21,14 @@ class UrlUtils {
       return '';
     }
 
-    // 已经是完整 URL
+    // 已经是完整 HTTP/HTTPS URL
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
+    }
+
+    // 处理 file:// 协议（移除 file:// 前缀，转换为相对路径）
+    if (url.startsWith('file://')) {
+      url = url.replaceFirst('file://', '');
     }
 
     // 相对路径，拼接服务器地址

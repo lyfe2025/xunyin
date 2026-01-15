@@ -11,7 +11,17 @@ logs/
 # 上传文件（忽略用户上传，保留默认资源）
 /uploads/*
 !/uploads/images/
-!/uploads/avatars/
-/uploads/avatars/*
-!/uploads/avatars/.gitkeep
+!/uploads/images/**
+!/uploads/photos/
+!/uploads/photos/**
+!/uploads/idcard/
+!/uploads/idcard/**
 !/uploads/audio/
+!/uploads/audio/**
+!/uploads/avatars/
+!/uploads/avatars/user*.jpg
+/uploads/avatars/*
+!/uploads/avatars/user1.jpg
+!/uploads/avatars/user2.jpg
+!/uploads/avatars/user3.jpg
+!/uploads/avatars/user4.jpg

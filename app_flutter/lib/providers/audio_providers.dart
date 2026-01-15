@@ -4,6 +4,7 @@ import 'package:just_audio/just_audio.dart';
 import '../core/utils/url_utils.dart';
 import '../services/audio_service.dart';
 import 'service_providers.dart';
+import 'settings_providers.dart';
 
 /// 音频上下文类型
 enum AudioContext { home, city, journey, explorationPoint, ar }
@@ -53,9 +54,10 @@ class AudioState {
 class AudioNotifier extends StateNotifier<AudioState> {
   final AudioPlayer _player = AudioPlayer();
   final AudioApiService _audioApi;
+  final Ref _ref;
   bool _wasPlayingBeforeAR = false;
 
-  AudioNotifier(this._audioApi) : super(AudioState()) {
+  AudioNotifier(this._audioApi, this._ref) : super(AudioState()) {
     _player.setLoopMode(LoopMode.one);
     _player.setVolume(0.5);
 
@@ -89,14 +91,20 @@ class AudioNotifier extends StateNotifier<AudioState> {
     
     if (state.isPlaying) {
       await pause();
+      // 暂停时，同步更新设置中的背景音乐开关
+      await _ref.read(settingsProvider.notifier).setBgmEnabled(false);
     } else if (state.currentTrackUrl != null) {
       await play();
+      // 播放时，同步更新设置中的背景音乐开关
+      await _ref.read(settingsProvider.notifier).setBgmEnabled(true);
     } else {
       // 没有音乐时，加载首页背景音乐
       // 立即设置加载状态，让 UI 显示加载中
       state = state.copyWith(isLoading: true);
       // 强制加载，即使上下文相同
       await _loadContextAudio(AudioContext.home, null);
+      // 播放时，同步更新设置中的背景音乐开关
+      await _ref.read(settingsProvider.notifier).setBgmEnabled(true);
     }
   }
 
@@ -190,6 +198,30 @@ class AudioNotifier extends StateNotifier<AudioState> {
   }
 
   Future<void> switchContext(AudioContext context, {String? contextId}) async {
+    // 检查背景音乐开关
+    final bgmEnabled = _ref.read(settingsProvider).bgmEnabled;
+    
+    developer.log(
+      'switchContext 被调用: context=$context, contextId=$contextId, bgmEnabled=$bgmEnabled',
+      name: 'AudioNotifier',
+    );
+    
+    // 如果背景音乐已关闭，不加载新音乐
+    if (!bgmEnabled) {
+      developer.log('背景音乐已关闭，跳过加载', name: 'AudioNotifier');
+      // 如果正在播放，暂停
+      if (state.isPlaying) {
+        await pause();
+      }
+      // 更新上下文但不加载音乐
+      state = state.copyWith(
+        context: context,
+        contextId: contextId,
+        isLoading: false,
+      );
+      return;
+    }
+    
     // 如果上下文相同且 ID 相同，不重复加载
     if (state.context == context && state.contextId == contextId) {
       state = state.copyWith(isLoading: false);
@@ -201,6 +233,20 @@ class AudioNotifier extends StateNotifier<AudioState> {
     
     // 调用内部加载方法
     await _loadContextAudio(context, contextId);
+  }
+
+  /// 强制重新加载当前上下文的音乐（用于设置中重新开启背景音乐）
+  Future<void> reloadCurrentContext() async {
+    developer.log(
+      'reloadCurrentContext 被调用: context=${state.context}, contextId=${state.contextId}',
+      name: 'AudioNotifier',
+    );
+    
+    // 设置加载状态
+    state = state.copyWith(isLoading: true);
+    
+    // 强制加载当前上下文的音乐
+    await _loadContextAudio(state.context, state.contextId);
   }
 
   Future<void> pauseForAR() async {
@@ -235,5 +281,5 @@ final audioStateProvider = StateNotifierProvider<AudioNotifier, AudioState>((
   ref,
 ) {
   final audioApi = ref.watch(audioApiServiceProvider);
-  return AudioNotifier(audioApi);
+  return AudioNotifier(audioApi, ref);
 });
