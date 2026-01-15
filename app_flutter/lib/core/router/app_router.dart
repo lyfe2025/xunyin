@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../config/app_config.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/auth/pages/login_page.dart';
 import '../../features/journey/pages/journey_detail_page.dart';
@@ -18,6 +20,8 @@ import '../../features/profile/pages/settings_page.dart';
 import '../../features/profile/pages/agreement_page.dart';
 import '../../features/profile/pages/edit_nickname_page.dart';
 import '../../features/profile/pages/edit_avatar_page.dart';
+import '../../models/splash_config.dart';
+import '../../providers/splash_config_provider.dart';
 import '../../features/profile/pages/bind_phone_page.dart';
 import '../../features/profile/pages/badges_page.dart';
 
@@ -135,18 +139,21 @@ class AppRouter {
   );
 }
 
-/// 启动页
-class SplashPage extends StatefulWidget {
+/// 启动页 - 支持从后台动态获取配置
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
+class _SplashPageState extends ConsumerState<SplashPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
+  int _countdown = 0;
+  bool _canSkip = false;
+  SplashConfig? _config;
 
   @override
   void initState() {
@@ -160,7 +167,6 @@ class _SplashPageState extends State<SplashPage>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
     _controller.forward();
-    _checkAuth();
   }
 
   @override
@@ -169,48 +175,198 @@ class _SplashPageState extends State<SplashPage>
     super.dispose();
   }
 
-  Future<void> _checkAuth() async {
-    await Future.delayed(const Duration(milliseconds: 2000));
+  void _startTimer(SplashConfig config) {
+    if (_config != null) return; // 防止重复启动
+    _config = config;
+    _countdown = config.duration;
+    _canSkip = config.skipDelay == 0;
+
+    // 启动倒计时
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+
+      setState(() {
+        _countdown--;
+        if (!_canSkip && config.skipDelay > 0) {
+          final elapsed = config.duration - _countdown;
+          _canSkip = elapsed >= config.skipDelay;
+        }
+      });
+
+      if (_countdown <= 0) {
+        _navigateNext();
+        return false;
+      }
+      return true;
+    });
+  }
+
+  void _navigateNext() {
     if (!mounted) return;
-    // 开发阶段：跳转到登录页
     context.go('/login');
+  }
+
+  void _skip() {
+    if (_canSkip) {
+      _navigateNext();
+    }
+  }
+
+  Color _parseColor(String? colorStr, Color defaultColor) {
+    if (colorStr == null || colorStr.isEmpty) return defaultColor;
+    try {
+      if (colorStr.startsWith('#')) {
+        final hex = colorStr.replaceFirst('#', '');
+        if (hex.length == 6) {
+          return Color(int.parse('FF$hex', radix: 16));
+        }
+      }
+    } catch (_) {}
+    return defaultColor;
+  }
+
+  /// 获取服务器基础 URL（不含 /api/app）
+  String get _serverBaseUrl {
+    final baseUrl = AppConfig.baseUrl;
+    if (baseUrl.endsWith('/api/app')) {
+      return baseUrl.substring(0, baseUrl.length - 8);
+    }
+    return baseUrl;
   }
 
   @override
   Widget build(BuildContext context) {
+    final configAsync = ref.watch(splashConfigProvider);
+
+    return configAsync.when(
+      data: (config) {
+        _startTimer(config);
+        return config.isAdMode
+            ? _buildAdSplash(config)
+            : _buildBrandSplash(config);
+      },
+      loading: () => _buildBrandSplash(const SplashConfig()),
+      error: (_, __) {
+        _startTimer(const SplashConfig());
+        return _buildBrandSplash(const SplashConfig());
+      },
+    );
+  }
+
+  /// 品牌启动页
+  Widget _buildBrandSplash(SplashConfig config) {
+    final bgColor = _parseColor(config.backgroundColor, const Color(0xFFF8F5F0));
+    final textColor = _parseColor(config.textColor, const Color(0xFF2D2D2D));
+    final logoColor = _parseColor(config.logoColor, const Color(0xFFC41E3A));
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F5F0),
+      backgroundColor: bgColor,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 使用 App 图标
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              _buildLogo(config, logoColor),
               const SizedBox(height: 24),
-              const Text(
-                '寻印',
+              Text(
+                config.appName ?? '寻印',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D2D2D),
+                  color: textColor,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                '探索城市文化，收集专属印记',
-                style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+              Text(
+                config.slogan ?? '探索城市文化，收集专属印记',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: textColor.withValues(alpha: 0.6),
+                ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 广告启动页
+  Widget _buildAdSplash(SplashConfig config) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 广告媒体
+          if (config.mediaUrl != null && config.mediaUrl!.isNotEmpty)
+            Image.network(
+              '$_serverBaseUrl${config.mediaUrl}',
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _buildBrandSplash(config),
+            ),
+          // 跳过按钮
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            right: 16,
+            child: GestureDetector(
+              onTap: _canSkip ? _skip : null,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  _canSkip ? '跳过 $_countdown' : '$_countdown',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogo(SplashConfig config, Color logoColor) {
+    // 优先级：远程图片 > 文字 Logo > 本地图片
+    if (config.logoImage != null && config.logoImage!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.network(
+          '$_serverBaseUrl${config.logoImage}',
+          width: 100,
+          height: 100,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildDefaultLogo(config, logoColor),
+        ),
+      );
+    }
+    // logoImage 为空时，直接显示文字 Logo
+    return _buildDefaultLogo(config, logoColor);
+  }
+
+  Widget _buildDefaultLogo(SplashConfig config, Color logoColor) {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        color: logoColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Center(
+        child: Text(
+          config.logoText ?? '印',
+          style: const TextStyle(
+            fontSize: 48,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),

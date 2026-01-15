@@ -8,6 +8,10 @@ class AppConfig {
   static bool get isDev => env == 'dev';
   static bool get isProd => env == 'prod';
 
+  // 开发环境 Mac IP 地址（真机调试时需要改成你的局域网 IP）
+  // 运行 `ipconfig getifaddr en0` 获取
+  static const String devHost = '192.168.123.156'; // TODO: 改成你的 Mac IP
+
   // API 配置
   static String get baseUrl {
     switch (env) {
@@ -15,7 +19,7 @@ class AppConfig {
         return 'https://api.xunyin.com/api/app'; // 生产环境
       case 'dev':
       default:
-        return 'http://localhost:3000/api/app'; // 开发环境
+        return 'http://$devHost:3000/api/app'; // 开发环境
     }
   }
 
@@ -26,7 +30,7 @@ class AppConfig {
         return 'https://xunyin.app';
       case 'dev':
       default:
-        return 'http://localhost:5173'; // 开发环境使用前端地址
+        return 'http://$devHost:5173'; // 开发环境使用前端地址
     }
   }
 

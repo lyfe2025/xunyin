@@ -10,12 +10,13 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在 .env 中设置 POSTGRES_PASSWORD}
       TZ: Asia/Shanghai
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - xunyin_postgres_data:/var/lib/postgresql/data
       # 数据库由 Prisma 统一管理，不再使用 SQL 文件初始化
       # - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       # - ./db/init_data.sql:/docker-entrypoint-initdb.d/02-init_data.sql
-    ports:
-      - "5433:5432"
+      # 生产环境不暴露端口，通过内部网络访问
+      # ports:
+      #   - "5433:5432"
     networks:
       - xunyin-network
     healthcheck:
@@ -33,9 +34,10 @@ services:
     environment:
       TZ: Asia/Shanghai
     volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
+      - xunyin_redis_data:/data
+    # 生产环境不暴露端口
+    # ports:
+    #   - "6379:6379"
     networks:
       - xunyin-network
     healthcheck:
@@ -63,8 +65,9 @@ services:
       LOG_DIR: logs
       TZ: Asia/Shanghai
     volumes:
-      - server_logs:/app/logs
+      - xunyin_server_logs:/app/logs
       - ./server-nestjs/uploads:/app/uploads
+    # 开发/测试时暴露端口供移动端访问
     ports:
       - "3000:3000"
     networks:
@@ -107,9 +110,9 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  xunyin_postgres_data:
     driver: local
-  redis_data:
+  xunyin_redis_data:
     driver: local
-  server_logs:
+  xunyin_server_logs:
     driver: local

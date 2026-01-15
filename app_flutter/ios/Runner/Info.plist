@@ -61,5 +61,12 @@
 	<!-- 相册权限描述 -->
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>寻印需要访问相册以选择头像和保存探索照片</string>
+	<!-- 本地网络权限（Flutter Debug 模式需要） -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>寻印需要访问本地网络以进行开发调试</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_dartVmService._tcp</string>
+	</array>
 </dict>
 </plist>

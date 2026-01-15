@@ -268,12 +268,21 @@ async function handleSubmit() {
     if (editingId.value) {
       await updateSplash(editingId.value, data)
       toast({ title: '更新成功' })
+      // 更新预览项
+      if (previewItem.value?.id === editingId.value) {
+        previewItem.value = { ...previewItem.value, ...data } as SplashConfig
+      }
     } else {
       await createSplash(data)
       toast({ title: '创建成功' })
     }
     dialogVisible.value = false
-    getList()
+    await getList()
+    // 如果是编辑，刷新预览项为最新数据
+    if (editingId.value && previewItem.value) {
+      const updated = list.value.find((item) => item.id === editingId.value)
+      if (updated) previewItem.value = updated
+    }
   } finally {
     submitLoading.value = false
   }
