@@ -102,17 +102,53 @@ const isAndroid = computed(() => {
 })
 
 // 下载处理
+// 处理下载 URL（支持相对路径和绝对路径）
+const getDownloadUrl = (url: string | undefined) => {
+  if (!url) return null
+  
+  // 如果是完整 URL（http/https 开头），直接返回
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  
+  // 如果是相对路径，补全为当前域名的完整 URL
+  if (url.startsWith('/')) {
+    return `${window.location.origin}${url}`
+  }
+  
+  return url
+}
+
 function handleIOSDownload() {
-  const url = config.value.iosStoreUrl
-  if (url && typeof url === 'string') {
-    window.location.href = url
+  const url = getDownloadUrl(config.value.iosStoreUrl)
+  console.log('iOS download clicked')
+  console.log('iosStoreUrl:', config.value.iosStoreUrl)
+  console.log('Final URL:', url)
+  
+  if (url) {
+    window.open(url, '_blank')
+  } else {
+    console.error('No iOS download URL configured')
   }
 }
 
 function handleAndroidDownload() {
-  const url = config.value.androidApkUrl || config.value.androidStoreUrl
-  if (url && typeof url === 'string') {
-    window.location.href = url
+  const url = getDownloadUrl(config.value.androidApkUrl || config.value.androidStoreUrl)
+  console.log('Android download clicked')
+  console.log('androidApkUrl:', config.value.androidApkUrl)
+  console.log('androidStoreUrl:', config.value.androidStoreUrl)
+  console.log('Final URL:', url)
+  
+  if (url) {
+    // 创建隐藏的 <a> 标签触发下载
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '' // 触发下载而非导航
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } else {
+    console.error('No download URL configured')
   }
 }
 
