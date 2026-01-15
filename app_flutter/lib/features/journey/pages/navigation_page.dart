@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
+import '../../../providers/audio_providers.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_buttons.dart';
@@ -36,6 +37,14 @@ class _NavigationPageState extends ConsumerState<NavigationPage>
   @override
   void initState() {
     super.initState();
+    // 进入导航页面时切换到探索点的背景音乐
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(audioStateProvider.notifier).switchContext(
+            AudioContext.explorationPoint,
+            contextId: widget.pointId,
+          );
+    });
+
     // 导航脉冲动画
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),

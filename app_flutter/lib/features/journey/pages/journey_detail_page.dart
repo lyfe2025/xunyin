@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/url_utils.dart';
 import '../../../models/journey.dart';
+import '../../../providers/audio_providers.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../providers/service_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
@@ -12,25 +13,42 @@ import '../../../shared/widgets/app_loading.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 
 /// 文化之旅详情页 - Aurora UI + Glassmorphism
-class JourneyDetailPage extends ConsumerWidget {
+class JourneyDetailPage extends ConsumerStatefulWidget {
   final String journeyId;
   const JourneyDetailPage({super.key, required this.journeyId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final journeyAsync = ref.watch(journeyDetailProvider(journeyId));
-    final pointsAsync = ref.watch(journeyPointsProvider(journeyId));
+  ConsumerState<JourneyDetailPage> createState() => _JourneyDetailPageState();
+}
+
+class _JourneyDetailPageState extends ConsumerState<JourneyDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    // 进入页面时切换到文化之旅的背景音乐
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(audioStateProvider.notifier).switchContext(
+            AudioContext.journey,
+            contextId: widget.journeyId,
+          );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final journeyAsync = ref.watch(journeyDetailProvider(widget.journeyId));
+    final pointsAsync = ref.watch(journeyPointsProvider(widget.journeyId));
     return Scaffold(
       body: journeyAsync.when(
         data: (journey) => _JourneyContent(
           journey: journey,
-          journeyId: journeyId,
+          journeyId: widget.journeyId,
           pointsAsync: pointsAsync,
         ),
         loading: () => _buildLoadingState(),
         error: (e, _) => _buildErrorState(e.toString()),
       ),
-      bottomNavigationBar: _StartButton(journeyId: journeyId),
+      bottomNavigationBar: _StartButton(journeyId: widget.journeyId),
     );
   }
 

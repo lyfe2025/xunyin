@@ -208,9 +208,12 @@ class _SettingsContent extends ConsumerWidget {
           _SwitchTile(
             icon: Icons.music_note_rounded,
             title: '背景音乐',
-            value: audioState.isPlaying,
-            onChanged: (_) =>
-                ref.read(audioStateProvider.notifier).togglePlay(),
+            subtitle: audioState.isLoading ? '加载中...' : null,
+            value: audioState.isPlaying || audioState.isLoading,
+            isLoading: audioState.isLoading,
+            onChanged: audioState.isLoading
+                ? null
+                : (_) => ref.read(audioStateProvider.notifier).togglePlay(),
           ),
           _SwitchTile(
             icon: Icons.notifications_rounded,
@@ -394,13 +397,17 @@ class _LogoutButton extends StatelessWidget {
 class _SwitchTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final bool isLoading;
+  final ValueChanged<bool>? onChanged;
 
   const _SwitchTile({
     required this.icon,
     required this.title,
+    this.subtitle,
     required this.value,
+    this.isLoading = false,
     required this.onChanged,
   });
 
@@ -409,7 +416,7 @@ class _SwitchTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => onChanged(!value),
+        onTap: onChanged != null ? () => onChanged!(!value) : null,
         child: SizedBox(
           height: 52,
           child: Padding(
@@ -419,24 +426,48 @@ class _SwitchTile extends StatelessWidget {
                 Icon(icon, size: 20, color: AppColors.textSecondaryAdaptive(context)),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: AppColors.textPrimaryAdaptive(context),
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: AppColors.textPrimaryAdaptive(context),
+                        ),
+                      ),
+                      if (subtitle != null)
+                        Text(
+                          subtitle!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textHintAdaptive(context),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                IgnorePointer(
-                  child: Transform.scale(
-                    scale: 0.85,
-                    child: Switch(
-                      value: value,
-                      onChanged: onChanged,
-                      activeColor: AppColors.accent,
+                if (isLoading)
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
+                    ),
+                  )
+                else
+                  IgnorePointer(
+                    child: Transform.scale(
+                      scale: 0.85,
+                      child: Switch(
+                        value: value,
+                        onChanged: onChanged,
+                        activeColor: AppColors.accent,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

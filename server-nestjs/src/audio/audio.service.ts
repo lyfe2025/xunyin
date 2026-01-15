@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class AudioService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   /**
    * 获取首页背景音乐
@@ -103,6 +103,75 @@ export class AudioService {
         orderBy: { orderNum: 'asc' },
       })
     }
+
+    if (!music) {
+      return null
+    }
+
+    return {
+      id: music.id,
+      name: music.name,
+      url: music.url,
+      duration: music.duration,
+    }
+  }
+
+  /**
+   * 获取探索点背景音乐
+   */
+  async getExplorationPointAudio(pointId: string) {
+    // 先查找探索点专属音乐（通过 bgmId 关联）
+    const point = await this.prisma.explorationPoint.findUnique({
+      where: { id: pointId },
+      select: {
+        name: true,
+        journeyId: true,
+        bgm: {
+          select: {
+            id: true,
+            name: true,
+            url: true,
+            duration: true,
+          },
+        },
+      },
+    })
+
+    // 如果探索点有关联的背景音乐
+    if (point?.bgm) {
+      return {
+        id: point.bgm.id,
+        name: point.bgm.name,
+        url: point.bgm.url,
+        duration: point.bgm.duration,
+      }
+    }
+
+    // 查找 BackgroundMusic 表中专属于该探索点的音乐
+    let music = await this.prisma.backgroundMusic.findFirst({
+      where: { context: 'exploration_point', contextId: pointId, status: '0' },
+      orderBy: { orderNum: 'asc' },
+    })
+
+    if (music) {
+      return {
+        id: music.id,
+        name: music.name,
+        url: music.url,
+        duration: music.duration,
+      }
+    }
+
+    // 如果探索点没有专属音乐，回退到文化之旅的音乐
+    if (point?.journeyId) {
+      return this.getJourneyAudio(point.journeyId)
+    }
+
+    // 返回默认探索点音乐
+    music = await this.prisma.backgroundMusic.findFirst({
+      where: { context: 'exploration_point', contextId: null, status: '0' },
+      orderBy: { orderNum: 'asc' },
+    })
 
     if (!music) {
       return null

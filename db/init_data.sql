@@ -1814,13 +1814,15 @@ ON CONFLICT DO NOTHING;
 
 
 -- 21. 初始化背景音乐数据
--- 注意：URL 为占位符，实际部署时需替换为真实音频文件地址
+-- 音乐文件存放在 server-nestjs/uploads/audio/bgm/ 目录
+-- 可从 Pixabay Music (https://pixabay.com/music/search/chinese/) 下载免费可商用音乐
+-- 运行 server-nestjs/scripts/download-bgm.sh 查看详细指南
 
 -- 首页默认背景音乐
 INSERT INTO background_music (id, name, url, context, context_id, duration, order_num, status, create_time, update_time)
 VALUES 
-  ('bgm_home_1', '古韵悠然', '/audio/bgm/home-default.mp3', 'home', NULL, 180, 1, '0', NOW(), NOW()),
-  ('bgm_home_2', '山水清音', '/audio/bgm/home-nature.mp3', 'home', NULL, 210, 2, '0', NOW(), NOW())
+  ('bgm_home_1', '古韵悠然', '/uploads/audio/bgm/home-default.mp3', 'home', NULL, 180, 1, '0', NOW(), NOW()),
+  ('bgm_home_2', '山水清音', '/uploads/audio/bgm/home-nature.mp3', 'home', NULL, 210, 2, '0', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- 城市背景音乐
@@ -1828,7 +1830,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_city_hangzhou',
   '江南丝竹',
-  '/audio/bgm/city-hangzhou.mp3',
+  '/uploads/audio/bgm/city-hangzhou.mp3',
   'city',
   c.id,
   240,
@@ -1843,7 +1845,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_city_suzhou',
   '姑苏雅韵',
-  '/audio/bgm/city-suzhou.mp3',
+  '/uploads/audio/bgm/city-suzhou.mp3',
   'city',
   c.id,
   220,
@@ -1858,7 +1860,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_city_nanjing',
   '金陵古调',
-  '/audio/bgm/city-nanjing.mp3',
+  '/uploads/audio/bgm/city-nanjing.mp3',
   'city',
   c.id,
   200,
@@ -1873,7 +1875,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_city_fuzhou',
   '闽韵悠扬',
-  '/audio/bgm/city-fuzhou.mp3',
+  '/uploads/audio/bgm/city-fuzhou.mp3',
   'city',
   c.id,
   230,
@@ -1889,7 +1891,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_journey_westlake',
   '西湖春晓',
-  '/audio/bgm/journey-westlake.mp3',
+  '/uploads/audio/bgm/journey-westlake.mp3',
   'journey',
   j.id,
   300,
@@ -1904,7 +1906,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_journey_lingyin',
   '禅意空灵',
-  '/audio/bgm/journey-lingyin.mp3',
+  '/uploads/audio/bgm/journey-lingyin.mp3',
   'journey',
   j.id,
   280,
@@ -1919,7 +1921,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_journey_sanfang',
   '坊巷古韵',
-  '/audio/bgm/journey-sanfang.mp3',
+  '/uploads/audio/bgm/journey-sanfang.mp3',
   'journey',
   j.id,
   260,
@@ -1934,7 +1936,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_journey_gushan',
   '鼓山梵音',
-  '/audio/bgm/journey-gushan.mp3',
+  '/uploads/audio/bgm/journey-gushan.mp3',
   'journey',
   j.id,
   290,
@@ -1949,7 +1951,7 @@ INSERT INTO background_music (id, name, url, context, context_id, duration, orde
 SELECT 
   'bgm_journey_minjiang',
   '闽江夜曲',
-  '/audio/bgm/journey-minjiang.mp3',
+  '/uploads/audio/bgm/journey-minjiang.mp3',
   'journey',
   j.id,
   250,

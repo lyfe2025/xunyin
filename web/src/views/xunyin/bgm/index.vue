@@ -359,6 +359,18 @@ async function handleBatchStatus(status: string) {
   }
 }
 
+// 获取完整的音频 URL（处理相对路径）
+function getFullAudioUrl(url: string): string {
+  if (!url) return ''
+  // 如果已经是完整 URL，直接返回
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  // 相对路径，拼接后端地址
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  return `${apiUrl}${url}`
+}
+
 function playAudio(item: Bgm) {
   if (currentPlayingId.value === item.id && isPlaying.value) {
     audioRef.value?.pause()
@@ -368,7 +380,7 @@ function playAudio(item: Bgm) {
       currentPlayingId.value = item.id
       audioProgress.value = 0
       if (audioRef.value) {
-        audioRef.value.src = item.url
+        audioRef.value.src = getFullAudioUrl(item.url)
         audioRef.value.load()
       }
     }
@@ -397,8 +409,8 @@ function onAudioEnded() {
   isPlaying.value = false
   audioProgress.value = 0
 }
-function seekAudio(value: number[]) {
-  if (audioRef.value && value[0] !== undefined) audioRef.value.currentTime = value[0]
+function seekAudio(value: number[] | undefined) {
+  if (audioRef.value && value && value[0] !== undefined) audioRef.value.currentTime = value[0]
 }
 
 function formatDuration(seconds: number | null): string {
@@ -496,7 +508,7 @@ function getAudioDuration(file: File): Promise<number> {
 // 只在新增模式下，切换类型时清空关联
 watch(
   () => form.context,
-  (newVal, oldVal) => {
+  (_newVal, oldVal) => {
     if (!isEdit.value && oldVal !== undefined) {
       form.contextId = undefined
     }

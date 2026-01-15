@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../models/journey.dart';
+import '../../../providers/audio_providers.dart';
 import '../../../providers/journey_providers.dart';
 import '../../../shared/widgets/aurora_background.dart';
 import '../../../shared/widgets/app_buttons.dart';
@@ -25,6 +26,13 @@ class _JourneyProgressPageState extends ConsumerState<JourneyProgressPage> {
   void initState() {
     super.initState();
     _loadData();
+    // 进入页面时切换到文化之旅的背景音乐
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(audioStateProvider.notifier).switchContext(
+            AudioContext.journey,
+            contextId: widget.journeyId,
+          );
+    });
   }
 
   Future<void> _loadData() async {

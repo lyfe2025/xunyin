@@ -1,5 +1,9 @@
-import 'dotenv/config';
-import { defineConfig, env } from 'prisma/config';
+import path from 'node:path'
+import { config } from 'dotenv'
+import { defineConfig } from 'prisma/config'
+
+// 显式加载 .env 文件
+config({ path: path.resolve(__dirname, '.env') })
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
@@ -8,6 +12,6 @@ export default defineConfig({
     seed: 'ts-node prisma/seed.ts',
   },
   datasource: {
-    url: env('DATABASE_URL'),
+    url: process.env.DATABASE_URL!,
   },
-});
+})

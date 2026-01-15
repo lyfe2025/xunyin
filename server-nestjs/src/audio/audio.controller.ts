@@ -27,4 +27,11 @@ export class AudioController {
   async getJourneyAudio(@Param('journeyId') journeyId: string) {
     return this.audioService.getJourneyAudio(journeyId)
   }
+
+  @Get('exploration-point/:pointId')
+  @ApiOperation({ summary: '获取探索点背景音乐' })
+  @ApiResponse({ status: 200, description: '成功' })
+  async getExplorationPointAudio(@Param('pointId') pointId: string) {
+    return this.audioService.getExplorationPointAudio(pointId)
+  }
 }

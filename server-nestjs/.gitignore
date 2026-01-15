@@ -14,3 +14,4 @@ logs/
 !/uploads/avatars/
 /uploads/avatars/*
 !/uploads/avatars/.gitkeep
+!/uploads/audio/

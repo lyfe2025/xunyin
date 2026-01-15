@@ -1,9 +1,17 @@
-import { Injectable, Inject, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { BusinessException } from '../common/exceptions'
 import { ErrorCode } from '../common/enums'
 import type { ChainProvider } from './interfaces/chain-provider.interface'
-import { CHAIN_PROVIDER } from './interfaces/chain-provider.interface'
+import { BlockchainConfigService } from './blockchain-config.service'
+import {
+  LocalChainProvider,
+  AntChainProvider,
+  BSNChainProvider,
+  PolygonProvider,
+  TimestampProvider,
+  ZhixinChainProvider,
+} from './providers'
 import type { Prisma } from '@prisma/client'
 
 @Injectable()
@@ -12,8 +20,35 @@ export class BlockchainService {
 
   constructor(
     private prisma: PrismaService,
-    @Inject(CHAIN_PROVIDER) private chainProvider: ChainProvider,
-  ) {}
+    private configService: BlockchainConfigService,
+    private localChain: LocalChainProvider,
+    private antChain: AntChainProvider,
+    private bsnChain: BSNChainProvider,
+    private polygonChain: PolygonProvider,
+    private timestampChain: TimestampProvider,
+    private zhixinChain: ZhixinChainProvider,
+  ) { }
+
+  /**
+   * 动态获取链服务提供者
+   */
+  private async getChainProvider(): Promise<ChainProvider> {
+    const provider = await this.configService.getProvider()
+    switch (provider) {
+      case 'antchain':
+        return this.antChain
+      case 'bsn':
+        return this.bsnChain
+      case 'polygon':
+        return this.polygonChain
+      case 'timestamp':
+        return this.timestampChain
+      case 'zhixin':
+        return this.zhixinChain
+      default:
+        return this.localChain
+    }
+  }
 
   /**
    * 印记上链
@@ -32,8 +67,11 @@ export class BlockchainService {
       throw new BusinessException(ErrorCode.DATA_ALREADY_EXISTS, '印记已上链')
     }
 
+    // 动态获取链服务提供者
+    const chainProvider = await this.getChainProvider()
+
     // 调用链服务上链
-    const chainResult = await this.chainProvider.chain({
+    const chainResult = await chainProvider.chain({
       sealId: userSeal.sealId,
       userId: userSeal.userId,
       sealName: userSeal.seal.name,
@@ -79,8 +117,11 @@ export class BlockchainService {
       throw new BusinessException(ErrorCode.DATA_NOT_FOUND, '未找到链上记录')
     }
 
+    // 动态获取链服务提供者
+    const chainProvider = await this.getChainProvider()
+
     // 调用链服务验证
-    const verifyResult = await this.chainProvider.verify(
+    const verifyResult = await chainProvider.verify(
       txHash,
       userSeal.chainCertificate as Record<string, unknown> | undefined,
     )

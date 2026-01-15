@@ -12,6 +12,7 @@ enum AudioContext { home, city, journey, explorationPoint, ar }
 class AudioState {
   final bool isPlaying;
   final bool isMuted;
+  final bool isLoading;
   final String? currentTrackUrl;
   final String? currentTrackTitle;
   final AudioContext context;
@@ -20,6 +21,7 @@ class AudioState {
   AudioState({
     this.isPlaying = false,
     this.isMuted = false,
+    this.isLoading = false,
     this.currentTrackUrl,
     this.currentTrackTitle,
     this.context = AudioContext.home,
@@ -29,6 +31,7 @@ class AudioState {
   AudioState copyWith({
     bool? isPlaying,
     bool? isMuted,
+    bool? isLoading,
     String? currentTrackUrl,
     String? currentTrackTitle,
     AudioContext? context,
@@ -37,6 +40,7 @@ class AudioState {
     return AudioState(
       isPlaying: isPlaying ?? this.isPlaying,
       isMuted: isMuted ?? this.isMuted,
+      isLoading: isLoading ?? this.isLoading,
       currentTrackUrl: currentTrackUrl ?? this.currentTrackUrl,
       currentTrackTitle: currentTrackTitle ?? this.currentTrackTitle,
       context: context ?? this.context,
@@ -76,50 +80,33 @@ class AudioNotifier extends StateNotifier<AudioState> {
 
   Future<void> togglePlay() async {
     developer.log(
-      'togglePlay 被调用, isPlaying: ${state.isPlaying}, currentTrackUrl: ${state.currentTrackUrl}',
+      'togglePlay 被调用, isPlaying: ${state.isPlaying}, currentTrackUrl: ${state.currentTrackUrl}, isLoading: ${state.isLoading}',
       name: 'AudioNotifier',
     );
+    
+    // 如果正在加载，忽略点击
+    if (state.isLoading) return;
+    
     if (state.isPlaying) {
       await pause();
     } else if (state.currentTrackUrl != null) {
       await play();
     } else {
       // 没有音乐时，加载首页背景音乐
-      await switchContext(AudioContext.home);
+      // 立即设置加载状态，让 UI 显示加载中
+      state = state.copyWith(isLoading: true);
+      // 强制加载，即使上下文相同
+      await _loadContextAudio(AudioContext.home, null);
     }
   }
 
-  Future<void> toggleMute() async {
-    final newMuted = !state.isMuted;
-    await _player.setVolume(newMuted ? 0 : 0.5);
-    state = state.copyWith(isMuted: newMuted);
-  }
-
-  Future<void> setTrack(String url, {String? title}) async {
-    try {
-      final fullUrl = UrlUtils.getFullImageUrl(url);
-      developer.log('设置音轨: $fullUrl', name: 'AudioNotifier');
-      await _player.setUrl(fullUrl);
-      state = state.copyWith(
-        currentTrackUrl: fullUrl,
-        currentTrackTitle: title,
-      );
-      await _player.play();
-    } catch (e) {
-      developer.log('播放失败: $e', name: 'AudioNotifier');
-    }
-  }
-
-  Future<void> switchContext(AudioContext context, {String? contextId}) async {
-    // 如果上下文相同且 ID 相同，不重复加载
-    if (state.context == context && state.contextId == contextId) {
-      return;
-    }
-
+  /// 内部方法：加载指定上下文的音频（不检查上下文是否相同）
+  Future<void> _loadContextAudio(AudioContext context, String? contextId) async {
     developer.log(
-      '切换音频上下文: $context, contextId: $contextId',
+      '加载音频上下文: $context, contextId: $contextId',
       name: 'AudioNotifier',
     );
+
     AudioInfo? audioInfo;
 
     try {
@@ -148,6 +135,8 @@ class AudioNotifier extends StateNotifier<AudioState> {
       }
     } catch (e) {
       developer.log('获取音频信息失败: $e', name: 'AudioNotifier');
+      state = state.copyWith(isLoading: false);
+      return;
     }
 
     developer.log('获取到音频信息: ${audioInfo?.url}', name: 'AudioNotifier');
@@ -160,6 +149,7 @@ class AudioNotifier extends StateNotifier<AudioState> {
         state = AudioState(
           isPlaying: true,
           isMuted: state.isMuted,
+          isLoading: false,
           currentTrackUrl: fullUrl,
           currentTrackTitle: audioInfo.title,
           context: context,
@@ -170,11 +160,47 @@ class AudioNotifier extends StateNotifier<AudioState> {
         }
       } catch (e) {
         developer.log('加载/播放音频失败: $e', name: 'AudioNotifier');
+        state = state.copyWith(isLoading: false);
       }
     } else {
       developer.log('未获取到音频信息', name: 'AudioNotifier');
-      state = state.copyWith(context: context, contextId: contextId);
+      state = state.copyWith(context: context, contextId: contextId, isLoading: false);
     }
+  }
+
+  Future<void> toggleMute() async {
+    final newMuted = !state.isMuted;
+    await _player.setVolume(newMuted ? 0 : 0.5);
+    state = state.copyWith(isMuted: newMuted);
+  }
+
+  Future<void> setTrack(String url, {String? title}) async {
+    try {
+      final fullUrl = UrlUtils.getFullImageUrl(url);
+      developer.log('设置音轨: $fullUrl', name: 'AudioNotifier');
+      await _player.setUrl(fullUrl);
+      state = state.copyWith(
+        currentTrackUrl: fullUrl,
+        currentTrackTitle: title,
+      );
+      await _player.play();
+    } catch (e) {
+      developer.log('播放失败: $e', name: 'AudioNotifier');
+    }
+  }
+
+  Future<void> switchContext(AudioContext context, {String? contextId}) async {
+    // 如果上下文相同且 ID 相同，不重复加载
+    if (state.context == context && state.contextId == contextId) {
+      state = state.copyWith(isLoading: false);
+      return;
+    }
+
+    // 设置加载状态
+    state = state.copyWith(isLoading: true);
+    
+    // 调用内部加载方法
+    await _loadContextAudio(context, contextId);
   }
 
   Future<void> pauseForAR() async {

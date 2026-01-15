@@ -3140,6 +3140,7 @@ async function main() {
         description:
           '杭州，简称"杭"，是浙江省省会，素有"人间天堂"的美誉。西湖、灵隐寺、雷峰塔等名胜古迹闻名遐迩。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/city-hangzhou.mp3',
         explorerCount: 0,
         orderNum: 1,
         status: '0',
@@ -3156,6 +3157,7 @@ async function main() {
         description:
           '苏州，古称姑苏，是江苏省地级市。以园林著称，拙政园、留园等被列入世界文化遗产。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/city-suzhou.mp3',
         explorerCount: 0,
         orderNum: 2,
         status: '0',
@@ -3171,6 +3173,7 @@ async function main() {
         longitude: 118.7969,
         description: '南京，简称"宁"，是江苏省省会，六朝古都，有着深厚的历史文化底蕴。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/city-nanjing.mp3',
         explorerCount: 0,
         orderNum: 3,
         status: '0',
@@ -3188,6 +3191,7 @@ async function main() {
         description:
           '福州，别称榕城，是福建省省会，有着2200多年的建城史。三坊七巷、鼓山、西湖等名胜古迹众多，是中国历史文化名城。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/city-fuzhou.mp3',
         explorerCount: 0,
         orderNum: 4,
         status: '0',
@@ -3204,6 +3208,7 @@ async function main() {
         description:
           '漫步西湖，探寻苏堤春晓、断桥残雪等十大经典景观，感受"欲把西湖比西子"的诗意之美。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/journey-westlake.mp3',
         rating: 3,
         estimatedMinutes: 180,
         totalDistance: 8500,
@@ -3222,6 +3227,7 @@ async function main() {
         theme: '佛教文化',
         description: '探访千年古刹灵隐寺，感受飞来峰石刻艺术，体验禅宗文化的深邃与宁静。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/journey-lingyin.mp3',
         rating: 4,
         estimatedMinutes: 120,
         totalDistance: 3200,
@@ -3241,6 +3247,7 @@ async function main() {
         theme: '古典园林',
         description: '游览拙政园、留园等世界文化遗产，领略"咫尺之内再造乾坤"的园林艺术。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/journey-garden.mp3',
         rating: 3,
         estimatedMinutes: 150,
         totalDistance: 5000,
@@ -3261,6 +3268,7 @@ async function main() {
         description:
           '漫步中国都市仅存的"里坊制度活化石"，探访林则徐、严复、冰心等名人故居，感受明清古建筑的独特魅力。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/journey-sanfang.mp3',
         rating: 4,
         estimatedMinutes: 150,
         totalDistance: 3500,
@@ -3280,6 +3288,7 @@ async function main() {
         theme: '佛教文化',
         description: '登临福州第一名山，参拜千年古刹涌泉寺，欣赏摩崖石刻，俯瞰榕城全景。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/journey-gushan.mp3',
         rating: 4,
         estimatedMinutes: 180,
         totalDistance: 5000,
@@ -3300,6 +3309,7 @@ async function main() {
         description:
           '沿闽江漫步，欣赏中洲岛、解放大桥、烟台山等标志性景观，感受福州的现代与历史交融。',
         coverImage: '',
+        bgmUrl: '/uploads/audio/bgm/journey-minjiang.mp3',
         rating: 3,
         estimatedMinutes: 120,
         totalDistance: 4000,
@@ -4172,24 +4182,16 @@ async function main() {
       // 首页默认背景音乐
       {
         name: '古韵悠然',
-        url: '/audio/bgm/home-default.mp3',
+        url: '/uploads/audio/bgm/home-default.mp3',
         context: 'home',
         contextId: null,
         duration: 180,
         orderNum: 1,
       },
-      {
-        name: '山水清音',
-        url: '/audio/bgm/home-nature.mp3',
-        context: 'home',
-        contextId: null,
-        duration: 210,
-        orderNum: 2,
-      },
       // 杭州城市背景音乐
       {
         name: '江南丝竹',
-        url: '/audio/bgm/city-hangzhou.mp3',
+        url: '/uploads/audio/bgm/city-hangzhou.mp3',
         context: 'city',
         contextId: hangzhou.id,
         duration: 240,
@@ -4198,7 +4200,7 @@ async function main() {
       // 苏州城市背景音乐
       {
         name: '姑苏雅韵',
-        url: '/audio/bgm/city-suzhou.mp3',
+        url: '/uploads/audio/bgm/city-suzhou.mp3',
         context: 'city',
         contextId: suzhou.id,
         duration: 220,
@@ -4207,7 +4209,7 @@ async function main() {
       // 南京城市背景音乐
       {
         name: '金陵古调',
-        url: '/audio/bgm/city-nanjing.mp3',
+        url: '/uploads/audio/bgm/city-nanjing.mp3',
         context: 'city',
         contextId: nanjing.id,
         duration: 200,
@@ -4216,7 +4218,7 @@ async function main() {
       // 福州城市背景音乐
       {
         name: '闽韵悠扬',
-        url: '/audio/bgm/city-fuzhou.mp3',
+        url: '/uploads/audio/bgm/city-fuzhou.mp3',
         context: 'city',
         contextId: fuzhou.id,
         duration: 230,
@@ -4225,7 +4227,7 @@ async function main() {
       // 西湖十景探秘背景音乐
       {
         name: '西湖春晓',
-        url: '/audio/bgm/journey-westlake.mp3',
+        url: '/uploads/audio/bgm/journey-westlake.mp3',
         context: 'journey',
         contextId: westLakeJourney.id,
         duration: 300,
@@ -4234,16 +4236,25 @@ async function main() {
       // 灵隐禅踪背景音乐
       {
         name: '禅意空灵',
-        url: '/audio/bgm/journey-lingyin.mp3',
+        url: '/uploads/audio/bgm/journey-lingyin.mp3',
         context: 'journey',
         contextId: lingyinJourney.id,
         duration: 280,
         orderNum: 1,
       },
+      // 园林雅韵背景音乐
+      {
+        name: '山水清音',
+        url: '/uploads/audio/bgm/journey-garden.mp3',
+        context: 'journey',
+        contextId: gardenJourney.id,
+        duration: 210,
+        orderNum: 1,
+      },
       // 三坊七巷寻古背景音乐
       {
         name: '坊巷古韵',
-        url: '/audio/bgm/journey-sanfang.mp3',
+        url: '/uploads/audio/bgm/journey-sanfang.mp3',
         context: 'journey',
         contextId: sanfangqixiangJourney.id,
         duration: 260,
@@ -4252,7 +4263,7 @@ async function main() {
       // 鼓山禅意行背景音乐
       {
         name: '鼓山梵音',
-        url: '/audio/bgm/journey-gushan.mp3',
+        url: '/uploads/audio/bgm/journey-gushan.mp3',
         context: 'journey',
         contextId: gushanJourney.id,
         duration: 290,
@@ -4261,7 +4272,7 @@ async function main() {
       // 闽江两岸背景音乐
       {
         name: '闽江夜曲',
-        url: '/audio/bgm/journey-minjiang.mp3',
+        url: '/uploads/audio/bgm/journey-minjiang.mp3',
         context: 'journey',
         contextId: minjiangJourney.id,
         duration: 250,

@@ -74,6 +74,7 @@ class FloatingControls extends ConsumerWidget {
                   : Icons.music_off_rounded,
               label: '音乐',
               isActive: audioState.isPlaying,
+              isLoading: audioState.isLoading,
               onTap: () {
                 ref.read(audioStateProvider.notifier).togglePlay();
               },
@@ -111,12 +112,14 @@ class _FloatingButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isActive;
+  final bool isLoading;
 
   const _FloatingButton({
     required this.icon,
     required this.label,
     required this.onTap,
     this.isActive = false,
+    this.isLoading = false,
   });
 
   @override
@@ -124,7 +127,7 @@ class _FloatingButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: isLoading ? null : onTap,
         borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -140,17 +143,28 @@ class _FloatingButton extends StatelessWidget {
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color: isActive
-                      ? AppColors.accent
-                      : AppColors.textSecondaryAdaptive(context),
-                ),
+                child: isLoading
+                    ? SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.accent,
+                          ),
+                        ),
+                      )
+                    : Icon(
+                        icon,
+                        size: 22,
+                        color: isActive
+                            ? AppColors.accent
+                            : AppColors.textSecondaryAdaptive(context),
+                      ),
               ),
               const SizedBox(height: 2),
               Text(
-                label,
+                isLoading ? '加载中' : label,
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,

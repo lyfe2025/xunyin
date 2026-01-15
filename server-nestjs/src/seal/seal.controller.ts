@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Query, Put, Delete, Body, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Param, Query, Put, Delete, Body, UseGuards } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { SealService } from './seal.service'
+import { BlockchainService } from '../blockchain/blockchain.service'
 import { AppAuthGuard } from '../app-auth/guards/app-auth.guard'
 import { CurrentUser } from '../app-auth/decorators/current-user.decorator'
 import type { CurrentAppUser } from '../app-auth/decorators/current-user.decorator'
@@ -12,11 +13,15 @@ import {
   AvailableSealVo,
 } from './dto/seal.dto'
 import { UserBadgeVo, SetBadgeTitleDto } from './dto/badge.dto'
+import { ChainSealVo, VerifyChainVo, ChainStatusVo } from '../blockchain/dto/chain-seal.dto'
 
 @ApiTags('印记')
 @Controller('app/seals')
 export class SealController {
-  constructor(private readonly sealService: SealService) {}
+  constructor(
+    private readonly sealService: SealService,
+    private readonly blockchainService: BlockchainService,
+  ) {}
 
   @Get('badges')
   @UseGuards(AppAuthGuard)
@@ -91,5 +96,30 @@ export class SealController {
   @ApiResponse({ status: 200, description: '成功', type: SealDetailVo })
   async findOne(@CurrentUser() user: CurrentAppUser, @Param('id') id: string) {
     return this.sealService.findOne(user.userId, id)
+  }
+
+  @Post(':id/chain')
+  @UseGuards(AppAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '印记上链存证' })
+  @ApiResponse({ status: 200, description: '成功', type: ChainSealVo })
+  async chainSeal(@CurrentUser() user: CurrentAppUser, @Param('id') id: string) {
+    return this.blockchainService.chainSeal(user.userId, id)
+  }
+
+  @Get(':id/chain/status')
+  @UseGuards(AppAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '查询印记上链状态' })
+  @ApiResponse({ status: 200, description: '成功', type: ChainStatusVo })
+  async getChainStatus(@CurrentUser() user: CurrentAppUser, @Param('id') id: string) {
+    return this.blockchainService.getChainStatus(user.userId, id)
+  }
+
+  @Get(':id/chain/verify')
+  @ApiOperation({ summary: '验证印记链上记录' })
+  @ApiResponse({ status: 200, description: '成功', type: VerifyChainVo })
+  async verifyChain(@Param('id') id: string, @Query('txHash') txHash: string) {
+    return this.blockchainService.verifyChain(txHash)
   }
 }

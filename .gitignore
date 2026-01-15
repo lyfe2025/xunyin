@@ -44,8 +44,11 @@ coverage/
 .prettiercache
 *.tsbuildinfo
 
-# 上传文件（本地开发）
-uploads/
+# 上传文件（本地开发，保留音频资源）
+/uploads/
+server-nestjs/uploads/*
+!server-nestjs/uploads/audio/
+!server-nestjs/uploads/images/
 
 # 备份文件
 *.bak
