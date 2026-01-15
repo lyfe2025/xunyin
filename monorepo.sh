@@ -388,6 +388,33 @@ smoke_tests() {
   (cd "$SERVER_DIR" && bash test-menu.sh)
 }
 
+# 生成更新日志静态文件 (commits.json)
+gen_commits() {
+  printf "${FG_BLUE}正在生成 commits.json...${RESET}\n"
+  (cd "$ROOT" && git log -100 --format='COMMIT_START%H|%h|%s|%aI|%an|%B|COMMIT_END' | node -e '
+const fs = require("fs");
+let input = "";
+process.stdin.on("data", chunk => input += chunk);
+process.stdin.on("end", () => {
+  const commits = input.split("COMMIT_START").filter(Boolean).map(block => {
+    const endIdx = block.indexOf("|COMMIT_END");
+    const content = block.substring(0, endIdx);
+    const parts = content.split("|");
+    const [sha, shortSha, message, date, author, ...rest] = parts;
+    const fullMessage = rest.join("|").trim();
+    const type = message.match(/^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[(:]/)?.[1] || "other";
+    const result = { sha, shortSha, message, type, date, author };
+    if (fullMessage && fullMessage !== message) {
+      result.fullMessage = fullMessage;
+    }
+    return result;
+  });
+  console.log(JSON.stringify(commits, null, 2));
+});
+' > "$SERVER_DIR/commits.json")
+  printf "${FG_GREEN}✓ 已生成 %s${RESET}\n" "$SERVER_DIR/commits.json"
+}
+
 # ============================================================
 # Docker 部署命令
 # ============================================================
@@ -548,6 +575,9 @@ print_menu() {
   printf -- "${FG_CYAN}18${RESET}. 查看服务状态                    ${FG_GRAY}docker-compose ps${RESET}\n"
   printf -- "${FG_CYAN}19${RESET}. 查看服务日志                    ${FG_GRAY}docker-compose logs -f [service]${RESET}\n"
   hr
+  printf -- "${FG_CYAN}[工具]${RESET}\n"
+  printf -- "${FG_CYAN}20${RESET}. 生成更新日志静态文件            ${FG_GRAY}git log -> commits.json${RESET}\n"
+  hr
   printf -- "${FG_CYAN}0${RESET}.  退出\n"
 }
 
@@ -572,6 +602,7 @@ run_by_id() {
     17) docker_restart_service ;;
     18) docker_ps ;;
     19) docker_logs ;;
+    20) gen_commits ;;
     0) exit 0 ;;
     *) echo "无效的选项" ;;
   esac

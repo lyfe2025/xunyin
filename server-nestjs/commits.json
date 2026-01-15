@@ -1,0 +1,450 @@
+[
+  {
+    "sha": "8611f1f1976cd36ecf5f7d3ad9ced9332812895d",
+    "shortSha": "8611f1f",
+    "message": "feat(ar): 实现AR功能系统和姿态识别能力",
+    "type": "feat",
+    "date": "2026-01-15T23:29:34+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(ar): 实现AR功能系统和姿态识别能力\n\n- 新增AR模块架构，包含AR服务、相机服务和手势识别服务\n- 实现AR视图包装器、相机预览、手势覆盖层和图片滤镜组件\n- 添加图片滤镜工具类支持图像处理和效果应用\n- 集成Google ML Kit姿态识别库实现人体姿态检测\n- 更新Android配置支持ARCore和相机权限声明\n- 提升iOS最低版本至13.0以支持AR功能\n- 配置Android SDK版本至24以上满足AR和ML Kit要求\n- 新增AR相关Provider管理AR服务依赖注入\n- 完善相册和旅程页面集成AR功能\n- 新增系统变更日志模块记录应用更新信息\n- 更新依赖包版本支持新增功能"
+  },
+  {
+    "sha": "e36928ff62f0ecd0f40c2677bd6b0d1f7df62539",
+    "shortSha": "e36928f",
+    "message": "feat(splash): 实现启动页动态配置系统和倒计时跳过功能",
+    "type": "feat",
+    "date": "2026-01-15T21:19:36+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(splash): 实现启动页动态配置系统和倒计时跳过功能\n\n- 新增 SplashConfig 模型支持启动页后台动态配置\n- 新增 splashConfigProvider 用于从服务器获取启动页配置\n- 实现启动页品牌模式和广告模式两种显示方案\n- 添加倒计时功能和条件跳过按钮（支持延迟显示）\n- 支持动态配置背景色、文字色、Logo 色等样式参数\n- 支持配置应用名称、副标题、Logo 图片等内容\n- 优化开发环境网络配置，支持真机调试时使用局域网 IP\n- 更新 iOS Info.plist 添加本地网络权限和 Bonjour 服务配置\n- 完善后端 NestJS 应用配置模块，新增启动页控制器和服务\n- 添加 favicon 和 logo 图片资源到上传目录\n- 更新 web 端启动页配置界面"
+  },
+  {
+    "sha": "088a710570cd94d8ed900c5abe98290612c4ea51",
+    "shortSha": "088a710",
+    "message": "feat(auth): 完善登录页布局系统和按钮样式配置",
+    "type": "feat",
+    "date": "2026-01-15T01:22:56+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(auth): 完善登录页布局系统和按钮样式配置\n\n- 实现登录页动态间距系统，根据 Logo 尺寸自动调整顶部、Logo 下方和分区间距\n- 优化页面布局结构，使用 ConstrainedBox 和 mainAxisAlignment 确保协议始终显示在底部\n- 新增按钮样式配置支持（filled、outlined、glass 三种样式）\n- 完善按钮装饰逻辑，支持渐变填充、描边和玻璃态样式\n- 优化加载状态下的按钮样式和进度指示器颜色适配\n- 更新登录配置模型和数据库 schema 以支持新的样式配置字段\n- 完善后端 API 和数据库迁移脚本以支持新增配置项\n- 增强用户协议交互，支持链接点击跳转功能"
+  },
+  {
+    "sha": "0d180fd3f2e4b6e5105c6ae36e055ff814af73ad",
+    "shortSha": "0d180fd",
+    "message": "feat(auth): 实现登录页动态配置系统和背景样式支持",
+    "type": "feat",
+    "date": "2026-01-15T00:48:49+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(auth): 实现登录页动态配置系统和背景样式支持\n\n- 新增登录配置模型和服务层，支持从后台动态获取登录页配置\n- 实现登录页背景类型切换（Aurora/图片/纯色/渐变）和动态样式应用\n- 添加登录方式动态控制（手机号/社交登录/第三方登录可配置）\n- 优化 Logo 显示，支持从资源或网络加载应用图标\n- 完善登录表单和协议条款的动态配置和条件渲染\n- 新增登录配置 Provider 和 API 接口，支持实时更新配置\n- 更新数据库 schema，移除冗余字段并优化登录配置表结构\n- 增强登录页 UI 灵活性，支持多种品牌定制需求"
+  },
+  {
+    "sha": "dd5bd93f29302aeb8498747d1222788d816232b2",
+    "shortSha": "dd5bd93",
+    "message": "docs(views/app-config/splash): 添加上传媒体文件的尺寸建议说明",
+    "type": "docs",
+    "date": "2026-01-14T22:22:33+08:00",
+    "author": "lyfe2025"
+  },
+  {
+    "sha": "656a4dc0277ec7ae61caa7b43de8f0237b8acbd3",
+    "shortSha": "656a4dc",
+    "message": "feat(下载页): 添加页脚文字配置并更新logo样式",
+    "type": "feat",
+    "date": "2026-01-14T21:17:25+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(下载页): 添加页脚文字配置并更新logo样式\n\n- 在下载页配置接口和页面中添加页脚文字支持\n- 更新logo显示样式为圆角并添加悬停效果\n- 补充默认配置中的logo和favicon路径"
+  },
+  {
+    "sha": "bf991291589cb661e9a36240360135bf34e5508e",
+    "shortSha": "bf99129",
+    "message": "feat(app-config): 完善登录页和下载页配置系统与Aurora设计体系",
+    "type": "feat",
+    "date": "2026-01-14T20:33:11+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(app-config): 完善登录页和下载页配置系统与Aurora设计体系\n\n- 新增登录页Aurora底纹配置和3色渐变背景支持\n- 新增Logo浮动动画开关和应用名称配置字段\n- 新增按钮文本自定义和渐变结束色配置\n- 完善下载页Logo动画和按钮样式配置\n- 更新数据库schema支持新增配置字段\n- 新增4条Prisma迁移脚本处理字段扩展\n- 更新后端DTO和Service层支持新配置参数\n- 更新前端API接口和配置管理页面\n- 完善PhonePreview组件展示新增配置效果\n- 初始化登录页和下载页默认配置数据\n- 与Flutter App设计规范完全对齐，支持Aurora warm配色体系"
+  },
+  {
+    "sha": "754b3c3e91276ffeb557079bf9ceeff9a53fcfc5",
+    "shortSha": "754b3c3",
+    "message": "feat(branding): 新增应用品牌标识和多平台图标资源",
+    "type": "feat",
+    "date": "2026-01-13T20:32:51+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(branding): 新增应用品牌标识和多平台图标资源\n\n- 新增 Android 自适应图标资源（hdpi、mdpi、xhdpi、xxhdpi、xxxhdpi）\n- 新增 Android 自适应图标 XML 配置和品牌色彩定义\n- 更新 iOS 应用图标资源和 AppIcon 配置（多种尺寸规格）\n- 新增 Web 平台 favicon 和 PWA 图标资源（192x192、512x512、maskable）\n- 新增 Web manifest.json 配置文件\n- 新增应用 logo 资源到 assets/images 目录\n- 更新 pubspec.yaml 和 pubspec.lock 依赖配置\n- 统一多平台应用品牌视觉标识，提升应用专业度和识别度"
+  },
+  {
+    "sha": "27586d4143d3982eca792b44574f7d8c883c0d55",
+    "shortSha": "27586d4",
+    "message": "feat(ui): 新增社交登录图标和完善交互反馈组件规范",
+    "type": "feat",
+    "date": "2026-01-11T01:01:13+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(ui): 新增社交登录图标和完善交互反馈组件规范\n\n- 新增 Apple、Google、WeChat 社交登录图标资源\n- 更新空相册插画资源\n- 完善 Flutter 色彩规范文档，新增交互反馈组件规范章节\n- 新增加载组件、对话框组件、通知组件和 Toast 轻量提示的使用规范\n- 优化全局错误处理器\n- 统一登录页面、相册页面、旅程页面等多个页面的交互反馈组件\n- 删除冗余的 ConfirmDialog 组件，统一使用 AppConfirmDialog\n- 更新数据库初始化数据和服务端种子数据\n- 完善城市选择器、应用对话框等共享组件的实现"
+  },
+  {
+    "sha": "060d3e7f2e9f992569bc70d6de6c40e62d0d99e8",
+    "shortSha": "060d3e7",
+    "message": "feat(theme): 完善品牌配色体系和 Flutter 色彩规范",
+    "type": "feat",
+    "date": "2026-01-10T23:56:38+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(theme): 完善品牌配色体系和 Flutter 色彩规范\n\n- 更新品牌色彩系统文档，新增详细的色彩分类和使用说明\n- 新增 Flutter 配色规范指南，包含核心色彩、使用原则和按钮组件规范\n- 重构 app_colors.dart，补充 accent、primary 及其亮暗变体色值\n- 更新 app_theme.dart，应用新的品牌配色体系到主题配置\n- 统一 AR 任务页、旅程完成页、旅程进度页、导航页、个人资料页、印记详情页的色彩使用\n- 建立清晰的色彩使用规范，区分主色（中国红）和辅助色（黛青）的应用场景\n- 规范按钮组件的渐变效果，推荐使用 AppPrimaryButton 以保持品牌一致性"
+  },
+  {
+    "sha": "46191c91a0c8507b75fe7abc450db5698c036135",
+    "shortSha": "46191c9",
+    "message": "feat(app): 新增徽章系统和完善应用配置",
+    "type": "feat",
+    "date": "2026-01-10T23:42:08+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(app): 新增徽章系统和完善应用配置\n\n- 新增徽章模型和徽章页面，实现用户成就展示系统\n- 新增徽章数据传输对象和后端服务接口\n- 更新应用名称为\"寻印\"，完善 Android 和 iOS 应用配置\n- 新增相机和相册权限描述，支持头像拍摄和照片上传功能\n- 新增主题模式存储和切换功能，支持亮色/暗色主题\n- 更新品牌色为中国红，优化视觉设计系统\n- 新增旅程卡片和空状态组件，完善旅程页面交互\n- 更新路由配置，新增徽章页面路由\n- 优化设置存储和主题配置，提升用户体验"
+  },
+  {
+    "sha": "dd34904351746b0f176836cf0b27fdffbd30f0ab",
+    "shortSha": "dd34904",
+    "message": "feat(ui): 新增插画资源和完善空状态设计系统",
+    "type": "feat",
+    "date": "2026-01-10T04:34:50+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(ui): 新增插画资源和完善空状态设计系统\n\n- 新增 9 个 unDraw 开源插画资源（相册、旅程、印记、活动等空状态和错误页面）\n- 创建插画资源规范文档（.kiro/steering/illustrations.md）包含下载、替换品牌色的完整指南\n- 新增 app_dimensions.dart 统一管理应用尺寸常量\n- 新增 app_buttons.dart、app_empty_state.dart、app_glass_card.dart 共享组件库\n- 新增 profile_home.dto.ts 和 profile_home.dart 数据模型支持个人主页展示\n- 新增 DictDataSheet.vue 字典数据管理页面\n- 新增 seal_rarity 数据库迁移字段支持印记稀有度等级\n- 更新 20+ 个页面集成新的空状态插画和玻璃态卡片设计\n- 更新印记、用户统计等服务支持新数据字段和业务逻辑\n- 完善 pubspec.yaml 依赖配置支持 SVG 插画渲染"
+  },
+  {
+    "sha": "3d2a9bd003ce6a407366c6361018f95311a17a2c",
+    "shortSha": "3d2a9bd",
+    "message": "feat(app): 新增应用信息工具和完善设置功能",
+    "type": "feat",
+    "date": "2026-01-10T02:37:20+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(app): 新增应用信息工具和完善设置功能\n\n- 新增 AppInfo 工具类用于获取应用版本、构建号和包名信息\n- 完善 SettingsStorage 缓存管理功能，支持缓存大小计算和清理\n- 新增缓存大小获取和格式化显示功能（支持 B/KB/MB/GB）\n- 新增 MyJourneysPage 页面用于展示用户旅程列表\n- 新增多个共享 UI 组件：AppBackButton、AppLoading、AppPageHeader、ConfirmDialog、SectionTitle\n- 新增 settings_providers 提供者用于管理设置相关状态\n- 更新路由配置添加 /journeys 路由\n- 优化 journey、user、audio 等服务和提供者的功能\n- 更新 Web 管理后台相关页面和 NestJS 后端接口\n- 改进应用初始化流程和缓存管理机制"
+  },
+  {
+    "sha": "99022ede28750a55eb638719a4e95ed177d8d0a6",
+    "shortSha": "99022ed",
+    "message": "feat(error-handler): 实现全局错误处理和异常捕获系统",
+    "type": "feat",
+    "date": "2026-01-10T00:48:08+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(error-handler): 实现全局错误处理和异常捕获系统\n\n- 新增 ErrorHandler 工具类，统一管理应用全局错误处理\n- 实现 Flutter 框架错误、平台调度器错误和异步错误的多层次捕获\n- 添加错误日志记录功能，内存中保留最近 50 条错误记录\n- 实现 guard() 方法为异步操作提供自动错误捕获和降级处理\n- 添加 showErrorSnackBar() 方法显示用户友好的错误提示\n- 实现错误信息转换逻辑，将技术错误转换为中文用户提示\n- 在 main.dart 中使用 runZonedGuarded 包装应用启动，捕获未处理的异步错误\n- 集成 ErrorHandler.init() 初始化全局错误处理器\n- 支持开发环境详细错误日志输出，为生产环境上报预留接口"
+  },
+  {
+    "sha": "0478f10af716c971d09ca8ede39e26a96a9cf61e",
+    "shortSha": "0478f10",
+    "message": "feat(ui): 实现 Aurora UI 和 Glassmorphism 设计系统",
+    "type": "feat",
+    "date": "2026-01-10T00:43:51+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(ui): 实现 Aurora UI 和 Glassmorphism 设计系统\n\n- 更新应用主题配置，采用 Aurora UI + Glassmorphism 风格\n- 优化 AppBar 主题，改为透明背景和现代字体设计\n- 重构 Card 组件主题，添加玻璃态边框和透明背景\n- 增强 ElevatedButton 和 OutlinedButton 样式，提升视觉层次感\n- 改进输入框主题，采用现代简洁风格和优化边框设计\n- 新增 TextButton 主题配置\n- 优化 BottomNavigationBar 主题，采用现代风格和透明背景\n- 新增 AuroraBackground 背景组件，支持渐变和光晕效果\n- 更新所有页面组件以适配新的设计系统\n- 调整浮动控制按钮和城市选择器样式以匹配新主题\n- 提升整体应用视觉一致性和用户体验"
+  },
+  {
+    "sha": "01abf638466db0c427d1871b5f81cf4007e826d9",
+    "shortSha": "01abf63",
+    "message": "docs(steering): 新增 UI/UX Pro Max 设计智能指南",
+    "type": "docs",
+    "date": "2026-01-09T21:31:18+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "docs(steering): 新增 UI/UX Pro Max 设计智能指南\n\n- 添加 UI/UX Pro Max 设计数据库文档，包含搜索方法和使用流程\n- 记录可用的设计领域（产品、风格、字体、配色、图表、UX、提示词）\n- 补充 Flutter 技术栈参考和专业规范（图标、交互、主题、布局、无障碍）\n- 提供示例工作流和交付前检查清单\n- 新增寻印 App 设计指南和产品定位建议\n- 更新 .gitignore 忽略外部设计工具数据库文件 (.shared/)"
+  },
+  {
+    "sha": "b48b5362c42ea2f32f800d304dd45b4d6067dc20",
+    "shortSha": "b48b536",
+    "message": "feat(share): 实现分享功能和分享卡片组件",
+    "type": "feat",
+    "date": "2026-01-09T21:25:55+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(share): 实现分享功能和分享卡片组件\n\n- 新增 ShareService 服务类，提供链接生成、复制和截图保存功能\n- 新增 ShareBottomSheet 组件用于印记详情页的分享交互\n- 新增 SealShareCard 组件用于展示可分享的印记卡片\n- 新增 SimpleShareSheet 组件用于简化的分享弹窗\n- 在 AppConfig 中添加分享链接域名配置，支持生产和开发环境\n- 更新照片详情页、任务完成页、文化之旅完成页和印记详情页的分享按钮\n- 将原有的占位符分享功能替换为完整的分享流程\n- 添加必要的依赖包支持图片保存和权限管理"
+  },
+  {
+    "sha": "6362790427edb5cc22b394eb899ccc146eb9502d",
+    "shortSha": "6362790",
+    "message": "feat(audio): 实现音频上下文切换和背景音乐管理系统",
+    "type": "feat",
+    "date": "2026-01-08T01:01:44+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(audio): 实现音频上下文切换和背景音乐管理系统\n\n- 新增 AudioNotifier 实现真实音频播放控制，集成 just_audio 库\n- 实现音频上下文切换机制，支持首页、城市、旅程、探索点等场景\n- 新增 getExplorationPointBgm API 接口获取探索点背景音乐\n- 优化 HomePage 初始化逻辑，在页面加载时自动切换到首页音乐\n- 完善城市选择交互，选中/取消城市时自动切换对应背景音乐\n- 实现 AR 模式音乐暂停恢复机制，记录暂停前播放状态\n- 添加音频播放状态监听，实时同步播放器状态到 Provider\n- 更新 pubspec.yaml 依赖配置以支持音频播放功能"
+  },
+  {
+    "sha": "5d991ffe0d0db2ad72d5f4c9a1352b63ce3f036f",
+    "shortSha": "5d991ff",
+    "message": "perf(throttler): 调整全局限流配置以支持更高并发",
+    "type": "perf",
+    "date": "2026-01-08T00:48:52+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "perf(throttler): 调整全局限流配置以支持更高并发\n\n- 短期限流（1秒）：从10次调整为30次，支持管理后台页面加载时的多个并发请求\n- 中期限流（10秒）：从50次调整为100次\n- 长期限流（1分钟）：从100次调整为300次\n- 优化注释说明，移除冗余的限流次数描述"
+  },
+  {
+    "sha": "e55c92d81be8f43fea6fce4e5f907489d11d5334",
+    "shortSha": "e55c92d",
+    "message": "feat(profile): 新增手机号绑定功能和短信服务模块",
+    "type": "feat",
+    "date": "2026-01-08T00:47:02+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(profile): 新增手机号绑定功能和短信服务模块\n\n- 新增 BindPhonePage 页面，支持手机号绑定和验证码验证\n- 新增 SmsService 服务类，封装短信发送和手机号绑定接口\n- 新增后端 SMS 模块，包含 SmsService 和 SmsController\n- 新增 sms.dto.ts 数据传输对象，定义短信相关请求参数\n- 更新路由配置，添加 /settings/phone 路由指向绑定手机号页面\n- 更新 SettingsPage，集成手机号绑定功能入口\n- 更新 AppProfileModule 和 AppProfileService，集成短信服务\n- 更新初始化数据和种子数据，支持短信功能\n- 完善代码质量规范文档，新增 TypeScript/Vue 格式规范和示例\n- 支持验证码倒计时、手机号格式验证和错误提示"
+  },
+  {
+    "sha": "612ae66b1b9e68fdc3ee348c0ba91c785fdcf8a1",
+    "shortSha": "612ae66",
+    "message": "feat(profile): 新增用户头像和昵称编辑功能",
+    "type": "feat",
+    "date": "2026-01-08T00:06:50+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(profile): 新增用户头像和昵称编辑功能\n\n- 新增头像编辑页面，支持从相机或相册选择图片\n- 新增昵称编辑页面，支持实时验证和更新\n- 新增设置存储模块，管理应用偏好设置（通知、定位等）\n- 新增上传服务，处理图片上传和进度跟踪\n- 新增用户资料服务，提供头像和昵称更新接口\n- 添加 image_picker 依赖支持图片选择功能\n- 扩展 API 客户端支持 PATCH 请求方法\n- 新增后端用户资料管理模块（NestJS）\n- 更新路由配置，添加编辑头像和昵称的路由\n- 完善用户资料管理功能，提升用户体验"
+  },
+  {
+    "sha": "c10328e7b15c62e51d719f096677dd6827d59e97",
+    "shortSha": "c10328e",
+    "message": "feat(app-config): 新增协议管理功能和Flutter协议页面",
+    "type": "feat",
+    "date": "2026-01-07T23:53:43+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(app-config): 新增协议管理功能和Flutter协议页面\n\n- 新增Flutter协议页面和协议服务，支持用户协议、隐私政策等多类型协议展示\n- 新增后端app-config模块，提供公开的协议查询接口（/api/app/agreements/:type）\n- 优化admin协议管理模块，完善协议编辑和数据验证功能\n- 更新Flutter依赖，新增audio_session、just_audio、package_info_plus等多个插件支持\n- 完善API规范文档，明确Flutter API路径不应包含/app前缀的约定\n- 更新数据库初始化脚本和种子数据，添加协议相关初始数据\n- 优化RichTextEditor组件，增强富文本编辑功能"
+  },
+  {
+    "sha": "181fa5a8cf073deedea2e33e0ef24d98f1167d9f",
+    "shortSha": "181fa5a",
+    "message": "feat(app): 新增URL工具类并优化图片URL处理",
+    "type": "feat",
+    "date": "2026-01-07T23:15:30+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(app): 新增URL工具类并优化图片URL处理\n\n- 新增 UrlUtils 工具类用于统一处理图片URL转换\n- 实现 getFullImageUrl 方法支持相对路径和完整URL的智能识别\n- 实现 serverBaseUrl 属性从 AppConfig 中提取服务器基础地址\n- 更新 Photo 模型使用 UrlUtils 处理图片URL和缩略图URL\n- 更新 JourneyDetailPage 使用网络图片作为背景并添加错误处理\n- 更新 CityBottomSheet 中城市和旅程卡片的图片URL处理\n- 统一应用内图片URL处理逻辑，提高代码复用性和可维护性"
+  },
+  {
+    "sha": "b09d2d3b1f9b2d93ebda8edaf2640337a18f694a",
+    "shortSha": "b09d2d3",
+    "message": "feat(health): 新增健康检查模块和压缩中间件支持",
+    "type": "feat",
+    "date": "2026-01-07T22:18:22+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(health): 新增健康检查模块和压缩中间件支持\n\n- 创建健康检查模块(health module)用于监控应用状态\n- 实现Prisma数据库连接健康检查(prisma.health.ts)\n- 实现Redis缓存连接健康检查(redis.health.ts)\n- 新增健康检查控制器(health.controller.ts)处理健康检查端点\n- 添加@types/compression依赖支持HTTP压缩中间件\n- 更新app.module.ts集成健康检查模块\n- 优化main.ts启动配置\n- 更新album和map控制器以支持新的健康检查机制\n- 升级@types/node依赖版本至24.10.2\n- 更新pnpm-lock.yaml依赖锁定文件"
+  },
+  {
+    "sha": "7461d94a3781aeb392da8511068538bf91d5944a",
+    "shortSha": "7461d94",
+    "message": "feat(app): 新增Flutter移动应用和项目文档结构",
+    "type": "feat",
+    "date": "2026-01-07T19:38:43+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(app): 新增Flutter移动应用和项目文档结构\n\n- 初始化Flutter项目结构和Android/iOS原生配置\n- 添加应用核心模块：API客户端、路由、主题、存储等\n- 实现功能模块：认证、首页、旅程、相册、印章、AR任务等\n- 集成高德地图服务和位置相关功能\n- 添加数据模型和服务层（用户、旅程、城市、相册等）\n- 配置Riverpod状态管理和依赖注入\n- 添加资源文件：字体、图标、图片、Lottie动画等\n- 新增项目方向文档：产品规划、技术架构、项目结构\n- 更新数据库初始化脚本和服务端配置\n- 完善项目文档和历史记录"
+  },
+  {
+    "sha": "db7cd65e9afb10fcdfc251829e5e593c3b8a4216",
+    "shortSha": "db7cd65",
+    "message": "refactor(admin): 统一使用 @CurrentUser 装饰器替代 @Request 注入",
+    "type": "refactor",
+    "date": "2026-01-06T11:28:54+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "refactor(admin): 统一使用 @CurrentUser 装饰器替代 @Request 注入\n\n- 在 agreement、download、login、promotion、splash、version 控制器中使用 @CurrentUser() 装饰器替代 @Request() req: any\n- 移除未使用的 @nestjs/common 中的 Request 导入\n- 在 agreement.dto.ts 中移除未使用的 ApiProperty 导入\n- 在 admin-bgm.service.ts 中优化类型安全\n- 新增 user.decorator.ts 装饰器文件用于统一用户信息获取\n- 更新代码质量指南文档，补充 TypeScript 类型安全、Prisma 查询类型、@CurrentUser 装饰器使用规范\n- 提升代码类型安全性，避免使用 any 类型，统一用户信息获取方式"
+  },
+  {
+    "sha": "56e88b51405dc745be923da0f6abcea52955ed3a",
+    "shortSha": "56e88b5",
+    "message": "feat(security): 实现速率限制和安全响应头防护",
+    "type": "feat",
+    "date": "2026-01-06T10:50:51+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(security): 实现速率限制和安全响应头防护\n\n- 添加 @nestjs/throttler 模块实现多级限流策略\n* 短期限流：每秒最多 10 次请求\n* 中期限流：每 10 秒最多 50 次请求\n* 长期限流：每分钟最多 100 次请求\n- 集成 helmet 中间件配置安全响应头\n* 生产环境启用完整 CSP 策略\n* 开发环境禁用 CSP 以支持 Swagger UI\n* 配置跨域资源策略允许静态资源访问\n- 更新依赖包：@nestjs/throttler@6.5.0 和 helmet@8.1.0\n- 更新安全审计报告文档，标记已修复的安全问题\n- 修复 BGM 服务和应用模块配置以支持新的安全中间件\n这些改进有效防止 DoS 攻击并增强应用安全性"
+  },
+  {
+    "sha": "33ba59a11769469165eceb37ee15306221f03ce1",
+    "shortSha": "33ba59a",
+    "message": "feat(login): 优化登录表单默认值和验证码联动逻辑",
+    "type": "feat",
+    "date": "2026-01-06T09:45:09+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(login): 优化登录表单默认值和验证码联动逻辑\n\n- 移除登录表单的硬编码默认账号密码，初始状态改为空值\n- 根据验证码启用状态动态设置账号密码显示逻辑\n* 验证码启用时清空默认账号密码\n* 验证码未启用时显示默认账号密码\n* 获取验证码失败时也显示默认账号密码\n- 条件渲染默认账号提示文本，仅在验证码未启用时显示\n- 提升用户体验和安全性，避免在验证码启用时暴露默认凭证"
+  },
+  {
+    "sha": "4b7eabe04b8188254953b41270b9221e5e183622",
+    "shortSha": "4b7eabe",
+    "message": "style: 统一代码格式并优化ESLint和Prettier配置",
+    "type": "style",
+    "date": "2026-01-06T08:24:06+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "style: 统一代码格式并优化ESLint和Prettier配置\n\n- 添加项目级别的 .editorconfig 配置文件以统一编辑器设置\n- 添加 .prettierrc.json 配置文件到项目根目录和 server-nestjs 目录\n- 删除 server-nestjs/.prettierrc 旧配置文件\n- 更新 server-nestjs/eslint.config.mjs 以优化代码质量检查规则\n- 添加代码质量指南文档 .kiro/steering/code-quality.md\n- 对所有 admin 模块的控制器、服务和 DTO 文件进行代码格式统一\n- 对所有业务模块（album、auth、audio、blockchain、city 等）进行代码格式统一\n- 对公共模块（decorators、filters、guards、interceptors、logger 等）进行代码格式统一\n- 统一代码风格包括引号、缩进、空格和换行符的处理\n- 提高代码可读性和一致性，便于团队协作和代码维护"
+  },
+  {
+    "sha": "77d5db2b6f58b0a3f3509cd9a9b54c4f229a80fd",
+    "shortSha": "77d5db2",
+    "message": "feat(app-config): 新增APP配置管理功能模块",
+    "type": "feat",
+    "date": "2026-01-06T02:13:30+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(app-config): 新增APP配置管理功能模块\n\n- 新增APP配置管理菜单和权限体系，包括启动页、登录页、协议、下载页、版本和推广统计\n- 创建admin-app-config模块，包含splash、login、agreement、download、version、promotion六个子模块\n- 实现各配置模块的controller、service和DTO，支持增删改查操作\n- 新增下载功能模块，提供文件下载和上传配置管理接口\n- 添加PhonePreview组件用于APP配置预览展示\n- 更新前端路由、权限和菜单配置，新增app-config相关API接口\n- 优化系统菜单顺序，调整系统管理、系统监控、系统工具的排序号\n- 更新数据库schema和初始化数据，新增APP配置相关表和菜单数据\n- 完善Prisma迁移文件和seed数据，确保数据库结构一致性"
+  },
+  {
+    "sha": "915eb8c3423805beaa25fd3b84b5c6ef0db13776",
+    "shortSha": "915eb8c",
+    "message": "feat(admin): 增加批量删除和批量修改状态功能",
+    "type": "feat",
+    "date": "2026-01-05T21:58:10+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(admin): 增加批量删除和批量修改状态功能\n\n- 为城市、文化之旅、探索点、印记等管理模块添加批量删除接口\n- 为城市、文化之旅、探索点、印记等管理模块添加批量修改状态接口\n- 新增BatchDeleteDto和BatchUpdateStatusDto数据传输对象\n- 在服务层实现批量操作的业务逻辑，包括关联数据检查\n- 更新前端API调用接口以支持批量操作\n- 优化StatusSwitch组件以支持批量状态修改\n- 统一代码格式，修复构造函数空格问题\n- 提升管理后台的数据管理效率，支持批量操作场景"
+  },
+  {
+    "sha": "52f7e8d3529790e9a397291de7be93f86579e123",
+    "shortSha": "52f7e8d",
+    "message": "style: 统一代码格式并优化ESLint配置",
+    "type": "style",
+    "date": "2026-01-05T03:42:06+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "style: 统一代码格式并优化ESLint配置\n\n- 更新ESLint规则配置，关闭不必要的TypeScript检查规则\n- 修复代码格式，统一空格和缩进风格\n- 扩展背景音乐功能支持探索点(point)上下文\n- 增强背景音乐服务查询逻辑，支持点位信息关联\n- 优化后台管理API数据传输对象定义\n- 更新权限验证逻辑和用户状态缓存处理\n- 改进前端组件样式和交互逻辑\n- 优化监控模块任务执行器和日志处理\n- 统一Web项目ESLint和Tailwind配置"
+  },
+  {
+    "sha": "780baab7caa6f370908fe4e931137af27957051a",
+    "shortSha": "780baab",
+    "message": "feat(auth): 增强用户状态校验和缓存管理",
+    "type": "feat",
+    "date": "2026-01-05T03:26:08+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(auth): 增强用户状态校验和缓存管理\n\n- 新增 UserStatusCacheService 服务，实现用户状态的 Redis 缓存管理\n- 在 JwtAuthGuard 中集成用户状态校验，检查用户是否存在、被删除或停用\n- 优化 auth.module.ts，导出 UserStatusCacheService 供其他模块使用\n- 修复 docker-compose.yml 中上传文件夹路径，改为 ./server-nestjs/uploads\n- 在数据库种子文件中添加 Redis 缓存清除逻辑，避免重新初始化后登录问题\n- 调整 prisma/seed.ts 中的代码格式，统一缩进风格\n- 移除不必要的 ESLint 禁用注释\n- 优化 web 前端布局和 nginx 配置\n- 提升系统安全性和用户状态管理的可靠性"
+  },
+  {
+    "sha": "65b8f12ed0301fd7290246d650422d55179a1805",
+    "shortSha": "65b8f12",
+    "message": "feat(blockchain): 扩展区块链存证服务提供者并优化相关配置",
+    "type": "feat",
+    "date": "2026-01-04T22:34:41+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(blockchain): 扩展区块链存证服务提供者并优化相关配置\n\n- 更新区块链字典数据，新增本地存证、时间戳存证、BSN开放联盟链、Polygon公链等多个存证服务提供者\n- 调整现有区块链选项的排序和默认值，将本地存证设为开发/演示环境的默认选项\n- 修改 ChainSealDto 中的 chainName 参数验证，移除硬编码的枚举值限制，改为从字典动态获取\n- 优化字典数据查询逻辑，将 dictType 从模糊匹配改为精确匹配以提高查询效率\n- 新增 getDictDataByType API 接口，支持根据字典类型获取字典数据列表用于下拉选择\n- 更新用户印记上链接口参数类型，支持动态的区块链服务提供者选择\n- 完善数据库初始化脚本和 Prisma seed 文件，添加 ESLint 禁用注释规范代码"
+  },
+  {
+    "sha": "caa7538036739ecd94b41bc964845dc34e953882",
+    "shortSha": "caa7538",
+    "message": "feat(blockchain): 完善区块链上链功能和多链支持",
+    "type": "feat",
+    "date": "2026-01-04T22:06:29+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(blockchain): 完善区块链上链功能和多链支持\n\n- 新增区块链配置管理服务和 Admin 控制器\n- 实现多链提供商支持（AntChain、BSN、Polygon、ZhixinChain、Timestamp、LocalChain）\n- 添加链提供商接口和工厂模式实现\n- 更新用户印记上链相关 API 和数据模型\n- 优化数据库 schema，统一迁移文件并更新字段注释\n- 更新 Dockerfile 和环境配置\n- 移除 Zeabur 部署相关文件和配置\n- 更新文档：删除 Zeabur 部署指南，完善优化建议清单，新增印记上链技术方案\n- 更新 README 移除在线演示链接\n- 支持多种区块链存证方式，满足不同场景需求"
+  },
+  {
+    "sha": "7c35fc49e8589bfd72a490771422e3ac3eeda7c1",
+    "shortSha": "7c35fc4",
+    "message": "style: 统一代码格式，修复引号和逗号样式问题",
+    "type": "style",
+    "date": "2026-01-04T20:24:52+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "style: 统一代码格式，修复引号和逗号样式问题\n\nrefactor: 清理无用代码和空行，优化组件导入路径\n\nstyle(admin): 调整模块格式，统一缩进和括号样式\n\nstyle(api): 统一API请求参数和响应格式\n\nstyle(components): 标准化组件属性和类名格式\n\nstyle(views): 清理模板多余空格，统一格式\n\nstyle(stores): 优化代码格式和计算属性使用\n\nstyle(utils): 清理注释多余空格，保持格式一致"
+  },
+  {
+    "sha": "73deab46d849d4c2601073519cd0568af2f384d1",
+    "shortSha": "73deab4",
+    "message": "feat(地图选择器): 增强地图选择器功能并修复相关问题",
+    "type": "feat",
+    "date": "2026-01-04T19:32:26+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(地图选择器): 增强地图选择器功能并修复相关问题\n\n- 添加未配置地图服务时的友好提示和跳转功能\n- 修复地图加载错误处理和重试机制\n- 优化表单中地图选点按钮的位置\n- 修复富文本编辑器链接和下划线功能\n- 为点管理表单添加默认 bgmId 值"
+  },
+  {
+    "sha": "6c83fd0c27fd9996b9a9c8481da96d67fd58245b",
+    "shortSha": "6c83fd0",
+    "message": "feat: 增加背景音乐管理和用户印记上链功能",
+    "type": "feat",
+    "date": "2025-12-31T10:30:11+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat: 增加背景音乐管理和用户印记上链功能\n\n- 新增背景音乐管理模块，支持关联探索点\n- 实现用户印记手动上链功能，支持多种区块链选择\n- 优化表格选择逻辑，使用v-model替代事件处理\n- 统一将分页大小从10调整为20\n- 添加vue-eslint-parser依赖\n- 修复探索点表单背景音乐字段缺失问题"
+  },
+  {
+    "sha": "ead144fb3e51ba92b7e0c4697a189ef0f17b571a",
+    "shortSha": "ead144f",
+    "message": "feat(admin): 新增用户进度和印记管理功能",
+    "type": "feat",
+    "date": "2025-12-31T09:18:02+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(admin): 新增用户进度和印记管理功能\n\nrefactor: 将默认分页大小从10调整为20\n\nfeat(progress): 添加用户进度管理模块，包括列表、统计和详情查看功能\nfeat(seal): 添加用户印记管理模块，包括列表、统计和详情查看功能\nfeat(web): 实现用户进度管理前端页面\nfeat(web): 实现用户印记管理前端页面\nfeat(db): 添加用户进度和印记的初始化数据\nfeat(menu): 添加用户进度和印记管理菜单及权限\ndocs: 更新用户协议和隐私政策内容"
+  },
+  {
+    "sha": "e2af8ab90f3def8944773a10604bea1ac50797fd",
+    "shortSha": "e2af8ab",
+    "message": "feat(字典管理): 新增字典数据管理页面及功能",
+    "type": "feat",
+    "date": "2025-12-31T08:39:02+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(字典管理): 新增字典数据管理页面及功能\n\nrefactor(用户管理): 扩展用户模型添加实名认证相关字段\n\nfeat(用户管理): 实现用户实名认证管理功能\n\nfeat(字典数据): 新增多种字典类型及数据\n\nstyle(图标): 添加品牌图标组件\n\nchore: 更新.gitignore排除备份文件\n\nperf(路由): 优化登录路由设置逻辑"
+  },
+  {
+    "sha": "001c2b20e923b4637f44e18c32f518b93ba7d23f",
+    "shortSha": "001c2b2",
+    "message": "feat(地图): 添加地图选点组件及地图服务API",
+    "type": "feat",
+    "date": "2025-12-31T08:06:53+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat(地图): 添加地图选点组件及地图服务API\n\nrefactor(系统管理): 为所有状态选择器添加查询触发事件\n\nfeat(城市管理): 添加地图选点功能并支持福州数据\n\nfeat(配置管理): 添加地图服务配置API\n\nchore(数据库): 添加福州城市及文化之旅数据"
+  },
+  {
+    "sha": "5191bc22426c9b71b04166959877f9c04116335a",
+    "shortSha": "5191bc2",
+    "message": "feat: 添加XLSX导出功能并优化资源URL处理",
+    "type": "feat",
+    "date": "2025-12-31T07:52:22+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat: 添加XLSX导出功能并优化资源URL处理\n\nrefactor: 重构构造函数格式和代码样式\n\nstyle: 调整图表宽度和日期显示格式\n\ndocs: 更新系统名称和描述为\"寻印\"\n\nchore: 添加xlsx依赖并更新pnpm-lock.yaml\n\nfeat(export): 实现Excel导出功能并增强导出工具\n\nfeat(url): 添加资源URL处理工具函数\n\nfeat(upload): 优化图片上传组件显示逻辑\n\nfeat(config): 更新Vite代理配置以支持上传资源\n\nfeat(init): 添加寻印业务初始数据到数据库\n\nfeat(swagger): 支持Redoc和Swagger文档切换"
+  },
+  {
+    "sha": "a5023199af4999dd31dad4d55b116ac6d70e3c4b",
+    "shortSha": "a502319",
+    "message": "feat: 添加寻印App和管理端相关模块与功能",
+    "type": "feat",
+    "date": "2025-12-31T04:18:04+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat: 添加寻印App和管理端相关模块与功能\n\nfeat(app-auth): 实现App用户认证模块\nfeat(city): 添加城市模块及相关功能\nfeat(journey): 实现文化之旅模块\nfeat(exploration-point): 添加探索点模块\nfeat(seal): 实现印记收集模块\nfeat(blockchain): 添加区块链存证功能\nfeat(album): 实现相册模块\nfeat(user-stats): 添加用户统计模块\nfeat(audio): 实现背景音乐服务\nfeat(map): 添加地图与定位服务\nfeat(admin): 实现管理端各模块CRUD功能\nfeat(web): 添加前端相关组件和API\ndocs: 更新数据库schema和API文档"
+  },
+  {
+    "sha": "31ccbd3a925431b72f60d0db0cf2e674cf167668",
+    "shortSha": "31ccbd3",
+    "message": "feat: 添加寻印业务数据模型和初始数据",
+    "type": "feat",
+    "date": "2025-12-29T18:16:42+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat: 添加寻印业务数据模型和初始数据\n\n添加寻印业务相关的数据模型和初始数据，包括：\n1. 新增App用户、城市、文化之旅等业务表结构\n2. 添加寻印管理菜单和权限配置\n3. 初始化寻印业务字典数据\n4. 更新数据库迁移脚本和种子数据\n5. 添加相关开发规范和API设计文档"
+  },
+  {
+    "sha": "0acad0e227ef16da98c86400612812962db435d9",
+    "shortSha": "0acad0e",
+    "message": "docs(xunyin-app): 更新UI设计提示文档和任务清单",
+    "type": "docs",
+    "date": "2025-12-29T16:31:39+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "docs(xunyin-app): 更新UI设计提示文档和任务清单\n\n添加详细的UI设计提示说明，包括15个核心页面和4个组件的设计规范\n更新任务清单，明确设计交付优先级和资源需求"
+  },
+  {
+    "sha": "6126a428f722389dda5c255d9ed74db168de1f87",
+    "shortSha": "6126a42",
+    "message": "docs(xunyin-app): add UI design prompts for all app screens",
+    "type": "docs",
+    "date": "2025-12-26T23:24:57+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "docs(xunyin-app): add UI design prompts for all app screens\n\n- Add comprehensive UI design prompts for 15+ mobile app screens\n- Include detailed design specifications with color palette, typography, and mood\n- Document key UI elements and layout for each screen (homepage, city panels, journey details, AR tasks, etc.)\n- Provide device specifications (iPhone 14 Pro, 390x844px) for all designs\n- Include design system guidelines with theme, colors, and visual style\n- Add AI-friendly prompts for design generation and implementation reference"
+  },
+  {
+    "sha": "d9f778bd07f1796b46e34d8f1e8257e4b13eeafe",
+    "shortSha": "d9f778b",
+    "message": "docs(xunyin-app): add comprehensive design document for Flutter app",
+    "type": "docs",
+    "date": "2025-12-26T23:10:26+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "docs(xunyin-app): add comprehensive design document for Flutter app\n\n- Add detailed technical architecture documentation for Xunyin Flutter app\n- Document layered architecture (Presentation, Domain, Data, Infrastructure)\n- Define complete project directory structure with feature-based organization\n- Specify Riverpod state management patterns and provider structure\n- Detail Amap SDK integration with map module design and navigation functionality\n- Compare AR technology options and recommend camera + ML Kit approach\n- Document AR module design with gesture recognition and photo exploration tasks\n- Define NestJS backend API client configuration and endpoint specifications\n- Include database schema design with user, journey, seal, and blockchain tables\n- Provide implementation guidelines for core features and security considerations\n- This design document serves as the technical blueprint for app development"
+  },
+  {
+    "sha": "b12d069e8d76ee0f14a307472b815d7e09e20320",
+    "shortSha": "b12d069",
+    "message": "chore: 移除已追踪的 .DS_Store 文件",
+    "type": "chore",
+    "date": "2025-12-26T23:09:21+08:00",
+    "author": "lyfe2025"
+  },
+  {
+    "sha": "2ddfadb85904deb6709a1ca9c3ed25f352da7c2a",
+    "shortSha": "2ddfadb",
+    "message": "feat: rebrand project from RBAC Admin Pro to Xunyin Admin",
+    "type": "feat",
+    "date": "2025-12-26T22:55:36+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "feat: rebrand project from RBAC Admin Pro to Xunyin Admin\n\n- Add comprehensive .gitignore file with Node.js, build, environment, and system file patterns\n- Update project branding across all documentation and configuration files\n- Rename repository references from rbac-admin-pro to xunyin-admin\n- Update LICENSE copyright and project URLs to reflect new branding\n- Expand Flutter app requirements with additional journey, AR, validation, seal, blockchain, and user module specifications\n- Update database scripts and Docker configuration with new project naming\n- Modify environment examples and deployment guides for Xunyin branding\n- Update frontend components and store modules with new project identity\n- Consolidate project identity across web, server, and documentation layers"
+  },
+  {
+    "sha": "81fb301c4b6e5a70a64222d1c51546bf7dcdf5b4",
+    "shortSha": "81fb301",
+    "message": "chore: initialize project repository with full stack setup",
+    "type": "chore",
+    "date": "2025-12-26T22:31:24+08:00",
+    "author": "lyfe2025",
+    "fullMessage": "chore: initialize project repository with full stack setup\n\n- Add monorepo workspace configuration with pnpm\n- Add NestJS backend server with authentication, authorization, and monitoring modules\n- Add comprehensive documentation covering deployment, development standards, and guides\n- Add database schema and initialization scripts with Prisma ORM\n- Add Docker and docker-compose configuration for containerized deployment\n- Add project specifications including brand guidelines, requirements, and wireframes\n- Add development utilities and shell scripts for database and monorepo management\n- Add license and README documentation for project overview\n- Initialize complete project structure with all dependencies and configurations"
+  }
+]
