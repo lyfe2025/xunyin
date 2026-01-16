@@ -5,15 +5,17 @@ import '../config/app_config.dart';
 class UrlUtils {
   /// 获取服务器基础 URL（不含 /api/app 路径）
   static String get serverBaseUrl {
-    // Web 环境：使用 Uri.base 获取当前页面的 origin
-    // Flutter Web 的 Image.network 需要完整 URL（不像浏览器 img 标签能自动解析相对路径）
+    // 统一使用 AppConfig.apiBaseUrl 提取基础 URL
+    // 这样 Web 和原生 App 使用相同的逻辑
+    final baseUrl = AppConfig.apiBaseUrl;
+    
+    // Web 环境：apiBaseUrl 是 '/api/app'，去掉后变成空字符串
+    // 这样拼接出来的是相对路径，浏览器会自动补全 origin
     if (kIsWeb) {
-      final origin = Uri.base.origin;
-      return origin;
+      return baseUrl.replaceAll('/api/app', '');
     }
 
-    // 原生 App：从 apiBaseUrl 提取域名
-    final baseUrl = AppConfig.apiBaseUrl;
+    // 原生 App：从完整 URL 提取域名
     final uri = Uri.parse(baseUrl);
     return '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
   }
