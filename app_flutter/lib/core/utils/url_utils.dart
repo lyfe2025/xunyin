@@ -1,19 +1,22 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../config/app_config.dart';
 
+// 条件导入：Web 环境获取 window.location.origin
+import 'url_utils_stub.dart'
+    if (dart.library.html) 'url_utils_web.dart' as platform;
+
 /// URL 工具类
 class UrlUtils {
   /// 获取服务器基础 URL（不含 /api/app 路径）
   /// 从 AppConfig.apiBaseUrl 中提取
   static String get serverBaseUrl {
-    final baseUrl = AppConfig.apiBaseUrl;
-    
-    // Web 环境：使用相对路径（空字符串），由 Nginx 代理处理
+    // Web 环境：使用当前页面的 origin（如 https://xunyin-web.pynb.org）
     if (kIsWeb) {
-      return '';
+      return platform.getOrigin();
     }
-    
-    // 原生 App：移除 /api/app 后缀
+
+    // 原生 App：从 apiBaseUrl 提取域名
+    final baseUrl = AppConfig.apiBaseUrl;
     final uri = Uri.parse(baseUrl);
     return '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
   }
