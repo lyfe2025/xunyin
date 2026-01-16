@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../config/app_config.dart';
 
 /// URL 工具类
@@ -6,7 +7,13 @@ class UrlUtils {
   /// 从 AppConfig.apiBaseUrl 中提取
   static String get serverBaseUrl {
     final baseUrl = AppConfig.apiBaseUrl;
-    // 移除 /api/app 后缀
+    
+    // Web 环境：使用相对路径（空字符串），由 Nginx 代理处理
+    if (kIsWeb) {
+      return '';
+    }
+    
+    // 原生 App：移除 /api/app 后缀
     final uri = Uri.parse(baseUrl);
     return '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
   }
