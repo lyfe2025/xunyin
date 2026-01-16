@@ -1,8 +1,12 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../config/app_config.dart';
 import '../storage/token_storage.dart';
+
+// 条件导入：Web 使用浏览器适配器，其他平台使用 IO 适配器
+import 'api_client_stub.dart'
+    if (dart.library.io) 'api_client_io.dart'
+    if (dart.library.html) 'api_client_web.dart' as adapter;
 
 /// 业务异常
 class ApiException implements Exception {
@@ -44,24 +48,10 @@ class ApiClient {
       ),
     );
 
-    // 配置 HTTP 适配器 - 使用更宽松的配置
-    final adapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        final client = HttpClient();
-        // 临时禁用证书验证（仅用于调试）
-        client.badCertificateCallback = (cert, host, port) => true;
-        // 增加超时时间
-        client.connectionTimeout = const Duration(seconds: 30);
-        client.idleTimeout = const Duration(seconds: 30);
-        // 启用自动解压
-        client.autoUncompress = true;
-        return client;
-      },
-    );
-    
-    // 临时禁用证书验证
-    adapter.validateCertificate = (cert, host, port) => true;
-    _dio.httpClientAdapter = adapter;
+    // 配置 HTTP 适配器 - Web 和原生平台使用不同适配器
+    if (!kIsWeb) {
+      adapter.configureHttpAdapter(_dio);
+    }
 
     _dio.interceptors.add(_AuthInterceptor());
     _dio.interceptors.add(_ErrorInterceptor());

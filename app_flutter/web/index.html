@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="$FLUTTER_BASE_HREF">
+    <meta charset="UTF-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="description" content="寻印 - 文化探索之旅">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="寻印">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <title>寻印</title>
+    <link rel="manifest" href="manifest.json">
+    <script>
+        var serviceWorkerVersion = null;
+        var scriptLoaded = false;
+        function loadMainDartJs() {
+            if (scriptLoaded) {
+                return;
+            }
+            scriptLoaded = true;
+            var scriptTag = document.createElement('script');
+            scriptTag.src = 'main.dart.js';
+            scriptTag.type = 'application/javascript';
+            document.body.append(scriptTag);
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                var serviceWorkerUrl = 'flutter_service_worker.js?v=' + serviceWorkerVersion;
+                navigator.serviceWorker.register(serviceWorkerUrl);
+                setTimeout(loadMainDartJs, 3000);
+            });
+        } else {
+            loadMainDartJs();
+        }
+    </script>
+</head>
+
+<body>
+    <script>
+        window.addEventListener('load', function (ev) {
+            _flutter = {
+                loader: null,
+            };
+            var loading = document.createElement('div');
+            loading.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:#fff;';
+            loading.innerHTML = '<div style="text-align:center;"><div style="width:50px;height:50px;border:3px solid #f3f3f3;border-top:3px solid #C41E3A;border-radius:50%;animation:spin 1s linear infinite;"></div><p style="margin-top:16px;color:#666;">加载中...</p></div><style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>';
+            document.body.appendChild(loading);
+        });
+    </script>
+</body>
+
+</html>
