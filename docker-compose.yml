@@ -54,7 +54,7 @@ services:
     container_name: xunyin-server
     restart: unless-stopped
     environment:
-      NODE_ENV: production
+      NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-xunyin_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-xunyin_admin}?schema=public
       REDIS_ENABLED: ${REDIS_ENABLED:-true}
