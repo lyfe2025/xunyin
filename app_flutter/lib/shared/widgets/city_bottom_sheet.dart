@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/url_utils.dart';
 import '../../models/city.dart';
@@ -247,12 +248,22 @@ class _CityBottomSheetState extends ConsumerState<CityBottomSheet> {
           if (widget.city.coverImage != null) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                UrlUtils.getFullImageUrl(widget.city.coverImage),
+              child: CachedNetworkImage(
+                imageUrl: UrlUtils.getFullImageUrl(widget.city.coverImage),
                 height: 140,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                placeholder: (context, url) => Container(
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariantAdaptive(context),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
                   height: 140,
                   decoration: BoxDecoration(
                     color: AppColors.surfaceVariantAdaptive(context),
@@ -472,10 +483,12 @@ class _JourneyCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: journey.coverImage != null
-                ? Image.network(
-                    UrlUtils.getFullImageUrl(journey.coverImage),
+                ? CachedNetworkImage(
+                    imageUrl: UrlUtils.getFullImageUrl(journey.coverImage),
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildPlaceholder(context),
+                    placeholder: (context, url) => _buildPlaceholder(context),
+                    errorWidget: (context, url, error) =>
+                        _buildPlaceholder(context),
                   )
                 : _buildPlaceholder(context),
           ),
@@ -852,12 +865,17 @@ class _JourneySearchDialogState extends State<_JourneySearchDialog> {
                               height: 44,
                               color: AppColors.surfaceVariantAdaptive(context),
                               child: journey.coverImage != null
-                                  ? Image.network(
-                                      UrlUtils.getFullImageUrl(
+                                  ? CachedNetworkImage(
+                                      imageUrl: UrlUtils.getFullImageUrl(
                                         journey.coverImage,
                                       ),
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Icon(
+                                      placeholder: (context, url) => Icon(
+                                        Icons.landscape_rounded,
+                                        size: 20,
+                                        color: AppColors.textHintAdaptive(context),
+                                      ),
+                                      errorWidget: (context, url, error) => Icon(
                                         Icons.landscape_rounded,
                                         size: 20,
                                         color: AppColors.textHintAdaptive(context),
