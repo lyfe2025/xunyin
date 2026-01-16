@@ -1,18 +1,17 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../config/app_config.dart';
 
-// 条件导入：Web 环境获取 window.location.origin
-import 'url_utils_stub.dart'
-    if (dart.library.html) 'url_utils_web.dart' as platform;
-
 /// URL 工具类
 class UrlUtils {
   /// 获取服务器基础 URL（不含 /api/app 路径）
-  /// 从 AppConfig.apiBaseUrl 中提取
   static String get serverBaseUrl {
-    // Web 环境：使用当前页面的 origin（如 https://xunyin-web.pynb.org）
+    // Web 环境：使用 Uri.base 获取当前页面的 origin
     if (kIsWeb) {
-      return platform.getOrigin();
+      final base = Uri.base;
+      final port = base.port;
+      // 标准端口不需要显示
+      final portStr = (port == 80 || port == 443 || port == 0) ? '' : ':$port';
+      return '${base.scheme}://${base.host}$portStr';
     }
 
     // 原生 App：从 apiBaseUrl 提取域名
