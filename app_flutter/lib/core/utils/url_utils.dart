@@ -27,11 +27,13 @@ class UrlUtils {
   /// 如果 [url] 为空，返回空字符串（由 UI 层处理占位图）
   static String getFullImageUrl(String? url) {
     if (url == null || url.trim().isEmpty) {
+      print('[UrlUtils] getFullImageUrl: input is null or empty');
       return '';
     }
 
     // 已经是完整 HTTP/HTTPS URL
     if (url.startsWith('http://') || url.startsWith('https://')) {
+      print('[UrlUtils] getFullImageUrl: already full URL: $url');
       return url;
     }
 
@@ -40,12 +42,18 @@ class UrlUtils {
       url = url.replaceFirst('file://', '');
     }
 
+    final base = serverBaseUrl;
+    String result;
+
     // 相对路径，拼接服务器地址
     if (url.startsWith('/')) {
-      return '$serverBaseUrl$url';
+      result = '$base$url';
+    } else {
+      // 没有斜杠开头，补上
+      result = '$base/$url';
     }
 
-    // 没有斜杠开头，补上
-    return '$serverBaseUrl/$url';
+    print('[UrlUtils] getFullImageUrl: input=$url, base=$base, result=$result');
+    return result;
   }
 }
